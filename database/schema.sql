@@ -73,3 +73,39 @@ INSERT INTO roles (nama) VALUES
     ('Koordinator Guru'),
     ('Guru')
 ON DUPLICATE KEY UPDATE nama = VALUES(nama);
+
+-- Seed node permission mengikuti persis struktur navigasi di
+-- cookbook/design-system.md bagian 2.2. Tiap node punya aksi 'lihat'
+-- dan 'edit' secara konsisten supaya matriks RBAC seragam, walau di
+-- praktiknya tidak semua kombinasi dipakai (lihat cookbook/prd.md
+-- untuk detail per modul).
+-- Skrip ini idempotent: jalankan hanya kalau tabel permissions kosong,
+-- supaya tidak duplikat kalau schema.sql dijalankan ulang.
+INSERT INTO permissions (modul, section, sub_section, aksi, display_order)
+SELECT * FROM (
+    SELECT 'Sekolah' AS modul, 'Data Sekolah' AS section, NULL AS sub_section, 'lihat' AS aksi, 1 AS display_order
+    UNION ALL SELECT 'Sekolah', 'Data Sekolah', NULL, 'edit', 2
+    UNION ALL SELECT 'Sekolah', 'Kurikulum', 'Manajemen Template', 'lihat', 3
+    UNION ALL SELECT 'Sekolah', 'Kurikulum', 'Manajemen Template', 'edit', 4
+    UNION ALL SELECT 'Sekolah', 'Kurikulum', 'Periode Penilaian', 'lihat', 5
+    UNION ALL SELECT 'Sekolah', 'Kurikulum', 'Periode Penilaian', 'edit', 6
+    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Daftar Karyawan', 'lihat', 7
+    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Daftar Karyawan', 'edit', 8
+    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Jabatan', 'lihat', 9
+    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Jabatan', 'edit', 10
+    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Manajemen Guru', 'lihat', 11
+    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Manajemen Guru', 'edit', 12
+    UNION ALL SELECT 'Murid', 'Manajemen Murid', NULL, 'lihat', 13
+    UNION ALL SELECT 'Murid', 'Manajemen Murid', NULL, 'edit', 14
+    UNION ALL SELECT 'Murid', 'Manajemen Kelas', NULL, 'lihat', 15
+    UNION ALL SELECT 'Murid', 'Manajemen Kelas', NULL, 'edit', 16
+    UNION ALL SELECT 'Murid', 'Rapor Murid', NULL, 'lihat', 17
+    UNION ALL SELECT 'Murid', 'Rapor Murid', NULL, 'edit', 18
+    UNION ALL SELECT 'Portal Guru', 'Dashboard', NULL, 'lihat', 19
+    UNION ALL SELECT 'Portal Guru', 'Dashboard', NULL, 'edit', 20
+    UNION ALL SELECT 'Portal Guru', 'Daftar Murid', NULL, 'lihat', 21
+    UNION ALL SELECT 'Portal Guru', 'Daftar Murid', NULL, 'edit', 22
+    UNION ALL SELECT 'Sistem', 'RBAC', NULL, 'lihat', 23
+    UNION ALL SELECT 'Sistem', 'RBAC', NULL, 'edit', 24
+) AS seed_data
+WHERE NOT EXISTS (SELECT 1 FROM permissions LIMIT 1);

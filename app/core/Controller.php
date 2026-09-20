@@ -2,6 +2,26 @@
 
 abstract class Controller
 {
+    /**
+     * Enforce CSRF otomatis untuk semua request POST/PUT/DELETE di
+     * SEMUA controller — tidak bergantung pada disiplin developer
+     * memanggil validasi manual di tiap method. Lihat
+     * cookbook/security.md bagian 2.
+     */
+    public function __construct()
+    {
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+        if (in_array($method, ['POST', 'PUT', 'DELETE'], true)) {
+            $token = (string) ($_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+
+            if (!validateCsrfToken($token)) {
+                http_response_code(419);
+                die('Token keamanan (CSRF) tidak valid atau kedaluwarsa. Muat ulang halaman dan coba lagi.');
+            }
+        }
+    }
+
     protected function view(string $name, array $data = []): void
     {
         extract($data);

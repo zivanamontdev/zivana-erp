@@ -28,9 +28,14 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
   <!-- INSERT idempotent ditambahkan di database/schema.sql. Belum diverifikasi ke MySQL nyata (lihat catatan task schema.sql di Fase 0). -->
 - [x] `RoleMiddleware` untuk enforce permission server-side (lihat `security.md` poin 3)
   <!-- Logika sudah ditulis dan lolos php -l, tapi query ke tabel role_permissions/permissions BELUM bisa diuji fungsional karena tidak ada instance MySQL di environment kerja ini. Uji ulang begitu DB tersedia. -->
-- [ ] Halaman Sistem → RBAC: render matriks permission, simpan perubahan checkbox ke `role_permissions`
-- [ ] CSRF protection otomatis di `Controller`/`Router` base class
-- [ ] `[Konfirmasi ke user dulu]` Alur reset password (belum ada screenshot halamannya)
+- [x] Halaman Sistem → RBAC: render matriks permission, simpan perubahan checkbox ke `role_permissions`
+  <!-- Terverifikasi visual (screenshot accordion tertutup & terbuka dengan data tiruan) — cocok dengan screenshot desain asli. Belum diuji fungsional simpan-ke-DB karena tidak ada MySQL live. Bukan tri-state indeterminate sungguhan, pakai pola "centang semua turunan" (lihat catatan di rbac.js). -->
+- [x] CSRF protection otomatis di `Controller`/`Router` base class
+  <!-- Diuji end-to-end: GET tidak terpengaruh, POST tanpa token ditolak HTTP 419. -->
+- [x] `[Konfirmasi ke user dulu]` Alur reset password (belum ada screenshot halamannya)
+  <!-- Diimplementasi mengikuti struktur password_resets di schema.md (token hash + expiry 1 jam), TANPA desain Figma acuan jadi tampilan mengikuti gaya Login apa adanya [ASUMSI]. Pengiriman email BELUM disambungkan ke SMTP asli (kredensial kosong) — link reset untuk sementara ditulis ke error_log dan ditampilkan di layar hanya saat APP_DEBUG=true. Sambungkan ke PHPMailer + SMTP produksi begitu kredensial tersedia. -->
+
+**Catatan lingkungan kerja**: ditemukan proses MySQL yang sudah berjalan di komputer ini (port 3306, PID terpisah dari instalasi project ini). TIDAK dicoba disambungkan tanpa izin karena tidak jelas kepunyaan/isi datanya. Semua kode Fase 1 yang menyentuh database baru lolos `php -l` dan review manual, BELUM diuji fungsional terhadap MySQL nyata. Kalau user berkenan share kredensial DB lokal (atau konfirmasi aman memakai server MySQL yang terdeteksi ini), pengujian end-to-end sesungguhnya bisa dilakukan mulai fase berikutnya.
 
 ## Fase 2 — Komponen UI Dasar (reusable, dipakai semua modul)
 

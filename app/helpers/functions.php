@@ -58,3 +58,27 @@ function getCsrfToken(): string
 
     return $_SESSION['csrf_token'];
 }
+
+/**
+ * Validasi token CSRF. Single-use — token dihapus dari session setelah
+ * divalidasi (baik valid maupun tidak), jadi form yang gagal submit
+ * (misal validasi input gagal) perlu redirect balik ke halaman GET
+ * supaya token baru dibuat lagi. Lihat cookbook/security.md bagian 2.
+ */
+function validateCsrfToken(string $token): bool
+{
+    if (empty($_SESSION['csrf_token']) || empty($_SESSION['csrf_token_expires'])) {
+        return false;
+    }
+
+    if (time() > $_SESSION['csrf_token_expires']) {
+        unset($_SESSION['csrf_token'], $_SESSION['csrf_token_expires']);
+        return false;
+    }
+
+    $valid = hash_equals($_SESSION['csrf_token'], $token);
+
+    unset($_SESSION['csrf_token'], $_SESSION['csrf_token_expires']);
+
+    return $valid;
+}

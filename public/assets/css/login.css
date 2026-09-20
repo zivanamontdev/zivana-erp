@@ -19,6 +19,32 @@
   min-height: 640px;
 }
 
+/* Varian tanpa panel kanan — dipakai di halaman lupa/reset kata sandi
+   yang belum punya desain Figma, lihat cookbook/prd.md poin asumsi #8. */
+.login-wrapper-single {
+  width: 620px;
+  justify-content: center;
+}
+
+.login-info {
+  background: var(--color-neutral-75);
+  border: 1px solid var(--color-neutral-150);
+  color: var(--color-neutral-700);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-body-sm);
+}
+
+.login-debug-link {
+  background: var(--color-orange-50);
+  border-color: var(--color-orange-300);
+  word-break: break-all;
+}
+
+.login-debug-link a {
+  color: var(--color-red-600);
+}
+
 /* ---------- Kolom kiri ---------- */
 
 .login-left {
