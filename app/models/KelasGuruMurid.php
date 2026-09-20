@@ -69,4 +69,53 @@ class KelasGuruMurid extends Model
         $stmt = $this->db->prepare('DELETE FROM kelas_guru_murid WHERE kelas_id = :kelas_id AND guru_id = :guru_id');
         $stmt->execute(['kelas_id' => $kelasId, 'guru_id' => $guruId]);
     }
+
+    /** Semua murid ampuan satu guru, lintas kelas (untuk halaman Manajemen Guru). */
+    public function forGuru(int $guruId): array
+    {
+        $sql = "SELECT mu.id, mu.nama_lengkap, k.level_kelas, k.nama_kelas
+                FROM kelas_guru_murid kgm
+                JOIN murid mu ON mu.id = kgm.murid_id
+                LEFT JOIN kelas k ON k.id = kgm.kelas_id
+                WHERE kgm.guru_id = :guru_id
+                ORDER BY mu.nama_lengkap ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['guru_id' => $guruId]);
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Ganti seluruh murid ampuan satu guru LINTAS KELAS (dipakai dari
+     * halaman Manajemen Guru, beda dengan replaceForGuruInKelas yang
+     * scoped ke 1 kelas dari Detail Kelas). kelas_id per baris diambil
+     * otomatis dari murid.kelas_id masing-masing.
+     */
+    public function replaceForGuru(int $guruId, array $muridIds): void
+    {
+        $db = $this->db;
+        $db->beginTransaction();
+
+        try {
+            $stmt = $db->prepare('DELETE FROM kelas_guru_murid WHERE guru_id = :guru_id');
+            $stmt->execute(['guru_id' => $guruId]);
+
+            $insertStmt = $db->prepare(
+                'INSERT INTO kelas_guru_murid (kelas_id, guru_id, murid_id)
+                 SELECT kelas_id, :guru_id, :murid_id FROM murid WHERE id = :murid_id2 AND kelas_id IS NOT NULL'
+            );
+
+            foreach (array_unique(array_map('intval', $muridIds)) as $muridId) {
+                if ($muridId > 0) {
+                    $insertStmt->execute(['guru_id' => $guruId, 'murid_id' => $muridId, 'murid_id2' => $muridId]);
+                }
+            }
+
+            $db->commit();
+        } catch (Throwable $e) {
+            $db->rollBack();
+            throw $e;
+        }
+    }
 }

@@ -57,3 +57,7 @@ $router->post('/murid', [MuridController::class, 'store']);
 $router->get('/murid/{id}/ubah', [MuridController::class, 'edit']);
 $router->post('/murid/{id}', [MuridController::class, 'update']);
 $router->get('/murid/{id}', [MuridController::class, 'show']);
+
+// --- Human Capital: Manajemen Guru ---
+$router->get('/manajemen-guru', [ManajemenGuruController::class, 'index']);
+$router->post('/manajemen-guru/{guruId}/murid', [ManajemenGuruController::class, 'saveMurid']);

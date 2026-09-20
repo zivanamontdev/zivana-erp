@@ -83,7 +83,10 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
   <!-- KaryawanController + view. [KEPUTUSAN, sudah dikonfirmasi user] Role RBAC ditempel ke Jabatan (kolom jabatan.role_id), bukan dipilih manual per karyawan — karyawan otomatis mewarisi role dari jabatan-nya. Alasan: role adalah properti fungsi/posisi bukan orang, tetap sesuai desain Figma untuk form Karyawan (tidak perlu field Role baru di situ), dan menutup celah role Superadmin/Koordinator Guru yang sebelumnya tidak bisa didapat (sekarang tinggal buat/ubah Jabatan dan pilih role-nya). Heuristik tebak nama "mengandung kata guru" yang dipakai sebelumnya sudah DIHAPUS. Diuji end-to-end ke MySQL live: migrasi kolom + backfill data lama berhasil, buat jabatan baru dengan role Koordinator Guru lalu buat karyawan dengannya - role Koordinator Guru ter-assign benar (sebelumnya tidak mungkin). -->
 - [x] **[BARU]** Field Role Sistem di form Tambah/Ubah Jabatan
   <!-- Deviasi kecil dari desain Figma asli (Jabatan cuma punya field Nama), tapi disepakati bersama user sebagai solusi lebih baik daripada menambah field Role di form Karyawan. -->
-- [ ] Halaman Manajemen Guru (card guru + list murid ampuan) — bergantung pada modul Murid/Kelas sudah ada datanya
+- [x] Halaman Manajemen Guru (card guru + list murid ampuan) — bergantung pada modul Murid/Kelas sudah ada datanya
+  <!-- ManajemenGuruController + view, reuse Guru-Murid Card dari Detail Kelas (Fase 5). Guru = karyawan aktif dengan jabatan.role_id -> role "Guru". Assign murid lintas kelas (beda dari Detail Kelas yang scoped 1 kelas) via KelasGuruMurid::replaceForGuru() - kelas_id per baris diambil otomatis dari murid.kelas_id, murid tanpa kelas otomatis tersaring dari pilihan dropdown. Diuji end-to-end ke MySQL live: assign murid berhasil, murid tanpa kelas terbukti tidak muncul di pilihan. -->
+
+**Fase 4 selesai.**
 
 ## Fase 5 — Murid & Kelas
 
