@@ -9,9 +9,10 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 - [x] Setup struktur folder sesuai `architecture.md` (app/, config/, database/, routes/, public/)
 - [x] Setup `Router`, `Controller` base class, `Model` base class, `Database` (PDO wrapper)
 - [x] Setup autoload manual (`spl_autoload_register`) + `composer.json` awal
-- [ ] Setup `.env` + `.env.example` + `config/config.php` (tanpa fallback hardcoded — lihat `security.md`)
-- [ ] Import `database/schema.sql` versi awal (tabel auth/RBAC dulu, tabel lain menyusul per fase)
-- [ ] Setup design token: `public/assets/css/tokens.css` dari `design-system.md` bagian 1.1–1.3
+- [x] Setup `.env` + `.env.example` + `config/config.php` (tanpa fallback hardcoded — lihat `security.md`)
+- [x] Import `database/schema.sql` versi awal (tabel auth/RBAC dulu, tabel lain menyusul per fase)
+  <!-- CATATAN: file schema.sql sudah ditulis lengkap (tabel roles/permissions/role_permissions/users/password_resets), tapi belum benar-benar di-"import"/dites ke server MySQL nyata karena tidak ada instance MySQL di environment ini. Jalankan `mysql -u root -p zivana_erp < database/schema.sql` (atau import via phpMyAdmin) di environment lokal/hosting yang sebenarnya, lalu verifikasi tidak ada error SQL sebelum lanjut. -->
+- [x] Setup design token: `public/assets/css/tokens.css` dari `design-system.md` bagian 1.1–1.3
 - [ ] Setup font Plus Jakarta Sans (Google Fonts atau self-host — putuskan sesuai `architecture.md` poin 6)
 - [ ] Build App Shell layout (`views/layouts/app-shell.php`): sidebar + 3-baris page header sesuai `design-system.md` bagian 2
 
