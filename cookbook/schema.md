@@ -55,7 +55,7 @@ Akun login. Dipisah dari `karyawan` karena Portal Guru login pakai akun yang sam
 |---|---|---|
 | id | INT PK | |
 | karyawan_id | INT FK → karyawan.id NULL | null untuk Superadmin/akun sistem |
-| role_id | INT FK → roles.id | |
+| role_id | INT FK → roles.id | **[UPDATE]** disalin otomatis dari `jabatan.role_id` saat karyawan dibuat/diubah jabatannya — lihat catatan di tabel `jabatan` |
 | email | VARCHAR(150) UNIQUE | |
 | password_hash | VARCHAR(255) | bcrypt via `password_hash()` |
 | remember_token | VARCHAR(255) NULL | hash SHA-256, bukan plaintext (ikut pola repo referensi) |
@@ -215,10 +215,14 @@ Level di bawah periode (dari accordion Rapor Murid).
 ## 4. Human Capital
 
 ### `jabatan`
+
+**[UPDATE — keputusan Fase 4, bukan lagi hanya asumsi]** Role RBAC (`roles`) ditempel di sini, bukan dipilih manual per karyawan. Karyawan otomatis mewarisi role dari jabatan-nya saat akun `users` dibuat. Alasan: role adalah properti fungsi/posisi bukan individu, dan ini menghindari perlu field "Role" terpisah di form Karyawan (tetap sesuai desain Figma yang cuma punya field "Jabatan").
+
 | Kolom | Tipe | Keterangan |
 |---|---|---|
 | id | INT PK | |
-| nama | VARCHAR(100) | Kepala Sekolah, Admin, Guru Kelas, Guru Shadow (`[ASUMSI definisi]`) |
+| role_id | INT FK → roles.id, NULL | role RBAC tetap untuk jabatan ini — wajib diisi lewat form (NULL hanya untuk data lama sebelum migrasi) |
+| nama | VARCHAR(100) | Kepala Sekolah, Admin, Guru Kelas, Guru Shadow (`[ASUMSI definisi "Guru Shadow"]`) |
 | is_active | TINYINT(1) DEFAULT 1 | |
 | created_at, updated_at | TIMESTAMP | |
 
