@@ -6,9 +6,9 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 
 ## Fase 0 — Fondasi Teknis
 
-- [ ] Setup struktur folder sesuai `architecture.md` (app/, config/, database/, routes/, public/)
-- [ ] Setup `Router`, `Controller` base class, `Model` base class, `Database` (PDO wrapper)
-- [ ] Setup autoload manual (`spl_autoload_register`) + `composer.json` awal
+- [x] Setup struktur folder sesuai `architecture.md` (app/, config/, database/, routes/, public/)
+- [x] Setup `Router`, `Controller` base class, `Model` base class, `Database` (PDO wrapper)
+- [x] Setup autoload manual (`spl_autoload_register`) + `composer.json` awal
 - [ ] Setup `.env` + `.env.example` + `config/config.php` (tanpa fallback hardcoded — lihat `security.md`)
 - [ ] Import `database/schema.sql` versi awal (tabel auth/RBAC dulu, tabel lain menyusul per fase)
 - [ ] Setup design token: `public/assets/css/tokens.css` dari `design-system.md` bagian 1.1–1.3
