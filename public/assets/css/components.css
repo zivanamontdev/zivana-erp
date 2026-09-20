@@ -564,3 +564,58 @@ body.modal-open {
 
 /* Accordion bersarang (nested) mewarisi style yang sama, cukup ulang
    markup .accordion-item di dalam .accordion-body. */
+
+/* ==========================================================
+   4.7 Pattern: Tabs
+   [BARU] Tidak eksplisit di Fase 2 todo.md, tapi dibutuhkan halaman
+   Data Sekolah (Fase 3) dan Manajemen Murid (Fase 5). Dibangun di sini
+   supaya tidak duplikat saat dipakai lagi.
+   ========================================================== */
+
+.tabs-nav {
+  display: flex;
+  gap: var(--space-6);
+  border-bottom: 1px solid var(--color-neutral-100);
+}
+
+.tabs-tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-3) 0;
+  margin-bottom: -1px;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-500);
+  border-bottom: 2px solid transparent;
+}
+
+.tabs-tab.is-active {
+  color: var(--color-red-600);
+  border-bottom-color: var(--color-red-600);
+  font-weight: var(--font-weight-bold);
+}
+
+.tabs-panel {
+  display: none;
+  padding-top: var(--space-5);
+}
+
+.tabs-panel.is-active {
+  display: block;
+}
+
+/* ==========================================================
+   Field row (form 2 kolom) — cookbook/design-system.md 4.4
+   ========================================================== */
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+.field-row .field-full {
+  grid-column: 1 / -1;
+}

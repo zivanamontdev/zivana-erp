@@ -20,3 +20,8 @@ $router->post('/reset-kata-sandi/{token}', [AuthController::class, 'resetPasswor
 // --- Sistem / RBAC ---
 $router->get('/rbac', [RbacController::class, 'index']);
 $router->post('/rbac', [RbacController::class, 'update']);
+
+// --- Sekolah ---
+$router->get('/sekolah', [SekolahController::class, 'index']);
+$router->post('/sekolah', [SekolahController::class, 'update']);
+$router->post('/sekolah/tahun-ajaran', [SekolahController::class, 'updateTahunAjaran']);

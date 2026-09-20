@@ -10,11 +10,22 @@ class RoleMiddleware
 {
     public function handle(string $modul, ?string $subSection = null, string $aksi = 'lihat'): void
     {
-        $roleId = (int) ($_SESSION['role_id'] ?? 0);
-
-        if ($roleId === 0 || !$this->hasAccess($roleId, $modul, $subSection, $aksi)) {
+        if (!$this->check($modul, $subSection, $aksi)) {
             $this->deny();
         }
+    }
+
+    /**
+     * Soft-check tanpa langsung deny — dipakai controller untuk
+     * keputusan tampilan (mis. tampilkan tombol "Ubah" atau tidak),
+     * bukan sebagai satu-satunya proteksi. Proteksi utama tetap lewat
+     * handle() di awal method controller.
+     */
+    public function check(string $modul, ?string $subSection = null, string $aksi = 'lihat'): bool
+    {
+        $roleId = (int) ($_SESSION['role_id'] ?? 0);
+
+        return $roleId !== 0 && $this->hasAccess($roleId, $modul, $subSection, $aksi);
     }
 
     private function hasAccess(int $roleId, string $modul, ?string $subSection, string $aksi): bool

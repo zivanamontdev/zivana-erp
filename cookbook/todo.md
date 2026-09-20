@@ -60,8 +60,12 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 
 - [x] Tabel `sekolah`, `sekolah_media`, `tahun_ajaran`
   <!-- Ditambahkan ke database/schema.sql. Belum diuji ke MySQL nyata (lihat catatan lingkungan kerja di Fase 1). -->
-- [ ] Halaman Data Sekolah (tab Informasi Umum, tab Kontak & Media) — mode lihat/ubah, validasi wajib
-- [ ] Modal Perbarui Tahun Ajaran
+- [x] Halaman Data Sekolah (tab Informasi Umum, tab Kontak & Media) — mode lihat/ubah, validasi wajib
+  <!-- SekolahController + view. Dibangun pattern Tabs baru (tidak ada di Fase 2, ditambahkan di sini karena dibutuhkan) di components.css. Diverifikasi visual: mode lihat, mode ubah+error validasi, tab Kontak & Media dengan daftar media repeatable — semua cocok dengan desain. [ASUMSI] opsi dropdown Bentuk Pendidikan (KB/TK/TPA) dan Jenis Media (Instagram/Facebook/TikTok/YouTube/Website) diturunkan dari konteks Montessori, bukan daftar lengkap resmi dari user. Belum diuji fungsional simpan-ke-DB (tidak ada MySQL live). -->
+- [x] Modal Perbarui Tahun Ajaran
+  <!-- Modal + SekolahController::updateTahunAjaran(). Nonaktifkan tahun ajaran lama, insert baru sebagai aktif. Diverifikasi visual sesuai spesifikasi. -->
+
+**Fase 3 selesai.**
 
 ## Fase 4 — Human Capital
 
