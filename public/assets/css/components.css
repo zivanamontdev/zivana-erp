@@ -566,6 +566,95 @@ body.modal-open {
    markup .accordion-item di dalam .accordion-body. */
 
 /* ==========================================================
+   Pattern: List Toolbar (search + filter di atas tabel daftar)
+   [BARU] Dibutuhkan mulai Fase 4, dipakai di semua halaman daftar.
+   ========================================================== */
+
+.list-toolbar {
+  margin-bottom: var(--space-4);
+}
+
+.list-filter {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.list-filter .field-input {
+  width: auto;
+  min-width: 160px;
+}
+
+.list-filter input[type="text"].field-input,
+.list-filter input[type="search"].field-input {
+  min-width: 220px;
+}
+
+/* ==========================================================
+   4.8 Pattern: Action Menu (dropdown "⋮" di kolom aksi tabel)
+   [BARU] Tidak eksplisit di Fase 2 todo.md, dibutuhkan untuk CRUD
+   Jabatan/Karyawan (Fase 4) dan seterusnya.
+   ========================================================== */
+
+.action-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.action-menu-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  color: var(--color-neutral-600);
+}
+
+.action-menu-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.action-menu-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: var(--color-neutral-white);
+  border: 1px solid var(--color-neutral-100);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(4, 4, 4, 0.12);
+  min-width: 140px;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.action-menu.is-open .action-menu-dropdown {
+  display: block;
+}
+
+.action-menu-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-800);
+}
+
+.action-menu-dropdown button:hover {
+  background: var(--color-neutral-75);
+}
+
+.action-menu-dropdown button.is-destructive {
+  color: var(--color-red-600);
+}
+
+/* ==========================================================
    4.7 Pattern: Tabs
    [BARU] Tidak eksplisit di Fase 2 todo.md, tapi dibutuhkan halaman
    Data Sekolah (Fase 3) dan Manajemen Murid (Fase 5). Dibangun di sini

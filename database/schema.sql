@@ -148,3 +148,38 @@ CREATE TABLE IF NOT EXISTS tahun_ajaran (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =========================================================
+-- HUMAN CAPITAL (Fase 4)
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS jabatan (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_jabatan_nama (nama)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS karyawan (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    jabatan_id INT NOT NULL,
+    nama VARCHAR(150) NOT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_karyawan_jabatan FOREIGN KEY (jabatan_id) REFERENCES jabatan(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tambahkan FK users.karyawan_id -> karyawan.id sekarang tabel karyawan
+-- sudah ada (tabel users dibuat lebih dulu di Fase 1 tanpa FK ini,
+-- lihat komentar di CREATE TABLE users).
+-- CATATAN PENTING: berbeda dari CREATE TABLE IF NOT EXISTS di atas,
+-- ALTER TABLE ini TIDAK idempotent. Kalau schema.sql dijalankan dari
+-- nol ke database kosong, aman. Kalau dijalankan ulang ke database
+-- yang sudah pernah menjalankan baris ini sebelumnya, akan muncul
+-- error "Duplicate foreign key constraint name" — itu WAJAR dan aman
+-- diabaikan (tandanya constraint memang sudah terpasang).
+ALTER TABLE users
+    ADD CONSTRAINT fk_users_karyawan FOREIGN KEY (karyawan_id) REFERENCES karyawan(id);

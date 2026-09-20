@@ -65,9 +65,9 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 ## Fase 3 — Modul Sekolah
 
 - [x] Tabel `sekolah`, `sekolah_media`, `tahun_ajaran`
-  <!-- Ditambahkan ke database/schema.sql. Belum diuji ke MySQL nyata (lihat catatan lingkungan kerja di Fase 1). -->
+  <!-- [UPDATE] Sudah diuji ke MySQL live: schema.sql sukses dieksekusi tanpa error. -->
 - [x] Halaman Data Sekolah (tab Informasi Umum, tab Kontak & Media) — mode lihat/ubah, validasi wajib
-  <!-- SekolahController + view. Dibangun pattern Tabs baru (tidak ada di Fase 2, ditambahkan di sini karena dibutuhkan) di components.css. Diverifikasi visual: mode lihat, mode ubah+error validasi, tab Kontak & Media dengan daftar media repeatable — semua cocok dengan desain. [ASUMSI] opsi dropdown Bentuk Pendidikan (KB/TK/TPA) dan Jenis Media (Instagram/Facebook/TikTok/YouTube/Website) diturunkan dari konteks Montessori, bukan daftar lengkap resmi dari user. Belum diuji fungsional simpan-ke-DB (tidak ada MySQL live). -->
+  <!-- SekolahController + view. Pattern Tabs baru ditambahkan di components.css. [ASUMSI] opsi dropdown Bentuk Pendidikan (KB/TK/TPA) dan Jenis Media diturunkan dari konteks Montessori, bukan daftar resmi dari user. [UPDATE] Sudah diuji end-to-end ke MySQL live: simpan data + baca ulang terbukti benar. -->
 - [x] Modal Perbarui Tahun Ajaran
   <!-- Modal + SekolahController::updateTahunAjaran(). Nonaktifkan tahun ajaran lama, insert baru sebagai aktif. Diverifikasi visual sesuai spesifikasi. -->
 
@@ -75,9 +75,12 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 
 ## Fase 4 — Human Capital
 
-- [ ] Tabel `jabatan`, `karyawan` (+ relasi ke `users`)
-- [ ] CRUD Jabatan
-- [ ] CRUD Daftar Karyawan (termasuk pembuatan akun `users` saat tambah karyawan, form "Ganti Kata Sandi" terpisah)
+- [x] Tabel `jabatan`, `karyawan` (+ relasi ke `users`)
+  <!-- FK users.karyawan_id -> karyawan.id ditambahkan lewat ALTER TABLE (lihat catatan non-idempotent di schema.sql). Diuji ke MySQL live: berhasil dibuat. -->
+- [x] CRUD Jabatan
+  <!-- JabatanController + view. Hapus = soft-delete (is_active=0), bukan DELETE FROM, konsisten dengan konvensi is_active di schema.md. Diuji end-to-end ke MySQL live: tambah/ubah/hapus semua benar. Ditambahkan juga komponen baru yang ternyata dibutuhkan: Action Menu (dropdown "⋮") dan List Toolbar (search+filter), belum ada di Fase 2. -->
+- [x] CRUD Daftar Karyawan (termasuk pembuatan akun `users` saat tambah karyawan, form "Ganti Kata Sandi" terpisah)
+  <!-- KaryawanController + view. [ASUMSI PENTING] Pemetaan jabatan->role RBAC tidak didokumentasikan di manapun (form cuma punya field "Jabatan", bukan "Role"). Aturan sementara: nama jabatan mengandung kata "guru" -> role Guru, selain itu -> role Admin. Superadmin/Koordinator Guru tidak bisa didapat lewat form ini, perlu di-set manual. PERLU DIKONFIRMASI KE USER. Diuji end-to-end ke MySQL live: tambah (karyawan+user dibuat, role ter-assign benar), ubah (role ikut update sesuai jabatan baru), ganti password (password_verify berhasil), hapus (soft-delete karyawan DAN nonaktifkan akun user-nya, akun yang dihapus terbukti tidak bisa login lagi). -->
 - [ ] Halaman Manajemen Guru (card guru + list murid ampuan) — bergantung pada modul Murid/Kelas sudah ada datanya
 
 ## Fase 5 — Murid & Kelas

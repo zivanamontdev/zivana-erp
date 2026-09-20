@@ -25,3 +25,16 @@ $router->post('/rbac', [RbacController::class, 'update']);
 $router->get('/sekolah', [SekolahController::class, 'index']);
 $router->post('/sekolah', [SekolahController::class, 'update']);
 $router->post('/sekolah/tahun-ajaran', [SekolahController::class, 'updateTahunAjaran']);
+
+// --- Human Capital: Jabatan ---
+$router->get('/jabatan', [JabatanController::class, 'index']);
+$router->post('/jabatan', [JabatanController::class, 'store']);
+$router->post('/jabatan/{id}', [JabatanController::class, 'update']);
+$router->post('/jabatan/{id}/hapus', [JabatanController::class, 'destroy']);
+
+// --- Human Capital: Daftar Karyawan ---
+$router->get('/karyawan', [KaryawanController::class, 'index']);
+$router->post('/karyawan', [KaryawanController::class, 'store']);
+$router->post('/karyawan/{id}', [KaryawanController::class, 'update']);
+$router->post('/karyawan/{id}/kata-sandi', [KaryawanController::class, 'updatePassword']);
+$router->post('/karyawan/{id}/hapus', [KaryawanController::class, 'destroy']);
