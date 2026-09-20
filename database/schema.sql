@@ -109,3 +109,42 @@ SELECT * FROM (
     UNION ALL SELECT 'Sistem', 'RBAC', NULL, 'edit', 24
 ) AS seed_data
 WHERE NOT EXISTS (SELECT 1 FROM permissions LIMIT 1);
+
+-- =========================================================
+-- SEKOLAH (Fase 3)
+-- =========================================================
+
+-- Singleton: hanya 1 baris (aplikasi tidak multi-tenant), lihat
+-- cookbook/schema.md bagian 2.
+CREATE TABLE IF NOT EXISTS sekolah (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama_legal VARCHAR(200) NOT NULL,
+    nama_komersial VARCHAR(200) NOT NULL,
+    bentuk_pendidikan VARCHAR(50) NOT NULL,
+    npsn VARCHAR(20) NOT NULL,
+    alamat TEXT NOT NULL,
+    no_telepon VARCHAR(30) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS sekolah_media (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sekolah_id INT NOT NULL,
+    jenis_media VARCHAR(50) NOT NULL,
+    nama_akun VARCHAR(150) NOT NULL,
+    url VARCHAR(255) NOT NULL,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sekolah_media_sekolah FOREIGN KEY (sekolah_id) REFERENCES sekolah(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS tahun_ajaran (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tahun_awal YEAR NOT NULL,
+    tahun_akhir YEAR NOT NULL,
+    is_active TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

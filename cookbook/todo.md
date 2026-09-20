@@ -51,12 +51,15 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
   <!-- .modal-overlay/.modal-box/.modal-sm/.modal-lg + modal.js (buka/tutup, klik overlay, ESC). Dimuat global lewat shell-footer.php. Diverifikasi visual (modal-sm) sesuai spesifikasi persis. -->
 - [x] Komponen Tabel (header, data row, kolom aksi ellipsis)
   <!-- .data-table-wrapper/.data-table di components.css. Diverifikasi visual, cocok dengan pola di semua screenshot daftar. -->
-- [ ] Pattern "Assign Many-to-Many" (dropdown dinamis + tombol tambah/hapus baris) — dipakai di 2 tempat nanti
-- [ ] Pattern "Accordion Bertingkat" — dipakai di RBAC, Rapor Murid, Pengisian Rapor
+- [x] Pattern "Assign Many-to-Many" (dropdown dinamis + tombol tambah/hapus baris) — dipakai di 2 tempat nanti
+  <!-- assign-list.js (clone via <template>) + .assign-list-* di components.css. Diverifikasi visual, siap dipakai di Manajemen Guru & Detail Kelas (Fase 4/5). -->
+- [x] Pattern "Accordion Bertingkat" — dipakai di RBAC, Rapor Murid, Pengisian Rapor
+  <!-- accordion.js generik + .accordion-item/.accordion-header/.accordion-body di components.css. Diverifikasi visual termasuk nested accordion. RBAC (Fase 1) tetap pakai varian khususnya sendiri (.rbac-role) karena ada chrome tambahan. -->
 
 ## Fase 3 — Modul Sekolah
 
-- [ ] Tabel `sekolah`, `sekolah_media`, `tahun_ajaran`
+- [x] Tabel `sekolah`, `sekolah_media`, `tahun_ajaran`
+  <!-- Ditambahkan ke database/schema.sql. Belum diuji ke MySQL nyata (lihat catatan lingkungan kerja di Fase 1). -->
 - [ ] Halaman Data Sekolah (tab Informasi Umum, tab Kontak & Media) — mode lihat/ubah, validasi wajib
 - [ ] Modal Perbarui Tahun Ajaran
 

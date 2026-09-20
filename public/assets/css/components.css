@@ -463,3 +463,104 @@ body.modal-open {
   color: var(--color-neutral-400);
   font-size: var(--font-size-body-sm);
 }
+
+/* ==========================================================
+   4.5 Pattern: Assign Many-to-Many
+   Dipakai di "Atur Anak Murid" (Manajemen Guru & Detail Kelas).
+   ========================================================== */
+
+.assign-list-card {
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.assign-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.assign-list-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.assign-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.assign-list-row .field-input {
+  flex: 1;
+}
+
+.assign-list-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-neutral-400);
+  padding: var(--space-1);
+  flex-shrink: 0;
+}
+
+.assign-list-remove svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================================
+   4.6 Pattern: Accordion Bertingkat
+   Dipakai di Rapor Murid (daftar) dan Pengisian Rapor. RBAC (Fase 1)
+   pakai varian khusus sendiri (.rbac-role) karena ada chrome tambahan
+   (icon edit, checkbox tree) di luar accordion polos ini.
+   ========================================================== */
+
+.accordion-item {
+  border: 1px solid var(--color-neutral-75);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.accordion-item + .accordion-item {
+  margin-top: var(--space-3);
+}
+
+.accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-neutral-white);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-family-base);
+}
+
+.accordion-chevron {
+  margin-left: auto;
+  display: inline-flex;
+  transition: transform 0.15s ease;
+}
+
+.accordion-item.is-open > .accordion-header .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  display: none;
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: 1px solid var(--color-neutral-75);
+}
+
+.accordion-item.is-open > .accordion-body {
+  display: block;
+}
+
+/* Accordion bersarang (nested) mewarisi style yang sama, cukup ulang
+   markup .accordion-item di dalam .accordion-body. */
