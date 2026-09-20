@@ -38,3 +38,12 @@ $router->post('/karyawan', [KaryawanController::class, 'store']);
 $router->post('/karyawan/{id}', [KaryawanController::class, 'update']);
 $router->post('/karyawan/{id}/kata-sandi', [KaryawanController::class, 'updatePassword']);
 $router->post('/karyawan/{id}/hapus', [KaryawanController::class, 'destroy']);
+
+// --- Murid: Manajemen Kelas ---
+$router->get('/kelas', [KelasController::class, 'index']);
+$router->post('/kelas', [KelasController::class, 'store']);
+$router->get('/kelas/{id}', [KelasController::class, 'show']);
+$router->post('/kelas/{id}', [KelasController::class, 'update']);
+$router->post('/kelas/{id}/hapus', [KelasController::class, 'destroy']);
+$router->post('/kelas/{id}/guru-murid', [KelasController::class, 'saveGuruMurid']);
+$router->post('/kelas/{id}/guru/{guruId}/hapus', [KelasController::class, 'removeGuru']);

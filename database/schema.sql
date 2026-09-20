@@ -188,3 +188,70 @@ CREATE TABLE IF NOT EXISTS karyawan (
 -- diabaikan (tandanya constraint memang sudah terpasang).
 ALTER TABLE users
     ADD CONSTRAINT fk_users_karyawan FOREIGN KEY (karyawan_id) REFERENCES karyawan(id);
+
+-- =========================================================
+-- MURID & KELAS (Fase 5)
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS kelas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tahun_ajaran_id INT NOT NULL,
+    level_kelas VARCHAR(50) NOT NULL,
+    nama_kelas VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_kelas_tahun_ajaran FOREIGN KEY (tahun_ajaran_id) REFERENCES tahun_ajaran(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS murid (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    -- Tab Data Murid
+    nama_lengkap VARCHAR(150) NOT NULL,
+    nama_panggilan VARCHAR(50) NOT NULL,
+    nisn VARCHAR(20) NULL,
+    agama VARCHAR(30) NOT NULL,
+    nik VARCHAR(20) NOT NULL,
+    no_registrasi_akte VARCHAR(50) NOT NULL,
+    jenis_kelamin ENUM('L', 'P') NOT NULL,
+    tempat_lahir VARCHAR(100) NOT NULL,
+    tanggal_lahir DATE NOT NULL,
+    alamat TEXT NOT NULL,
+    -- Tab Informasi Pendaftaran
+    tanggal_masuk_sekolah DATE NOT NULL,
+    status_kondisi VARCHAR(50) NOT NULL,
+    jenis_kebutuhan VARCHAR(150) NULL,
+    kelengkapan_berkas VARCHAR(150) NULL,
+    kelas_id INT NULL,
+    -- Tab Relasi & Kontak
+    alamat_domisili VARCHAR(255) NOT NULL,
+    anak_ke INT NULL,
+    jumlah_saudara INT NOT NULL,
+    nama_ayah VARCHAR(150) NOT NULL,
+    pendidikan_ayah VARCHAR(100) NOT NULL,
+    pekerjaan_ayah VARCHAR(100) NOT NULL,
+    telp_ayah VARCHAR(30) NOT NULL,
+    nama_ibu VARCHAR(150) NOT NULL,
+    pendidikan_ibu VARCHAR(100) NOT NULL,
+    pekerjaan_ibu VARCHAR(100) NOT NULL,
+    telp_ibu VARCHAR(30) NOT NULL,
+    -- Status
+    status ENUM('bersekolah', 'tanpa_keterangan', 'tamat', 'berhenti') NOT NULL DEFAULT 'bersekolah',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_murid_kelas FOREIGN KEY (kelas_id) REFERENCES kelas(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Pivot 3-arah: satu kelas bisa punya beberapa guru, masing-masing
+-- guru punya subset murid sendiri di kelas itu. Dipakai bersama oleh
+-- modul Manajemen Guru dan Detail Kelas (satu implementasi reusable).
+CREATE TABLE IF NOT EXISTS kelas_guru_murid (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    kelas_id INT NOT NULL,
+    guru_id INT NOT NULL,
+    murid_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_kelas_guru_murid (kelas_id, guru_id, murid_id),
+    CONSTRAINT fk_kgm_kelas FOREIGN KEY (kelas_id) REFERENCES kelas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_kgm_guru FOREIGN KEY (guru_id) REFERENCES karyawan(id) ON DELETE CASCADE,
+    CONSTRAINT fk_kgm_murid FOREIGN KEY (murid_id) REFERENCES murid(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

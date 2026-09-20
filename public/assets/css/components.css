@@ -566,6 +566,50 @@ body.modal-open {
    markup .accordion-item di dalam .accordion-body. */
 
 /* ==========================================================
+   Pattern: Guru-Murid Card
+   [BARU] Dibutuhkan Detail Kelas (Fase 5) dan Manajemen Guru (Fase 4,
+   dibangun ulang di sini). Card guru + list murid ampuannya.
+   ========================================================== */
+
+.guru-murid-card {
+  border: 1px solid var(--color-neutral-75);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  overflow: hidden;
+}
+
+.guru-murid-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.guru-murid-card-header > div:first-child {
+  flex: 1;
+}
+
+.guru-murid-card-list {
+  border-top: 1px solid var(--color-neutral-75);
+}
+
+.guru-murid-item {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-neutral-75);
+  font-size: var(--font-size-body-sm);
+}
+
+.guru-murid-item:first-child {
+  border-top: none;
+}
+
+.assign-guru-context {
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+/* ==========================================================
    Pattern: List Toolbar (search + filter di atas tabel daftar)
    [BARU] Dibutuhkan mulai Fase 4, dipakai di semua halaman daftar.
    ========================================================== */

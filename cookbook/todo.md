@@ -87,9 +87,12 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 
 ## Fase 5 — Murid & Kelas
 
-- [ ] Tabel `kelas`, `murid`, `kelas_guru_murid`
-- [ ] CRUD Manajemen Kelas + Detail Kelas (multi-guru per kelas)
-- [ ] Modal "Atur Anak Murid" (assign, dipakai dari Manajemen Guru dan Detail Kelas — pastikan satu implementasi reusable)
+- [x] Tabel `kelas`, `murid`, `kelas_guru_murid`
+  <!-- Diuji ke MySQL live: 3 tabel berhasil dibuat, FK dan cascade behavior (murid.kelas_id SET NULL saat kelas dihapus) terverifikasi jalan. -->
+- [x] CRUD Manajemen Kelas + Detail Kelas (multi-guru per kelas)
+  <!-- KelasController + view index/show. Hapus kelas = hard DELETE (bukan soft-delete, karena kelas tidak punya is_active di schema.md). Diuji end-to-end ke MySQL live: tambah/ubah/hapus kelas, dan verifikasi murid.kelas_id benar-benar jadi NULL setelah kelas dihapus (bukan ikut terhapus). -->
+- [x] Modal "Atur Anak Murid" (assign, dipakai dari Manajemen Guru dan Detail Kelas — pastikan satu implementasi reusable)
+  <!-- Diimplementasi via KelasGuruMurid::replaceForGuruInKelas() (DELETE lalu INSERT ulang) — dipakai baik untuk "+ Tambah Guru" (guru baru) maupun "Atur Anak Murid" (ubah assignment guru yang sudah ada), logikanya identik. Diuji end-to-end: assign 2 murid -> ubah jadi 1 murid berbeda -> hapus guru dari kelas, semua benar di database. Komponen baru yang dibutuhkan: Guru-Murid Card (akan dipakai lagi di Manajemen Guru, Fase 4 item terakhir). -->
 - [ ] CRUD Manajemen Murid — 3 tab (Data Murid, Informasi Pendaftaran, Relasi & Kontak), field lengkap sesuai `schema.md`
 - [ ] Mode Detail Murid (read-only + field relasi Level Kelas/Kelas)
 - [ ] `[Konfirmasi ke user dulu]` Fitur "Import" murid (format file, mapping kolom)
