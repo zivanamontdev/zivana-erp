@@ -153,13 +153,18 @@ CREATE TABLE IF NOT EXISTS tahun_ajaran (
 -- HUMAN CAPITAL (Fase 4)
 -- =========================================================
 
+-- role_id: setiap jabatan punya SATU role RBAC tetap (bukan dipilih per
+-- karyawan) — keputusan bersama user, lihat cookbook/todo.md Fase 4.
+-- Karyawan otomatis mewarisi role dari jabatan-nya saat dibuat.
 CREATE TABLE IF NOT EXISTS jabatan (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    role_id INT NULL,
     nama VARCHAR(100) NOT NULL,
     is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_jabatan_nama (nama)
+    UNIQUE KEY uq_jabatan_nama (nama),
+    CONSTRAINT fk_jabatan_role FOREIGN KEY (role_id) REFERENCES roles(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS karyawan (

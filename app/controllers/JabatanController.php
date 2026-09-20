@@ -10,21 +10,21 @@ class JabatanController extends Controller
         $search = trim((string) $this->input('q', ''));
         $status = (string) $this->input('status', '');
 
-        $sql = 'SELECT * FROM jabatan WHERE 1=1';
+        $sql = 'SELECT j.*, r.nama AS nama_role FROM jabatan j LEFT JOIN roles r ON r.id = j.role_id WHERE 1=1';
         $params = [];
 
         if ($search !== '') {
-            $sql .= ' AND nama LIKE :q';
+            $sql .= ' AND j.nama LIKE :q';
             $params['q'] = '%' . $search . '%';
         }
 
         if ($status === 'aktif') {
-            $sql .= ' AND is_active = 1';
+            $sql .= ' AND j.is_active = 1';
         } elseif ($status === 'nonaktif') {
-            $sql .= ' AND is_active = 0';
+            $sql .= ' AND j.is_active = 0';
         }
 
-        $sql .= ' ORDER BY nama ASC';
+        $sql .= ' ORDER BY j.nama ASC';
 
         $stmt = Database::getInstance()->prepare($sql);
         $stmt->execute($params);
@@ -34,6 +34,7 @@ class JabatanController extends Controller
             'breadcrumb' => 'Karyawan &gt; Jabatan',
             'activeNavItem' => 'jabatan',
             'jabatanList' => $stmt->fetchAll(),
+            'roleOptions' => (new Role())->all('id ASC'),
             'canEdit' => (new RoleMiddleware())->check('Human Capital', 'Jabatan', 'edit'),
             'search' => $search,
             'status' => $status,
@@ -46,9 +47,10 @@ class JabatanController extends Controller
         $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
 
         $nama = trim((string) $this->input('nama', ''));
+        $roleId = (int) $this->input('role_id', 0);
 
-        if ($nama !== '') {
-            (new Jabatan())->create(['nama' => $nama, 'is_active' => 1]);
+        if ($nama !== '' && $roleId > 0) {
+            (new Jabatan())->create(['nama' => $nama, 'role_id' => $roleId, 'is_active' => 1]);
         }
 
         $this->redirect('/jabatan');
@@ -60,9 +62,10 @@ class JabatanController extends Controller
         $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
 
         $nama = trim((string) $this->input('nama', ''));
+        $roleId = (int) $this->input('role_id', 0);
 
-        if ($nama !== '') {
-            (new Jabatan())->update((int) $id, ['nama' => $nama]);
+        if ($nama !== '' && $roleId > 0) {
+            (new Jabatan())->update((int) $id, ['nama' => $nama, 'role_id' => $roleId]);
         }
 
         $this->redirect('/jabatan');

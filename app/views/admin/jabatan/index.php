@@ -28,17 +28,19 @@ require VIEW_PATH . '/layouts/shell-header.php';
         <thead>
             <tr>
                 <th>Nama Jabatan</th>
+                <th>Role</th>
                 <th>Status</th>
                 <th class="col-action"></th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($jabatanList)): ?>
-            <tr><td colspan="3" class="data-table-empty">Belum ada data jabatan. Tambahkan jabatan pertama lewat tombol "Tambah Jabatan".</td></tr>
+            <tr><td colspan="4" class="data-table-empty">Belum ada data jabatan. Tambahkan jabatan pertama lewat tombol "Tambah Jabatan".</td></tr>
             <?php endif; ?>
             <?php foreach ($jabatanList as $jabatan): ?>
             <tr>
                 <td><?= e($jabatan['nama']) ?></td>
+                <td><?= e($jabatan['nama_role'] ?? '-') ?></td>
                 <td><span class="badge <?= $jabatan['is_active'] ? 'badge-positif' : 'badge-netral' ?>"><?= $jabatan['is_active'] ? 'Aktif' : 'Nonaktif' ?></span></td>
                 <td class="col-action">
                     <?php if ($canEdit): ?>
@@ -66,6 +68,15 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <div class="field">
                 <label class="field-label">Nama Jabatan *</label>
                 <input type="text" name="nama" class="field-input" value="<?= e($jabatan['nama']) ?>" required>
+            </div>
+            <div class="field">
+                <label class="field-label">Role Sistem *</label>
+                <select name="role_id" class="field-input" required>
+                    <option value="">Pilih role sistem</option>
+                    <?php foreach ($roleOptions as $role): ?>
+                    <option value="<?= $role['id'] ?>" <?= $jabatan['role_id'] == $role['id'] ? 'selected' : '' ?>><?= e($role['nama']) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
@@ -99,6 +110,15 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <div class="field">
                 <label class="field-label">Nama Jabatan *</label>
                 <input type="text" name="nama" class="field-input" placeholder="Isi nama jabatan" required>
+            </div>
+            <div class="field">
+                <label class="field-label">Role Sistem *</label>
+                <select name="role_id" class="field-input" required>
+                    <option value="">Pilih role sistem</option>
+                    <?php foreach ($roleOptions as $role): ?>
+                    <option value="<?= $role['id'] ?>"><?= e($role['nama']) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>

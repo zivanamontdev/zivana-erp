@@ -61,7 +61,9 @@ class KaryawanController extends Controller
         $password = (string) $this->input('password', '');
         $passwordConfirmation = (string) $this->input('password_confirmation', '');
 
-        if ($nama === '' || $jabatanId === 0 || $email === '' || strlen($password) < 8 || $password !== $passwordConfirmation) {
+        $roleId = $this->roleIdForJabatan($jabatanId);
+
+        if ($nama === '' || $jabatanId === 0 || $email === '' || strlen($password) < 8 || $password !== $passwordConfirmation || $roleId === null) {
             $this->redirect('/karyawan');
             return;
         }
@@ -71,8 +73,6 @@ class KaryawanController extends Controller
 
         try {
             $karyawanId = (new Karyawan())->create(['jabatan_id' => $jabatanId, 'nama' => $nama, 'is_active' => 1]);
-
-            $roleId = $this->roleIdForJabatan($jabatanId);
 
             (new User())->create([
                 'karyawan_id' => $karyawanId,
@@ -100,7 +100,9 @@ class KaryawanController extends Controller
         $jabatanId = (int) $this->input('jabatan_id', 0);
         $email = trim((string) $this->input('email', ''));
 
-        if ($nama === '' || $jabatanId === 0 || $email === '') {
+        $roleId = $this->roleIdForJabatan($jabatanId);
+
+        if ($nama === '' || $jabatanId === 0 || $email === '' || $roleId === null) {
             $this->redirect('/karyawan');
             return;
         }
@@ -111,7 +113,7 @@ class KaryawanController extends Controller
         $stmt = $db->prepare('UPDATE users SET email = :email, role_id = :role_id WHERE karyawan_id = :karyawan_id');
         $stmt->execute([
             'email' => $email,
-            'role_id' => $this->roleIdForJabatan($jabatanId),
+            'role_id' => $roleId,
             'karyawan_id' => (int) $id,
         ]);
 
@@ -152,26 +154,16 @@ class KaryawanController extends Controller
     }
 
     /**
-     * [ASUMSI] Pemetaan jabatan -> role RBAC tidak eksplisit
-     * didokumentasikan di manapun (RBAC pakai 4 role tetap, jabatan
-     * bebas macam-macam seperti "Guru Kelas", "Guru Shadow", "Admin",
-     * "Kepala Sekolah"). Aturan sementara: jabatan yang namanya
-     * mengandung kata "guru" (case-insensitive) di-assign role Guru,
-     * sisanya di-assign role Admin. Superadmin dan Koordinator Guru
-     * tidak bisa didapat lewat jalur ini — perlu di-set manual di DB
-     * atau lewat mekanisme lain, karena tidak ada UI untuk memilih
-     * role secara langsung saat tambah karyawan (sesuai desain Figma
-     * yang hanya punya field "Jabatan", bukan field "Role").
+     * Role RBAC sekarang jadi properti Jabatan (keputusan bersama user,
+     * lihat cookbook/todo.md Fase 4) — setiap karyawan otomatis
+     * mewarisi role dari jabatan-nya, bukan dipilih manual per orang.
+     * Jabatan tanpa role_id (data lama/belum dikonfigurasi) akan
+     * membuat karyawan tanpa akses apapun sampai jabatan-nya diberi role.
      */
-    private function roleIdForJabatan(int $jabatanId): int
+    private function roleIdForJabatan(int $jabatanId): ?int
     {
         $jabatan = (new Jabatan())->find($jabatanId);
-        $namaJabatan = $jabatan['nama'] ?? '';
 
-        $roleModel = new Role();
-        $roleName = stripos($namaJabatan, 'guru') !== false ? 'Guru' : 'Admin';
-        $role = $roleModel->findByName($roleName);
-
-        return $role ? (int) $role['id'] : (int) $roleModel->findByName('Admin')['id'];
+        return isset($jabatan['role_id']) ? (int) $jabatan['role_id'] : null;
     }
 }
