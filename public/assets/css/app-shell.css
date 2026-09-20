@@ -1,0 +1,242 @@
+/*
+ * App Shell — Zivana ERP
+ * Sumber: cookbook/design-system.md bagian 2 (App Shell)
+ * Dipakai di semua halaman KECUALI Login (lihat 5.1).
+ */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-neutral-900);
+  background: var(--color-neutral-white);
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---------- 2.1 Sidebar ---------- */
+
+.sidebar {
+  width: 236px;
+  flex-shrink: 0;
+  background: var(--color-red-50);
+  border-right: 1px solid var(--color-neutral-100);
+  padding: var(--space-4) var(--space-4) var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  transition: width 0.15s ease;
+}
+
+.sidebar.is-collapsed {
+  width: 93px;
+}
+
+.sidebar-header {
+  height: 36px;
+  padding-left: var(--space-3);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.sidebar-header img {
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.sidebar.is-collapsed .sidebar-header-text,
+.sidebar.is-collapsed .nav-label,
+.sidebar.is-collapsed .nav-group-label {
+  display: none;
+}
+
+.sidebar-collapse-btn {
+  width: 36px;
+  height: 36px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--color-neutral-75);
+}
+
+.sidebar.is-collapsed .sidebar-collapse-btn {
+  margin-left: 0;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+}
+
+.nav-group:first-child {
+  padding-top: 0;
+}
+
+.nav-group + .nav-group {
+  border-top: 1px solid var(--color-neutral-100);
+}
+
+.nav-group-label {
+  font-size: var(--font-size-caption-md);
+  line-height: var(--line-height-caption-md);
+  color: var(--color-neutral-400);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.nav-item,
+.nav-group-toggle {
+  height: 45px;
+  padding: 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--color-neutral-600);
+  text-decoration: none;
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nav-item svg,
+.nav-group-toggle svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+.nav-item:hover:not(.is-active),
+.nav-group-toggle:hover {
+  background: var(--color-neutral-75);
+}
+
+.nav-item.is-active {
+  background: var(--color-red-600);
+  color: var(--color-neutral-50);
+}
+
+.nav-group-toggle .nav-chevron {
+  margin-left: auto;
+  transition: transform 0.15s ease;
+}
+
+.nav-group.is-open .nav-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-submenu {
+  margin-left: 28px;
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-neutral-100);
+  display: none;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nav-group.is-open .nav-submenu {
+  display: flex;
+}
+
+.sidebar.is-collapsed .nav-submenu,
+.sidebar.is-collapsed .nav-group-toggle .nav-chevron {
+  display: none;
+}
+
+/* ---------- 2.3 / 2.4 Content & Page Header ---------- */
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  background: var(--color-neutral-50);
+  border-bottom: 1px solid var(--color-neutral-100);
+}
+
+.page-header-row {
+  padding: var(--space-3) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.page-header-toolbar {
+  height: 61px;
+  justify-content: space-between;
+}
+
+.page-header-toolbar .search-field {
+  width: 167px;
+}
+
+.page-header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.page-header-breadcrumb {
+  height: 45px;
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+}
+
+.page-header-title-row {
+  height: 61px;
+  justify-content: space-between;
+}
+
+.page-header-title-row h1 {
+  margin: 0;
+  font-size: var(--font-size-headline-sm);
+  line-height: var(--line-height-headline-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.content-body {
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 996px;
+  width: 100%;
+}

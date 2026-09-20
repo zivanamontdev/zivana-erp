@@ -13,12 +13,15 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 - [x] Import `database/schema.sql` versi awal (tabel auth/RBAC dulu, tabel lain menyusul per fase)
   <!-- CATATAN: file schema.sql sudah ditulis lengkap (tabel roles/permissions/role_permissions/users/password_resets), tapi belum benar-benar di-"import"/dites ke server MySQL nyata karena tidak ada instance MySQL di environment ini. Jalankan `mysql -u root -p zivana_erp < database/schema.sql` (atau import via phpMyAdmin) di environment lokal/hosting yang sebenarnya, lalu verifikasi tidak ada error SQL sebelum lanjut. -->
 - [x] Setup design token: `public/assets/css/tokens.css` dari `design-system.md` bagian 1.1–1.3
-- [ ] Setup font Plus Jakarta Sans (Google Fonts atau self-host — putuskan sesuai `architecture.md` poin 6)
-- [ ] Build App Shell layout (`views/layouts/app-shell.php`): sidebar + 3-baris page header sesuai `design-system.md` bagian 2
+- [x] Setup font Plus Jakarta Sans (Google Fonts atau self-host — putuskan sesuai `architecture.md` poin 6)
+  <!-- Dipakai via Google Fonts CDN (client-side), lihat app/views/layouts/head.php. Terverifikasi render benar lewat screenshot headless browser. -->
+- [x] Build App Shell layout (`views/layouts/app-shell.php`): sidebar + 3-baris page header sesuai `design-system.md` bagian 2
+  <!-- Diimplementasi sebagai app/views/layouts/shell-header.php + shell-footer.php (pola include, bukan satu file, supaya view halaman bisa menyisipkan konten di antaranya tanpa output buffering). Sudah diverifikasi visual lewat screenshot, cocok dengan struktur di screenshot asli. -->
 
 ## Fase 1 — Auth & RBAC (blocker untuk semua modul lain)
 
-- [ ] Tabel `roles`, `permissions`, `role_permissions`, `users`, `password_resets`
+- [x] Tabel `roles`, `permissions`, `role_permissions`, `users`, `password_resets`
+  <!-- Sudah dibuat di database/schema.sql pada Batch 2 (Fase 0), lihat catatan di task tersebut soal belum diuji import ke MySQL nyata. -->
 - [ ] Halaman Login (email, password, Ingat Saya, Lupa kata sandi) + `AuthMiddleware`, `GuestMiddleware`
 - [ ] Seed 4 role: Superadmin, Admin, Koordinator Guru, Guru
 - [ ] `RoleMiddleware` untuk enforce permission server-side (lihat `security.md` poin 3)
