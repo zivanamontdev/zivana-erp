@@ -94,6 +94,5 @@ require VIEW_PATH . '/layouts/shell-header.php';
     <?php endforeach; ?>
 </div>
 
-<script src="<?= BASE_PATH ?>/assets/js/checkbox-tree.js"></script>
 <script src="<?= BASE_PATH ?>/assets/js/rbac.js"></script>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

@@ -45,9 +45,12 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
   <!-- public/assets/css/components.css: .field-input/.field-textarea dengan state default/active/filled/viewonly/negative dan varian icon left/right/double. -->
 - [x] Komponen Checkbox (termasuk logika tri-state untuk RBAC)
   <!-- public/assets/js/checkbox-tree.js (modul reusable) + refactor app/views/admin/rbac/index.php untuk pakai tri-state sungguhan (indeterminate), menggantikan pola "select all" sederhana dari Fase 1. Terverifikasi visual: indikator indeterminate (minus merah) muncul benar saat sebagian anak tercentang. -->
-- [ ] Komponen Badge Status (4 varian warna)
-- [ ] Komponen Modal (dua ukuran: 440px, 668px)
-- [ ] Komponen Tabel (header, data row, kolom aksi ellipsis)
+- [x] Komponen Badge Status (4 varian warna)
+  <!-- .badge-positif/peringatan/netral/destruktif di components.css. Diverifikasi visual, cocok persis dengan screenshot Manajemen Murid. -->
+- [x] Komponen Modal (dua ukuran: 440px, 668px)
+  <!-- .modal-overlay/.modal-box/.modal-sm/.modal-lg + modal.js (buka/tutup, klik overlay, ESC). Dimuat global lewat shell-footer.php. Diverifikasi visual (modal-sm) sesuai spesifikasi persis. -->
+- [x] Komponen Tabel (header, data row, kolom aksi ellipsis)
+  <!-- .data-table-wrapper/.data-table di components.css. Diverifikasi visual, cocok dengan pola di semua screenshot daftar. -->
 - [ ] Pattern "Assign Many-to-Many" (dropdown dinamis + tombol tambah/hapus baris) — dipakai di 2 tempat nanti
 - [ ] Pattern "Accordion Bertingkat" — dipakai di RBAC, Rapor Murid, Pengisian Rapor
 

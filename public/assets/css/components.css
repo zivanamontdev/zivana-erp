@@ -307,3 +307,159 @@
   gap: var(--space-2);
   cursor: pointer;
 }
+
+/* ==========================================================
+   4.2 Badge Status
+   ========================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-caption-md);
+  line-height: var(--line-height-caption-md);
+  white-space: nowrap;
+}
+
+.badge-positif {
+  background: var(--color-green-50);
+  color: var(--color-green-600);
+}
+
+.badge-peringatan {
+  background: var(--color-orange-50);
+  color: var(--color-orange-600);
+}
+
+.badge-netral {
+  background: var(--color-neutral-75);
+  color: var(--color-neutral-300);
+}
+
+.badge-destruktif {
+  background: var(--color-red-50);
+  color: var(--color-red-600);
+}
+
+/* ==========================================================
+   4.3 Modal
+   ========================================================== */
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(34, 33, 38, 0.2); /* neutral-800 @ 20% opacity */
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.modal-overlay.is-open {
+  display: flex;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal-box {
+  background: var(--color-neutral-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.modal-sm {
+  max-width: 440px;
+}
+
+.modal-lg {
+  max-width: 668px;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: var(--font-size-headline-sm);
+  line-height: var(--line-height-headline-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* ==========================================================
+   4.1 Tabel
+   ========================================================== */
+
+.data-table-wrapper {
+  border: 1px solid var(--color-neutral-75);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead th {
+  background: var(--color-neutral-75);
+  padding: var(--space-3) var(--space-4);
+  height: 45px;
+  text-align: left;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-neutral-900);
+}
+
+.data-table tbody td {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-neutral-75);
+  font-size: var(--font-size-body-sm);
+  height: 53px;
+  color: var(--color-neutral-900);
+}
+
+.data-table .col-action {
+  width: 20px;
+  text-align: right;
+}
+
+.data-table .col-action button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  color: var(--color-neutral-600);
+}
+
+.data-table .col-action svg {
+  width: 20px;
+  height: 20px;
+}
+
+.data-table-empty {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-neutral-400);
+  font-size: var(--font-size-body-sm);
+}
