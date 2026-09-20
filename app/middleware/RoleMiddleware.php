@@ -46,8 +46,12 @@ class RoleMiddleware
         ];
 
         if ($subSection !== null) {
-            $sql .= ' AND (p.sub_section = :sub_section OR p.section = :sub_section)';
-            $params['sub_section'] = $subSection;
+            // Placeholder tidak boleh dipakai dua kali dalam satu query saat
+            // native prepared statement dipakai (PDO::ATTR_EMULATE_PREPARES
+            // = false di Database.php) — pakai 2 nama beda untuk nilai yang sama.
+            $sql .= ' AND (p.sub_section = :sub_section1 OR p.section = :sub_section2)';
+            $params['sub_section1'] = $subSection;
+            $params['sub_section2'] = $subSection;
         }
 
         $stmt = $db->prepare($sql);

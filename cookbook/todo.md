@@ -35,7 +35,13 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 - [x] `[Konfirmasi ke user dulu]` Alur reset password (belum ada screenshot halamannya)
   <!-- Diimplementasi mengikuti struktur password_resets di schema.md (token hash + expiry 1 jam), TANPA desain Figma acuan jadi tampilan mengikuti gaya Login apa adanya [ASUMSI]. Pengiriman email BELUM disambungkan ke SMTP asli (kredensial kosong) — link reset untuk sementara ditulis ke error_log dan ditampilkan di layar hanya saat APP_DEBUG=true. Sambungkan ke PHPMailer + SMTP produksi begitu kredensial tersedia. -->
 
-**Catatan lingkungan kerja**: ditemukan proses MySQL yang sudah berjalan di komputer ini (port 3306, PID terpisah dari instalasi project ini). TIDAK dicoba disambungkan tanpa izin karena tidak jelas kepunyaan/isi datanya. Semua kode Fase 1 yang menyentuh database baru lolos `php -l` dan review manual, BELUM diuji fungsional terhadap MySQL nyata. Kalau user berkenan share kredensial DB lokal (atau konfirmasi aman memakai server MySQL yang terdeteksi ini), pengujian end-to-end sesungguhnya bisa dilakukan mulai fase berikutnya.
+**[UPDATE] Database live sudah tersambung** (izin diberikan user). Koneksi: `127.0.0.1` (bukan `localhost` — lihat catatan di `.env.example` soal error `mysql_native_password`), user `root` tanpa password, database `zivana_erp` (baru dibuat, tidak menyentuh database lain di server yang sama). `schema.sql` sukses dieksekusi (8 tabel + seed 4 role + 24 permission).
+
+**Pengujian end-to-end sungguhan yang sudah dilakukan dan LOLOS**: login (real password_verify), guard AuthMiddleware/GuestMiddleware, halaman Sekolah (baca kondisi kosong + simpan data + baca ulang), halaman RBAC (baca permission ter-grant + simpan perubahan), modal Perbarui Tahun Ajaran, logout.
+
+**1 bug ditemukan dan diperbaiki** selama pengujian ini: `RoleMiddleware::hasAccess()` memakai named parameter PDO (`:sub_section`) dua kali dalam satu query — tidak valid untuk native prepared statement (`PDO::ATTR_EMULATE_PREPARES = false`). Diperbaiki jadi `:sub_section1`/`:sub_section2`.
+
+Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.test` / `password123` (role Superadmin, semua permission granted). Ini data development, bukan untuk dibawa ke produksi.
 
 ## Fase 2 — Komponen UI Dasar (reusable, dipakai semua modul)
 
