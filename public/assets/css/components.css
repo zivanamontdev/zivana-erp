@@ -1,0 +1,309 @@
+/*
+ * Komponen UI Dasar — Zivana ERP
+ * Sumber: cookbook/design-system.md bagian 3 (Komponen)
+ * Dipakai di semua modul. Menggantikan style tombol ad-hoc yang
+ * sebelumnya duplikat di login.css/rbac.css (lihat Fase 2 todo.md).
+ */
+
+/* ==========================================================
+   3.2 Buttons
+   ========================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  height: 37px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.btn-just-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+/* ---------- Primary ---------- */
+
+.btn-primary {
+  background: var(--color-red-600);
+  border-color: var(--color-red-600);
+  color: var(--color-neutral-white);
+}
+
+.btn-primary:hover,
+.btn-primary.is-pressed {
+  background: var(--color-red-700);
+  border-color: var(--color-red-700);
+}
+
+.btn-primary:disabled {
+  background: var(--color-neutral-75);
+  border-color: var(--color-neutral-100);
+  color: var(--color-neutral-150);
+  cursor: not-allowed;
+}
+
+/* ---------- Secondary ---------- */
+
+.btn-secondary {
+  background: var(--color-red-100);
+  border-color: var(--color-red-200);
+  color: var(--color-neutral-800);
+}
+
+/* [ASUMSI] Pressed/Disable Secondary tidak eksplisit dispesifikasikan
+   di design-system.md 3.2 (hanya Regular). Diturunkan konsisten dengan
+   pola Primary: pressed = 1 step lebih gelap, disable = abu-abu netral. */
+.btn-secondary:hover,
+.btn-secondary.is-pressed {
+  background: var(--color-red-200);
+  border-color: var(--color-red-300);
+}
+
+.btn-secondary:disabled {
+  background: var(--color-neutral-75);
+  border-color: var(--color-neutral-100);
+  color: var(--color-neutral-150);
+  cursor: not-allowed;
+}
+
+/* ---------- Tertiary ---------- */
+
+.btn-tertiary {
+  background: var(--color-neutral-white);
+  border-color: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+}
+
+/* [ASUMSI] sama seperti Secondary, Pressed/Disable Tertiary diturunkan. */
+.btn-tertiary:hover,
+.btn-tertiary.is-pressed {
+  background: var(--color-neutral-75);
+}
+
+.btn-tertiary:disabled {
+  background: var(--color-neutral-75);
+  border-color: var(--color-neutral-100);
+  color: var(--color-neutral-150);
+  cursor: not-allowed;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ==========================================================
+   3.1 Input
+   ========================================================== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field-label {
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-caption-md);
+  line-height: var(--line-height-caption-md);
+}
+
+.field-input,
+.field-textarea {
+  width: 100%;
+  height: 37px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-neutral-75);
+  background: var(--color-neutral-white);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-neutral-900);
+}
+
+.field-textarea {
+  height: auto;
+  min-height: 88px;
+  resize: vertical;
+}
+
+.field-input::placeholder,
+.field-textarea::placeholder {
+  color: var(--color-neutral-100);
+}
+
+/* State "active" identik dengan "default" di Figma — ditambahkan focus
+   ring eksplisit untuk aksesibilitas, lihat cookbook/design-system.md
+   bagian 6 ("Input state active sama persis dengan default"). */
+.field-input:focus,
+.field-textarea:focus {
+  outline: none;
+  border-color: var(--color-red-600);
+  box-shadow: 0 0 0 2px var(--color-red-100);
+}
+
+/* State "viewonly" — dipakai juga untuk disabled (tidak ada varian
+   disabled terpisah, lihat design-system.md 3.1). */
+.field-input.is-viewonly,
+.field-textarea.is-viewonly,
+.field-input:disabled,
+.field-textarea:disabled {
+  background: var(--color-neutral-75);
+  border-color: var(--color-neutral-150);
+  color: var(--color-neutral-600);
+}
+
+/* State "negative" (error validasi) */
+.field-input.is-negative,
+.field-textarea.is-negative {
+  background: var(--color-neutral-50);
+  border-color: var(--color-red-300);
+}
+
+.field-error {
+  color: var(--color-red-600);
+  font-size: var(--font-size-caption-md);
+  line-height: var(--line-height-caption-md);
+}
+
+.field-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-input-wrapper .field-input {
+  padding-right: 40px;
+}
+
+.field-input-wrapper.has-left-icon .field-input {
+  padding-left: 40px;
+  padding-right: var(--space-3);
+}
+
+.field-input-wrapper.has-double-icon .field-input {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.field-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--color-neutral-300);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.field-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.field-icon-left {
+  left: var(--space-3);
+}
+
+.field-icon-right {
+  right: var(--space-3);
+}
+
+.field-icon-toggle {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-neutral-300);
+}
+
+.field-icon-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================================
+   3.3 Checkbox
+   ========================================================== */
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-neutral-150);
+  background: var(--color-neutral-white);
+  appearance: none;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox:checked {
+  background: var(--color-red-600);
+  border-color: var(--color-red-600);
+}
+
+.checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--color-neutral-white);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* State indeterminate (tri-state) — dipakai untuk parent checkbox di
+   pattern RBAC/pohon bertingkat saat sebagian (bukan semua) anaknya
+   tercentang. Tidak ada contoh visual di Figma untuk state ini,
+   warnanya diturunkan dari pola checked. [ASUMSI visual] */
+.checkbox:indeterminate {
+  background: var(--color-red-100);
+  border-color: var(--color-red-600);
+}
+
+.checkbox:indeterminate::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 6.5px;
+  width: 8px;
+  height: 2px;
+  background: var(--color-red-600);
+  border: none;
+  transform: none;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}

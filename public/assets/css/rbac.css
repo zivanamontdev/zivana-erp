@@ -1,43 +1,8 @@
 /*
  * Halaman RBAC — cookbook/design-system.md bagian 5.3.
- * Catatan: style tombol (.btn) di sini masih minimal/duplikat dari
- * login.css. Fase 2 (Komponen UI Dasar) akan konsolidasi jadi satu
- * components.css bersama, lihat cookbook/todo.md.
+ * Style tombol (.btn) dan checkbox (.checkbox) sekarang dari
+ * components.css (Fase 2) — file ini hanya berisi layout khusus RBAC.
  */
-
-.btn {
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  height: 37px;
-  padding: 0 var(--space-3);
-  font-family: inherit;
-  font-size: var(--font-size-body-sm);
-  border: 1px solid transparent;
-}
-
-.btn-primary {
-  background: var(--color-red-600);
-  border-color: var(--color-red-600);
-  color: var(--color-neutral-white);
-}
-
-.btn-primary:hover {
-  background: var(--color-red-700);
-  border-color: var(--color-red-700);
-}
-
-.btn-tertiary {
-  background: var(--color-neutral-white);
-  border-color: var(--color-neutral-100);
-  color: var(--color-neutral-800);
-}
-
-.btn-tertiary:disabled {
-  background: var(--color-neutral-75);
-  border-color: var(--color-neutral-100);
-  color: var(--color-neutral-150);
-  cursor: not-allowed;
-}
 
 .rbac-list {
   display: flex;

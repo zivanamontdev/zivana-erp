@@ -91,59 +91,9 @@
   font-size: var(--font-size-body-sm);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.field-label {
-  color: var(--color-neutral-500);
-}
-
-.field-input {
-  height: 37px;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-neutral-75);
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: var(--font-size-body-sm);
-  color: var(--color-neutral-900);
-  width: 100%;
-}
-
-.field-input:focus {
-  outline: none;
-  border-color: var(--color-red-600);
-  box-shadow: 0 0 0 2px var(--color-red-100);
-}
-
-.field-input-wrapper {
-  position: relative;
-}
-
-.field-input-wrapper .field-input {
-  padding-right: 40px;
-}
-
-.field-icon-toggle {
-  position: absolute;
-  right: var(--space-2);
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
-  color: var(--color-neutral-300);
-  padding: 0;
-}
-
-.field-icon-toggle svg {
-  width: 16px;
-  height: 16px;
-}
+/* .field, .field-input, .field-input-wrapper, .field-icon-toggle
+   sekarang dari components.css (Fase 2) — dihapus dari sini supaya
+   tidak duplikat/konflik. */
 
 .login-form-meta {
   display: flex;
@@ -165,31 +115,6 @@
 
 .login-forgot:hover {
   text-decoration: underline;
-}
-
-.btn {
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  height: 37px;
-  padding: var(--space-2);
-  font-family: inherit;
-  font-size: var(--font-size-body-sm);
-  border: 1px solid transparent;
-}
-
-.btn-primary {
-  background: var(--color-red-600);
-  border-color: var(--color-red-600);
-  color: var(--color-neutral-white);
-}
-
-.btn-primary:hover {
-  background: var(--color-red-700);
-  border-color: var(--color-red-700);
-}
-
-.btn-block {
-  width: 100%;
 }
 
 .login-footer {

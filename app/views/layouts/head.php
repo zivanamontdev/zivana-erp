@@ -18,4 +18,5 @@ $pageTitle = $pageTitle ?? APP_NAME;
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/tokens.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/components.css">
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/app-shell.css">

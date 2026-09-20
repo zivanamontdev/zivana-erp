@@ -39,9 +39,12 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 
 ## Fase 2 — Komponen UI Dasar (reusable, dipakai semua modul)
 
-- [ ] Komponen Button (Primary/Secondary/Tertiary × Regular/Pressed/Disable)
-- [ ] Komponen Input (textfield/textarea × 5 state × 4 varian icon)
-- [ ] Komponen Checkbox (termasuk logika tri-state untuk RBAC)
+- [x] Komponen Button (Primary/Secondary/Tertiary × Regular/Pressed/Disable)
+  <!-- public/assets/css/components.css. Pressed/Disable untuk Secondary/Tertiary diturunkan [ASUMSI] karena design-system.md hanya spesifikasi Regular untuk keduanya. Diverifikasi visual di halaman Login & RBAC. -->
+- [x] Komponen Input (textfield/textarea × 5 state × 4 varian icon)
+  <!-- public/assets/css/components.css: .field-input/.field-textarea dengan state default/active/filled/viewonly/negative dan varian icon left/right/double. -->
+- [x] Komponen Checkbox (termasuk logika tri-state untuk RBAC)
+  <!-- public/assets/js/checkbox-tree.js (modul reusable) + refactor app/views/admin/rbac/index.php untuk pakai tri-state sungguhan (indeterminate), menggantikan pola "select all" sederhana dari Fase 1. Terverifikasi visual: indikator indeterminate (minus merah) muncul benar saat sebagian anak tercentang. -->
 - [ ] Komponen Badge Status (4 varian warna)
 - [ ] Komponen Modal (dua ukuran: 440px, 668px)
 - [ ] Komponen Tabel (header, data row, kolom aksi ellipsis)

@@ -31,11 +31,11 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <input type="hidden" name="role_id" value="<?= $roleId ?>">
 
             <?php foreach ($permissionTree as $modul => $sections): ?>
-            <div class="rbac-modul" data-rbac-group>
+            <div class="rbac-modul" data-tree-group>
                 <label class="rbac-modul-header">
-                    <input type="checkbox" data-rbac-parent>
+                    <input type="checkbox" class="checkbox" data-tree-parent>
                     <span class="text-body-sm"><?= e($modul) ?></span>
-                    <span class="rbac-count" data-rbac-count></span>
+                    <span class="rbac-count" data-tree-count></span>
                 </label>
                 <div class="rbac-modul-body">
                     <?php foreach ($sections as $sectionName => $subSections): ?>
@@ -46,7 +46,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
                             <div class="rbac-leaf-actions">
                                 <?php foreach ($subSections['_'] as $perm): ?>
                                 <label class="rbac-action-checkbox">
-                                    <input type="checkbox" data-rbac-checkbox name="permission_ids[]"
+                                    <input type="checkbox" class="checkbox" data-tree-leaf name="permission_ids[]"
                                         value="<?= (int) $perm['id'] ?>"
                                         <?= isset($granted[$roleId][$perm['id']]) ? 'checked' : '' ?>>
                                     <span class="text-caption-md"><?= ucfirst(e($perm['aksi'])) ?></span>
@@ -55,11 +55,11 @@ require VIEW_PATH . '/layouts/shell-header.php';
                             </div>
                         </div>
                         <?php else: ?>
-                        <div class="rbac-section" data-rbac-group>
+                        <div class="rbac-section" data-tree-group>
                             <label class="rbac-section-header">
-                                <input type="checkbox" data-rbac-parent>
+                                <input type="checkbox" class="checkbox" data-tree-parent>
                                 <span class="text-body-sm"><?= e($sectionName) ?></span>
-                                <span class="rbac-count" data-rbac-count></span>
+                                <span class="rbac-count" data-tree-count></span>
                             </label>
                             <div class="rbac-section-body">
                                 <?php foreach ($subSections as $subName => $perms): ?>
@@ -69,7 +69,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
                                     <div class="rbac-leaf-actions">
                                         <?php foreach ($perms as $perm): ?>
                                         <label class="rbac-action-checkbox">
-                                            <input type="checkbox" data-rbac-checkbox name="permission_ids[]"
+                                            <input type="checkbox" class="checkbox" data-tree-leaf name="permission_ids[]"
                                                 value="<?= (int) $perm['id'] ?>"
                                                 <?= isset($granted[$roleId][$perm['id']]) ? 'checked' : '' ?>>
                                             <span class="text-caption-md"><?= ucfirst(e($perm['aksi'])) ?></span>
@@ -94,5 +94,6 @@ require VIEW_PATH . '/layouts/shell-header.php';
     <?php endforeach; ?>
 </div>
 
+<script src="<?= BASE_PATH ?>/assets/js/checkbox-tree.js"></script>
 <script src="<?= BASE_PATH ?>/assets/js/rbac.js"></script>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>
