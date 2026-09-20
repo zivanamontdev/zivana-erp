@@ -93,9 +93,14 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
   <!-- KelasController + view index/show. Hapus kelas = hard DELETE (bukan soft-delete, karena kelas tidak punya is_active di schema.md). Diuji end-to-end ke MySQL live: tambah/ubah/hapus kelas, dan verifikasi murid.kelas_id benar-benar jadi NULL setelah kelas dihapus (bukan ikut terhapus). -->
 - [x] Modal "Atur Anak Murid" (assign, dipakai dari Manajemen Guru dan Detail Kelas — pastikan satu implementasi reusable)
   <!-- Diimplementasi via KelasGuruMurid::replaceForGuruInKelas() (DELETE lalu INSERT ulang) — dipakai baik untuk "+ Tambah Guru" (guru baru) maupun "Atur Anak Murid" (ubah assignment guru yang sudah ada), logikanya identik. Diuji end-to-end: assign 2 murid -> ubah jadi 1 murid berbeda -> hapus guru dari kelas, semua benar di database. Komponen baru yang dibutuhkan: Guru-Murid Card (akan dipakai lagi di Manajemen Guru, Fase 4 item terakhir). -->
-- [ ] CRUD Manajemen Murid — 3 tab (Data Murid, Informasi Pendaftaran, Relasi & Kontak), field lengkap sesuai `schema.md`
-- [ ] Mode Detail Murid (read-only + field relasi Level Kelas/Kelas)
+- [x] CRUD Manajemen Murid — 3 tab (Data Murid, Informasi Pendaftaran, Relasi & Kontak), field lengkap sesuai `schema.md`
+  <!-- MuridController + satu view form.php reusable untuk tambah/ubah/detail (mengurangi duplikasi ~20 field x 3 mode). Field "Umur" computed dari tanggal_lahir, tidak disimpan ke DB. Tidak ada fitur Hapus murid — memang tidak ada modal_hapus di screenshot manapun untuk modul ini (status murid berubah lewat field status, bukan dihapus). [ASUMSI] opsi dropdown Status Kondisi (Reguler/Berkebutuhan Khusus) diturunkan dari konteks, hanya "Reguler" yang terkonfirmasi di crawling. Diuji end-to-end ke MySQL live: tambah (termasuk validasi 19 field wajib + old-input preserved saat gagal), ubah, dan detail semua benar. -->
+- [x] Mode Detail Murid (read-only + field relasi Level Kelas/Kelas)
+  <!-- Dibangun bersamaan dengan form.php di atas ($mode='detail'). Level Kelas/Kelas terkonfirmasi tampil sebagai hasil relasi (JOIN ke tabel kelas), bukan input langsung, sesuai temuan crawling. -->
 - [ ] `[Konfirmasi ke user dulu]` Fitur "Import" murid (format file, mapping kolom)
+  <!-- BLOCKED: tidak ada default di dokumen manapun soal format file (CSV/Excel?) atau mapping kolom yang diharapkan. Tombol "Import" sudah ditampilkan di UI (disabled, dengan tooltip penjelasan) supaya tidak menyesatkan user seolah fitur ini aktif. Perlu keputusan user sebelum diimplementasikan. -->
+
+**Fase 5 selesai** (kecuali item Import yang BLOCKED menunggu keputusan user).
 
 ## Fase 6 — Kurikulum & Template Rapor
 

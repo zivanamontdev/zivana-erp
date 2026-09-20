@@ -47,3 +47,13 @@ $router->post('/kelas/{id}', [KelasController::class, 'update']);
 $router->post('/kelas/{id}/hapus', [KelasController::class, 'destroy']);
 $router->post('/kelas/{id}/guru-murid', [KelasController::class, 'saveGuruMurid']);
 $router->post('/kelas/{id}/guru/{guruId}/hapus', [KelasController::class, 'removeGuru']);
+
+// --- Murid: Manajemen Murid ---
+// Urutan penting: /murid/tambah harus terdaftar SEBELUM /murid/{id}
+// supaya tidak ke-tangkap sebagai {id}="tambah" oleh Router.
+$router->get('/murid', [MuridController::class, 'index']);
+$router->get('/murid/tambah', [MuridController::class, 'create']);
+$router->post('/murid', [MuridController::class, 'store']);
+$router->get('/murid/{id}/ubah', [MuridController::class, 'edit']);
+$router->post('/murid/{id}', [MuridController::class, 'update']);
+$router->get('/murid/{id}', [MuridController::class, 'show']);
