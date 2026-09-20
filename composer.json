@@ -1,0 +1,9 @@
+{
+    "name": "zivana/erp",
+    "description": "Zivana ERP - modul eRapor, native PHP tanpa framework",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1"
+    }
+}

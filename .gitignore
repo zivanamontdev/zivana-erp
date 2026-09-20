@@ -1,0 +1,8 @@
+.env
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+composer.lock
+public/uploads/*
+!public/uploads/.gitkeep
