@@ -40,3 +40,21 @@ function e(?string $value): string
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+/**
+ * Ambil (atau buat baru kalau belum ada/kedaluwarsa) token CSRF untuk
+ * request saat ini. Validasi penuh (validateCsrfToken) ditambahkan di
+ * Controller base class pada task CSRF khusus — lihat cookbook/todo.md
+ * Fase 1 dan cookbook/security.md bagian 2.
+ */
+function getCsrfToken(): string
+{
+    $expired = empty($_SESSION['csrf_token_expires']) || time() > $_SESSION['csrf_token_expires'];
+
+    if (empty($_SESSION['csrf_token']) || $expired) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+        $_SESSION['csrf_token_expires'] = time() + 3600; // 1 jam
+    }
+
+    return $_SESSION['csrf_token'];
+}

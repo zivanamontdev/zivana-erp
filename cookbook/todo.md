@@ -22,9 +22,12 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 
 - [x] Tabel `roles`, `permissions`, `role_permissions`, `users`, `password_resets`
   <!-- Sudah dibuat di database/schema.sql pada Batch 2 (Fase 0), lihat catatan di task tersebut soal belum diuji import ke MySQL nyata. -->
-- [ ] Halaman Login (email, password, Ingat Saya, Lupa kata sandi) + `AuthMiddleware`, `GuestMiddleware`
-- [ ] Seed 4 role: Superadmin, Admin, Koordinator Guru, Guru
-- [ ] `RoleMiddleware` untuk enforce permission server-side (lihat `security.md` poin 3)
+- [x] Halaman Login (email, password, Ingat Saya, Lupa kata sandi) + `AuthMiddleware`, `GuestMiddleware`
+  <!-- Terverifikasi visual via screenshot (headless browser) — cocok dengan desain asli. Link "Lupa kata sandi?" mengarah ke /lupa-kata-sandi yang belum dibangun (task terpisah di bawah). Icon toggle show/hide password pakai icon_search sementara [ASUMSI], belum ada icon "eye" di assets/icons. -->
+- [x] Seed 4 role: Superadmin, Admin, Koordinator Guru, Guru
+  <!-- INSERT idempotent ditambahkan di database/schema.sql. Belum diverifikasi ke MySQL nyata (lihat catatan task schema.sql di Fase 0). -->
+- [x] `RoleMiddleware` untuk enforce permission server-side (lihat `security.md` poin 3)
+  <!-- Logika sudah ditulis dan lolos php -l, tapi query ke tabel role_permissions/permissions BELUM bisa diuji fungsional karena tidak ada instance MySQL di environment kerja ini. Uji ulang begitu DB tersedia. -->
 - [ ] Halaman Sistem → RBAC: render matriks permission, simpan perubahan checkbox ke `role_permissions`
 - [ ] CSRF protection otomatis di `Controller`/`Router` base class
 - [ ] `[Konfirmasi ke user dulu]` Alur reset password (belum ada screenshot halamannya)

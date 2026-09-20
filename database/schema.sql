@@ -63,3 +63,13 @@ CREATE TABLE IF NOT EXISTS password_resets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed 4 role tetap, dikonfirmasi dari layar Sistem -> RBAC
+-- (lihat cookbook/design-system.md bagian 5.3). Idempotent lewat
+-- UNIQUE KEY uq_roles_nama di atas.
+INSERT INTO roles (nama) VALUES
+    ('Superadmin'),
+    ('Admin'),
+    ('Koordinator Guru'),
+    ('Guru')
+ON DUPLICATE KEY UPDATE nama = VALUES(nama);
