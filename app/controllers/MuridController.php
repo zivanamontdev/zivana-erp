@@ -147,7 +147,7 @@ class MuridController extends Controller
     {
         $this->view('admin.murid.form', [
             'pageTitle' => $mode === 'tambah' ? 'Tambah Murid' : ($mode === 'ubah' ? 'Ubah Data Murid' : 'Detail Murid'),
-            'breadcrumb' => 'Manajemen Murid &gt; ' . ($mode === 'tambah' ? 'Tambah Murid' : ($mode === 'ubah' ? 'Ubah Data Murid' : 'Detail Murid')),
+            'breadcrumb' => breadcrumb('Manajemen Murid', $mode === 'tambah' ? 'Tambah Murid' : ($mode === 'ubah' ? 'Ubah Data Murid' : 'Detail Murid')),
             'activeNavItem' => 'manajemen-murid',
             'mode' => $mode,
             'muridId' => $id,

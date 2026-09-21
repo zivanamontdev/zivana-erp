@@ -152,7 +152,7 @@ class RaporMuridController extends Controller
 
         $this->view('admin.rapor-murid.show', [
             'pageTitle' => 'Pratinjau Rapor Murid',
-            'breadcrumb' => 'Rapor Murid &gt; Pratinjau Rapor Murid',
+            'breadcrumb' => breadcrumb('Rapor Murid', 'Pratinjau Rapor Murid'),
             'activeNavItem' => 'rapor-murid',
             'rapor' => $rapor,
             'areas' => $this->buildStructureWithNilai((int) $rapor['template_id'], (int) $rapor['id']),

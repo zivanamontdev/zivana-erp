@@ -265,9 +265,34 @@ body {
 
 .page-header-breadcrumb {
   height: 45px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   color: var(--color-neutral-500);
   font-size: var(--font-size-body-sm);
   line-height: var(--line-height-body-sm);
+}
+
+.breadcrumb-parent {
+  color: var(--color-neutral-400);
+}
+
+.breadcrumb-current {
+  color: var(--color-neutral-800);
+  font-weight: var(--font-weight-bold);
+}
+
+.breadcrumb-separator {
+  width: 16px;
+  height: 16px;
+  color: var(--color-neutral-300);
+  transform: rotate(-90deg);
+}
+
+.breadcrumb-info {
+  width: 16px;
+  height: 16px;
+  color: var(--color-neutral-300);
 }
 
 .page-header-title-row {

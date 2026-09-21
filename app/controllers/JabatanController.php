@@ -31,7 +31,7 @@ class JabatanController extends Controller
 
         $this->view('admin.jabatan.index', [
             'pageTitle' => 'Jabatan',
-            'breadcrumb' => 'Karyawan &gt; Jabatan',
+            'breadcrumb' => breadcrumb('Karyawan', 'Jabatan'),
             'activeNavItem' => 'jabatan',
             'jabatanList' => $stmt->fetchAll(),
             'roleOptions' => (new Role())->all('id ASC'),

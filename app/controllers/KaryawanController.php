@@ -39,7 +39,10 @@ class KaryawanController extends Controller
 
         $this->view('admin.karyawan.index', [
             'pageTitle' => 'Daftar Karyawan',
-            'breadcrumb' => null,
+            // [FIX] Sebelumnya null — dikonfirmasi dari assets/ss/Human
+            // Capital - menu_karyawan - submenu_daftar_karyawan(daftar).svg
+            // bahwa breadcrumb "Karyawan > Daftar Karyawan" seharusnya ada.
+            'breadcrumb' => breadcrumb('Karyawan', 'Daftar Karyawan'),
             'activeNavItem' => 'daftar-karyawan',
             'karyawanList' => $stmt->fetchAll(),
             'jabatanOptions' => (new Jabatan())->where('is_active', 1),

@@ -101,7 +101,7 @@ class KelasController extends Controller
 
         $this->view('admin.kelas.show', [
             'pageTitle' => 'Detail Kelas',
-            'breadcrumb' => 'Manajemen Kelas &gt; Detail Kelas',
+            'breadcrumb' => breadcrumb('Manajemen Kelas', 'Detail Kelas'),
             'activeNavItem' => 'manajemen-kelas',
             'kelas' => $kelas,
             'canEdit' => $canEdit,

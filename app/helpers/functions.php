@@ -56,6 +56,30 @@ function initials(string $name): string
 }
 
 /**
+ * HTML baris breadcrumb ("Parent > Halaman ⓘ") untuk dilempar sebagai
+ * $breadcrumb ke layouts/shell-header.php. [FIX] Sebelumnya TIDAK ADA
+ * satupun view yang mengisi breadcrumb meski design-system.md 2.3
+ * eksplisit mewajibkannya di halaman 2-level (submenu, detail, form).
+ * Dikonfirmasi ulang langsung dari assets/ss/*.svg (bukan cuma daftar
+ * contoh di design-system.md yang ternyata tidak lengkap) — pola yang
+ * benar: SETIAP halaman yang diakses lewat submenu ATAU halaman
+ * detail/form turunan dari sebuah daftar, dapat breadcrumb ke
+ * parent-nya; hanya daftar top-level (diakses langsung dari item
+ * sidebar biasa) yang tidak.
+ *
+ * [ASUMSI] Ikon "ⓘ" di sebelah kanan selalu ada di semua SVG breadcrumb
+ * tapi tidak ada tooltip/konten yang ter-crawl untuk isinya — dirender
+ * statis/dekoratif, tidak ada perilaku klik/hover khusus.
+ */
+function breadcrumb(string $parent, string $current): string
+{
+    return '<span class="breadcrumb-parent">' . e($parent) . '</span>'
+        . icon('icon_chevron', 'breadcrumb-separator')
+        . '<span class="breadcrumb-current">' . e($current) . '</span>'
+        . icon('icon_tooltip', 'breadcrumb-info');
+}
+
+/**
  * Ambil (atau buat baru kalau belum ada/kedaluwarsa) token CSRF untuk
  * request saat ini. Validasi penuh (validateCsrfToken) ditambahkan di
  * Controller base class pada task CSRF khusus — lihat cookbook/todo.md

@@ -29,7 +29,7 @@ class TemplateRaporController extends Controller
 
         $this->view('admin.template-rapor.index', [
             'pageTitle' => 'Manajemen Template',
-            'breadcrumb' => 'Kurikulum &gt; Manajemen Template',
+            'breadcrumb' => breadcrumb('Kurikulum', 'Manajemen Template'),
             'activeNavItem' => 'manajemen-template',
             'templateList' => $stmt->fetchAll(),
         ]);
@@ -49,8 +49,13 @@ class TemplateRaporController extends Controller
         }
 
         $this->view('admin.template-rapor.show', [
-            'pageTitle' => 'Pratinjau Template',
-            'breadcrumb' => 'Kurikulum &gt; Pratinjau Template',
+            // [FIX] Judul H1 dikonfirmasi dari assets/ss/Sekolah - menu_
+            // kurikulum - submenu_manajemen_template - halaman_detail_
+            // pratinjau_template.svg cuma "Pratinjau" (bukan "Pratinjau
+            // Template") — breadcrumb-nya sendiri yang menyebut "Pratinjau
+            // Template" sebagai penanda halaman.
+            'pageTitle' => 'Pratinjau',
+            'breadcrumb' => breadcrumb('Kurikulum', 'Pratinjau Template'),
             'activeNavItem' => 'manajemen-template',
             'template' => $template,
             'areas' => $this->buildStructure((int) $id),
