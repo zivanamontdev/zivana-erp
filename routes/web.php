@@ -72,3 +72,10 @@ $router->post('/kurikulum/periode-penilaian/{id}/hapus', [PeriodePenilaianContro
 $router->get('/kurikulum/manajemen-template', [TemplateRaporController::class, 'index']);
 $router->get('/kurikulum/manajemen-template/{id}', [TemplateRaporController::class, 'show']);
 $router->get('/kurikulum/manajemen-template/{id}/pdf', [TemplateRaporController::class, 'downloadPdf']);
+
+// --- Murid: Rapor Murid (Admin) ---
+$router->get('/rapor-murid', [RaporMuridController::class, 'index']);
+$router->post('/rapor-murid/sesi', [RaporMuridController::class, 'storeSesi']);
+$router->post('/rapor-murid/{id}/setujui', [RaporMuridController::class, 'approve']);
+$router->get('/rapor-murid/{id}/pdf', [RaporMuridController::class, 'downloadPdf']);
+$router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);

@@ -387,3 +387,70 @@ SELECT * FROM (
     UNION ALL SELECT 4, 'Merapikan alat main setelah digunakan', 1, 2
 ) AS seed_data
 WHERE NOT EXISTS (SELECT 1 FROM template_rapor_item WHERE subkategori_id IN (1, 2, 3, 4));
+
+-- =========================================================
+-- RAPOR (Fase 7)
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS sesi_pembagian_rapor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    periode_id INT NOT NULL,
+    template_id INT NOT NULL,
+    nama VARCHAR(150) NOT NULL,
+    tanggal_mulai DATE NOT NULL,
+    tanggal_selesai DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sesi_periode FOREIGN KEY (periode_id) REFERENCES periode_penilaian(id) ON DELETE CASCADE,
+    CONSTRAINT fk_sesi_template FOREIGN KEY (template_id) REFERENCES template_rapor(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- disetujui_oleh: FK ke users, BUKAN role tertentu yang di-hardcode.
+-- [KEPUTUSAN pengganti item asumsi "role approver"] siapa yang boleh
+-- approve diatur lewat RBAC (permission 'edit' pada Murid > Rapor
+-- Murid), bukan role spesifik yang ditulis di kode. Sekolah bebas
+-- assign permission itu ke role manapun (Koordinator Guru, Admin,
+-- dst) lewat halaman RBAC yang sudah ada.
+CREATE TABLE IF NOT EXISTS rapor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    murid_id INT NOT NULL,
+    sesi_pembagian_id INT NOT NULL,
+    template_id INT NOT NULL,
+    guru_id INT NULL,
+    status ENUM('belum_diisi', 'menunggu_persetujuan', 'disetujui') NOT NULL DEFAULT 'belum_diisi',
+    disetujui_oleh INT NULL,
+    disetujui_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_rapor_murid_sesi (murid_id, sesi_pembagian_id),
+    CONSTRAINT fk_rapor_murid FOREIGN KEY (murid_id) REFERENCES murid(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rapor_sesi FOREIGN KEY (sesi_pembagian_id) REFERENCES sesi_pembagian_rapor(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rapor_template FOREIGN KEY (template_id) REFERENCES template_rapor(id),
+    CONSTRAINT fk_rapor_guru FOREIGN KEY (guru_id) REFERENCES karyawan(id) ON DELETE SET NULL,
+    CONSTRAINT fk_rapor_disetujui_oleh FOREIGN KEY (disetujui_oleh) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rapor_nilai (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rapor_id INT NOT NULL,
+    item_id INT NOT NULL,
+    semester ENUM('ganjil', 'genap') NOT NULL,
+    skala_nilai_opsi_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_rapor_nilai (rapor_id, item_id, semester),
+    CONSTRAINT fk_rapor_nilai_rapor FOREIGN KEY (rapor_id) REFERENCES rapor(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rapor_nilai_item FOREIGN KEY (item_id) REFERENCES template_rapor_item(id),
+    CONSTRAINT fk_rapor_nilai_opsi FOREIGN KEY (skala_nilai_opsi_id) REFERENCES skala_nilai_opsi(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rapor_catatan_guru (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rapor_id INT NOT NULL,
+    area_id INT NOT NULL,
+    catatan TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_rapor_catatan (rapor_id, area_id),
+    CONSTRAINT fk_rapor_catatan_rapor FOREIGN KEY (rapor_id) REFERENCES rapor(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rapor_catatan_area FOREIGN KEY (area_id) REFERENCES template_rapor_area(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

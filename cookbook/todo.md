@@ -133,10 +133,18 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 
 ## Fase 7 — Rapor (Bagian Paling Kompleks)
 
-- [ ] Tabel `sesi_pembagian_rapor`, `rapor`, `rapor_nilai`, `rapor_catatan_guru`
-- [ ] Halaman Rapor Murid (Admin): accordion 3 level Periode → Sesi → per-murid dengan status
-- [ ] Pratinjau Rapor Murid (Admin): render dokumen terisi data nyata, tombol Simpan PDF
-- [ ] `[Konfirmasi dulu]` Definisikan role approver rapor (Koordinator Guru vs Kepala Sekolah) sebelum bangun alur approval
+- [x] Tabel `sesi_pembagian_rapor`, `rapor`, `rapor_nilai`, `rapor_catatan_guru`
+  <!-- Diuji ke MySQL live: 4 tabel berhasil dibuat, FK ke periode/template/murid/guru/users semua benar. -->
+- [x] Halaman Rapor Murid (Admin): accordion 3 level Periode → Sesi → per-murid dengan status
+  <!-- RaporMuridController + view, reuse pattern accordion generik dari Fase 2. Modal "Tambah Sesi Pembagian" otomatis generate baris rapor untuk semua murid berstatus bersekolah + assign guru dari kelas_guru_murid. Diuji end-to-end ke MySQL live: buat sesi -> 4 baris rapor otomatis ter-generate dengan status belum_diisi, guru_id ter-assign benar untuk murid yang sudah punya guru. Visual sangat cocok dengan desain (badge jumlah murid, badge status merah/oranye/hijau). -->
+- [x] Pratinjau Rapor Murid (Admin): render dokumen terisi data nyata, tombol Simpan PDF
+  <!-- Reuse pattern _document.php dari Pratinjau Template tapi placeholder diganti data murid+kelas+nisn sungguhan, dan sel nilai menampilkan simbol asli (bukan kosong) kalau sudah diisi guru. Diuji end-to-end dengan data simulasi (9 nilai + 1 catatan guru): nama/kelas asli tampil benar, simbol nilai per item tampil sesuai data, PDF ter-generate valid. -->
+- [x] `[Konfirmasi dulu]` Definisikan role approver rapor (Koordinator Guru vs Kepala Sekolah) sebelum bangun alur approval
+  <!-- [KEPUTUSAN] Diselesaikan TANPA hardcode role tertentu — approval (`RaporMuridController::approve()`) dilindungi oleh permission RBAC 'edit' pada Murid > Rapor Murid yang SUDAH ADA di infrastruktur RBAC, bukan pengecekan role spesifik di kode. Sekolah bebas assign permission itu ke role manapun (Koordinator Guru, Admin, dst) lewat halaman RBAC yang sudah dibangun di Fase 1. Diuji end-to-end: approve mengubah status jadi disetujui + mencatat disetujui_oleh (user_id) dan disetujui_at. -->
+
+**Catatan lingkungan:** MySQL (Laragon) tetap perlu dinyalakan via `laragon.exe /auto-start` kalau mati, bukan mysqld.exe langsung (lihat catatan Fase 6).
+
+**Fase 7 selesai.**
 
 ## Fase 8 — Portal Guru
 
