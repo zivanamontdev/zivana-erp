@@ -38,6 +38,14 @@ class AuthMiddleware
         $_SESSION['user_name'] = $user['email'];
         $_SESSION['karyawan_id'] = $user['karyawan_id'] !== null ? (int) $user['karyawan_id'] : null;
 
+        $role = (new Role())->find((int) $user['role_id']);
+        $_SESSION['role_name'] = $role['nama'] ?? '';
+
+        $karyawanNama = $_SESSION['karyawan_id'] !== null
+            ? ((new Karyawan())->find($_SESSION['karyawan_id'])['nama'] ?? null)
+            : null;
+        $_SESSION['display_name'] = $karyawanNama ?? ucfirst(strstr($user['email'], '@', true) ?: $user['email']);
+
         return true;
     }
 

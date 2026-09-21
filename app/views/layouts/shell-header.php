@@ -17,19 +17,23 @@ $breadcrumb = $breadcrumb ?? null;
 $headerActions = $headerActions ?? '';
 $activeNavItem = $activeNavItem ?? '';
 
-// Struktur navigasi persis sesuai cookbook/design-system.md bagian 2.2.
-// 'perm' => [modul, subSection] dipakai untuk filter item yang tidak
-// bisa diakses role saat ini (lihat filterNavByPermission() di bawah)
-// — server-side tetap dilindungi RoleMiddleware, ini murni soal UX
-// supaya tidak menampilkan menu yang toh akan di-403 kalau diklik.
+// Struktur navigasi dikonfirmasi ULANG langsung dari assets/ss/sidebar.svg,
+// sidebar_submenu.svg dan sidebar_submenu2.svg (bukan dari deskripsi teks
+// design-system.md 2.2 yang ternyata salah urutan/nesting-nya di grup
+// Human Capital — lihat catatan [FIX] di bawah). Tiap grup punya daftar
+// 'entries' berurutan persis seperti tampilan SVG; entry bertipe 'item'
+// (link langsung) atau 'submenu' (dropdown dengan children).
+// 'perm' => [modul, subSection] dipakai untuk filter entry yang tidak
+// bisa diakses role saat ini — server-side tetap dilindungi
+// RoleMiddleware, ini murni soal UX supaya tidak menampilkan menu yang
+// toh akan di-403 kalau diklik.
 $navGroups = [
     [
         'label' => 'Sekolah',
-        'items' => [
-            ['key' => 'data-sekolah', 'label' => 'Data Sekolah', 'href' => '/sekolah', 'icon' => 'icon_school', 'perm' => ['Sekolah', 'Data Sekolah']],
-        ],
-        'submenus' => [
+        'entries' => [
+            ['type' => 'item', 'key' => 'data-sekolah', 'label' => 'Data Sekolah', 'href' => '/sekolah', 'icon' => 'icon_school', 'perm' => ['Sekolah', 'Data Sekolah']],
             [
+                'type' => 'submenu',
                 'key' => 'kurikulum',
                 'label' => 'Kurikulum',
                 'icon' => 'icon_book_marked',
@@ -42,76 +46,79 @@ $navGroups = [
     ],
     [
         'label' => 'Human Capital',
-        'items' => [],
-        'submenus' => [
+        'entries' => [
             [
+                'type' => 'submenu',
                 'key' => 'karyawan',
                 'label' => 'Karyawan',
                 'icon' => 'icon_users',
                 'items' => [
                     ['key' => 'daftar-karyawan', 'label' => 'Daftar Karyawan', 'href' => '/karyawan', 'perm' => ['Human Capital', 'Daftar Karyawan']],
                     ['key' => 'jabatan', 'label' => 'Jabatan', 'href' => '/jabatan', 'perm' => ['Human Capital', 'Jabatan']],
-                    ['key' => 'manajemen-guru', 'label' => 'Manajemen Guru', 'href' => '/manajemen-guru', 'perm' => ['Human Capital', 'Manajemen Guru']],
                 ],
             ],
+            // [FIX] Dikonfirmasi dari assets/ss/sidebar_submenu2.svg (Karyawan
+            // di-expand): "Manajemen Guru" BUKAN child dari submenu Karyawan —
+            // itu item top-level tersendiri dengan ikon sendiri, muncul
+            // SETELAH header "Karyawan" (bukan di dalamnya). Sebelumnya
+            // salah dinested sebagai child submenu Karyawan.
+            ['type' => 'item', 'key' => 'manajemen-guru', 'label' => 'Manajemen Guru', 'href' => '/manajemen-guru', 'icon' => 'icon_user_round_cog', 'perm' => ['Human Capital', 'Manajemen Guru']],
         ],
     ],
     [
         'label' => 'Murid',
-        'items' => [
-            ['key' => 'manajemen-murid', 'label' => 'Manajemen Murid', 'href' => '/murid', 'icon' => 'icon_graduation_cap', 'perm' => ['Murid', 'Manajemen Murid']],
-            ['key' => 'manajemen-kelas', 'label' => 'Manajemen Kelas', 'href' => '/kelas', 'icon' => 'icon_backpack', 'perm' => ['Murid', 'Manajemen Kelas']],
-            ['key' => 'rapor-murid', 'label' => 'Rapor Murid', 'href' => '/rapor-murid', 'icon' => 'icon_book_user', 'perm' => ['Murid', 'Rapor Murid']],
+        'entries' => [
+            ['type' => 'item', 'key' => 'manajemen-murid', 'label' => 'Manajemen Murid', 'href' => '/murid', 'icon' => 'icon_graduation_cap', 'perm' => ['Murid', 'Manajemen Murid']],
+            ['type' => 'item', 'key' => 'manajemen-kelas', 'label' => 'Manajemen Kelas', 'href' => '/kelas', 'icon' => 'icon_backpack', 'perm' => ['Murid', 'Manajemen Kelas']],
+            ['type' => 'item', 'key' => 'rapor-murid', 'label' => 'Rapor Murid', 'href' => '/rapor-murid', 'icon' => 'icon_book_user', 'perm' => ['Murid', 'Rapor Murid']],
         ],
-        'submenus' => [],
     ],
     [
         'label' => 'Portal Guru',
-        'items' => [
-            ['key' => 'portal-dashboard', 'label' => 'Dashboard', 'href' => '/portal-guru/dashboard', 'icon' => 'icon_layout_dashboard', 'perm' => ['Portal Guru', 'Dashboard']],
-            ['key' => 'portal-daftar-murid', 'label' => 'Daftar Murid', 'href' => '/portal-guru/murid', 'icon' => 'icon_backpack', 'perm' => ['Portal Guru', 'Daftar Murid']],
+        'entries' => [
+            ['type' => 'item', 'key' => 'portal-dashboard', 'label' => 'Dashboard', 'href' => '/portal-guru/dashboard', 'icon' => 'icon_layout_dashboard', 'perm' => ['Portal Guru', 'Dashboard']],
+            ['type' => 'item', 'key' => 'portal-daftar-murid', 'label' => 'Daftar Murid', 'href' => '/portal-guru/murid', 'icon' => 'icon_backpack', 'perm' => ['Portal Guru', 'Daftar Murid']],
         ],
-        'submenus' => [],
     ],
     [
         'label' => 'Sistem',
-        'items' => [
-            ['key' => 'rbac', 'label' => 'RBAC', 'href' => '/rbac', 'icon' => 'icon_user_cog', 'perm' => ['Sistem', 'RBAC']],
+        'entries' => [
+            ['type' => 'item', 'key' => 'rbac', 'label' => 'RBAC', 'href' => '/rbac', 'icon' => 'icon_user_cog', 'perm' => ['Sistem', 'RBAC']],
         ],
-        'submenus' => [],
     ],
 ];
 
-// Filter item yang tidak bisa diakses role saat ini (aksi 'lihat').
+// Filter entry/child yang tidak bisa diakses role saat ini (aksi 'lihat').
 // Ini murni UX — proteksi sungguhan tetap RoleMiddleware server-side.
 $roleChecker = new RoleMiddleware();
 $canAccessNav = fn(array $item) => !isset($item['perm']) || $roleChecker->check($item['perm'][0], $item['perm'][1], 'lihat');
 
 foreach ($navGroups as $gi => $group) {
-    $navGroups[$gi]['items'] = array_values(array_filter($group['items'], $canAccessNav));
-
-    foreach ($group['submenus'] as $si => $submenu) {
-        $navGroups[$gi]['submenus'][$si]['items'] = array_values(array_filter($submenu['items'], $canAccessNav));
+    foreach ($group['entries'] as $ei => $entry) {
+        if ($entry['type'] === 'submenu') {
+            $navGroups[$gi]['entries'][$ei]['items'] = array_values(array_filter($entry['items'], $canAccessNav));
+        }
     }
 
-    $navGroups[$gi]['submenus'] = array_values(array_filter(
-        $navGroups[$gi]['submenus'],
-        fn($submenu) => !empty($submenu['items'])
+    // Buang entry item yang tidak diizinkan, dan submenu yang jadi kosong.
+    $navGroups[$gi]['entries'] = array_values(array_filter(
+        $navGroups[$gi]['entries'],
+        fn($entry) => $entry['type'] === 'submenu' ? !empty($entry['items']) : $canAccessNav($entry)
     ));
 }
 
 // Buang grup yang jadi kosong total setelah difilter.
-$navGroups = array_values(array_filter(
-    $navGroups,
-    fn($group) => !empty($group['items']) || !empty($group['submenus'])
-));
+$navGroups = array_values(array_filter($navGroups, fn($group) => !empty($group['entries'])));
 
 // Buka otomatis submenu yang salah satu child-nya sedang aktif.
 foreach ($navGroups as $gi => $group) {
-    foreach ($group['submenus'] as $si => $submenu) {
-        foreach ($submenu['items'] as $item) {
+    foreach ($group['entries'] as $ei => $entry) {
+        if ($entry['type'] !== 'submenu') {
+            continue;
+        }
+        foreach ($entry['items'] as $item) {
             if ($item['key'] === $activeNavItem) {
-                $navGroups[$gi]['submenus'][$si]['is_open'] = true;
+                $navGroups[$gi]['entries'][$ei]['is_open'] = true;
             }
         }
     }
@@ -134,27 +141,28 @@ foreach ($navGroups as $gi => $group) {
 
         <nav class="nav-menu">
             <?php foreach ($navGroups as $group): ?>
-            <div class="nav-group<?= !empty($group['submenus'][0]['is_open'] ?? false) ? ' is-open' : '' ?>">
-                <?php foreach ($group['items'] as $item): ?>
-                <a href="<?= BASE_PATH . e($item['href']) ?>" class="nav-item<?= $activeNavItem === $item['key'] ? ' is-active' : '' ?>">
-                    <?= icon($item['icon']) ?>
-                    <span class="nav-label"><?= e($item['label']) ?></span>
-                </a>
-                <?php endforeach; ?>
-
-                <?php foreach ($group['submenus'] as $submenu): ?>
-                <button type="button" class="nav-group-toggle" data-nav-toggle>
-                    <?= icon($submenu['icon']) ?>
-                    <span class="nav-label"><?= e($submenu['label']) ?></span>
-                    <span class="nav-chevron"><?= icon('icon_chevron') ?></span>
-                </button>
-                <div class="nav-submenu">
-                    <?php foreach ($submenu['items'] as $item): ?>
-                    <a href="<?= BASE_PATH . e($item['href']) ?>" class="nav-item<?= $activeNavItem === $item['key'] ? ' is-active' : '' ?>">
-                        <span class="nav-label"><?= e($item['label']) ?></span>
+            <?php $groupHasOpenSubmenu = !empty(array_filter($group['entries'], fn($e) => $e['type'] === 'submenu' && !empty($e['is_open']))); ?>
+            <div class="nav-group<?= $groupHasOpenSubmenu ? ' is-open' : '' ?>">
+                <?php foreach ($group['entries'] as $entry): ?>
+                    <?php if ($entry['type'] === 'item'): ?>
+                    <a href="<?= BASE_PATH . e($entry['href']) ?>" class="nav-item<?= $activeNavItem === $entry['key'] ? ' is-active' : '' ?>">
+                        <?= icon($entry['icon']) ?>
+                        <span class="nav-label"><?= e($entry['label']) ?></span>
                     </a>
-                    <?php endforeach; ?>
-                </div>
+                    <?php else: ?>
+                    <button type="button" class="nav-group-toggle" data-nav-toggle>
+                        <?= icon($entry['icon']) ?>
+                        <span class="nav-label"><?= e($entry['label']) ?></span>
+                        <span class="nav-chevron"><?= icon('icon_chevron') ?></span>
+                    </button>
+                    <div class="nav-submenu">
+                        <?php foreach ($entry['items'] as $item): ?>
+                        <a href="<?= BASE_PATH . e($item['href']) ?>" class="nav-item<?= $activeNavItem === $item['key'] ? ' is-active' : '' ?>">
+                            <span class="nav-label"><?= e($item['label']) ?></span>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </div>
             <?php endforeach; ?>
@@ -165,11 +173,31 @@ foreach ($navGroups as $gi => $group) {
         <header class="page-header">
             <div class="page-header-row page-header-toolbar">
                 <input type="search" class="search-field" placeholder="Cari">
-                <div class="page-header-user">
-                    <!-- [ASUMSI] Icon aksi toolbar persis belum terdokumentasi di design-system.md 2.3,
-                         pakai icon_bolt sementara sebagai placeholder notifikasi. -->
-                    <?= icon('icon_bolt') ?>
-                    <span><?= e($_SESSION['user_name'] ?? '') ?></span>
+                <!--
+                    [FIX] Widget profil user (nama + role + avatar inisial +
+                    chevron) — sebelumnya salah diimplementasikan sebagai
+                    ikon notifikasi + email mentah, padahal semua SVG di
+                    assets/ss/ yang menampilkan header konsisten menunjukkan
+                    widget profil (mis. "Nur Sahayana" / "Admin" + avatar
+                    "NS"), bukan notifikasi. design-system.md 2.3 tidak
+                    mendokumentasikan komponen ini sama sekali (gap crawl
+                    sebelumnya). Dropdown isinya belum ada contoh visual di
+                    SVG manapun (semua capture dalam kondisi tertutup) —
+                    diisi minimal dengan "Keluar" karena sebelum ini TIDAK
+                    ADA cara logout lewat UI sama sekali di halaman manapun.
+                -->
+                <div class="action-menu page-header-user" data-action-menu>
+                    <button type="button" class="page-header-user-toggle" data-action-menu-toggle>
+                        <div class="page-header-user-info">
+                            <span class="page-header-user-name"><?= e($_SESSION['display_name'] ?? '') ?></span>
+                            <span class="page-header-user-role"><?= e($_SESSION['role_name'] ?? '') ?></span>
+                        </div>
+                        <div class="page-header-avatar"><?= e(initials($_SESSION['display_name'] ?? '?')) ?></div>
+                        <?= icon('icon_chevron') ?>
+                    </button>
+                    <div class="action-menu-dropdown">
+                        <a href="<?= BASE_PATH ?>/logout">Keluar</a>
+                    </div>
                 </div>
             </div>
 

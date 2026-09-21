@@ -42,6 +42,20 @@ function e(?string $value): string
 }
 
 /**
+ * Inisial 2 huruf dari nama untuk avatar bulat di page-header (lihat
+ * assets/ss/*.svg mana pun yang menunjukkan header — widget "NS" untuk
+ * "Nur Sahayana"). Ambil huruf pertama dari 2 kata pertama saja,
+ * kata ke-3+ diabaikan.
+ */
+function initials(string $name): string
+{
+    $words = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY);
+    $letters = array_map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)), array_slice($words, 0, 2));
+
+    return implode('', $letters) ?: '?';
+}
+
+/**
  * Ambil (atau buat baru kalau belum ada/kedaluwarsa) token CSRF untuk
  * request saat ini. Validasi penuh (validateCsrfToken) ditambahkan di
  * Controller base class pada task CSRF khusus — lihat cookbook/todo.md

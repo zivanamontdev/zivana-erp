@@ -33,11 +33,24 @@ class AuthController extends Controller
         $_SESSION['user_name'] = $user['email'];
         $_SESSION['karyawan_id'] = $user['karyawan_id'] !== null ? (int) $user['karyawan_id'] : null;
 
+        $role = (new Role())->find((int) $user['role_id']);
+        $_SESSION['role_name'] = $role['nama'] ?? '';
+
+        // [FIX] Widget profil di page-header (avatar inisial + nama + role)
+        // butuh nama tampilan asli, bukan email — dikonfirmasi dari
+        // assets/ss/*.svg mana pun yang menampilkan header ("Nur Sahayana"
+        // / "Admin"), bukan disebut eksplisit di design-system.md (gap
+        // dokumentasi sebelumnya). Fallback ke bagian sebelum "@" email
+        // untuk akun tanpa data karyawan (mis. Superadmin).
+        $karyawanNama = $_SESSION['karyawan_id'] !== null
+            ? ((new Karyawan())->find($_SESSION['karyawan_id'])['nama'] ?? null)
+            : null;
+        $_SESSION['display_name'] = $karyawanNama ?? ucfirst(strstr($user['email'], '@', true) ?: $user['email']);
+
         if ($rememberMe) {
             $this->setRememberToken($userModel, (int) $user['id']);
         }
 
-        $role = (new Role())->find((int) $user['role_id']);
         $isGuru = $role && $role['nama'] === 'Guru';
 
         $this->redirect($isGuru ? '/portal-guru/dashboard' : '/sekolah');

@@ -689,7 +689,8 @@ body.modal-open {
   display: block;
 }
 
-.action-menu-dropdown button {
+.action-menu-dropdown button,
+.action-menu-dropdown a {
   display: block;
   width: 100%;
   text-align: left;
@@ -700,9 +701,12 @@ body.modal-open {
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
   color: var(--color-neutral-800);
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
-.action-menu-dropdown button:hover {
+.action-menu-dropdown button:hover,
+.action-menu-dropdown a:hover {
   background: var(--color-neutral-75);
 }
 

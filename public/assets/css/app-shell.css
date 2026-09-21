@@ -210,7 +210,57 @@ body {
 .page-header-user {
   display: flex;
   align-items: center;
+}
+
+.page-header-user-toggle {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+}
+
+.page-header-user svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-neutral-600);
+  flex-shrink: 0;
+}
+
+.page-header-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.3;
+}
+
+.page-header-user-name {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-800);
+  white-space: nowrap;
+}
+
+.page-header-user-role {
+  font-size: var(--font-size-caption-md);
+  color: var(--color-neutral-400);
+}
+
+.page-header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-red-100);
+  color: var(--color-red-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-caption-md);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
 }
 
 .page-header-breadcrumb {
@@ -281,7 +331,7 @@ body {
     max-width: 120px;
   }
 
-  .page-header-user span {
+  .page-header-user-info {
     display: none;
   }
 
