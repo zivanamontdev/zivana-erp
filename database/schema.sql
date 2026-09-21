@@ -342,3 +342,48 @@ SELECT * FROM (
     UNION ALL SELECT 1, 'triangle-full', 'Berkembang Sangat Baik', 4
 ) AS seed_data
 WHERE NOT EXISTS (SELECT 1 FROM skala_nilai_opsi WHERE skala_id = 1);
+
+-- Seed 4 template sistem, dikonfirmasi dari crawling Manajemen
+-- Template (semua bertipe "System", tidak ada tombol tambah — lihat
+-- cookbook/design-system.md 5.2). Hanya "Rapor Montessori Tengah
+-- Semester" yang dibangun strukturnya secara detail (area/subkategori/
+-- item) karena hanya itu yang ter-crawl lengkap dari Pratinjau
+-- Template; 3 template lain dibuat sebagai baris kosong dulu.
+INSERT INTO template_rapor (id, nama, kategori, tipe) VALUES
+    (1, 'Rapor Montessori Tengah Semester', 'rapor_murid', 'system'),
+    (2, 'Rapor Montessori Akhir Semester', 'rapor_murid', 'system'),
+    (3, 'Rapor Al-Qur''an', 'rapor_sekolah', 'system'),
+    (4, 'Rapor Bahasa Inggris', 'rapor_sekolah', 'system')
+ON DUPLICATE KEY UPDATE nama = VALUES(nama);
+
+-- Struktur "Rapor Montessori Tengah Semester" (template_id=1).
+-- [ASUMSI] Hanya 1 area ("Area Keterampilan Hidup") dan 1 item contoh
+-- ("Menutup mulut saat batuk dan bersin") yang terkonfirmasi persis
+-- dari crawling halaman 1 dari 4 dokumen. Sisa item di bawah ini
+-- PLACEHOLDER masuk akal secara konteks Montessori, BUKAN konten
+-- kurikulum resmi — WAJIB diganti dengan data asli dari user sebelum
+-- dipakai produksi.
+INSERT INTO template_rapor_area (id, template_id, nama_area, display_order) VALUES
+    (1, 1, 'AREA KETERAMPILAN HIDUP', 1)
+ON DUPLICATE KEY UPDATE nama_area = VALUES(nama_area);
+
+INSERT INTO template_rapor_subkategori (id, area_id, label, nama, display_order) VALUES
+    (1, 1, 'a', 'Perawatan Diri', 1),
+    (2, 1, 'b', 'Motorik Halus', 2),
+    (3, 1, 'c', 'Motorik Kasar', 3),
+    (4, 1, 'd', 'Kepedulian Terhadap Lingkungan', 4)
+ON DUPLICATE KEY UPDATE nama = VALUES(nama);
+
+INSERT INTO template_rapor_item (subkategori_id, nama_tujuan, skala_nilai_id, display_order)
+SELECT * FROM (
+    SELECT 1 AS subkategori_id, 'Menutup mulut saat batuk dan bersin' AS nama_tujuan, 1 AS skala_nilai_id, 1 AS display_order
+    UNION ALL SELECT 1, 'Mencuci tangan sebelum dan sesudah makan', 1, 2
+    UNION ALL SELECT 1, 'Memakai dan melepas sepatu sendiri', 1, 3
+    UNION ALL SELECT 2, 'Menggunting mengikuti garis lurus', 1, 1
+    UNION ALL SELECT 2, 'Meronce manik-manik', 1, 2
+    UNION ALL SELECT 3, 'Berjalan di atas garis lurus', 1, 1
+    UNION ALL SELECT 3, 'Melompat dengan dua kaki', 1, 2
+    UNION ALL SELECT 4, 'Membuang sampah pada tempatnya', 1, 1
+    UNION ALL SELECT 4, 'Merapikan alat main setelah digunakan', 1, 2
+) AS seed_data
+WHERE NOT EXISTS (SELECT 1 FROM template_rapor_item WHERE subkategori_id IN (1, 2, 3, 4));

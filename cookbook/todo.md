@@ -115,8 +115,15 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
   <!-- BLOCKED: tidak ada default terdokumentasi, hanya contoh dummy "A-"/"Tahfizh Mumtaz" yang terlihat di crawling form guru, tidak cukup untuk membuat skala baku. -->
 - [x] CRUD Periode Penilaian
   <!-- PeriodePenilaianController + view. [ASUMSI] opsi dropdown Tipe (Tengah/Akhir Semester) dan Kategori (Rapor Murid/Rapor Sekolah) diturunkan dari pola nama periode di screenshot, bukan daftar resmi. Diuji end-to-end ke MySQL live: tambah/ubah/hapus semua benar. -->
-- [ ] Halaman Manajemen Template (daftar, read-only kalau memang semua "System")
-- [ ] Pratinjau Template — render dokumen 1 halaman dulu sesuai screenshot yang ada, `[konfirmasi struktur halaman 2-4 ke user/designer sebelum lanjut]`
+- [x] Halaman Manajemen Template (daftar, read-only kalau memang semua "System")
+  <!-- TemplateRaporController::index() + view, murni read-only sesuai temuan crawling (semua tipe System, tidak ada tombol tambah). Diuji end-to-end ke MySQL live: 4 template ter-seed tampil benar dengan kategori/status/tanggal. -->
+- [x] Pratinjau Template — render dokumen 1 halaman dulu sesuai screenshot yang ada, `[konfirmasi struktur halaman 2-4 ke user/designer sebelum lanjut]`
+  <!-- View show.php + CSS rapor-document.css + helper renderSkalaSimbol() (render segitiga custom via inline SVG). Diverifikasi visual: watermark, header, identitas placeholder, legenda 4 simbol, tabel area/subkategori/item — semua cocok dengan desain. [ASUMSI BESAR] Struktur data (9 item di 4 subkategori "AREA KETERAMPILAN HIDUP") adalah PLACEHOLDER masuk akal secara konteks Montessori, BUKAN kurikulum resmi — hanya 1 item ("Menutup mulut saat batuk dan bersin") yang terkonfirmasi asli dari crawling. WAJIB diganti data asli dari user sebelum produksi. Halaman 2-4 dokumen (kemungkinan area lain + Bacaan Jilid + PAI + catatan guru, lihat pola di form Pengisian Rapor guru) BELUM dibangun, menunggu konfirmasi user/designer. -->
+
+**PENTING — perlu keputusan/konten dari user sebelum lanjut Fase 7:**
+1. Konten kurikulum asli (semua area/subkategori/tujuan penilaian) untuk menggantikan placeholder di atas
+2. Struktur halaman 2-4 dokumen rapor
+3. Skala nilai untuk PAI/Bacaan Jilid (poin di atas)
 - [ ] Pilih & integrasikan library PDF (dompdf/mpdf — lihat `architecture.md` poin 5), fitur "Simpan PDF"
 
 ## Fase 7 — Rapor (Bagian Paling Kompleks)

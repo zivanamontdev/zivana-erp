@@ -67,3 +67,7 @@ $router->get('/kurikulum/periode-penilaian', [PeriodePenilaianController::class,
 $router->post('/kurikulum/periode-penilaian', [PeriodePenilaianController::class, 'store']);
 $router->post('/kurikulum/periode-penilaian/{id}', [PeriodePenilaianController::class, 'update']);
 $router->post('/kurikulum/periode-penilaian/{id}/hapus', [PeriodePenilaianController::class, 'destroy']);
+
+// --- Sekolah: Kurikulum > Manajemen Template ---
+$router->get('/kurikulum/manajemen-template', [TemplateRaporController::class, 'index']);
+$router->get('/kurikulum/manajemen-template/{id}', [TemplateRaporController::class, 'show']);
