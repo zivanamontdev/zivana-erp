@@ -255,3 +255,90 @@ CREATE TABLE IF NOT EXISTS kelas_guru_murid (
     CONSTRAINT fk_kgm_guru FOREIGN KEY (guru_id) REFERENCES karyawan(id) ON DELETE CASCADE,
     CONSTRAINT fk_kgm_murid FOREIGN KEY (murid_id) REFERENCES murid(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =========================================================
+-- KURIKULUM & TEMPLATE RAPOR (Fase 6)
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS skala_nilai (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- simbol: kode pendek untuk render bentuk visual di view (bukan teks
+-- simbol asli, karena simbolnya berupa bentuk segitiga custom, bukan
+-- karakter unicode standar). Lihat cookbook/design-system.md 3.5.
+CREATE TABLE IF NOT EXISTS skala_nilai_opsi (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    skala_id INT NOT NULL,
+    simbol VARCHAR(20) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_skala_opsi_skala FOREIGN KEY (skala_id) REFERENCES skala_nilai(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS template_rapor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(150) NOT NULL,
+    kategori ENUM('rapor_murid', 'rapor_sekolah') NOT NULL DEFAULT 'rapor_murid',
+    tipe ENUM('system', 'custom') NOT NULL DEFAULT 'system',
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS template_rapor_area (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    template_id INT NOT NULL,
+    nama_area VARCHAR(150) NOT NULL,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_tr_area_template FOREIGN KEY (template_id) REFERENCES template_rapor(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS template_rapor_subkategori (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    area_id INT NOT NULL,
+    label VARCHAR(5) NOT NULL,
+    nama VARCHAR(150) NOT NULL,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_tr_sub_area FOREIGN KEY (area_id) REFERENCES template_rapor_area(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS template_rapor_item (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subkategori_id INT NOT NULL,
+    nama_tujuan VARCHAR(255) NOT NULL,
+    skala_nilai_id INT NOT NULL,
+    display_order INT DEFAULT 0,
+    CONSTRAINT fk_tr_item_sub FOREIGN KEY (subkategori_id) REFERENCES template_rapor_subkategori(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tr_item_skala FOREIGN KEY (skala_nilai_id) REFERENCES skala_nilai(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS periode_penilaian (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tahun_ajaran_id INT NOT NULL,
+    nama VARCHAR(150) NOT NULL,
+    tipe VARCHAR(50) NOT NULL,
+    kategori VARCHAR(50) NOT NULL,
+    awal_periode DATE NOT NULL,
+    akhir_periode DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_periode_tahun_ajaran FOREIGN KEY (tahun_ajaran_id) REFERENCES tahun_ajaran(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed skala nilai Montessori 4 simbol, dikonfirmasi dari crawling
+-- Pratinjau Template & Pratinjau Rapor Murid (lihat
+-- cookbook/design-system.md bagian 3.5).
+INSERT INTO skala_nilai (id, nama) VALUES (1, 'Montessori 4 Simbol')
+ON DUPLICATE KEY UPDATE nama = VALUES(nama);
+
+INSERT INTO skala_nilai_opsi (skala_id, simbol, label, display_order)
+SELECT * FROM (
+    SELECT 1 AS skala_id, 'slash' AS simbol, 'Baru dikenalkan' AS label, 1 AS display_order
+    UNION ALL SELECT 1, 'triangle-sm', 'Mulai Berkembang', 2
+    UNION ALL SELECT 1, 'triangle-lg', 'Berkembang Sesuai Harapan', 3
+    UNION ALL SELECT 1, 'triangle-full', 'Berkembang Sangat Baik', 4
+) AS seed_data
+WHERE NOT EXISTS (SELECT 1 FROM skala_nilai_opsi WHERE skala_id = 1);

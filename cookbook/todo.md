@@ -107,10 +107,14 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 
 ## Fase 6 — Kurikulum & Template Rapor
 
-- [ ] Tabel `template_rapor`, `template_rapor_area`, `template_rapor_subkategori`, `template_rapor_item`, `skala_nilai`, `skala_nilai_opsi`
-- [ ] Seed skala nilai Montessori 4 simbol
+- [x] Tabel `template_rapor`, `template_rapor_area`, `template_rapor_subkategori`, `template_rapor_item`, `skala_nilai`, `skala_nilai_opsi`
+  <!-- Diuji ke MySQL live: 6 tabel berhasil dibuat (7 termasuk periode_penilaian yang digabung di batch sama). Catatan lingkungan: MySQL sempat mati total (proses Laragon berhenti), dinyalakan ulang lewat `laragon.exe /auto-start` — kalau di sesi mendatang MySQL mati lagi, jalankan itu, BUKAN start mysqld langsung (mysqld standalone gagal load component_reference_cache.dll di instalasi Laragon ini). -->
+- [x] Seed skala nilai Montessori 4 simbol
+  <!-- 4 opsi (slash/triangle-sm/triangle-lg/triangle-full) berhasil di-seed dan diverifikasi di MySQL live. -->
 - [ ] `[Konfirmasi ke user dulu]` Skala nilai untuk PAI/Bacaan Jilid
-- [ ] CRUD Periode Penilaian
+  <!-- BLOCKED: tidak ada default terdokumentasi, hanya contoh dummy "A-"/"Tahfizh Mumtaz" yang terlihat di crawling form guru, tidak cukup untuk membuat skala baku. -->
+- [x] CRUD Periode Penilaian
+  <!-- PeriodePenilaianController + view. [ASUMSI] opsi dropdown Tipe (Tengah/Akhir Semester) dan Kategori (Rapor Murid/Rapor Sekolah) diturunkan dari pola nama periode di screenshot, bukan daftar resmi. Diuji end-to-end ke MySQL live: tambah/ubah/hapus semua benar. -->
 - [ ] Halaman Manajemen Template (daftar, read-only kalau memang semua "System")
 - [ ] Pratinjau Template — render dokumen 1 halaman dulu sesuai screenshot yang ada, `[konfirmasi struktur halaman 2-4 ke user/designer sebelum lanjut]`
 - [ ] Pilih & integrasikan library PDF (dompdf/mpdf — lihat `architecture.md` poin 5), fitur "Simpan PDF"

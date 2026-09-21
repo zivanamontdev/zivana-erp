@@ -61,3 +61,9 @@ $router->get('/murid/{id}', [MuridController::class, 'show']);
 // --- Human Capital: Manajemen Guru ---
 $router->get('/manajemen-guru', [ManajemenGuruController::class, 'index']);
 $router->post('/manajemen-guru/{guruId}/murid', [ManajemenGuruController::class, 'saveMurid']);
+
+// --- Sekolah: Kurikulum > Periode Penilaian ---
+$router->get('/kurikulum/periode-penilaian', [PeriodePenilaianController::class, 'index']);
+$router->post('/kurikulum/periode-penilaian', [PeriodePenilaianController::class, 'store']);
+$router->post('/kurikulum/periode-penilaian/{id}', [PeriodePenilaianController::class, 'update']);
+$router->post('/kurikulum/periode-penilaian/{id}/hapus', [PeriodePenilaianController::class, 'destroy']);
