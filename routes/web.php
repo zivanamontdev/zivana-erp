@@ -71,3 +71,4 @@ $router->post('/kurikulum/periode-penilaian/{id}/hapus', [PeriodePenilaianContro
 // --- Sekolah: Kurikulum > Manajemen Template ---
 $router->get('/kurikulum/manajemen-template', [TemplateRaporController::class, 'index']);
 $router->get('/kurikulum/manajemen-template/{id}', [TemplateRaporController::class, 'show']);
+$router->get('/kurikulum/manajemen-template/{id}/pdf', [TemplateRaporController::class, 'downloadPdf']);

@@ -104,3 +104,33 @@ function renderSkalaSimbol(string $kode): string
 
     return '<svg class="skala-simbol" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">' . $shape . '</svg>';
 }
+
+/**
+ * URL/data-URI untuk asset gambar. Dipakai di view yang bisa dirender
+ * baik sebagai halaman web biasa (path relatif normal) MAUPUN sebagai
+ * PDF via Dompdf ($inline=true) — Dompdf tidak selalu bisa resolve
+ * path relatif "/assets/..." dengan benar, jadi untuk PDF gambar
+ * di-inline sebagai base64 data URI supaya pasti tampil.
+ */
+function assetSrc(string $relativePath, bool $inline = false): string
+{
+    $relativePath = ltrim($relativePath, '/');
+
+    if (!$inline) {
+        return (defined('BASE_PATH') ? BASE_PATH : '') . '/assets/' . $relativePath;
+    }
+
+    $fullPath = ROOT_PATH . '/public/assets/' . $relativePath;
+
+    if (!file_exists($fullPath)) {
+        return '';
+    }
+
+    $mime = match (strtolower(pathinfo($fullPath, PATHINFO_EXTENSION))) {
+        'svg' => 'image/svg+xml',
+        'jpg', 'jpeg' => 'image/jpeg',
+        default => 'image/png',
+    };
+
+    return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($fullPath));
+}

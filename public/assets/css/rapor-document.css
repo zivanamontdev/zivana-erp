@@ -49,12 +49,19 @@
 }
 
 .rapor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   border-bottom: 2px solid var(--color-neutral-800);
   padding-bottom: var(--space-4);
   margin-bottom: var(--space-4);
+}
+
+.rapor-header table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rapor-header td {
+  border: none;
+  padding: 0;
 }
 
 .rapor-header h1 {

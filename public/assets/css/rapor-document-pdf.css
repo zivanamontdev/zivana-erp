@@ -1,0 +1,125 @@
+/*
+ * Versi khusus PDF dari rapor-document.css — nilai literal (bukan CSS
+ * variable), karena dukungan CSS custom property di Dompdf tidak
+ * konsisten antar versi. Kalau ubah desain di rapor-document.css,
+ * WAJIB disinkronkan manual ke sini juga.
+ */
+
+body {
+  font-family: 'Plus Jakarta Sans', 'DejaVu Sans', sans-serif;
+  color: #111015;
+}
+
+.rapor-page {
+  background: #FFFFFF;
+  padding: 24px;
+  position: relative;
+}
+
+.rapor-watermark {
+  position: absolute;
+  top: 200px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  opacity: 0.05;
+}
+
+.rapor-watermark img {
+  width: 300px;
+}
+
+.rapor-header {
+  border-bottom: 2px solid #222126;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.rapor-header table {
+  width: 100%;
+}
+
+.rapor-header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.rapor-header p {
+  margin: 4px 0 0;
+  color: #5C5B5F;
+}
+
+.rapor-header img {
+  height: 40px;
+}
+
+.rapor-identitas {
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+
+.rapor-identitas div {
+  margin-bottom: 4px;
+}
+
+.rapor-legenda {
+  padding: 12px 16px;
+  background: #FCFCFD;
+  margin-bottom: 20px;
+}
+
+.rapor-legenda-item {
+  display: inline-block;
+  margin-right: 20px;
+  font-size: 10px;
+}
+
+.skala-simbol {
+  color: #222126;
+  vertical-align: middle;
+}
+
+.rapor-area-title {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 16px 0 12px;
+  text-transform: uppercase;
+}
+
+.rapor-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.rapor-table th,
+.rapor-table td {
+  border: 1px solid #B4B3B6;
+  padding: 6px 10px;
+  font-size: 10px;
+  text-align: left;
+}
+
+.rapor-table th {
+  background: #E4E3E5;
+  text-align: center;
+}
+
+.rapor-table .col-nilai {
+  width: 60px;
+  text-align: center;
+}
+
+.rapor-subkategori-row td {
+  font-weight: bold;
+  background: #FCFCFD;
+}
+
+.rapor-footer {
+  text-align: center;
+  color: #9D9C9F;
+  font-size: 9px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #E4E3E5;
+}

@@ -124,7 +124,10 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 1. Konten kurikulum asli (semua area/subkategori/tujuan penilaian) untuk menggantikan placeholder di atas
 2. Struktur halaman 2-4 dokumen rapor
 3. Skala nilai untuk PAI/Bacaan Jilid (poin di atas)
-- [ ] Pilih & integrasikan library PDF (dompdf/mpdf — lihat `architecture.md` poin 5), fitur "Simpan PDF"
+- [x] Pilih & integrasikan library PDF (dompdf/mpdf — lihat `architecture.md` poin 5), fitur "Simpan PDF"
+  <!-- Pilih dompdf/dompdf ^3.1 (lebih ringan untuk shared hosting, sesuai saran di architecture.md). Diinstall via composer.phar (ditemukan di ~/.config/herd-lite/bin/), vendor/ di-regenerate dengan `composer install --no-dev --optimize-autoloader` sebelum commit sesuai konvensi deploy.md. Markup dokumen diekstrak ke partial _document.php yang dipakai bersama preview web dan generate PDF (hindari duplikasi). CSS khusus PDF (rapor-document-pdf.css, nilai literal bukan var()) dibuat terpisah karena dukungan CSS custom property di Dompdf tidak konsisten. Gambar di-inline base64 untuk PDF (path relatif tidak reliable di Dompdf). Diuji end-to-end: PDF ter-generate valid (%PDF-1.7), konten diverifikasi lengkap via pdftotext (semua teks termasuk placeholder, legenda, area/subkategori/item, footer, urutan benar). Verifikasi visual render PDF tidak bisa dilakukan (tidak ada pdftoppm/ImageMagick di environment ini), tapi markup HTML-nya identik dengan yang sudah diverifikasi visual di preview web. -->
+
+**Fase 6 selesai** (kecuali skala nilai PAI/Bacaan Jilid yang BLOCKED, dan konten kurikulum asli yang masih placeholder — lihat catatan "PENTING" di atas).
 
 ## Fase 7 — Rapor (Bagian Paling Kompleks)
 

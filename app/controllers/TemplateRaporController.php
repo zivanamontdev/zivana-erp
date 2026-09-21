@@ -58,6 +58,42 @@ class TemplateRaporController extends Controller
         ]);
     }
 
+    public function downloadPdf(string $id): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'lihat');
+
+        $template = (new TemplateRapor())->find((int) $id);
+
+        if (!$template) {
+            http_response_code(404);
+            require VIEW_PATH . '/errors/404.php';
+            return;
+        }
+
+        $areas = $this->buildStructure((int) $id);
+        $legenda = (new SkalaNilai())->opsi(1);
+        $forPdf = true;
+
+        ob_start();
+        require VIEW_PATH . '/admin/template-rapor/_document.php';
+        $documentHtml = ob_get_clean();
+
+        $css = file_get_contents(ROOT_PATH . '/public/assets/css/rapor-document-pdf.css');
+
+        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body>' . $documentHtml . '</body></html>';
+
+        $dompdf = new \Dompdf\Dompdf(['defaultFont' => 'DejaVu Sans', 'isRemoteEnabled' => false]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'pratinjau-' . preg_replace('/[^a-z0-9]+/i', '-', strtolower($template['nama'])) . '.pdf';
+
+        $dompdf->stream($filename, ['Attachment' => true]);
+        exit;
+    }
+
     /**
      * Susun struktur area -> subkategori -> item lengkap dengan opsi
      * skala nilainya masing-masing (dipakai untuk render dokumen).
