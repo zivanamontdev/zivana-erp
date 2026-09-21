@@ -1,0 +1,176 @@
+/*
+ * Portal Guru — cookbook/design-system.md (Portal Guru > Dashboard).
+ */
+
+.dashboard-banner {
+  background: var(--color-red-600);
+  color: var(--color-neutral-white);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.dashboard-card {
+  border: 1px solid var(--color-neutral-75);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dashboard-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+
+.dashboard-card-header h2 {
+  margin: 0;
+}
+
+.dashboard-murid-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-neutral-75);
+  font-size: var(--font-size-body-sm);
+}
+
+.dashboard-murid-row:first-of-type {
+  border-top: none;
+}
+
+.dashboard-murid-link {
+  text-decoration: none;
+  font-size: var(--font-size-caption-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.dashboard-murid-link.is-pending {
+  color: var(--color-red-600);
+}
+
+.dashboard-murid-link.is-done {
+  color: var(--color-green-600);
+}
+
+/* ---------- Pengisian Rapor ---------- */
+
+.pengisian-rapor-warning {
+  background: var(--color-orange-50);
+  color: var(--color-orange-600);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-body-sm);
+  margin-bottom: var(--space-4);
+}
+
+.pengisian-rapor-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.pengisian-rapor-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--color-neutral-75);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pengisian-rapor-progress-bar-fill {
+  height: 100%;
+  background: var(--color-red-600);
+}
+
+.pengisian-kategori {
+  border: 1px solid var(--color-neutral-75);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  overflow: hidden;
+}
+
+.pengisian-kategori-header {
+  background: var(--color-red-600);
+  color: var(--color-neutral-white);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-body-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.pengisian-subkategori-header {
+  background: var(--color-orange-100);
+  color: var(--color-neutral-800);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.pengisian-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-neutral-75);
+}
+
+.pengisian-item-row .field-input {
+  max-width: 320px;
+}
+
+.pengisian-catatan-guru {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-neutral-75);
+}
+
+.pengisian-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  position: sticky;
+  bottom: 0;
+  background: var(--color-neutral-white);
+  padding: var(--space-3) 0;
+}
+
+/* ---------- Responsif — Pengisian Rapor WAJIB jalan baik di HP ---------- */
+@media (max-width: 480px) {
+  .pengisian-item-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pengisian-item-row .field-input {
+    max-width: none;
+  }
+
+  .pengisian-actions {
+    flex-direction: column;
+  }
+
+  .pengisian-actions .btn {
+    width: 100%;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

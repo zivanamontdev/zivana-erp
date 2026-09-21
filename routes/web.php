@@ -79,3 +79,7 @@ $router->post('/rapor-murid/sesi', [RaporMuridController::class, 'storeSesi']);
 $router->post('/rapor-murid/{id}/setujui', [RaporMuridController::class, 'approve']);
 $router->get('/rapor-murid/{id}/pdf', [RaporMuridController::class, 'downloadPdf']);
 $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);
+
+// --- Portal Guru ---
+$router->get('/portal-guru/dashboard', [PortalGuruController::class, 'dashboard']);
+$router->get('/portal-guru/murid', [PortalGuruController::class, 'daftarMurid']);

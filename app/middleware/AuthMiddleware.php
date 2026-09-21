@@ -36,6 +36,7 @@ class AuthMiddleware
         $_SESSION['user_id'] = (int) $user['id'];
         $_SESSION['role_id'] = (int) $user['role_id'];
         $_SESSION['user_name'] = $user['email'];
+        $_SESSION['karyawan_id'] = $user['karyawan_id'] !== null ? (int) $user['karyawan_id'] : null;
 
         return true;
     }

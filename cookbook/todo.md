@@ -148,8 +148,10 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 
 ## Fase 8 — Portal Guru
 
-- [ ] Dashboard Guru: 3 blok (Agenda Sedang Berlangsung, Daftar Murid ampuan, Agenda Berikutnya + empty state)
-- [ ] Daftar Murid (read-only, versi guru)
+- [x] Dashboard Guru: 3 blok (Agenda Sedang Berlangsung, Daftar Murid ampuan, Agenda Berikutnya + empty state)
+  <!-- PortalGuruController::dashboard(). Agenda Sedang Berlangsung/Berikutnya diturunkan langsung dari tanggal_mulai/tanggal_selesai sesi_pembagian_rapor (tidak perlu tabel "agenda" terpisah). Tambahan penting: session sekarang menyimpan karyawan_id saat login (AuthController + AuthMiddleware) supaya Portal Guru bisa identifikasi "murid ampuan saya". BONUS FIX: sidebar sekarang filter item sesuai permission RBAC role aktif (sebelumnya semua role lihat semua menu meski nanti di-403 kalau diklik) - ditemukan saat testing sebagai guru, App Shell (shell-header.php) diupdate untuk semua modul, bukan cuma Portal Guru. Diuji end-to-end ke MySQL live sebagai akun guru sungguhan: badge count, countdown hari, link kontekstual Isi Rapor, empty state Agenda Berikutnya, dan filter sidebar semua benar. -->
+- [x] Daftar Murid (read-only, versi guru)
+  <!-- PortalGuruController::daftarMurid(), 5 kolom tanpa Status/aksi CRUD sesuai temuan crawling. Diuji end-to-end: hanya menampilkan murid yang diampu guru yang login. -->
 - [ ] Form Pengisian Rapor (desktop) — struktur berjenjang Kategori→Sub-kategori→item, textarea Catatan Guru, progress bar
 - [ ] Versi mobile Pengisian Rapor (WAJIB jalan baik di HP — satu-satunya halaman dengan requirement mobile eksplisit)
 - [ ] Tombol "Selesaikan Rapor" → ubah status jadi "menunggu_persetujuan", kunci form dari edit lebih lanjut

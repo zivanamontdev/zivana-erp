@@ -18,11 +18,15 @@ $headerActions = $headerActions ?? '';
 $activeNavItem = $activeNavItem ?? '';
 
 // Struktur navigasi persis sesuai cookbook/design-system.md bagian 2.2.
+// 'perm' => [modul, subSection] dipakai untuk filter item yang tidak
+// bisa diakses role saat ini (lihat filterNavByPermission() di bawah)
+// — server-side tetap dilindungi RoleMiddleware, ini murni soal UX
+// supaya tidak menampilkan menu yang toh akan di-403 kalau diklik.
 $navGroups = [
     [
         'label' => 'Sekolah',
         'items' => [
-            ['key' => 'data-sekolah', 'label' => 'Data Sekolah', 'href' => '/sekolah', 'icon' => 'icon_school'],
+            ['key' => 'data-sekolah', 'label' => 'Data Sekolah', 'href' => '/sekolah', 'icon' => 'icon_school', 'perm' => ['Sekolah', 'Data Sekolah']],
         ],
         'submenus' => [
             [
@@ -30,8 +34,8 @@ $navGroups = [
                 'label' => 'Kurikulum',
                 'icon' => 'icon_book_marked',
                 'items' => [
-                    ['key' => 'manajemen-template', 'label' => 'Manajemen Template', 'href' => '/kurikulum/manajemen-template'],
-                    ['key' => 'periode-penilaian', 'label' => 'Periode Penilaian', 'href' => '/kurikulum/periode-penilaian'],
+                    ['key' => 'manajemen-template', 'label' => 'Manajemen Template', 'href' => '/kurikulum/manajemen-template', 'perm' => ['Sekolah', 'Manajemen Template']],
+                    ['key' => 'periode-penilaian', 'label' => 'Periode Penilaian', 'href' => '/kurikulum/periode-penilaian', 'perm' => ['Sekolah', 'Periode Penilaian']],
                 ],
             ],
         ],
@@ -45,9 +49,9 @@ $navGroups = [
                 'label' => 'Karyawan',
                 'icon' => 'icon_users',
                 'items' => [
-                    ['key' => 'daftar-karyawan', 'label' => 'Daftar Karyawan', 'href' => '/karyawan'],
-                    ['key' => 'jabatan', 'label' => 'Jabatan', 'href' => '/jabatan'],
-                    ['key' => 'manajemen-guru', 'label' => 'Manajemen Guru', 'href' => '/manajemen-guru'],
+                    ['key' => 'daftar-karyawan', 'label' => 'Daftar Karyawan', 'href' => '/karyawan', 'perm' => ['Human Capital', 'Daftar Karyawan']],
+                    ['key' => 'jabatan', 'label' => 'Jabatan', 'href' => '/jabatan', 'perm' => ['Human Capital', 'Jabatan']],
+                    ['key' => 'manajemen-guru', 'label' => 'Manajemen Guru', 'href' => '/manajemen-guru', 'perm' => ['Human Capital', 'Manajemen Guru']],
                 ],
             ],
         ],
@@ -55,28 +59,52 @@ $navGroups = [
     [
         'label' => 'Murid',
         'items' => [
-            ['key' => 'manajemen-murid', 'label' => 'Manajemen Murid', 'href' => '/murid', 'icon' => 'icon_graduation_cap'],
-            ['key' => 'manajemen-kelas', 'label' => 'Manajemen Kelas', 'href' => '/kelas', 'icon' => 'icon_backpack'],
-            ['key' => 'rapor-murid', 'label' => 'Rapor Murid', 'href' => '/rapor-murid', 'icon' => 'icon_book_user'],
+            ['key' => 'manajemen-murid', 'label' => 'Manajemen Murid', 'href' => '/murid', 'icon' => 'icon_graduation_cap', 'perm' => ['Murid', 'Manajemen Murid']],
+            ['key' => 'manajemen-kelas', 'label' => 'Manajemen Kelas', 'href' => '/kelas', 'icon' => 'icon_backpack', 'perm' => ['Murid', 'Manajemen Kelas']],
+            ['key' => 'rapor-murid', 'label' => 'Rapor Murid', 'href' => '/rapor-murid', 'icon' => 'icon_book_user', 'perm' => ['Murid', 'Rapor Murid']],
         ],
         'submenus' => [],
     ],
     [
         'label' => 'Portal Guru',
         'items' => [
-            ['key' => 'portal-dashboard', 'label' => 'Dashboard', 'href' => '/portal-guru/dashboard', 'icon' => 'icon_layout_dashboard'],
-            ['key' => 'portal-daftar-murid', 'label' => 'Daftar Murid', 'href' => '/portal-guru/murid', 'icon' => 'icon_backpack'],
+            ['key' => 'portal-dashboard', 'label' => 'Dashboard', 'href' => '/portal-guru/dashboard', 'icon' => 'icon_layout_dashboard', 'perm' => ['Portal Guru', 'Dashboard']],
+            ['key' => 'portal-daftar-murid', 'label' => 'Daftar Murid', 'href' => '/portal-guru/murid', 'icon' => 'icon_backpack', 'perm' => ['Portal Guru', 'Daftar Murid']],
         ],
         'submenus' => [],
     ],
     [
         'label' => 'Sistem',
         'items' => [
-            ['key' => 'rbac', 'label' => 'RBAC', 'href' => '/rbac', 'icon' => 'icon_user_cog'],
+            ['key' => 'rbac', 'label' => 'RBAC', 'href' => '/rbac', 'icon' => 'icon_user_cog', 'perm' => ['Sistem', 'RBAC']],
         ],
         'submenus' => [],
     ],
 ];
+
+// Filter item yang tidak bisa diakses role saat ini (aksi 'lihat').
+// Ini murni UX — proteksi sungguhan tetap RoleMiddleware server-side.
+$roleChecker = new RoleMiddleware();
+$canAccessNav = fn(array $item) => !isset($item['perm']) || $roleChecker->check($item['perm'][0], $item['perm'][1], 'lihat');
+
+foreach ($navGroups as $gi => $group) {
+    $navGroups[$gi]['items'] = array_values(array_filter($group['items'], $canAccessNav));
+
+    foreach ($group['submenus'] as $si => $submenu) {
+        $navGroups[$gi]['submenus'][$si]['items'] = array_values(array_filter($submenu['items'], $canAccessNav));
+    }
+
+    $navGroups[$gi]['submenus'] = array_values(array_filter(
+        $navGroups[$gi]['submenus'],
+        fn($submenu) => !empty($submenu['items'])
+    ));
+}
+
+// Buang grup yang jadi kosong total setelah difilter.
+$navGroups = array_values(array_filter(
+    $navGroups,
+    fn($group) => !empty($group['items']) || !empty($group['submenus'])
+));
 
 // Buka otomatis submenu yang salah satu child-nya sedang aktif.
 foreach ($navGroups as $gi => $group) {
