@@ -68,6 +68,7 @@ class AuthController extends Controller
             'path' => '/',
             'httponly' => true,
             'samesite' => 'Lax',
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
         ]);
     }
 

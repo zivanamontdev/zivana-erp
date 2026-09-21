@@ -45,7 +45,7 @@ class PengisianRaporController extends Controller
     public function simpan(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'lihat');
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'edit');
 
         $rapor = $this->findOwnRapor((int) $raporId);
 
@@ -63,7 +63,7 @@ class PengisianRaporController extends Controller
     public function selesaikan(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'lihat');
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'edit');
 
         $rapor = $this->findOwnRapor((int) $raporId);
 

@@ -96,6 +96,9 @@ if (session_status() === PHP_SESSION_NONE) {
         'lifetime' => SESSION_LIFETIME * 60,
         'httponly' => true,
         'samesite' => 'Lax',
+        // Otomatis aktif kalau request datang lewat HTTPS (produksi) —
+        // tidak di-hardcode true supaya tetap jalan di HTTP lokal (dev).
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
     ]);
     session_start();
 }

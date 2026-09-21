@@ -3,7 +3,7 @@
         'name' => 'zivana/erp',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '5c96c65ddd9f5b5f3d1257b560a04c462cb679b2',
+        'reference' => 'a51c6915c426eb6b253ea43db000521517df8530',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -58,7 +58,7 @@
         'zivana/erp' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '5c96c65ddd9f5b5f3d1257b560a04c462cb679b2',
+            'reference' => 'a51c6915c426eb6b253ea43db000521517df8530',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

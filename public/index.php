@@ -49,7 +49,18 @@ if (file_exists(CONFIG_PATH . '/config.php')) {
 if (file_exists(CORE_PATH . '/Router.php') && file_exists(ROOT_PATH . '/routes/web.php')) {
     $router = new Router();
     require ROOT_PATH . '/routes/web.php';
-    $router->dispatch();
+
+    // Lihat cookbook/security.md bagian 4 — exception tak tertangani
+    // tidak boleh bocor ke publik sebagai stack trace mentah saat
+    // APP_DEBUG=false. Detail tetap dicatat via error_log() untuk
+    // debugging, ditampilkan ke layar hanya kalau APP_DEBUG true.
+    try {
+        $router->dispatch();
+    } catch (Throwable $exception) {
+        error_log($exception->getMessage() . "\n" . $exception->getTraceAsString());
+        http_response_code(500);
+        require VIEW_PATH . '/errors/500.php';
+    }
 } else {
     echo 'Zivana ERP — bootstrap siap, routing belum dikonfigurasi.';
 }
