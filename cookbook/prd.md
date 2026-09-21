@@ -62,10 +62,11 @@ Sistem
 - Fitur "Perbarui Tahun Ajaran" via modal terpisah — set tahun ajaran aktif berjalan (tahun awal/akhir)
 
 ### 3.2 Sekolah — Kurikulum → Manajemen Template
-- Daftar template rapor (tampaknya predefined/system, kolom Tipe = "System", tidak ada tombol tambah) — contoh: "Rapor Montessori Tengah Semester", "Rapor Montessori Akhir Semester", "Rapor Al-Qur'an", "Rapor Bahasa Inggris"
+- Daftar template rapor — **[KEPUTUSAN, dikonfirmasi user]** memang tidak ada CRUD untuk struktur kurikulum (area/sub-kategori/item penilaian). Kolom Tipe = "System" di semua baris itu disengaja: konten kurikulum bersifat *fixed*, dikelola langsung di database (lewat developer/AI assistant) saat ada revisi kurikulum, bukan lewat UI Admin. Halaman ini murni read-only + Pratinjau. Contoh template: "Rapor Montessori Tengah Semester", "Rapor Montessori Akhir Semester", "Rapor Al-Qur'an", "Rapor Bahasa Inggris"
 - Filter: Semua Tipe, Semua Kategori (kategori: Rapor Murid / Rapor Sekolah)
 - **Pratinjau Template**: render dokumen rapor multi-halaman (4 halaman) dengan placeholder variable (`{Nama Siswa}`, `{Kelas Siswa}`, `{NISN Siswa}`), skala penilaian custom Montessori (4 simbol non-numerik), struktur hierarkis Area → Sub-kategori (a/b/c/d) → Tujuan (item penilaian individual). Tombol "Simpan PDF" — fitur generate PDF dari template + data murid.
 - `[ASUMSI]` Hanya halaman 1 dari 4 yang punya screenshot; struktur halaman 2–4 (kemungkinan area penilaian lain, Bacaan Jilid, PAI, catatan guru) diasumsikan dari struktur form Pengisian Rapor guru — perlu dikonfirmasi ke user/designer.
+- `[ASUMSI]` Konten kurikulum yang saat ini ter-seed di database (9 item contoh di "AREA KETERAMPILAN HIDUP") adalah PLACEHOLDER, bukan kurikulum resmi — perlu diganti dengan data asli dari user.
 
 ### 3.3 Sekolah — Kurikulum → Periode Penilaian
 - CRUD periode penilaian: nama, tipe, kategori, tanggal awal/akhir

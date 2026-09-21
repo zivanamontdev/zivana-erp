@@ -120,8 +120,10 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 - [x] Pratinjau Template — render dokumen 1 halaman dulu sesuai screenshot yang ada, `[konfirmasi struktur halaman 2-4 ke user/designer sebelum lanjut]`
   <!-- View show.php + CSS rapor-document.css + helper renderSkalaSimbol() (render segitiga custom via inline SVG). Diverifikasi visual: watermark, header, identitas placeholder, legenda 4 simbol, tabel area/subkategori/item — semua cocok dengan desain. [ASUMSI BESAR] Struktur data (9 item di 4 subkategori "AREA KETERAMPILAN HIDUP") adalah PLACEHOLDER masuk akal secara konteks Montessori, BUKAN kurikulum resmi — hanya 1 item ("Menutup mulut saat batuk dan bersin") yang terkonfirmasi asli dari crawling. WAJIB diganti data asli dari user sebelum produksi. Halaman 2-4 dokumen (kemungkinan area lain + Bacaan Jilid + PAI + catatan guru, lihat pola di form Pengisian Rapor guru) BELUM dibangun, menunggu konfirmasi user/designer. -->
 
-**PENTING — perlu keputusan/konten dari user sebelum lanjut Fase 7:**
-1. Konten kurikulum asli (semua area/subkategori/tujuan penilaian) untuk menggantikan placeholder di atas
+**[KEPUTUSAN, dikonfirmasi user]** Tidak ada CRUD untuk struktur kurikulum (area/sub-kategori/item). Ini disengaja, bukan celah — konten kurikulum bersifat *fixed*, dikelola manual lewat developer/AI assistant langsung ke database saat ada revisi, BUKAN lewat UI Admin. `template_rapor.tipe = 'System'` mencerminkan ini. Tidak perlu bangun halaman Tambah/Ubah/Hapus untuk area/subkategori/item di fase manapun, kecuali user secara eksplisit minta ini diubah nanti.
+
+**PENTING — masih perlu konten dari user sebelum lanjut Fase 7:**
+1. Konten kurikulum asli (semua area/subkategori/tujuan penilaian) untuk menggantikan placeholder di atas — akan di-input manual ke database begitu tersedia
 2. Struktur halaman 2-4 dokumen rapor
 3. Skala nilai untuk PAI/Bacaan Jilid (poin di atas)
 - [x] Pilih & integrasikan library PDF (dompdf/mpdf — lihat `architecture.md` poin 5), fitur "Simpan PDF"
