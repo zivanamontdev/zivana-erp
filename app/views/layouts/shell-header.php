@@ -12,10 +12,15 @@
  *   breadcrumb hanya muncul di halaman yang punya parent)
  * - $headerActions (string) — HTML tombol aksi di baris judul, sudah di-render oleh view
  * - $activeNavItem (string) — key item nav yang aktif, lihat daftar $navGroups di bawah
+ * - $pageTitleHtml (string) — HTML mentah pengganti $pageTitle untuk H1 (mis. nama
+ *   murid + dropdown switcher di Pratinjau Rapor Murid) — view yang set ini WAJIB
+ *   escape sendiri bagian data dinamisnya. Kalau tidak di-set, $pageTitle dipakai
+ *   apa adanya (di-escape otomatis).
  */
 $breadcrumb = $breadcrumb ?? null;
 $headerActions = $headerActions ?? '';
 $activeNavItem = $activeNavItem ?? '';
+$pageTitleHtml = $pageTitleHtml ?? null;
 
 // Struktur navigasi dikonfirmasi ULANG langsung dari assets/ss/sidebar.svg,
 // sidebar_submenu.svg dan sidebar_submenu2.svg (bukan dari deskripsi teks
@@ -206,7 +211,7 @@ foreach ($navGroups as $gi => $group) {
             <?php endif; ?>
 
             <div class="page-header-row page-header-title-row">
-                <h1><?= e($pageTitle) ?></h1>
+                <h1><?= $pageTitleHtml ?? e($pageTitle) ?></h1>
                 <div class="page-header-actions"><?= $headerActions ?></div>
             </div>
         </header>

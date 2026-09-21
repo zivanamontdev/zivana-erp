@@ -150,8 +150,17 @@ class RaporMuridController extends Controller
             return;
         }
 
+        $siblingStmt = $db->prepare(
+            'SELECT r.id, mu.nama_lengkap
+             FROM rapor r JOIN murid mu ON mu.id = r.murid_id
+             WHERE r.sesi_pembagian_id = :sesi_id AND r.id != :current_id
+             ORDER BY mu.nama_lengkap ASC'
+        );
+        $siblingStmt->execute(['sesi_id' => $rapor['sesi_pembagian_id'], 'current_id' => $rapor['id']]);
+
         $this->view('admin.rapor-murid.show', [
             'pageTitle' => 'Pratinjau Rapor Murid',
+            'pageTitleHtml' => muridSwitcherTitle($rapor, $siblingStmt->fetchAll(), '/rapor-murid/{id}'),
             'breadcrumb' => breadcrumb('Rapor Murid', 'Pratinjau Rapor Murid'),
             'activeNavItem' => 'rapor-murid',
             'rapor' => $rapor,

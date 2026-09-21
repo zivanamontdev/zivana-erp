@@ -80,6 +80,41 @@ function breadcrumb(string $parent, string $current): string
 }
 
 /**
+ * HTML untuk $pageTitleHtml di Pratinjau Rapor Murid (admin & guru).
+ * [FIX] Sebelumnya H1 di halaman ini teks statis "Pratinjau Rapor
+ * Murid" — dikonfirmasi dari assets/ss/Murid - menu_rapor_murid -
+ * halaman_pratinjau_rapor.svg dan Portal Guru - menu_dashboard -
+ * halaman_pratinjau_rapor_murid.svg, H1 seharusnya NAMA MURID dengan
+ * dropdown chevron untuk pindah ke murid lain di sesi yang sama —
+ * dipakai ulang di RaporMuridController (admin) dan
+ * PengisianRaporController::pratinjau() (guru).
+ *
+ * @param array{id:int,nama_lengkap:string} $current
+ * @param array<array{id:int,nama_lengkap:string}> $siblings
+ * @param string $urlTemplate URL dengan placeholder "{id}", mis. "/rapor-murid/{id}"
+ */
+function muridSwitcherTitle(array $current, array $siblings, string $urlTemplate): string
+{
+    $base = defined('BASE_PATH') ? BASE_PATH : '';
+    $html = '<div class="action-menu page-title-switcher" data-action-menu>'
+        . '<button type="button" class="page-title-switcher-toggle" data-action-menu-toggle>'
+        . e($current['nama_lengkap']) . icon('icon_chevron') . '</button>';
+
+    if (!empty($siblings)) {
+        $html .= '<div class="action-menu-dropdown">';
+        foreach ($siblings as $sibling) {
+            $url = $base . str_replace('{id}', (string) $sibling['id'], $urlTemplate);
+            $html .= '<a href="' . e($url) . '">' . e($sibling['nama_lengkap']) . '</a>';
+        }
+        $html .= '</div>';
+    }
+
+    $html .= '</div>';
+
+    return $html;
+}
+
+/**
  * Ambil (atau buat baru kalau belum ada/kedaluwarsa) token CSRF untuk
  * request saat ini. Validasi penuh (validateCsrfToken) ditambahkan di
  * Controller base class pada task CSRF khusus — lihat cookbook/todo.md

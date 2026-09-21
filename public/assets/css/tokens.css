@@ -58,6 +58,14 @@
   --color-green-800: #003C1E;
   --color-green-900: #001305;
 
+  /* ---------- 1.1 Warna — Blue (indikator progress) ----------
+     [BARU] Ditemukan saat re-audit assets/ss/Portal Guru - halaman_
+     pengisian_rapor(desktop_mode).svg (progress bar) — tidak ada di
+     crawling design-system.md awal. Cuma 1 shade yang dikonfirmasi dari
+     SVG (bukan skala 50-900 penuh seperti red/orange/green), diberi
+     nama -600 mengikuti pola shade "utama" pada family warna lain. */
+  --color-blue-600: #4344E8;
+
   /* ---------- 1.2 Tipografi ---------- */
   --font-family-base: 'Plus Jakarta Sans', sans-serif;
 

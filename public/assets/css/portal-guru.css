@@ -68,56 +68,112 @@
   color: var(--color-green-600);
 }
 
-/* ---------- Pengisian Rapor ---------- */
+/* ==========================================================
+   Pengisian Rapor — layout "fokus" (TANPA sidebar/topbar)
+   [FIX TOTAL] Ditemukan lewat re-audit langsung assets/ss/Portal Guru
+   - halaman_pengisian_rapor(desktop_mode + mobile_mode).svg: halaman
+   ini punya visual berbeda dari sisa aplikasi — bukan konten di dalam
+   app-shell, tapi rangkaian "chip" rounded-card terpisah (radius 16px
+   untuk kartu putih, 8px untuk band kategori/subkategori) yang di-
+   stack dengan gap kecil, mengambang di atas background merah muda
+   penuh halaman. Warna kategori/subkategori juga sebelumnya salah
+   shade (red-600/orange-100 -> seharusnya red-300/orange-300, sudah
+   ada sebagai token, cuma salah dipakai). Progress bar pakai warna
+   biru baru (--color-blue-600) yang sebelumnya tidak ada di token
+   sama sekali.
+   ========================================================== */
+
+.focus-shell {
+  min-height: 100vh;
+  background: var(--color-red-50);
+  /* 64px vertikal: tidak ada token spacing yang cocok (skala berhenti
+     di --space-6/24px), dikonfirmasi dari posisi y=64 kartu di SVG. */
+  padding: 64px var(--space-6);
+}
+
+.focus-column {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.pengisian-header-card {
+  background: var(--color-neutral-white);
+  border-radius: 16px;
+  padding: var(--space-5) var(--space-6);
+  position: relative;
+}
+
+.pengisian-header-card h1 {
+  margin: 0 0 var(--space-1);
+}
+
+.pengisian-header-card .field {
+  max-width: 320px;
+  margin-bottom: var(--space-3);
+}
+
+.pengisian-header-actions {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-6);
+  display: flex;
+  gap: var(--space-3);
+}
 
 .pengisian-rapor-warning {
-  background: var(--color-orange-50);
-  color: var(--color-orange-600);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3) var(--space-4);
+  color: var(--color-neutral-500);
   font-size: var(--font-size-body-sm);
-  margin-bottom: var(--space-4);
+  margin: 0 0 var(--space-4);
 }
 
 .pengisian-rapor-progress {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-bottom: var(--space-5);
+}
+
+.pengisian-rapor-progress-label {
+  color: var(--color-neutral-600);
+  font-size: var(--font-size-body-sm);
+  white-space: nowrap;
 }
 
 .pengisian-rapor-progress-bar {
   flex: 1;
-  height: 8px;
+  height: 4px;
   background: var(--color-neutral-75);
-  border-radius: 4px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .pengisian-rapor-progress-bar-fill {
   height: 100%;
-  background: var(--color-red-600);
+  background: var(--color-blue-600);
 }
 
 .pengisian-kategori {
-  border: 1px solid var(--color-neutral-75);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-4);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .pengisian-kategori-header {
-  background: var(--color-red-600);
+  background: var(--color-red-300);
   color: var(--color-neutral-white);
-  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-6);
   font-size: var(--font-size-body-md);
   font-weight: var(--font-weight-bold);
 }
 
 .pengisian-subkategori-header {
-  background: var(--color-orange-100);
+  background: var(--color-orange-300);
   color: var(--color-neutral-800);
-  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-6);
   font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-bold);
 }
@@ -127,32 +183,35 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--color-neutral-75);
+  background: var(--color-neutral-white);
+  border-radius: 16px;
+  padding: var(--space-4) var(--space-6);
 }
 
 .pengisian-item-row .field-input {
-  max-width: 320px;
+  max-width: 220px;
 }
 
 .pengisian-catatan-guru {
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-neutral-75);
+  background: var(--color-neutral-white);
+  border-radius: 16px;
+  padding: var(--space-4) var(--space-6);
 }
 
 .pengisian-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-3);
-  margin-top: var(--space-5);
-  position: sticky;
-  bottom: 0;
-  background: var(--color-neutral-white);
-  padding: var(--space-3) 0;
+  display: none;
 }
 
 /* ---------- Responsif — Pengisian Rapor WAJIB jalan baik di HP ---------- */
 @media (max-width: 480px) {
+  .focus-shell {
+    padding: var(--space-4);
+  }
+
+  .pengisian-header-actions {
+    display: none;
+  }
+
   .pengisian-item-row {
     flex-direction: column;
     align-items: stretch;
@@ -162,8 +221,16 @@
     max-width: none;
   }
 
+  /* [ASUMSI] design-system.md 5.4: tombol aksi pindah ke sticky bar
+     bawah HANYA di mode mobile (desktop di toolbar atas kartu header). */
   .pengisian-actions {
+    display: flex;
     flex-direction: column;
+    gap: var(--space-3);
+    position: sticky;
+    bottom: 0;
+    background: var(--color-red-50);
+    padding: var(--space-3) 0;
   }
 
   .pengisian-actions .btn {

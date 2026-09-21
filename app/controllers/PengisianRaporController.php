@@ -29,9 +29,6 @@ class PengisianRaporController extends Controller
         [$totalItem, $terisiItem] = $this->hitungProgress($areas);
 
         $this->view('portal-guru.pengisian-rapor', [
-            'pageTitle' => 'Pengisian Rapor',
-            'breadcrumb' => null,
-            'activeNavItem' => 'portal-daftar-murid',
             'rapor' => $rapor,
             'areas' => $areas,
             'semester' => $semester,
@@ -95,7 +92,16 @@ class PengisianRaporController extends Controller
 
         $this->view('portal-guru.pratinjau-rapor', [
             'pageTitle' => 'Pratinjau Rapor Murid',
-            'breadcrumb' => null,
+            // [FIX] H1 seharusnya nama murid + switcher (lihat catatan di
+            // muridSwitcherTitle()), dan breadcrumb sebelumnya null padahal
+            // dikonfirmasi ADA dari assets/ss/Portal Guru - menu_dashboard -
+            // halaman_pratinjau_rapor_murid.svg.
+            'pageTitleHtml' => muridSwitcherTitle(
+                $rapor,
+                $this->daftarMuridLainDiSesi((int) $rapor['sesi_pembagian_id'], (int) $rapor['id']),
+                '/portal-guru/rapor/{id}/pratinjau'
+            ),
+            'breadcrumb' => breadcrumb('Rapor Murid', 'Pratinjau Rapor Murid'),
             'activeNavItem' => 'portal-daftar-murid',
             'rapor' => $rapor,
             'areas' => $this->buildStructureWithNilai((int) $rapor['template_id'], (int) $rapor['id']),
