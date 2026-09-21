@@ -181,6 +181,13 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 
 **Fase 9 selesai.**
 
+### Perbaikan pasca-Fase 9 (feedback user menjalankan aplikasi di lokal)
+
+- [x] Area konten tidak full-width di layar nyata (tabel berhenti di tengah, sisa ruang kosong di kanan)
+  <!-- Root cause: design-system.md 2.4 mendokumentasikan "lebar konten efektif 996px" — angka ini hasil ukur di kanvas Figma 1280px, bukan lebar tetap yang dimaksud untuk semua ukuran layar. Karena browser nyata hampir selalu lebih lebar dari 1280px, cap keras `max-width:996px` di .content-body (app-shell.css) membuat konten berhenti di tengah. Diperbaiki jadi max-width:1600px (tabel/accordion sekarang benar-benar full-width di lebar laptop/desktop umum 1280-1600px, tetap ada batas di monitor ultra-wide). Diverifikasi via screenshot CDP di 1512px pada: Manajemen Murid (tabel), Rapor Murid (accordion), Data Sekolah (form 2 kolom), modal Tambah Karyawan, Portal Guru Dashboard (grid), Manajemen Kelas (tabel), RBAC (tree) — semua rapi, tidak ada yang melar aneh. -->
+- [x] Tombol terasa "tidak jelas" — kontras kurang dan padding terasa sempit
+  <!-- Root cause ganda: (1) .btn punya padding 8px SERAGAM di semua sisi (sesuai design-system.md 3.2), membuat tombol berteks nyaris tanpa jarak horizontal — diperbaiki jadi 8px vertikal + 20px horizontal, plus font-weight bold supaya tombol terbaca lebih solid. (2) .btn-tertiary (background putih, border neutral-100) nyaris identik dengan .field-input (background putih, border neutral-75) — tinggi, radius, dan warna nyaris sama sehingga tombol Tertiary (mis. tombol "Cari" di baris filter) baur dengan dropdown/input di sebelahnya. Diperbaiki: border digelapkan ke neutral-150 + tambah box-shadow tipis supaya tetap terbaca sebagai elemen bisa-diklik. [KEPUTUSAN, dikonfirmasi user lewat AskUserQuestion] User mengonfirmasi kedua penyebab ini (kontras kurang DAN padding beda) lewat screenshot pembanding, bukan tebakan sepihak. -->
+
 ---
 
 ## Item yang Butuh Konfirmasi User Sebelum Dikerjakan

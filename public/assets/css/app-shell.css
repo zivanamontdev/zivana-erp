@@ -237,7 +237,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: 996px;
+  /* [FIX] design-system.md 2.4 mendokumentasikan lebar konten efektif
+     996px, tapi itu hasil ukur di kanvas Figma 1280px — bukan lebar
+     tetap yang dimaksud untuk semua ukuran layar. Di layar nyata yang
+     hampir selalu lebih lebar dari 1280px, cap keras 996px membuat
+     tabel/konten berhenti di tengah dan menyisakan ruang kosong besar
+     di kanan (bukan margin, tapi celah tak terpakai). Diganti jadi
+     max-width lebih longgar supaya tabel benar-benar full-width di
+     layar laptop/desktop umum, tapi tetap ada batas di layar ultra-wide
+     supaya form/field tidak melar tak wajar. -->
+  max-width: 1600px;
   width: 100%;
 }
 

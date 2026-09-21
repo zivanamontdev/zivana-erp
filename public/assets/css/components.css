@@ -15,11 +15,17 @@
   justify-content: center;
   gap: var(--space-3);
   height: 37px;
-  padding: var(--space-2);
+  /* [FIX] design-system.md 3.2 mencatat "padding 8px semua sisi", tapi
+     itu bikin tombol berteks nyaris tanpa jarak horizontal dari label
+     ke tepi — terasa sempit dan mirip input/dropdown di sekitarnya.
+     Tetap 8px vertikal (sesuai tinggi 37px yang terdokumentasi), tapi
+     horizontal dilebarkan supaya tombol terasa lebih solid. */
+  padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   font-family: var(--font-family-base);
   font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-body-sm);
   cursor: pointer;
   text-decoration: none;
@@ -88,7 +94,13 @@
 
 .btn-tertiary {
   background: var(--color-neutral-white);
-  border-color: var(--color-neutral-100);
+  /* [FIX] Border neutral-100 nyaris sama dengan border .field-input
+     (neutral-75) dan tinggi/radius-nya pun identik — tombol Tertiary
+     jadi baur dengan input/dropdown di sekitarnya (mis. tombol "Cari"
+     di baris filter). Border digelapkan + tambah shadow tipis supaya
+     tetap terbaca sebagai elemen yang bisa diklik, bukan field input. */
+  border-color: var(--color-neutral-150);
+  box-shadow: 0 1px 2px rgba(17, 16, 21, 0.06);
   color: var(--color-neutral-800);
 }
 
