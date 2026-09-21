@@ -82,7 +82,10 @@ class PortalGuruController extends Controller
         }
 
         $this->view('portal-guru.daftar-murid', [
-            'pageTitle' => 'Daftar Murid',
+            // [FIX] Dikonfirmasi dari assets/ss/Portal Guru - menu_daftar_
+            // murid.svg — judul H1 "Daftar Murid Guru", bukan "Daftar Murid"
+            // (nama menu sidebar-nya sendiri tetap "Daftar Murid").
+            'pageTitle' => 'Daftar Murid Guru',
             'breadcrumb' => null,
             'activeNavItem' => 'portal-daftar-murid',
             'muridList' => $muridList,
