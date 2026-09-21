@@ -83,3 +83,7 @@ $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);
 // --- Portal Guru ---
 $router->get('/portal-guru/dashboard', [PortalGuruController::class, 'dashboard']);
 $router->get('/portal-guru/murid', [PortalGuruController::class, 'daftarMurid']);
+$router->get('/portal-guru/rapor/{id}', [PengisianRaporController::class, 'show']);
+$router->post('/portal-guru/rapor/{id}/simpan', [PengisianRaporController::class, 'simpan']);
+$router->post('/portal-guru/rapor/{id}/selesaikan', [PengisianRaporController::class, 'selesaikan']);
+$router->get('/portal-guru/rapor/{id}/pratinjau', [PengisianRaporController::class, 'pratinjau']);

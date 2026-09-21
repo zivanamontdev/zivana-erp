@@ -240,3 +240,43 @@ body {
   max-width: 996px;
   width: 100%;
 }
+
+/*
+ * Sidebar tidak punya breakpoint mobile di desain asli (semua layar
+ * dibuat di 1280px, lihat cookbook/design-system.md bagian 6) kecuali
+ * Portal Guru > Pengisian Rapor yang WAJIB jalan di HP. Tanpa aturan
+ * ini sidebar 236px penuh memakan ~74% dari layar 320px. Dipaksa jadi
+ * mode ikon-saja (submenu ikut disembunyikan — aman karena grup Portal
+ * Guru, satu-satunya menu yang dipakai role Guru, tidak punya submenu).
+ */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 64px;
+  }
+
+  .sidebar-header-text,
+  .sidebar .nav-label,
+  .sidebar .nav-group-label,
+  .sidebar .nav-submenu,
+  .sidebar .nav-group-toggle .nav-chevron {
+    display: none;
+  }
+
+  .page-header-row {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .page-header-toolbar .search-field {
+    width: 100%;
+    max-width: 120px;
+  }
+
+  .page-header-user span {
+    display: none;
+  }
+
+  .content-body {
+    padding: var(--space-3) var(--space-4);
+  }
+}
