@@ -45,8 +45,14 @@ class KelasGuruMurid extends Model
 
     public function removeGuruFromKelas(int $kelasId, int $guruId): void
     {
-        $stmt = $this->db->prepare('DELETE FROM kelas_guru_murid WHERE kelas_id = :kelas_id AND guru_id = :guru_id');
-        $stmt->execute(['kelas_id' => $kelasId, 'guru_id' => $guruId]);
+        $this->db->beginTransaction();
+        try {
+            $query = $this->db->prepare('SELECT murid_id FROM kelas_guru_murid WHERE kelas_id=? AND guru_id=?');
+            $query->execute([$kelasId,$guruId]); $ids=$query->fetchAll(PDO::FETCH_COLUMN);
+            $this->db->prepare('DELETE FROM kelas_guru_murid WHERE kelas_id=? AND guru_id=?')->execute([$kelasId,$guruId]);
+            foreach ($ids as $id) StudentReportSync::sync((int)$id);
+            $this->db->commit();
+        } catch (Throwable $e) { $this->db->rollBack(); throw $e; }
     }
 
     /** Semua murid ampuan satu guru, lintas kelas (untuk halaman Manajemen Guru). */
@@ -102,17 +108,14 @@ class KelasGuruMurid extends Model
                 }
                 $students[$id] = (int) $student['kelas_id'];
             }
+            $previous = $db->prepare('SELECT murid_id FROM kelas_guru_murid WHERE guru_id=?' . ($kelasId !== null ? ' AND kelas_id=?' : ''));
+            $previous->execute($kelasId !== null ? [$guruId,$kelasId] : [$guruId]);
+            $affected = array_unique(array_merge($ids,$previous->fetchAll(PDO::FETCH_COLUMN)));
             $delete = $db->prepare('DELETE FROM kelas_guru_murid WHERE guru_id = ?' . ($kelasId !== null ? ' AND kelas_id = ?' : ''));
             $delete->execute($kelasId !== null ? [$guruId, $kelasId] : [$guruId]);
             $insert = $db->prepare('INSERT INTO kelas_guru_murid (kelas_id, guru_id, murid_id) VALUES (?, ?, ?)');
             foreach ($students as $id => $classId) $insert->execute([$classId, $guruId, $id]);
-            // Draft report ownership follows the current assignment; submitted reports stay historical.
-            $refresh = $db->prepare("UPDATE rapor SET guru_id=(SELECT kg.guru_id FROM kelas_guru_murid kg WHERE kg.murid_id=rapor.murid_id LIMIT 1) WHERE status='belum_diisi' AND guru_id=?");
-            $refresh->execute([$guruId]);
-            foreach ($ids as $id) {
-                $refresh = $db->prepare("UPDATE rapor SET guru_id=? WHERE murid_id=? AND status='belum_diisi'");
-                $refresh->execute([$guruId, $id]);
-            }
+            foreach ($affected as $id) StudentReportSync::sync((int)$id);
             $db->commit();
         } catch (Throwable $e) {
             $db->rollBack();

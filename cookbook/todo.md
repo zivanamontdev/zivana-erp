@@ -36,6 +36,8 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 
 ### D. Sumber data periode dan penugasan rapor
 
+- [x] Sinkronisasi pada tambah/ubah murid, perubahan penugasan guru, dan hapus kelas: buat draft hanya untuk sesi berjalan/mendatang dengan tahun ajaran kelas yang cocok; lepaskan kepemilikan draft yang tidak lagi memenuhi syarat. Tes SQLite terisolasi mencakup duplikasi, perpindahan tahun, murid nonaktif, riwayat terkirim, nilai yang sudah tersimpan, dan rollback kegagalan. Integrasi tulis HTTP/MySQL masih perlu diuji.
+
 - [x] Semester Ganjil/Genap terpisah dari tipe Tengah/Akhir; empat kombinasi unik per tahun ajaran.
 - [x] Delapan periode contoh dibuat untuk tahun ajaran 2024/2025 dan 2025/2026; tahun aktif 2026/2027 tidak diubah. Dua periode lama dan data rapor terkait dihapus atas izin pengguna, dengan cadangan lokal.
 - [x] Daftar Rapor Murid admin memakai satu tabel per periode, tanpa card sesi bersarang; baris rapor tersedia menuju pratinjau dan draft tidak dapat dibuka.

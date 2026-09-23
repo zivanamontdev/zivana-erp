@@ -4,6 +4,20 @@ class Murid extends Model
 {
     protected string $table = 'murid';
 
+    public function create(array $data)
+    {
+        $this->db->beginTransaction();
+        try {
+            $id = parent::create($data);
+            StudentReportSync::sync((int)$id);
+            $this->db->commit();
+            return $id;
+        } catch (Throwable $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
     /** Keep a pupil's existing teacher when moving class; clear assignment if unclassified. */
     public function update($id, array $data): bool
     {
@@ -22,6 +36,7 @@ class Murid extends Model
                     $stmt->execute([$id]);
                 }
             }
+            StudentReportSync::sync((int)$id);
             $this->db->commit();
             return $result;
         } catch (Throwable $e) {

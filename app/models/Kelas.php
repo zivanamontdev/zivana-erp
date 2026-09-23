@@ -5,6 +5,24 @@ class Kelas extends Model
     public const LEVELS = ['Akar', 'Batang', 'Ranting', 'Daun'];
     protected string $table = 'kelas';
 
+    public function delete($id): bool
+    {
+        $this->db->beginTransaction();
+        try {
+            $lock = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql' ? ' FOR UPDATE' : '';
+            $query = $this->db->prepare('SELECT id FROM murid WHERE kelas_id=? ORDER BY id' . $lock);
+            $query->execute([$id]);
+            $studentIds = $query->fetchAll(PDO::FETCH_COLUMN);
+            $result = parent::delete($id);
+            foreach ($studentIds as $studentId) StudentReportSync::sync((int)$studentId);
+            $this->db->commit();
+            return $result;
+        } catch (Throwable $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
     public function withCounts(): array
     {
         $sql = "SELECT k.*,

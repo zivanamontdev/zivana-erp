@@ -67,7 +67,15 @@ Migrasi mengubah `permissions.aksi` menjadi VARCHAR dan menambahkan 17 izin. Gra
 - Route privat bertambah menjadi 53 dan semuanya lulus tes penolakan role tanpa izin. Migrasi katalog kini berisi 18 izin tambahan; eksekusi lanjutan menambah 1 izin PDF Guru dengan mempertahankan grant sebelumnya.
 - Template yang kosong diberi pesan eksplisit dan tidak dapat dikirim. Tahun ajaran aktif maupun isi kurikulum tidak diganti untuk membuat dashboard terlihat berisi.
 
-### Sisa verifikasi
+### Sinkronisasi murid dan penugasan setelah periode dibuat
+
+- `StudentReportSync` dipanggil dalam transaksi tambah/ubah murid, penggantian/pelepasan penugasan guru, dan penghapusan kelas. Membuka halaman tidak membuat rapor.
+- Sesi yang tanggal akhirnya hari ini atau sesudahnya menerima draft murid berstatus `bersekolah` dengan tahun ajaran kelas sesuai dan semester eksplisit. Tanpa guru, draft tetap belum mempunyai pemilik; penugasan berikutnya mengisinya.
+- Draft pada sesi berjalan/mendatang kehilangan pemilik jika murid keluar dari kelas/tahun/status yang memenuhi syarat. Nilai draft tidak dihapus. Rapor terkirim/disetujui dan sesi yang sudah lewat tidak diubah oleh sinkronisasi ini.
+- `php tests/student-report-sync-regression.php` lulus: murid baru setelah periode, batas tanggal/tahun/semester, idempotensi, lepas/ganti guru, pindah tahun, nonaktif/aktif murid, hapus kelas, serta rollback apabila pembuatan rapor gagal. Menggunakan SQLite in-memory, bukan database aplikasi.
+- Seluruh 13 skrip tes PHP (selain fixture server) dan `node tests/report-entry-ui.js` lulus setelah perubahan. Belum menutup kebutuhan pengujian HTTP tulis/MySQL dan visual browser di bawah.
+
+### Sisa verifikasi setelah sinkronisasi
 
 - Login dan matriks RBAC melalui browser nyata (desktop/mobile), termasuk interaksi checkbox tri-state dan cookie remember-login lintas request.
 - Audit positif seluruh aksi melalui HTTP/database MySQL; tes semua route di atas merupakan tes penolakan, bukan pembuktian semua fitur berhasil.
