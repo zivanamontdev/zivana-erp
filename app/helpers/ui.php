@@ -379,7 +379,7 @@ function uiSelect(string $name, string $label, array $choices, array $options = 
         . '<label class="field-label font-geist' . (!empty($options['hideLabel']) ? ' ui-visually-hidden' : '') . '" for="' . e($id) . '">' . e($label) . '</label>'
         . '<select ' . uiAttrs($attrs) . '>';
     foreach ($choices as $value => $text) {
-        $html .= '<option ' . uiAttrs(['value' => (string) $value, 'selected' => (string) ($options['value'] ?? '') === (string) $value]) . '>' . e((string) $text) . '</option>';
+        $html .= '<option ' . uiAttrs(['value' => (string) $value, 'selected' => (string) ($options['value'] ?? '') === (string) $value, 'data-option-image' => $options['optionImages'][$value] ?? null]) . '>' . e((string) $text) . '</option>';
     }
     $html .= '</select><template data-select-chevron>' . icon('icon_chevron') . '</template>';
     if ($error !== '') $html .= '<span class="field-error" id="' . e($id) . '-error" role="alert">' . e($error) . '</span>';

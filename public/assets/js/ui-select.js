@@ -54,7 +54,7 @@
           button.setAttribute('role', 'option');
           button.tabIndex = -1;
           button.disabled = option.disabled;
-          button.textContent = option.textContent;
+          renderOption(button, option);
           button.addEventListener('click', function () {
             select.selectedIndex = index;
             select.dispatchEvent(new Event('change', {bubbles: true}));
@@ -63,9 +63,26 @@
           list.appendChild(button);
           buttons.push(button);
         });
+        function renderOption(target, option) {
+          target.textContent = '';
+          target.classList.toggle('ui-select-value--image', !!(option && option.dataset.optionImage));
+          if (!option) return;
+          if (option.dataset.optionImage) {
+            var image = document.createElement('img');
+            image.src = option.dataset.optionImage;
+            image.alt = '';
+            image.width = 24;
+            image.height = 24;
+            image.className = 'ui-select-option-image';
+            target.appendChild(image);
+          }
+          var caption = document.createElement('span');
+          caption.textContent = option.textContent;
+          target.appendChild(caption);
+        }
         function sync() {
           trigger.disabled = select.disabled;
-          text.textContent = select.selectedOptions[0] ? select.selectedOptions[0].textContent : '';
+          renderOption(text, select.selectedOptions[0]);
           buttons.forEach(function (button, index) {
             button.disabled = select.options[index].disabled;
             button.hidden = select.options[index].hidden;

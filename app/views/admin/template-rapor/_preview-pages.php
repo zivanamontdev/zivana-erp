@@ -29,11 +29,7 @@ $previewLegend = [
                     <div class="template-paper-symbols">
                         <?php foreach ($previewLegend as $symbol => $label): ?>
                         <div>
-                            <?php if ($symbol === 'triangle-sm'): ?>
-                                <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><polyline points="9,1 1,15 16,15" fill="none" stroke="currentColor" stroke-width=".7"/></svg>
-                            <?php else: ?>
                                 <?= renderSkalaSimbol($symbol) ?>
-                            <?php endif; ?>
                             <span><?= e($label) ?></span>
                         </div>
                         <?php endforeach; ?>

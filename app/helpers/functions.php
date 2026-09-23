@@ -245,24 +245,30 @@ function validateCsrfToken(string $token): bool
 
 /**
  * Render simbol skala penilaian Montessori (bentuk custom, bukan
- * karakter unicode standar) sebagai inline SVG kecil. Dipakai di
+ * karakter unicode standar) dari aset SVG bersama. Dipakai di
  * legenda dan sel nilai dokumen rapor. Lihat
  * cookbook/design-system.md bagian 3.5.
  *
  * @param string $kode 'slash'|'triangle-sm'|'triangle-lg'|'triangle-full'
  */
+function skalaSimbolSrc(string $kode): string
+{
+    static $sources = [];
+    $files = [
+        'slash' => 'penilaian-1-sisi.svg',
+        'triangle-sm' => 'penilaian-2-sisi.svg',
+        'triangle-lg' => 'penilaian-3-sisi.svg',
+        'triangle-full' => 'penilaian-full.svg',
+    ];
+    if (!isset($files[$kode])) return '';
+    // Embed the same source for browser and offline PDF; no duplicate public asset.
+    return $sources[$kode] ??= 'data:image/svg+xml;base64,' . base64_encode(file_get_contents(ROOT_PATH . '/assets/' . $files[$kode]));
+}
+
 function renderSkalaSimbol(string $kode): string
 {
-    $shapes = [
-        'slash' => '<line x1="4" y1="16" x2="12" y2="2" stroke="currentColor" stroke-width="1.5"/>',
-        'triangle-sm' => '<polygon points="8,4 13,14 3,14" fill="none" stroke="currentColor" stroke-width="1.2"/>',
-        'triangle-lg' => '<polygon points="8,1 15,15 1,15" fill="none" stroke="currentColor" stroke-width="1.2"/>',
-        'triangle-full' => '<polygon points="8,1 15,15 1,15" fill="currentColor"/>',
-    ];
-
-    $shape = $shapes[$kode] ?? '';
-
-    return '<svg class="skala-simbol" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">' . $shape . '</svg>';
+    $source = skalaSimbolSrc($kode);
+    return $source === '' ? '' : '<img class="skala-simbol" width="16" height="16" src="' . e($source) . '" alt="" aria-hidden="true">';
 }
 
 /**

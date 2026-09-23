@@ -1616,3 +1616,25 @@ Baris memuat nama murid di kiri, status teks dan chevron 20px di kanan dengan ga
 - Pengisian tetap memakai layout fokus tanpa sidebar. Nilai memakai `uiSelect`, catatan memakai `uiField` textarea, aksi memakai `uiButton`. `uiSelect` menerima `attributes` untuk atribut native seperti data hook; komponen tidak menyimpan state nilai terpisah dari select native.
 - Tombol Kirim/Selesaikan nonaktif jika template kosong atau nilai belum lengkap. Progres mengikuti perubahan dropdown; simpan draft tetap diperbolehkan. Aksi desktop berada di kartu header, aksi mobile di bawah. Peringatan keluar melindungi perubahan yang belum disimpan.
 - Pratinjau guru memakai komponen kertas horizontal yang sama dengan admin, refresh dan PDF sesuai izin, tanpa Setujui. Jumlah halaman mengikuti konten nyata; jangan menduplikasi nilai atau halaman agar terlihat empat halaman.
+# Simbol penilaian bersama
+
+**Pembaruan mobile Pengisian Rapor:** pada viewport ≤40rem, header fullwidth tanpa gutter layar dan tanpa radius; padding internal tetap 20px/24px. Card penilaian tetap memiliki gutter horizontal 20px. Grup tombol header yang sama diposisikan `fixed` di bawah viewport, fullwidth, background token `page-background`, border atas `neutral-100`, dan padding 20px/24px ditambah safe-area perangkat. Tidak ada duplikasi tombol/form. Ruang bawah form mengikuti tinggi toolbar melalui ResizeObserver (fallback 7rem) agar penilaian terakhir tidak tertutup. Di desktop tombol tetap sejajar judul. Aturan ini menggantikan ketentuan sebelumnya bahwa tombol mobile tetap di bagian atas.
+
+Khusus halaman Pengisian Rapor (layout `.focus-shell`), background menggunakan `var(--color-red-50)` dari bank `config/colors.php`. Background global halaman lain tetap menggunakan token `page-background`.
+
+Header Pengisian Rapor: card radius 1rem (16px), padding vertikal 1.25rem (20px) dan horizontal 1.5rem (24px). Judul dan tombol Arsip/Selesaikan berada satu baris flex, aksi di kanan; pada layar sempit boleh membungkus tanpa keluar card. Nama murid sebenarnya ditampilkan sebagai teks di bawah judul, bukan dropdown. Tombol tetap di header pada mobile (menggantikan toolbar bawah sebelumnya). Baris penilaian: card radius 1rem, padding vertikal .75rem (12px), horizontal 1.5rem; antarbaris dan dari header kuning ke baris pertama berjarak .75rem. Warna tetap memakai token yang tersedia.
+
+Pengisian Rapor menggunakan disclosure bertingkat: header merah membuka/menutup seluruh area beserta catatan guru; header kuning membuka/menutup subkategori penilaian secara independen. Keduanya tertutup saat halaman dimuat. Gunakan native `<details class="ui-disclosure">` dengan `<summary class="ui-disclosure-trigger">` dan `.ui-disclosure-chevron`, sehingga klik maupun Enter/Space bekerja tanpa JavaScript tambahan. Menutup area tidak menonaktifkan/menghapus input, tidak mereset kondisi subkategori, dan tidak mengubah perhitungan progres atau nilai yang dikirim.
+
+Dropdown penilaian pada Pengisian Rapor memakai lebar desktop 22rem (352px pada font dasar 16px), termasuk ikon dan chevron. Jangan batasi input di dalamnya ke 220px. Pada layar hingga 56rem, dropdown berada di bawah tujuan penilaian dan mengisi lebar kontainer; label tetap boleh membungkus pada layar sempit tanpa overflow. Lebar overlay mengikuti trigger melalui komponen `uiSelect`.
+
+Gunakan `skalaSimbolSrc()` / `renderSkalaSimbol()` untuk semua penilaian, bukan karakter Unicode atau bentuk SVG yang digambar ulang:
+
+| Kode tersimpan | Aset sumber | Keterangan |
+| --- | --- | --- |
+| `slash` | `assets/penilaian-1-sisi.svg` | Baru dikenalkan |
+| `triangle-sm` | `assets/penilaian-2-sisi.svg` | Mulai Berkembang |
+| `triangle-lg` | `assets/penilaian-3-sisi.svg` | Berkembang Sesuai Harapan |
+| `triangle-full` | `assets/penilaian-full.svg` | Berkembang Sangat Baik |
+
+`uiSelect` menerima `optionImages` berupa peta nilai opsi → sumber gambar. Dropdown custom menampilkan gambar dan label, termasuk pilihan aktif. Native fallback tetap menampilkan label dan mengirim ID opsi yang sama. Ukuran: dropdown 24px (1.5rem), legenda pratinjau 32px (2rem), sel pratinjau 12px (.75rem), dokumen/PDF 16px. Proporsi aset dipertahankan. Sumber di-embed sebagai data URI untuk mendukung PDF tanpa akses jaringan; aset asli tidak diduplikasi atau diubah warnanya.

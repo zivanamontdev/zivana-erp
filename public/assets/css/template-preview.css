@@ -45,7 +45,8 @@
 .template-paper-legend { padding: .75rem; border-top: 1px solid var(--color-neutral-75); }
 .template-paper-symbols { display: flex; justify-content: space-between; gap: .5rem; margin-top: .75rem; color: var(--color-neutral-600); }
 .template-paper-symbols > div { display: flex; flex-direction: column; align-items: center; gap: .5rem; white-space: nowrap; }
-.template-paper-symbols svg { width: 1.8125rem; height: 1.8125rem; color: var(--color-neutral-600); }
+.template-paper-symbols .skala-simbol { width: 2rem; height: 2rem; object-fit: contain; }
+.template-paper-table .skala-simbol { width: .75rem; height: .75rem; object-fit: contain; vertical-align: middle; }
 .template-paper-columns { margin-top: 1rem; }
 .template-paper-columns--two { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
 .template-paper-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: .25rem; font-size: .5625rem; line-height: 1.5; color: var(--color-report-table-heading); }

@@ -3,6 +3,13 @@
   document.addEventListener('DOMContentLoaded', function () {
     var form = document.querySelector('[data-report-entry]');
     if (!form) return;
+    // Reserve the actual mobile toolbar height, including wrapped labels/safe area.
+    var actions = form.querySelector('.pengisian-header-actions');
+    if (actions && window.ResizeObserver) {
+      new window.ResizeObserver(function () {
+        form.style.setProperty('--report-actions-height', actions.getBoundingClientRect().height + 'px');
+      }).observe(actions);
+    }
     var dirty = false;
     var fields = Array.from(form.querySelectorAll('select[data-report-value]'));
     function updateProgress() {

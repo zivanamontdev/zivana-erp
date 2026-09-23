@@ -15,17 +15,7 @@
 $kelasLabel = trim(($rapor['level_kelas'] ?? '') . ' ' . ($rapor['nama_kelas'] ?? '')) ?: '-';
 $pageTitle = 'Pengisian Rapor';
 
-// [ASUMSI] Native <select><option> tidak bisa merender bentuk SVG
-// (renderSkalaSimbol dipakai di dokumen/pratinjau). Dikonfirmasi dari
-// SVG, dropdown di form ini menampilkan karakter simbol + label sekaligus
-// (mis. "/ (Baru dikenalkan)") — didekati pakai karakter unicode yang
-// bentuknya paling mendekati tiap simbol.
-$simbolChar = [
-    'slash' => '/',
-    'triangle-sm' => '▵',
-    'triangle-lg' => '△',
-    'triangle-full' => '▲',
-];
+// Custom select displays the shared SVG assets; native fallback keeps readable labels.
 
 require VIEW_PATH . '/layouts/focus-header.php';
 ?>
@@ -38,22 +28,18 @@ require VIEW_PATH . '/layouts/focus-header.php';
     <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
 
     <div class="pengisian-header-card">
-        <h1>Pengisian Rapor</h1>
-
-        <div class="field">
-            <label class="field-label" for="rapor-murid-switcher">Nama Murid</label>
-            <?php
-            $currentMuridUrl = BASE_PATH . '/portal-guru/rapor/' . (int) $rapor['id'];
-            $muridChoices = [$currentMuridUrl => $rapor['nama_lengkap'] . ' — ' . $kelasLabel];
-            foreach ($daftarMuridLain as $lain) {
-                $muridChoices[BASE_PATH . '/portal-guru/rapor/' . (int) $lain['id']] = $lain['nama_lengkap'];
-            }
-            echo uiFilter('murid_switcher', 'Nama Murid', $muridChoices, [
-                'id' => 'rapor-murid-switcher', 'value' => $currentMuridUrl, 'marginVertical' => 0,
-                'attributes' => ['data-report-switcher' => true],
-            ]);
-            ?>
+        <div class="pengisian-header-top">
+            <h1>Pengisian Rapor</h1>
+            <div class="pengisian-header-actions">
+<?php if (uiCan('Portal Guru', 'Daftar Murid', 'edit')): ?>
+                <?= uiButton('Arsip Rapor', 'outline', ['type'=>'submit','marginVertical'=>0]) ?>
+<?php endif; ?>
+<?php if (uiCan('Portal Guru', 'Daftar Murid', 'kirim')): ?>
+                <?= uiButton('Selesaikan Rapor', 'primary', ['type'=>'submit','marginVertical'=>0,'disabled'=>$totalItem===0 || $terisiItem!==$totalItem,'attributes'=>['data-report-submit'=>true,'formaction'=>BASE_PATH . '/portal-guru/rapor/' . (int)$rapor['id'] . '/selesaikan']]) ?>
+<?php endif; ?>
+            </div>
         </div>
+        <p class="pengisian-student-name"><?= e($rapor['nama_lengkap']) ?></p>
 
         <p class="pengisian-rapor-warning">
             Pastikan tiap penilaian sudah benar sebelum diselesaikan. Rapor akan terkunci setelah dikirim untuk persetujuan Kepala Sekolah/Admin.
@@ -68,60 +54,55 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <span class="pengisian-rapor-progress-label" data-report-count><?= $terisiItem ?> dari <?= $totalItem ?></span>
         </div>
 
-        <div class="pengisian-header-actions">
-<?php if (uiCan('Portal Guru', 'Daftar Murid', 'edit')): ?>
-            <?= uiButton('Arsip Rapor', 'outline', ['type'=>'submit','marginVertical'=>0]) ?>
-<?php endif; ?>
-<?php if (uiCan('Portal Guru', 'Daftar Murid', 'kirim')): ?>
-            <?= uiButton('Selesaikan Rapor', 'primary', ['type'=>'submit','marginVertical'=>0,'disabled'=>$totalItem===0 || $terisiItem!==$totalItem,'attributes'=>['data-report-submit'=>true,'formaction'=>BASE_PATH . '/portal-guru/rapor/' . (int)$rapor['id'] . '/selesaikan']]) ?>
-<?php endif; ?>
-        </div>
     </div>
 
     <?php foreach ($areas as $area): ?>
-    <div class="pengisian-kategori">
+    <details class="pengisian-kategori ui-disclosure">
         <?php // [FIX] nama_area disimpan ALL CAPS di DB (sesuai konvensi dokumen
         // cetak — lihat rapor-document.css), tapi form Pengisian Rapor
         // menampilkannya Title Case sesuai SVG. Transform tampilan saja,
         // nilai tersimpan tidak diubah. ?>
-        <div class="pengisian-kategori-header"><?= e(mb_convert_case($area['nama_area'], MB_CASE_TITLE, 'UTF-8')) ?></div>
+        <summary class="pengisian-kategori-header ui-disclosure-trigger"><span><?= e(mb_convert_case($area['nama_area'], MB_CASE_TITLE, 'UTF-8')) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary>
+        <div class="pengisian-disclosure-content">
 
         <?php foreach ($area['subkategori'] as $sub): ?>
-        <div class="pengisian-subkategori-header">Tujuan – <?= e($sub['nama']) ?></div>
+        <details class="pengisian-subkategori ui-disclosure">
+        <summary class="pengisian-subkategori-header ui-disclosure-trigger"><span>Tujuan – <?= e($sub['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary>
+        <div class="pengisian-disclosure-content">
 
         <?php foreach ($sub['item'] as $item): ?>
         <div class="pengisian-item-row">
             <span><?= e($item['nama_tujuan']) ?></span>
             <?php
             $choices = ['' => 'Pilih jawaban anda'];
-            foreach ($item['opsi'] as $opsi) $choices[$opsi['id']] = ($simbolChar[$opsi['simbol']] ?? '') . ' (' . $opsi['label'] . ')';
+            $optionImages = [];
+            foreach ($item['opsi'] as $opsi) {
+                $choices[$opsi['id']] = $opsi['label'];
+                $optionImages[$opsi['id']] = skalaSimbolSrc($opsi['simbol']);
+            }
             echo uiSelect('nilai[' . (int)$item['id'] . ']', $item['nama_tujuan'], $choices, [
                 'id'=>'report-value-' . (int)$item['id'], 'value'=>$item['nilai_opsi_id'] ?? '',
                 'hideLabel'=>true, 'attributes'=>['data-report-value'=>true],
+                'optionImages'=>$optionImages,
             ]);
             ?>
         </div>
         <?php endforeach; ?>
+        </div>
+        </details>
         <?php endforeach; ?>
 
         <div class="pengisian-catatan-guru">
             <?= uiField('catatan[' . (int)$area['id'] . ']', 'Catatan Guru', ['type'=>'textarea','id'=>'report-note-' . (int)$area['id'],'value'=>$catatanList[$area['id']] ?? '', 'placeholder'=>'Masukkan catatan guru', 'attributes'=>['rows'=>3]]) ?>
         </div>
-    </div>
+        </div>
+    </details>
     <?php endforeach; ?>
 
     <?php if ($totalItem === 0): ?>
     <p role="status"><?= uiText('Template rapor ini belum memiliki item penilaian. Hubungi Admin untuk melengkapi template; rapor belum dapat dikirim.', 'body-sm', ['tone'=>'muted']) ?></p>
     <?php endif; ?>
 
-    <div class="pengisian-actions">
-<?php if (uiCan('Portal Guru', 'Daftar Murid', 'edit')): ?>
-        <?= uiButton('Arsip Rapor', 'outline', ['type'=>'submit','marginVertical'=>0]) ?>
-<?php endif; ?>
-<?php if (uiCan('Portal Guru', 'Daftar Murid', 'kirim')): ?>
-        <?= uiButton('Selesaikan Rapor', 'primary', ['type'=>'submit','marginVertical'=>0,'disabled'=>$totalItem===0 || $terisiItem!==$totalItem,'attributes'=>['data-report-submit'=>true,'formaction'=>BASE_PATH . '/portal-guru/rapor/' . (int)$rapor['id'] . '/selesaikan']]) ?>
-<?php endif; ?>
-    </div>
 </form>
 
 <script src="<?= BASE_PATH ?>/assets/js/ui-select.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-select.js') ?>"></script>
