@@ -46,13 +46,8 @@ $controller->deactivate((string) $id);
 check((int) $positions->find($id)['is_active'] === 0, 'Deactivate must retain the position.');
 $controller->activate((string) $id);
 check((int) $positions->find($id)['is_active'] === 1, 'Activate must restore status.');
-try {
-    $controller->destroy((string) $id);
-    throw new RuntimeException('Referenced position must not be deleted.');
-} catch (PDOException $e) {
-    // SQLite enforces the same FK restriction; production catches MySQL error 1451.
-    check($e->getCode() === '23000', 'Expected a foreign-key violation.');
-}
+$controller->destroy((string) $id);
+check(!empty($_SESSION['jabatan_delete_error']), 'Referenced position deletion must show an error.');
 check((int) $positions->find($id)['is_active'] === 1, 'Failed delete must not deactivate.');
 
 $employees = new KaryawanController();

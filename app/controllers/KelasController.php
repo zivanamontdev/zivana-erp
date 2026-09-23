@@ -25,7 +25,7 @@ class KelasController extends Controller
         $namaKelas = trim((string) $this->input('nama_kelas', ''));
         $tahunAjaran = (new TahunAjaran())->whereFirst('is_active', 1);
 
-        if ($levelKelas !== '' && $namaKelas !== '' && $tahunAjaran) {
+        if (in_array($levelKelas, Kelas::LEVELS, true) && $namaKelas !== '' && $tahunAjaran) {
             (new Kelas())->create([
                 'tahun_ajaran_id' => $tahunAjaran['id'],
                 'level_kelas' => $levelKelas,
@@ -44,11 +44,11 @@ class KelasController extends Controller
         $levelKelas = trim((string) $this->input('level_kelas', ''));
         $namaKelas = trim((string) $this->input('nama_kelas', ''));
 
-        if ($levelKelas !== '' && $namaKelas !== '') {
+        if (in_array($levelKelas, Kelas::LEVELS, true) && $namaKelas !== '') {
             (new Kelas())->update((int) $id, ['level_kelas' => $levelKelas, 'nama_kelas' => $namaKelas]);
         }
 
-        $this->redirect('/kelas');
+        $this->redirect($this->input('return_to') === 'detail' ? '/kelas/' . (int) $id : '/kelas');
     }
 
     public function destroy(string $id): void
@@ -79,12 +79,6 @@ class KelasController extends Controller
 
         $canEdit = (new RoleMiddleware())->check('Murid', 'Manajemen Kelas', 'edit');
 
-        // Guru yang bisa ditambahkan: semua karyawan aktif yang belum
-        // jadi pengampu di kelas ini (dropdown "Tambah Guru").
-        $sudahJadiGuru = array_column((new KelasGuruMurid())->forKelas((int) $id), 'guru_id');
-        $guruTersedia = (new Karyawan())->allWithJabatan();
-        $guruTersedia = array_filter($guruTersedia, fn($k) => !in_array((int) $k['id'], $sudahJadiGuru, true) && $k['is_active']);
-
         // Murid yang bisa di-assign: murid yang kelas_id-nya kelas ini.
         $muridDiKelasIni = (new Murid())->where('kelas_id', (int) $id);
 
@@ -106,7 +100,6 @@ class KelasController extends Controller
             'kelas' => $kelas,
             'canEdit' => $canEdit,
             'guruMuridGroups' => $guruMuridGroups,
-            'guruTersedia' => array_values($guruTersedia),
             'muridDiKelasIni' => $muridDiKelasIni,
             'assignedElsewhere' => $assignedElsewhere,
         ]);
@@ -126,7 +119,11 @@ class KelasController extends Controller
         $muridIds = $this->input('murid_ids', []);
 
         if ($guruId > 0 && is_array($muridIds)) {
-            (new KelasGuruMurid())->replaceForGuruInKelas((int) $id, $guruId, $muridIds);
+            try {
+                (new KelasGuruMurid())->replaceForGuruInKelas((int) $id, $guruId, $muridIds);
+            } catch (DomainException $e) {
+                $_SESSION['assignment_error'] = $e->getMessage();
+            }
         }
 
         $this->redirect('/kelas/' . $id);

@@ -40,28 +40,7 @@ class KelasGuruMurid extends Model
     /** Ganti seluruh murid ampuan satu guru di satu kelas (dipakai tambah & ubah). */
     public function replaceForGuruInKelas(int $kelasId, int $guruId, array $muridIds): void
     {
-        $db = $this->db;
-        $db->beginTransaction();
-
-        try {
-            $stmt = $db->prepare('DELETE FROM kelas_guru_murid WHERE kelas_id = :kelas_id AND guru_id = :guru_id');
-            $stmt->execute(['kelas_id' => $kelasId, 'guru_id' => $guruId]);
-
-            $insertStmt = $db->prepare(
-                'INSERT INTO kelas_guru_murid (kelas_id, guru_id, murid_id) VALUES (:kelas_id, :guru_id, :murid_id)'
-            );
-
-            foreach (array_unique(array_map('intval', $muridIds)) as $muridId) {
-                if ($muridId > 0) {
-                    $insertStmt->execute(['kelas_id' => $kelasId, 'guru_id' => $guruId, 'murid_id' => $muridId]);
-                }
-            }
-
-            $db->commit();
-        } catch (Throwable $e) {
-            $db->rollBack();
-            throw $e;
-        }
+        $this->replaceAssignments($guruId, $muridIds, $kelasId);
     }
 
     public function removeGuruFromKelas(int $kelasId, int $guruId): void
@@ -94,24 +73,46 @@ class KelasGuruMurid extends Model
      */
     public function replaceForGuru(int $guruId, array $muridIds): void
     {
+        $this->replaceAssignments($guruId, $muridIds, null);
+    }
+
+    private function replaceAssignments(int $guruId, array $muridIds, ?int $kelasId): void
+    {
         $db = $this->db;
+        $ids = array_values(array_unique(array_filter(array_map('intval', $muridIds), fn($id) => $id > 0)));
+        sort($ids);
         $db->beginTransaction();
-
         try {
-            $stmt = $db->prepare('DELETE FROM kelas_guru_murid WHERE guru_id = :guru_id');
-            $stmt->execute(['guru_id' => $guruId]);
-
-            $insertStmt = $db->prepare(
-                'INSERT INTO kelas_guru_murid (kelas_id, guru_id, murid_id)
-                 SELECT kelas_id, :guru_id, :murid_id FROM murid WHERE id = :murid_id2 AND kelas_id IS NOT NULL'
-            );
-
-            foreach (array_unique(array_map('intval', $muridIds)) as $muridId) {
-                if ($muridId > 0) {
-                    $insertStmt->execute(['guru_id' => $guruId, 'murid_id' => $muridId, 'murid_id2' => $muridId]);
+            $teacher = $db->prepare("SELECT ka.id FROM karyawan ka JOIN jabatan j ON j.id = ka.jabatan_id WHERE ka.id = ? AND ka.is_active = 1 AND j.nama IN ('Guru Kelas', 'Guru Shadow')");
+            $teacher->execute([$guruId]);
+            if (!$teacher->fetch()) throw new DomainException('Guru tidak tersedia atau tidak aktif.');
+            $lock = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql' ? ' FOR UPDATE' : '';
+            $students = [];
+            foreach ($ids as $id) {
+                $stmt = $db->prepare('SELECT id, kelas_id FROM murid WHERE id = ?' . $lock);
+                $stmt->execute([$id]);
+                $student = $stmt->fetch();
+                if (!$student || !$student['kelas_id'] || ($kelasId !== null && (int) $student['kelas_id'] !== $kelasId)) {
+                    throw new DomainException('Murid harus memiliki kelas yang sesuai sebelum ditugaskan.');
                 }
+                $assigned = $db->prepare('SELECT guru_id FROM kelas_guru_murid WHERE murid_id = ?' . $lock);
+                $assigned->execute([$id]);
+                foreach ($assigned->fetchAll() as $row) {
+                    if ((int) $row['guru_id'] !== $guruId) throw new DomainException('Murid sudah memiliki guru. Lepaskan penugasan dari guru sebelumnya terlebih dahulu.');
+                }
+                $students[$id] = (int) $student['kelas_id'];
             }
-
+            $delete = $db->prepare('DELETE FROM kelas_guru_murid WHERE guru_id = ?' . ($kelasId !== null ? ' AND kelas_id = ?' : ''));
+            $delete->execute($kelasId !== null ? [$guruId, $kelasId] : [$guruId]);
+            $insert = $db->prepare('INSERT INTO kelas_guru_murid (kelas_id, guru_id, murid_id) VALUES (?, ?, ?)');
+            foreach ($students as $id => $classId) $insert->execute([$classId, $guruId, $id]);
+            // Draft report ownership follows the current assignment; submitted reports stay historical.
+            $refresh = $db->prepare("UPDATE rapor SET guru_id=(SELECT kg.guru_id FROM kelas_guru_murid kg WHERE kg.murid_id=rapor.murid_id LIMIT 1) WHERE status='belum_diisi' AND guru_id=?");
+            $refresh->execute([$guruId]);
+            foreach ($ids as $id) {
+                $refresh = $db->prepare("UPDATE rapor SET guru_id=? WHERE murid_id=? AND status='belum_diisi'");
+                $refresh->execute([$guruId, $id]);
+            }
             $db->commit();
         } catch (Throwable $e) {
             $db->rollBack();

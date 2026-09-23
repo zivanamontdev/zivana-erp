@@ -6,19 +6,19 @@
  *
  * Variabel dari RaporMuridController::show(): $rapor, $areas, $legenda
  */
-$headerActions = '<button type="button" class="ui-button ui-button--outline ui-button--icon-only" aria-label="Muat ulang" onclick="location.reload()">' . icon('icon_refresh') . '</button> '
-    . '<a href="' . BASE_PATH . '/rapor-murid/' . $rapor['id'] . '/pdf" class="ui-button ui-button--primary">Simpan PDF</a>';
+$headerActions = uiButton('Muat ulang', 'outline', ['icon'=>'icon_refresh', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['onclick'=>'location.reload()']])
+    . '<a href="' . BASE_PATH . '/rapor-murid/' . (int) $rapor['id'] . '/pdf" class="ui-button ui-button--outline">Simpan PDF</a>';
+if ($canApprove && $rapor['status'] === 'menunggu_persetujuan') {
+    $headerActions .= '<form method="POST" action="' . BASE_PATH . '/rapor-murid/' . (int) $rapor['id'] . '/setujui"><input type="hidden" name="csrf_token" value="' . e(getCsrfToken()) . '">'
+        . uiButton('Setujui', 'primary', ['type'=>'submit','marginVertical'=>0]) . '</form>';
+}
 
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/rapor-document.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/rapor-document.css') ?>">
-
-<div class="rapor-toolbar">
-    <span class="rapor-pagination">Halaman 1 dari 4</span>
-</div>
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/template-preview.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/template-preview.css') ?>">
 
 <?php
-$forPdf = false;
-require VIEW_PATH . '/admin/rapor-murid/_document.php';
+$previewPages = ReportPreview::pages($areas);
+require VIEW_PATH . '/admin/template-rapor/_preview-pages.php';
 require VIEW_PATH . '/layouts/shell-footer.php';
 ?>

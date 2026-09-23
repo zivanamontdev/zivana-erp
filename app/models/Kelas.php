@@ -2,6 +2,7 @@
 
 class Kelas extends Model
 {
+    public const LEVELS = ['Akar', 'Batang', 'Ranting', 'Daun'];
     protected string $table = 'kelas';
 
     public function withCounts(): array

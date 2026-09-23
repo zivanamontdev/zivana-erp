@@ -1,4 +1,5 @@
 .env
+database/backups/
 node_modules/
 .DS_Store
 Thumbs.db
@@ -6,3 +7,6 @@ Thumbs.db
 composer.lock
 public/uploads/*
 !public/uploads/.gitkeep
+# Local headless-browser UI test artifacts (not application data).
+tests/edge-report-profile/
+tests/report-preview-check.png

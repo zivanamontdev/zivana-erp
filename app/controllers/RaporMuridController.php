@@ -9,7 +9,12 @@ class RaporMuridController extends Controller
 
         $db = Database::getInstance();
 
-        $periodeList = $db->query('SELECT * FROM periode_penilaian ORDER BY awal_periode DESC')->fetchAll();
+        $years = (new TahunAjaran())->all('tahun_awal DESC');
+        $active = array_values(array_filter($years, static fn($y) => $y['is_active']));
+        $yearId = (int) $this->input('tahun_ajaran_id', $active[0]['id'] ?? ($years[0]['id'] ?? 0));
+        $periods = $db->prepare('SELECT * FROM periode_penilaian WHERE tahun_ajaran_id=? ORDER BY awal_periode DESC');
+        $periods->execute([$yearId]);
+        $periodeList = $periods->fetchAll();
 
         foreach ($periodeList as &$periode) {
             $sesiStmt = $db->prepare('SELECT * FROM sesi_pembagian_rapor WHERE periode_id = :id ORDER BY tanggal_mulai DESC');
@@ -38,77 +43,12 @@ class RaporMuridController extends Controller
             'breadcrumb' => null,
             'activeNavItem' => 'rapor-murid',
             'periodeList' => $periodeList,
-            'periodeOptions' => (new PeriodePenilaian())->all('nama ASC'),
-            'templateOptions' => (new TemplateRapor())->where('kategori', 'rapor_murid'),
+            'tahunOptions' => $years,
+            'tahunId' => $yearId,
             'canEdit' => (new RoleMiddleware())->check('Murid', 'Rapor Murid', 'edit'),
         ]);
     }
 
-    /**
-     * Buat Sesi Pembagian Rapor baru DAN sekaligus generate baris
-     * `rapor` untuk semua murid aktif (status=bersekolah), meng-assign
-     * guru_id dari kelas_guru_murid (guru pertama yang ditemukan).
-     */
-    public function storeSesi(): void
-    {
-        $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Rapor Murid', 'edit');
-
-        $periodeId = (int) $this->input('periode_id', 0);
-        $templateId = (int) $this->input('template_id', 0);
-        $nama = trim((string) $this->input('nama', ''));
-        $tanggalMulai = trim((string) $this->input('tanggal_mulai', ''));
-        $tanggalSelesai = trim((string) $this->input('tanggal_selesai', ''));
-
-        if ($periodeId === 0 || $templateId === 0 || $nama === '' || $tanggalMulai === '' || $tanggalSelesai === '') {
-            $this->redirect('/rapor-murid');
-            return;
-        }
-
-        $db = Database::getInstance();
-        $db->beginTransaction();
-
-        try {
-            $sesiId = (new SesiPembagianRapor())->create([
-                'periode_id' => $periodeId,
-                'template_id' => $templateId,
-                'nama' => $nama,
-                'tanggal_mulai' => $tanggalMulai,
-                'tanggal_selesai' => $tanggalSelesai,
-            ]);
-
-            $muridList = $db->query("SELECT id FROM murid WHERE status = 'bersekolah'")->fetchAll();
-            $guruStmt = $db->prepare('SELECT guru_id FROM kelas_guru_murid WHERE murid_id = :murid_id LIMIT 1');
-            $raporModel = new Rapor();
-
-            foreach ($muridList as $murid) {
-                $guruStmt->execute(['murid_id' => $murid['id']]);
-                $guruRow = $guruStmt->fetch();
-
-                $raporModel->create([
-                    'murid_id' => $murid['id'],
-                    'sesi_pembagian_id' => $sesiId,
-                    'template_id' => $templateId,
-                    'guru_id' => $guruRow['guru_id'] ?? null,
-                    'status' => 'belum_diisi',
-                ]);
-            }
-
-            $db->commit();
-        } catch (Throwable $e) {
-            $db->rollBack();
-            throw $e;
-        }
-
-        $this->redirect('/rapor-murid');
-    }
-
-    /**
-     * Setujui rapor (ubah status menjadi 'disetujui'). Siapa yang
-     * boleh akses ini diatur lewat RBAC permission 'edit' pada Murid >
-     * Rapor Murid — TIDAK di-hardcode ke role tertentu (lihat
-     * cookbook/todo.md Fase 7 soal keputusan role approver).
-     */
     public function approve(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);
@@ -117,11 +57,8 @@ class RaporMuridController extends Controller
         $rapor = (new Rapor())->find((int) $raporId);
 
         if ($rapor && $rapor['status'] === 'menunggu_persetujuan') {
-            (new Rapor())->update((int) $raporId, [
-                'status' => 'disetujui',
-                'disetujui_oleh' => $_SESSION['user_id'],
-                'disetujui_at' => date('Y-m-d H:i:s'),
-            ]);
+            $stmt = Database::getInstance()->prepare("UPDATE rapor SET status='disetujui', disetujui_oleh=?, disetujui_at=? WHERE id=? AND status='menunggu_persetujuan'");
+            $stmt->execute([$_SESSION['user_id'], date('Y-m-d H:i:s'), (int) $raporId]);
         }
 
         $this->redirect('/rapor-murid');
@@ -135,9 +72,13 @@ class RaporMuridController extends Controller
         $db = Database::getInstance();
 
         $stmt = $db->prepare(
-            'SELECT r.*, mu.nama_lengkap, mu.nisn, k.level_kelas, k.nama_kelas
+            'SELECT r.*, mu.nama_lengkap, mu.nisn, k.level_kelas, k.nama_kelas,
+             pp.semester, pp.tipe AS periode_tipe, ta.tahun_awal, ta.tahun_akhir
              FROM rapor r
              JOIN murid mu ON mu.id = r.murid_id
+             JOIN sesi_pembagian_rapor sp ON sp.id=r.sesi_pembagian_id
+             JOIN periode_penilaian pp ON pp.id=sp.periode_id
+             JOIN tahun_ajaran ta ON ta.id=pp.tahun_ajaran_id
              LEFT JOIN kelas k ON k.id = mu.kelas_id
              WHERE r.id = :id'
         );
@@ -149,11 +90,15 @@ class RaporMuridController extends Controller
             require VIEW_PATH . '/errors/404.php';
             return;
         }
+        if ($rapor['status'] === 'belum_diisi') {
+            $this->redirect('/rapor-murid');
+            return;
+        }
 
         $siblingStmt = $db->prepare(
             'SELECT r.id, mu.nama_lengkap
              FROM rapor r JOIN murid mu ON mu.id = r.murid_id
-             WHERE r.sesi_pembagian_id = :sesi_id AND r.id != :current_id
+             WHERE r.sesi_pembagian_id = :sesi_id AND r.id != :current_id AND r.status <> \'belum_diisi\'
              ORDER BY mu.nama_lengkap ASC'
         );
         $siblingStmt->execute(['sesi_id' => $rapor['sesi_pembagian_id'], 'current_id' => $rapor['id']]);
@@ -164,6 +109,7 @@ class RaporMuridController extends Controller
             'breadcrumb' => breadcrumb('Rapor Murid', 'Pratinjau Rapor Murid'),
             'activeNavItem' => 'rapor-murid',
             'rapor' => $rapor,
+            'canApprove' => (new RoleMiddleware())->check('Murid', 'Rapor Murid', 'edit'),
             'areas' => $this->buildStructureWithNilai((int) $rapor['template_id'], (int) $rapor['id']),
             'legenda' => (new SkalaNilai())->opsi(1),
         ]);
@@ -176,9 +122,13 @@ class RaporMuridController extends Controller
 
         $db = Database::getInstance();
         $stmt = $db->prepare(
-            'SELECT r.*, mu.nama_lengkap, mu.nisn, k.level_kelas, k.nama_kelas
+            'SELECT r.*, mu.nama_lengkap, mu.nisn, k.level_kelas, k.nama_kelas,
+             pp.semester, pp.tipe AS periode_tipe, ta.tahun_awal, ta.tahun_akhir
              FROM rapor r
              JOIN murid mu ON mu.id = r.murid_id
+             JOIN sesi_pembagian_rapor sp ON sp.id=r.sesi_pembagian_id
+             JOIN periode_penilaian pp ON pp.id=sp.periode_id
+             JOIN tahun_ajaran ta ON ta.id=pp.tahun_ajaran_id
              LEFT JOIN kelas k ON k.id = mu.kelas_id
              WHERE r.id = :id'
         );
@@ -188,6 +138,10 @@ class RaporMuridController extends Controller
         if (!$rapor) {
             http_response_code(404);
             require VIEW_PATH . '/errors/404.php';
+            return;
+        }
+        if ($rapor['status'] === 'belum_diisi') {
+            $this->redirect('/rapor-murid');
             return;
         }
 

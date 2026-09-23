@@ -8,61 +8,43 @@
  */
 $isDetail = $mode === 'detail';
 $isTambah = $mode === 'tambah';
+$kelasOptions = $kelasOptions ?? [];
 
 $val = function (string $field) use ($murid, $old) {
     return array_key_exists($field, $old) ? $old[$field] : ($murid[$field] ?? '');
 };
 
-/** Render satu field text/date/number secara konsisten di 3 mode. */
+/** Shared primitives for create/edit; data cards for every detail value. */
 $field = function (string $name, string $label, string $type = 'text', bool $required = true, bool $fullWidth = false) use ($isDetail, $val, $errors) {
     $value = (string) $val($name);
-    $hasError = isset($errors[$name]);
-    $class = $fullWidth ? 'field field-full' : 'field';
-    ob_start();
-    ?>
-    <div class="<?= $class ?>">
-        <label class="field-label"><?= e($label) ?><?= $required ? ' *' : '' ?></label>
-        <?php if ($isDetail): ?>
-        <div class="field-input is-viewonly"><?= e($value !== '' ? $value : '-') ?></div>
-        <?php else: ?>
-        <input type="<?= $type ?>" name="<?= $name ?>" class="field-input<?= $hasError ? ' is-negative' : '' ?>" value="<?= e($value) ?>">
-        <?php if ($hasError): ?><span class="field-error"><?= e($errors[$name]) ?></span><?php endif; ?>
-        <?php endif; ?>
-    </div>
-    <?php
-    return ob_get_clean();
+    if ($isDetail) return uiDataCard($label, $value, ['class' => $fullWidth ? 'field-full' : '']);
+    $options = ['variant' => 'form', 'font' => 'geist', 'type' => $type,
+        'value' => $value, 'required' => $required, 'error' => $errors[$name] ?? '',
+        'class' => $fullWidth ? 'field-full' : '', 'placeholder' => 'Isi ' . mb_strtolower($label)];
+    if ($type === 'date') $options += ['icon' => 'icon_calendar', 'iconCalendar' => true];
+    return uiField($name, $label . ($required ? ' *' : ''), $options);
 };
-
-/** Render satu field dropdown (select) secara konsisten di 3 mode. */
 $selectField = function (string $name, string $label, array $options, bool $required = true) use ($isDetail, $val, $errors) {
     $value = (string) $val($name);
-    $hasError = isset($errors[$name]);
-    ob_start();
-    ?>
-    <div class="field">
-        <label class="field-label"><?= e($label) ?><?= $required ? ' *' : '' ?></label>
-        <?php if ($isDetail): ?>
-        <div class="field-input is-viewonly"><?= e($options[$value] ?? ($value !== '' ? $value : '-')) ?></div>
-        <?php else: ?>
-        <select name="<?= $name ?>" class="field-input<?= $hasError ? ' is-negative' : '' ?>">
-            <option value="">Pilih <?= e(mb_strtolower($label)) ?></option>
-            <?php foreach ($options as $optVal => $optLabel): ?>
-            <option value="<?= e($optVal) ?>" <?= $value === $optVal ? 'selected' : '' ?>><?= e($optLabel) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <?php if ($hasError): ?><span class="field-error"><?= e($errors[$name]) ?></span><?php endif; ?>
-        <?php endif; ?>
-    </div>
-    <?php
-    return ob_get_clean();
+    if ($isDetail) return uiDataCard($label, $options[$value] ?? $value);
+    return uiSelect($name, $label . ($required ? ' *' : ''),
+        ['' => 'Pilih ' . mb_strtolower($label)] + $options,
+        ['value' => $value, 'required' => $required, 'error' => $errors[$name] ?? '']);
 };
 
 $agamaOptions = ['Islam' => 'Islam', 'Kristen Protestan' => 'Kristen Protestan', 'Katolik' => 'Katolik', 'Hindu' => 'Hindu', 'Buddha' => 'Buddha', 'Konghucu' => 'Konghucu'];
 $jenisKelaminOptions = ['L' => 'Laki-laki', 'P' => 'Perempuan'];
-// [ASUMSI] Hanya "Reguler" yang terkonfirmasi dari crawling screenshot,
-// opsi lain diturunkan dari keberadaan field "Jenis Kebutuhan" di tab
-// yang sama, perlu dikonfirmasi ke user.
-$statusKondisiOptions = ['Reguler' => 'Reguler', 'Berkebutuhan Khusus' => 'Berkebutuhan Khusus'];
+// Keep stored values compatible with existing student records.
+$statusKondisiOptions = ['Reguler' => 'Regular', 'Berkebutuhan Khusus' => 'ABK (Anak Berkebutuhan Khusus)'];
+$selectedClassId = (string) $val('kelas_id');
+$selectedLevel = '';
+$classChoices = ['' => 'Pilih kelas'];
+$classLevels = [];
+foreach ($kelasOptions as $classOption) {
+    $classChoices[$classOption['id']] = $classOption['nama_kelas'];
+    $classLevels[$classOption['id']] = $classOption['level_kelas'];
+    if ((string) $classOption['id'] === $selectedClassId) $selectedLevel = $classOption['level_kelas'];
+}
 
 $formAction = $isTambah ? BASE_PATH . '/murid' : BASE_PATH . '/murid/' . $muridId;
 
@@ -70,17 +52,16 @@ $headerActions = '';
 if ($isDetail && $canEdit) {
     $headerActions = '<a href="' . BASE_PATH . '/murid/' . $muridId . '/ubah" class="ui-button ui-button--primary">Ubah Data Murid</a>';
 } elseif (!$isDetail) {
-    $headerActions = '<button type="submit" form="form-murid" class="ui-button ui-button--primary">'
-        . ($isTambah ? 'Simpan Data Murid' : 'Simpan Perubahan') . '</button>';
+    $headerActions = uiButton($isTambah ? 'Simpan Data Murid' : 'Simpan Perubahan', 'primary', ['type' => 'submit', 'marginVertical' => 0, 'attributes' => ['form' => 'form-murid']]);
 }
 
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
-<div class="tabs" data-tabs>
+<div class="tabs student-record-tabs" data-tabs>
     <div class="tabs-nav">
-        <button type="button" class="tabs-tab is-active" data-tab-target="data-murid">Data Murid</button>
-        <button type="button" class="tabs-tab" data-tab-target="informasi">Informasi Pendaftaran</button>
-        <button type="button" class="tabs-tab" data-tab-target="relasi">Relasi &amp; Kontak</button>
+        <?= uiButton('Data Murid', 'tabular-active', ['marginVertical' => 0, 'class' => 'is-active', 'attributes' => ['data-tab-target' => 'data-murid']]) ?>
+        <?= uiButton('Informasi Pendaftaran', 'tabular-inactive', ['marginVertical' => 0, 'class' => '', 'attributes' => ['data-tab-target' => 'informasi']]) ?>
+        <?= uiButton('Relasi & Kontak', 'tabular-inactive', ['marginVertical' => 0, 'class' => '', 'attributes' => ['data-tab-target' => 'relasi']]) ?>
     </div>
 
     <?php if (!$isDetail): ?><form method="POST" action="<?= $formAction ?>" id="form-murid"><?php endif; ?>
@@ -105,29 +86,20 @@ require VIEW_PATH . '/layouts/shell-header.php';
         </div>
         <div class="field-row">
             <?= $field('tanggal_lahir', 'Tanggal Lahir', 'date') ?>
-            <div class="field">
-                <label class="field-label">Umur</label>
-                <div class="field-input is-viewonly"><?php
-                    $tglLahir = $val('tanggal_lahir');
-                    if ($tglLahir) {
-                        $umur = (new DateTime($tglLahir))->diff(new DateTime())->y;
-                        echo $umur . ' tahun';
-                    } else {
-                        echo '-';
-                    }
-                ?></div>
-            </div>
+            <?php
+            $age = '';
+            $birthDateValue = (string) $val('tanggal_lahir');
+            $birthDate = DateTimeImmutable::createFromFormat('!Y-m-d', $birthDateValue);
+            $today = new DateTimeImmutable('today');
+            if ($birthDate && $birthDate->format('Y-m-d') === $birthDateValue && $birthDate <= $today) {
+                $age = (string) $birthDate->diff($today)->y;
+            }
+            echo $isDetail ? uiDataCard('Umur', $age)
+                : uiField('umur', 'Umur', ['variant' => 'form', 'font' => 'geist', 'disabled' => true, 'value' => $age]);
+            ?>
         </div>
         <div class="field-row">
-            <div class="field field-full">
-                <label class="field-label">Alamat *</label>
-                <?php if ($isDetail): ?>
-                <div class="field-textarea is-viewonly"><?= nl2br(e($val('alamat') ?: '-')) ?></div>
-                <?php else: ?>
-                <textarea name="alamat" class="field-textarea<?= isset($errors['alamat']) ? ' is-negative' : '' ?>" placeholder="Isi alamat"><?= e($val('alamat')) ?></textarea>
-                <?php if (isset($errors['alamat'])): ?><span class="field-error"><?= e($errors['alamat']) ?></span><?php endif; ?>
-                <?php endif; ?>
-            </div>
+            <?= $field('alamat', 'Alamat', 'textarea', true, true) ?>
         </div>
     </div>
 
@@ -142,16 +114,14 @@ require VIEW_PATH . '/layouts/shell-header.php';
         </div>
         <?php if ($isDetail): ?>
         <div class="field-row">
-            <div class="field">
-                <label class="field-label">Level Kelas</label>
-                <div class="field-input is-viewonly"><?= e($murid['level_kelas'] ?? '-') ?></div>
-            </div>
-            <div class="field">
-                <label class="field-label">Kelas</label>
-                <div class="field-input is-viewonly"><?= e($murid['nama_kelas'] ?? '-') ?></div>
-            </div>
+            <?= uiDataCard('Level Kelas', $murid['level_kelas'] ?? null) ?>
+            <?= uiDataCard('Kelas', $murid['nama_kelas'] ?? null) ?>
         </div>
-        <p class="text-caption-md">Level Kelas dan Kelas diatur lewat modul Manajemen Kelas, bukan dari form ini.</p>
+        <?php else: ?>
+        <div class="field-row" data-student-class data-class-levels="<?= e(json_encode($classLevels)) ?>">
+            <?= uiSelect('kelas_id', 'Kelas *', $classChoices, ['value' => $selectedClassId, 'required' => true, 'error' => $errors['kelas_id'] ?? '']) ?>
+            <?= uiSelect('level_kelas', 'Level Kelas *', ['' => 'Pilih kelas terlebih dahulu'] + array_combine(Kelas::LEVELS, Kelas::LEVELS), ['value' => $selectedLevel, 'required' => true]) ?>
+        </div>
         <?php endif; ?>
     </div>
 
@@ -171,7 +141,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
         </div>
         <div class="field-row">
             <?= $field('pekerjaan_ayah', 'Pekerjaan') ?>
-            <?= $field('telp_ayah', 'No. Telp') ?>
+            <?= $field('telp_ayah', 'No. Telp', 'tel') ?>
         </div>
 
         <h3 class="text-body-sm font-bold">Informasi Ibu</h3>
@@ -181,11 +151,15 @@ require VIEW_PATH . '/layouts/shell-header.php';
         </div>
         <div class="field-row">
             <?= $field('pekerjaan_ibu', 'Pekerjaan') ?>
-            <?= $field('telp_ibu', 'No. Telp') ?>
+            <?= $field('telp_ibu', 'No. Telp', 'tel') ?>
         </div>
     </div>
 
     <?php if (!$isDetail): ?></form><?php endif; ?>
 </div>
 
+<?php if (!$isDetail): ?>
+<script src="<?= BASE_PATH ?>/assets/js/murid-age.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/murid-age.js') ?>"></script>
+<script src="<?= BASE_PATH ?>/assets/js/murid-class.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/murid-class.js') ?>"></script>
+<?php endif; ?>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

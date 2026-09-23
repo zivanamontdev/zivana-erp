@@ -11,6 +11,9 @@
 $headerActions = '';
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
+<?php if (!empty($_SESSION['report_error'])): ?>
+<p role="alert"><?= uiText($_SESSION['report_error'], 'body-sm', ['tone'=>'status-inactive']) ?></p>
+<?php unset($_SESSION['report_error']); endif; ?>
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 
 <div class="dashboard-banner">

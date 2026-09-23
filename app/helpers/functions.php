@@ -139,14 +139,29 @@ function initials(string $name): string
  * tapi tidak ada tooltip/konten yang ter-crawl untuk isinya — dirender
  * statis/dekoratif, tidak ada perilaku klik/hover khusus.
  */
-function breadcrumb(string $parent, string $current, string ...$descendants): string
+function breadcrumb(string|array $parent, string|array $current, string|array ...$descendants): string
 {
+    // Explicit [label, path] segments override these existing navigation defaults.
+    $routes = [
+        'Kurikulum' => '/kurikulum/manajemen-template',
+        'Manajemen Rapor' => '/kurikulum/manajemen-template',
+        'Periode Rapor' => '/kurikulum/periode-penilaian',
+        'Karyawan' => '/karyawan', 'Daftar Karyawan' => '/karyawan',
+        'Jabatan' => '/jabatan', 'Manajemen Kelas' => '/kelas',
+        'Manajemen Murid' => '/murid', 'Rapor Murid' => '/rapor-murid',
+    ];
     $segments = array_merge([$parent, $current], $descendants);
     $html = '';
-    foreach ($segments as $index => $label) {
+    foreach ($segments as $index => $segment) {
+        $label = is_array($segment) ? (string) $segment[0] : $segment;
+        $path = is_array($segment) ? ($segment[1] ?? null) : ($routes[$label] ?? null);
         if ($index > 0) $html .= icon('icon_chevron', 'breadcrumb-separator');
         $class = $index === count($segments) - 1 ? 'breadcrumb-current' : 'breadcrumb-parent';
-        $html .= '<span class="' . $class . '">' . e($label) . '</span>';
+        if ($class === 'breadcrumb-parent' && is_string($path) && str_starts_with($path, '/') && !str_starts_with($path, '//')) {
+            $html .= '<a class="' . $class . '" href="' . e((defined('BASE_PATH') ? BASE_PATH : '') . $path) . '">' . e($label) . '</a>';
+        } else {
+            $html .= '<span class="' . $class . '"' . ($class === 'breadcrumb-current' ? ' aria-current="page"' : '') . '>' . e($label) . '</span>';
+        }
     }
     return $html . icon('icon_tooltip', 'breadcrumb-info');
 }

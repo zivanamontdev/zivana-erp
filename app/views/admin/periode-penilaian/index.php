@@ -21,12 +21,17 @@ ob_start();
 $headerActions = ob_get_clean() . $headerActions;
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
+<?php if (!empty($_SESSION['period_error'])): ?>
+<p role="alert"><?= uiText($_SESSION['period_error'], 'body-sm', ['tone'=>'status-inactive']) ?></p>
+<?php unset($_SESSION['period_error']); endif; ?>
 
 <div class="data-table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
                 <th>Nama Periode</th>
+                <th>Semester</th>
+                <th>Tipe</th>
                 <th>Awal Periode</th>
                 <th>Akhir Periode</th>
                 <th class="col-action"></th>
@@ -34,11 +39,13 @@ require VIEW_PATH . '/layouts/shell-header.php';
         </thead>
         <tbody>
             <?php if (empty($periodeList)): ?>
-            <tr><td colspan="4" class="data-table-empty">Belum ada data periode penilaian. Tambahkan lewat tombol "Tambah Periode Penilaian".</td></tr>
+            <tr><td colspan="6" class="data-table-empty">Belum ada periode rapor.</td></tr>
             <?php endif; ?>
             <?php foreach ($periodeList as $p): ?>
             <tr>
                 <td><?= e($p['nama']) ?></td>
+                <td><?= e(ReportWorkflow::SEMESTERS[$p['semester'] ?? ''] ?? 'Belum ditentukan') ?></td>
+                <td><?= e($p['tipe']) ?></td>
                 <td><?= date('d/m/Y', strtotime($p['awal_periode'])) ?></td>
                 <td><?= date('d/m/Y', strtotime($p['akhir_periode'])) ?></td>
                 <td class="col-action">
@@ -59,4 +66,5 @@ require VIEW_PATH . '/layouts/shell-header.php';
 </div>
 
 <?php require VIEW_PATH . '/admin/periode-penilaian/_modals.php'; ?>
+<script src="<?= BASE_PATH ?>/assets/js/period-form.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/period-form.js') ?>"></script>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

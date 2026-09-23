@@ -10,6 +10,8 @@
 $forPdf = $forPdf ?? false;
 $logoSrc = assetSrc('images/logo-colored.png', $forPdf);
 $kelasLabel = trim(($rapor['level_kelas'] ?? '') . ' ' . ($rapor['nama_kelas'] ?? '')) ?: '-';
+$reportTitle = 'Laporan Perkembangan ' . ($rapor['periode_tipe'] ?? 'Tengah Semester');
+$yearLabel = isset($rapor['tahun_awal']) ? $rapor['tahun_awal'] . '/' . $rapor['tahun_akhir'] : '-';
 ?>
 <div class="rapor-page">
     <div class="rapor-watermark">
@@ -19,8 +21,8 @@ $kelasLabel = trim(($rapor['level_kelas'] ?? '') . ' ' . ($rapor['nama_kelas'] ?
     <div class="rapor-header">
         <table><tr>
             <td style="border:none; padding:0;">
-                <h1>LAPORAN PERKEMBANGAN TENGAH SEMESTER</h1>
-                <p>T.P {Tahun Ajaran}</p>
+                <h1><?= e(mb_strtoupper($reportTitle)) ?></h1>
+                <p>T.P <?= e($yearLabel) ?></p>
             </td>
             <td style="border:none; padding:0; text-align:right; width:80px;">
                 <img src="<?= $logoSrc ?>" alt="<?= e(APP_NAME) ?>">
@@ -71,5 +73,5 @@ $kelasLabel = trim(($rapor['level_kelas'] ?? '') . ' ' . ($rapor['nama_kelas'] ?
     </table>
     <?php endforeach; ?>
 
-    <div class="rapor-footer">Laporan Perkembangan Tengah Semester T.P {Tahun Ajaran}</div>
+    <div class="rapor-footer"><?= e($reportTitle) ?> T.P <?= e($yearLabel) ?></div>
 </div>

@@ -28,9 +28,10 @@ implementasi turunan, bukan ukuran tambahan yang diklaim berasal dari Figma.
 
 **Aturan implementasi yang berlaku mulai revisi ini**
 5. Background halaman selalu memakai token `page-background` (`neutral-50`).
-6. Setiap nilai HEX baru dari prompt/desain wajib ditambahkan ke
-   `config/colors.php`; jangan menulis HEX langsung di view, helper, atau
-   stylesheet komponen.
+6. Untuk setiap nilai HEX dari prompt/desain, periksa `config/colors.php`
+   terlebih dahulu. Jika warnanya sudah ada, gunakan token yang tersedia;
+   jika belum ada, tambahkan ke bank warna sebelum implementasi komponen.
+   Jangan menulis HEX langsung di view, helper, atau stylesheet komponen.
 7. PHP mengambil warna lewat `colorToken('nama-token')`. CSS memakai custom
    property yang dirender dari file yang sama oleh `colorCssVariables()`.
 8. Jika prompt menyebut font `Geist`, gunakan font Geist. Jika font tidak
@@ -593,6 +594,140 @@ dipertahankan; tinggi toolbar mengikuti isi dan padding bila konten membungkus.
 
 ### 2.4 Area Konten
 
+Periode Rapor: form urut Nama, Semester (Ganjil/Genap), Tipe (Tengah/Akhir),
+Awal, Akhir. Tipe dinonaktifkan sampai Semester dipilih. Semester dan tipe
+independen; satu tahun ajaran maksimal empat kombinasi unik. Tahun ajaran
+periode tidak berubah ketika diedit. Periode yang sudah mempunyai rapor tidak
+bisa diubah semester/tipe-nya; periode lama dengan semester NULL harus
+diklasifikasikan eksplisit dan tidak boleh bertentangan dengan nilai tersimpan.
+Migrasi `20260923_report_semester.sql` menambahkan kolom tanpa menebak semester.
+
+Membuat periode otomatis membuat sesi dan rapor kosong untuk murid Bersekolah
+pada kelas di tahun ajaran terkait, dengan guru dari penugasan murid. Tidak ada
+lagi tombol/endpoint Tambah Sesi pada Rapor Murid. Halaman daftar hanya memiliki
+filter Tahun Ajaran (default tahun aktif), menampilkan breakdown periode/sesi
+yang sudah ada. Data sesi historis tidak digabung atau dihapus otomatis.
+Status Belum diisi tidak memiliki tautan pratinjau; endpoint preview dan PDF admin
+juga menolak status tersebut. Menunggu Persetujuan membuka pratinjau dengan
+button Setujui primary untuk Kepala Sekolah/Admin berizin edit (serta akun
+Superadmin sistem tanpa jabatan). Guru tidak mendapat akses modul Rapor Murid;
+pengisian tetap melalui Portal Guru dengan pemeriksaan kepemilikan.
+
+Pratinjau rapor asli memakai komponen template-preview/paper: pembungkus abu-abu
+dari bank warna, scroll horizontal tanpa indikator, tabel dua kolom, logo ikon
+sebagai watermark. Jumlah lembar mengikuti data asli, tidak dipaksa empat atau
+menyalin fixture. Nama/NISN/kelas, tahun dan tipe berasal dari rapor; nilai tidak
+dibuat-buat. Simpan PDF outline, refresh outline icon-only, Setujui primary.
+Template tanpa item tidak dapat diajukan untuk persetujuan; semua nilai template
+harus lengkap. Semester nilai diambil dari periode, bukan dari tipe Tengah/Akhir.
+
+`uiFilter()` memakai dropdown custom global (ui-select.js), dengan trigger
+button outline, font Plus Jakarta Sans, ikon kanan 20px. Overlay selebar
+trigger, mengikuti tema opsi dropdown aplikasi. Native select tetap menjadi
+sumber nilai GET dan fallback tanpa JavaScript; onchange/auto-submit tetap
+berfungsi, termasuk kombinasi pencarian, Jabatan dan Status pada Karyawan.
+
+Jabatan dibatasi ke Kepala Sekolah, Admin, Guru Kelas, Guru Shadow melalui
+dropdown dan validasi backend (`Jabatan::NAMES`). Nama duplikat ditolak.
+Jabatan yang masih digunakan karyawan, termasuk karyawan nonaktif, tidak boleh
+dihapus; FK tetap menjadi pengaman terakhir terhadap perubahan bersamaan.
+Manajemen Guru menampilkan semua karyawan aktif berjabatan Guru Kelas/Guru Shadow
+berdasarkan nama jabatan, bukan role RBAC. Setiap guru mendapat kartu/list sendiri
+termasuk jika belum ada murid. Filter jabatan hanya menawarkan dua jabatan guru;
+aturan yang sama berlaku pada pilihan guru di Detail Kelas dan validasi penugasan.
+Data jabatan lama di luar empat nama tidak dihapus atau dialihkan otomatis jika
+masih dipakai karyawan; diperlukan pilihan pemindahan dari pemilik data.
+
+Relasi Murid/Kelas/Guru: form Tambah/Ubah Murid menampilkan Kelas terlebih
+dahulu, kemudian Level Kelas pada tab Informasi Pendaftaran. Pengguna memilih
+nama kelas; level otomatis terisi dan dropdown level hanya menawarkan level
+milik kelas tersebut. Mengganti/mengosongkan kelas memperbarui/mengosongkan level.
+kelas_id adalah sumber kebenaran, level tidak disimpan ulang pada murid.
+Murid boleh sementara tanpa guru. Seorang guru dapat mengampu murid lintas kelas,
+tetapi setiap murid maksimal satu guru. Dropdown penugasan menampilkan nama murid
+beserta kelas, menyembunyikan murid milik guru lain, dan backend memvalidasi ulang.
+Penugasan guru lain harus dilepas terlebih dahulu; konflik tidak mengubah data.
+Perubahan kelas murid mempertahankan guru dan menyinkronkan kelas penugasan.
+Penghapusan kelas membuat murid tanpa kelas dan melepas penugasan di kelas itu.
+
+Database baru memakai UNIQUE(murid_id) di kelas_guru_murid. Database existing
+memerlukan `database/migrations/20260923_single_teacher.sql`; jalankan audit
+duplikat terlebih dahulu dan selesaikan pilihan guru secara manual jika ada.
+Migrasi tidak memilih/menghapus data duplikat otomatis. Aplikasi memakai transaksi
+dan row lock murid untuk menghindari penugasan ganda melalui kedua alur UI.
+
+Detail Kelas: header memakai button outline Ubah Data Kelas yang membuka modal
+form kelas global dan kembali ke detail setelah disimpan. Level/Nama Kelas
+memakai uiDataCard dua kolom (gap horizontal 24px). Daftar Guru & Murid memakai
+guru-murid-card dengan padding baris 16px horizontal/12px vertikal, jumlah murid
+berupa uiText Geist body-sm tanpa badge, nama guru regular, baris murid memiliki
+chevron kanan 20px dan tautan ke detail murid. Tidak ada tombol/modal Tambah Guru:
+daftar otomatis berasal dari guru yang memiliki penugasan murid di kelas tersebut.
+Modal Atur Anak Murid menggunakan partial global `components/student-assignment-modal.php`
+bersama Manajemen Guru: dropdown compact, X padding 8px, uiModal assignment.
+Di Manajemen Guru, chevron murid juga menuju detail murid terkait.
+Semua isi berasal dari data kelas,
+bukan nama atau jumlah contoh di screenshot.
+
+Daftar Kelas memakai tabel global dengan margin atas 16px, nama/level berupa teks,
+aksi Lihat Detail untuk pengguna berizin lihat, Ubah/Hapus untuk izin edit.
+Tambah Kelas memakai button primary dengan ikon plus di kanan. Modal tambah/ubah
+memakai uiModal form (padding 24px, kontrol 400px, gap 20px), uiSelect Level Kelas
+dan uiField Nama Kelas (Geist). Pilihan level hanya Akar, Batang, Ranting, Daun,
+bersumber dari Kelas::LEVELS dan divalidasi server-side. Nama Kelas bebas diisi.
+Kedua field wajib; submit disabled sampai valid, primary untuk tambah dan outline
+untuk ubah. Modal hapus memakai uiModal delete, Batal outline dan Hapus Kelas
+outline-danger; data murid/guru tidak ikut dihapus.
+
+Breadcrumb: setiap level induk adalah tautan kembali ke route terkait;
+level terakhir menandai halaman aktif (`aria-current="page"`). Helper
+`breadcrumb()` mendukung segmen `[label, path]` untuk tujuan spesifik, termasuk
+Portal Guru agar tidak menuju route admin. Grup Kurikulum yang tidak memiliki
+halaman sendiri menuju Manajemen Rapor. Warna dan tipografi tetap mengikuti
+komponen breadcrumb, dengan hover/focus dari token warna.
+Daftar Murid: Kondisi ditampilkan Regular/ABK, Nama mendapat porsi utama;
+urutan akhir kolom adalah Kondisi, Guru Kelas, Status, aksi. Menu Lihat Detail
+tersedia bagi pengguna dengan izin lihat, sedangkan Ubah memerlukan izin edit.
+Pembungkus tabel memiliki margin atas 16px.
+
+Field disabled menggunakan `uiField(..., ['disabled' => true])`: border 1px
+`neutral-150`, background `neutral-75`, teks `neutral-600`. Radius, padding,
+tipografi dan inner shadow mengikuti varian form asal, tanpa opacity pudar.
+Umur pada Tambah/Ubah Murid adalah field disabled yang menghitung usia dalam
+tahun penuh dari Tanggal Lahir, diperbarui saat input berubah termasuk melalui
+datepicker. Nilai hanya angka (tanpa "tahun"), kosong untuk tanggal kosong/tidak
+valid/masa depan. Nilai turunan ini tidak dikirim atau disimpan ke database.
+
+Tambah/Ubah/Detail Murid berbagi satu view: mode input memakai `uiField`
+variant form (Geist), `uiSelect`, datepicker custom dan button tabular
+active/inactive (gap 12px). Field number/tel mempertahankan tipe inputnya;
+label wajib diberi asterisk, error server dan nilai input lama tetap ditampilkan.
+Validasi membuka tab field wajib pertama yang belum valid.
+Mode detail memakai `uiDataCard` yang sama dengan Detail Sekolah di semua tab,
+bukan input disabled: border 1px neutral-75, radius 8px, padding 12px, gap
+label/nilai 8px, label Geist 12px/18px dan nilai Geist 14px/21px. Grid dua kolom
+memakai gap horizontal 24px dan vertikal 20px, turun ke satu kolom di layar kecil.
+Alamat fullwidth; field kosong ditampilkan sebagai tanda strip.
+
+Manajemen Guru: header dan baris murid memakai padding 16px horizontal/12px
+vertikal. Jumlah murid menggunakan uiText body-sm, font Geist, weight regular,
+tone preview (bank warna login-preview-text), tanpa badge. Nama murid di kiri,
+level dan nama kelas di kanan menggunakan gaya body-sm yang sama, diikuti
+chevron kanan 20px dengan gap 12px.
+
+Modal Atur Anak Murid memakai uiModal variant assignment: lebar 680px responsif,
+padding 24px dan jarak konten 20px. Panel guru memakai orange-50, dropdown
+memakai uiSelect dengan hideLabel (label tetap tersedia bagi pembaca layar).
+Tambah Murid dan hapus baris X memakai button outline, Batal outline, Simpan
+primary. Baris baru memakai placeholder kosong, bukan memilih murid pertama.
+Ikon tiga titik pada Manajemen Guru langsung membuka modal Atur Anak Murid
+untuk guru terkait, tanpa dropdown perantara karena hanya memiliki satu aksi.
+Dropdown murid menggunakan `uiSelect(..., ['variant' => 'compact'])`: padding
+vertikal 8px dan horizontal 12px, dengan tipografi form tetap 14px/21px.
+Varian berlaku pada native fallback maupun trigger dropdown custom, termasuk
+baris yang ditambahkan. Varian default tidak berubah. Tombol X memakai icon-only
+outline dengan padding 8px di semua sisi, ikon 20px, tanpa ukuran paksa 47px.
+
 Jabatan mengikuti komponen Karyawan: Tambah Jabatan dengan `icon_plus` kanan,
 status teks `status-active`/`status-inactive`, modal `uiModal()` (400px field,
 padding 24px, gap 20px), `uiField()` Nama Jabatan dan `uiSelect()` Role Sistem.
@@ -1019,14 +1154,20 @@ Tabel dokumen rapor/PDF tetap memakai komponen dokumen terpisah.
 
 ### 4.2 Badge Status
 
-Badge dipakai di kolom status. Radius 4px, padding horizontal 8px, padding vertikal 0.
+Badge dipakai di kolom status melalui `uiBadge($label, $variant)`. Font default
+Plus Jakarta Sans 14px/21px regular, radius 4px, padding horizontal 8px dan vertikal 0,
+border 1px. Ukuran mengikuti token responsif; tinggi mengikuti isi, bukan dikunci.
 
-| Jenis status | Background | Teks | Contoh nilai |
-|---|---|---|---|
-| Positif | `green-50` | `green-600` | Bersekolah, Aktif |
-| Peringatan | `orange-50` | `orange-600` | Tanpa Keterangan |
-| Netral atau selesai | `neutral-75` | `neutral-300` | Tamat, Berhenti |
-| Destruktif | `red-50` | `red-600` | Perlu Revisi |
+| Variant | Background | Teks | Border | Status Murid |
+|---|---|---|---|---|
+| `positif` | `green-50` | `green-600` | `green-100` | Bersekolah |
+| `peringatan` | `orange-50` | `orange-600` | `orange-100` | Tanpa Keterangan |
+| `netral` | `neutral-75` | `neutral-300` | `neutral-100` | Tamat |
+| `destruktif` | `red-50` | `red-600` | `red-400` | Berhenti |
+
+Semua warna varian ini sudah tersedia di bank warna; jangan membuat duplikat.
+CSS `.badge` global juga memperbarui pengguna badge lama. Status Karyawan/Jabatan
+tetap berupa teks tanpa badge sesuai spesifikasi halaman tersebut.
 
 Badge selalu memakai tint lembut, tidak pernah fill solid. Ini disengaja supaya badge tidak tertukar dengan tombol.
 
@@ -1367,6 +1508,24 @@ Agenda berikutnya:
 
 ### 5.2 Manajemen Template
 
+Pratinjau Tengah/Akhir Semester memakai `_preview-pages.php` dengan stylesheet
+terisolasi `template-preview.css`. Pembungkus fullwidth memakai token bank warna
+`button-tab-inactive-border` (#DDDDDD), radius 4px, padding/gap 16px. Label
+“Halaman n dari 4” berada di dalam pembungkus, di atas masing-masing lembar.
+Empat lembar disusun horizontal, tidak menyusut, dengan scrollbar tersembunyi;
+region dapat difokuskan untuk navigasi keyboard dan mendukung geser sentuh.
+Tinggi pembungkus mengikuti lembar beserta label/padding, bukan tinggi viewport.
+Kertas berukuran 622.64 × 874.67px pada root 16px, menggunakan rem agar zoom browser
+tetap berlaku; viewport sempit menggulir area ini tanpa melebarkan halaman aplikasi.
+
+Fixture visual mengikuti referensi Document Preview: logo lengkap pada header,
+watermark logo ikon, identitas placeholder merah, legenda empat simbol pada
+halaman pertama, tabel Tujuan/Aparatus/TS Ganjil/TS Genap. Halaman kedua memakai
+dua kolom keterampilan hidup dan sensorial. Halaman 3–4 sementara mengulang 1–2,
+bukan kurikulum resmi. Tahun contoh 2024/2025 mengikuti gambar; judul/footer
+menyesuaikan Tengah atau Akhir Semester. Fixture tidak menulis database.
+Ekspor PDF tetap menggunakan `_document.php` berbasis database, belum fixture ini.
+
 Layar ini paling kompleks dan paling berisiko molor kalau tidak dibaca dulu. Isinya panel pratinjau dokumen rapor lengkap dengan placeholder variable seperti `{Nama Siswa}`, `{Kelas Siswa}`, dan `{NISN Siswa}`, plus indikator paginasi yang menunjukkan dokumen rapor terdiri dari 4 halaman.
 
 Konsekuensinya untuk developer, output rapor bukan satu halaman melainkan dokumen multi halaman yang digabung jadi satu PDF per murid per periode. Pastikan arsitektur PDF generation mengasumsikan multi halaman sejak awal, jangan dibangun untuk satu halaman lalu ditambal belakangan.
@@ -1442,3 +1601,8 @@ untuk menu dari tombol tiga titik. Semua item button/link memakai padding
 horizontal dan vertikal `var(--space-2)` (8px pada baseline desain, mengikuti
 skala responsif). Aturan tombol ikon pada kolom aksi hanya menargetkan trigger,
 bukan item dropdown, agar padding dan warna komponen menu tidak tertimpa.
+### Daftar Rapor Murid per periode
+
+Gunakan partial `components/report-period-table.php`, yang menggabungkan komponen accordion dan `data-table` menjadi **satu pembungkus per periode**, tanpa card sesi di dalamnya. Header menampilkan nama periode dan rentang tanggal di kiri, jumlah rapor tanpa badge dan chevron di kanan. Padding header/baris 12px vertikal dan 16px horizontal; jarak antarperiode 12px. Periode pertama terbuka secara default.
+
+Baris memuat nama murid di kiri, status teks dan chevron 20px di kanan dengan gap 12px. `Belum diisi` memakai token merah dan tidak memiliki tautan; `Menunggu persetujuan` memakai token orange-600. Rapor disetujui cukup menampilkan chevron (status tetap tersedia bagi pembaca layar). Seluruh baris rapor yang tersedia menjadi tautan ke pratinjau. Semua warna berasal dari bank warna; jangan menambahkan warna HEX pada halaman.

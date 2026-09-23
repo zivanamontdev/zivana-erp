@@ -53,8 +53,10 @@ class JabatanController extends Controller
         $nama = trim((string) $this->input('nama', ''));
         $roleId = (int) $this->input('role_id', 0);
 
-        if ($nama !== '' && $roleId > 0) {
+        if (in_array($nama, Jabatan::NAMES, true) && $roleId > 0 && (new Jabatan())->nameAvailable($nama)) {
             (new Jabatan())->create(['nama' => $nama, 'role_id' => $roleId, 'is_active' => 1]);
+        } else {
+            $_SESSION['jabatan_delete_error'] = 'Pilih salah satu dari empat jabatan yang diizinkan, pastikan belum terdaftar, dan pilih role sistem.';
         }
 
         $this->redirect('/jabatan');
@@ -68,8 +70,10 @@ class JabatanController extends Controller
         $nama = trim((string) $this->input('nama', ''));
         $roleId = (int) $this->input('role_id', 0);
 
-        if ($nama !== '' && $roleId > 0) {
+        if (in_array($nama, Jabatan::NAMES, true) && $roleId > 0 && (new Jabatan())->nameAvailable($nama, (int) $id)) {
             (new Jabatan())->update((int) $id, ['nama' => $nama, 'role_id' => $roleId]);
+        } else {
+            $_SESSION['jabatan_delete_error'] = 'Pilih salah satu dari empat jabatan yang diizinkan, pastikan belum terdaftar, dan pilih role sistem.';
         }
 
         $this->redirect('/jabatan');
@@ -81,6 +85,11 @@ class JabatanController extends Controller
         $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
 
         unset($_SESSION['jabatan_delete_error']);
+        if ((new Jabatan())->hasEmployees((int) $id)) {
+            $_SESSION['jabatan_delete_error'] = 'Jabatan masih digunakan oleh karyawan dan tidak dapat dihapus. Pindahkan jabatan karyawan terkait terlebih dahulu.';
+            $this->redirect('/jabatan');
+            return;
+        }
         try {
             (new Jabatan())->delete((int) $id);
         } catch (PDOException $e) {

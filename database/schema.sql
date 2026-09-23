@@ -259,6 +259,7 @@ CREATE TABLE IF NOT EXISTS kelas_guru_murid (
     murid_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_kelas_guru_murid (kelas_id, guru_id, murid_id),
+    UNIQUE KEY uq_murid_single_guru (murid_id),
     CONSTRAINT fk_kgm_kelas FOREIGN KEY (kelas_id) REFERENCES kelas(id) ON DELETE CASCADE,
     CONSTRAINT fk_kgm_guru FOREIGN KEY (guru_id) REFERENCES karyawan(id) ON DELETE CASCADE,
     CONSTRAINT fk_kgm_murid FOREIGN KEY (murid_id) REFERENCES murid(id) ON DELETE CASCADE
@@ -326,6 +327,7 @@ CREATE TABLE IF NOT EXISTS template_rapor_item (
 CREATE TABLE IF NOT EXISTS periode_penilaian (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tahun_ajaran_id INT NOT NULL,
+    semester ENUM('ganjil','genap') NULL,
     nama VARCHAR(150) NOT NULL,
     tipe VARCHAR(50) NOT NULL,
     kategori VARCHAR(50) NOT NULL,
@@ -333,6 +335,7 @@ CREATE TABLE IF NOT EXISTS periode_penilaian (
     akhir_periode DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_periode_year_semester_type (tahun_ajaran_id, semester, tipe),
     CONSTRAINT fk_periode_tahun_ajaran FOREIGN KEY (tahun_ajaran_id) REFERENCES tahun_ajaran(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

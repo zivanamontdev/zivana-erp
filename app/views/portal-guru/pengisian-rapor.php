@@ -29,6 +29,9 @@ $simbolChar = [
 
 require VIEW_PATH . '/layouts/focus-header.php';
 ?>
+<?php if (!empty($_SESSION['report_error'])): ?>
+<p role="alert"><?= uiText($_SESSION['report_error'], 'body-sm', ['tone'=>'status-inactive']) ?></p>
+<?php unset($_SESSION['report_error']); endif; ?>
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 
 <form method="POST" action="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/simpan">

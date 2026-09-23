@@ -56,7 +56,8 @@ class PeriodePenilaianController extends Controller
         $data = $this->collectInput();
 
         if ($data !== null) {
-            (new PeriodePenilaian())->create($data);
+            try { ReportWorkflow::savePeriod($data); }
+            catch (DomainException $e) { $_SESSION['period_error'] = $e->getMessage(); }
         }
 
         $this->redirect('/kurikulum/periode-penilaian');
@@ -67,10 +68,11 @@ class PeriodePenilaianController extends Controller
         $this->middleware(AuthMiddleware::class);
         $this->middleware(RoleMiddleware::class, 'Sekolah', 'Periode Penilaian', 'edit');
 
-        $data = $this->collectInput();
+        $data = $this->collectInput((int) $id);
 
         if ($data !== null) {
-            (new PeriodePenilaian())->update((int) $id, $data);
+            try { ReportWorkflow::savePeriod($data, (int) $id); }
+            catch (DomainException $e) { $_SESSION['period_error'] = $e->getMessage(); }
         }
 
         $this->redirect('/kurikulum/periode-penilaian');
@@ -86,21 +88,24 @@ class PeriodePenilaianController extends Controller
         $this->redirect('/kurikulum/periode-penilaian');
     }
 
-    private function collectInput(): ?array
+    private function collectInput(?int $id = null): ?array
     {
         $tahunAjaran = (new TahunAjaran())->whereFirst('is_active', 1);
         $nama = trim((string) $this->input('nama', ''));
         $tipe = trim((string) $this->input('tipe', ''));
+        $semester = trim((string) $this->input('semester', ''));
         $kategori = trim((string) $this->input('kategori', ''));
         $awal = trim((string) $this->input('awal_periode', ''));
         $akhir = trim((string) $this->input('akhir_periode', ''));
 
         if ($nama === '' || $tipe === '' || $kategori === '' || $awal === '' || $akhir === '' || !$tahunAjaran) {
+            $_SESSION['period_error'] = 'Lengkapi semua field periode dan pastikan tahun ajaran aktif tersedia.';
             return null;
         }
 
         return [
-            'tahun_ajaran_id' => $tahunAjaran['id'],
+            'tahun_ajaran_id' => $id ? ((new PeriodePenilaian())->find($id)['tahun_ajaran_id'] ?? $tahunAjaran['id']) : $tahunAjaran['id'],
+            'semester' => $semester,
             'nama' => $nama,
             'tipe' => $tipe,
             'kategori' => $kategori,

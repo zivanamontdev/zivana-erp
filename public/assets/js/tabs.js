@@ -6,6 +6,20 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-tabs]').forEach(function (tabs) {
+      var firstInvalid = null;
+      // Required fields in another tab must be visible before browser focus.
+      tabs.addEventListener('invalid', function (event) {
+        if (firstInvalid && firstInvalid !== event.target) {
+          event.preventDefault();
+          return;
+        }
+        firstInvalid = event.target;
+        window.setTimeout(function () { firstInvalid = null; }, 0);
+        var panel = event.target.closest('[data-tab-panel]');
+        if (!panel || panel.classList.contains('is-active')) return;
+        var trigger = tabs.querySelector('[data-tab-target="' + panel.getAttribute('data-tab-panel') + '"]');
+        if (trigger) trigger.click();
+      }, true);
       tabs.querySelectorAll('[data-tab-target]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var target = btn.getAttribute('data-tab-target');

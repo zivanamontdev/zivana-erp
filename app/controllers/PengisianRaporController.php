@@ -22,7 +22,12 @@ class PengisianRaporController extends Controller
             return;
         }
 
-        $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']);
+        try { $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']); }
+        catch (DomainException $e) {
+            $_SESSION['report_error'] = $e->getMessage();
+            $this->redirect('/portal-guru/dashboard');
+            return;
+        }
         $areas = $this->buildStructureForPengisian((int) $rapor['template_id'], (int) $rapor['id'], $semester);
         $catatanList = $this->getCatatanMap((int) $rapor['id']);
 
@@ -51,7 +56,12 @@ class PengisianRaporController extends Controller
             return;
         }
 
-        $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']);
+        try { $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']); }
+        catch (DomainException $e) {
+            $_SESSION['report_error'] = $e->getMessage();
+            $this->redirect('/portal-guru/dashboard');
+            return;
+        }
         $this->simpanNilaiDanCatatan((int) $raporId, $semester);
 
         $this->redirect('/portal-guru/rapor/' . $raporId);
@@ -69,10 +79,22 @@ class PengisianRaporController extends Controller
             return;
         }
 
-        $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']);
+        try { $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']); }
+        catch (DomainException $e) {
+            $_SESSION['report_error'] = $e->getMessage();
+            $this->redirect('/portal-guru/dashboard');
+            return;
+        }
         $this->simpanNilaiDanCatatan((int) $raporId, $semester);
 
-        (new Rapor())->update((int) $raporId, ['status' => 'menunggu_persetujuan']);
+        [$total, $filled] = $this->hitungProgress($this->buildStructureForPengisian((int) $rapor['template_id'], (int) $raporId, $semester));
+        if ($total === 0 || $filled !== $total) {
+            $_SESSION['report_error'] = 'Lengkapi semua nilai sebelum mengirim rapor. Jika template kosong, hubungi admin.';
+            $this->redirect('/portal-guru/rapor/' . $raporId);
+            return;
+        }
+        $stmt = Database::getInstance()->prepare("UPDATE rapor SET status='menunggu_persetujuan' WHERE id=? AND guru_id=? AND status='belum_diisi'");
+        $stmt->execute([(int) $raporId, (int) $_SESSION['karyawan_id']]);
 
         $this->redirect('/portal-guru/rapor/' . $raporId . '/pratinjau');
     }
@@ -101,7 +123,7 @@ class PengisianRaporController extends Controller
                 $this->daftarMuridLainDiSesi((int) $rapor['sesi_pembagian_id'], (int) $rapor['id']),
                 '/portal-guru/rapor/{id}/pratinjau'
             ),
-            'breadcrumb' => breadcrumb('Rapor Murid', 'Pratinjau Rapor Murid'),
+            'breadcrumb' => breadcrumb(['Rapor Murid', '/portal-guru/murid'], 'Pratinjau Rapor Murid'),
             'activeNavItem' => 'portal-daftar-murid',
             'rapor' => $rapor,
             'areas' => $this->buildStructureWithNilai((int) $rapor['template_id'], (int) $rapor['id']),
@@ -120,9 +142,13 @@ class PengisianRaporController extends Controller
         $guruId = (int) ($_SESSION['karyawan_id'] ?? 0);
 
         $stmt = Database::getInstance()->prepare(
-            'SELECT r.*, mu.nama_lengkap, mu.nisn, k.level_kelas, k.nama_kelas
+            'SELECT r.*, mu.nama_lengkap, mu.nisn, k.level_kelas, k.nama_kelas,
+             pp.semester, pp.tipe AS periode_tipe, ta.tahun_awal, ta.tahun_akhir
              FROM rapor r
              JOIN murid mu ON mu.id = r.murid_id
+             JOIN sesi_pembagian_rapor sp ON sp.id=r.sesi_pembagian_id
+             JOIN periode_penilaian pp ON pp.id=sp.periode_id
+             JOIN tahun_ajaran ta ON ta.id=pp.tahun_ajaran_id
              LEFT JOIN kelas k ON k.id = mu.kelas_id
              WHERE r.id = :id AND r.guru_id = :guru_id'
         );
@@ -245,15 +271,17 @@ class PengisianRaporController extends Controller
     private function semesterUntukSesi(int $sesiId): string
     {
         $stmt = Database::getInstance()->prepare(
-            'SELECT pp.tipe
+            'SELECT pp.semester
              FROM sesi_pembagian_rapor s
              JOIN periode_penilaian pp ON pp.id = s.periode_id
              WHERE s.id = :id'
         );
         $stmt->execute(['id' => $sesiId]);
-        $tipe = $stmt->fetchColumn();
-
-        return $tipe === 'Akhir Semester' ? 'genap' : 'ganjil';
+        $semester = $stmt->fetchColumn();
+        if (!isset(ReportWorkflow::SEMESTERS[$semester ?: ''])) {
+            throw new DomainException('Semester periode belum ditentukan. Hubungi admin untuk memperbarui periode rapor.');
+        }
+        return $semester;
     }
 
     /**

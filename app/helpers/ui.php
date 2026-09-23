@@ -81,7 +81,7 @@ function uiButton(string $label, string $variant = 'primary', array $options = [
 }
 
 /**
- * Native select for form filters; choices are [value => label].
+ * Custom dropdown filter with native fallback; choices are [value => label].
  * Options: value, id, disabled, fullWidth, class, attributes and control spacing.
  * Selection is submitted by the surrounding form, never auto-submitted here.
  */
@@ -100,15 +100,17 @@ function uiFilter(string $name, string $label, array $choices, array $options = 
         'class' => uiClassList(['ui-filter', $disabled ? 'is-disabled' : '',
             !empty($options['fullWidth']) ? 'ui-control--full' : '', (string) ($options['class'] ?? '')]),
         'style' => uiControlSpacing($options) ?: null,
+        'data-ui-select' => true,
+        'data-ui-filter' => true,
     ];
-    $html = '<span ' . uiAttrs($wrapper) . '><select ' . uiAttrs($attributes) . '>';
+    $html = '<span ' . uiAttrs($wrapper) . '><label class="ui-visually-hidden" for="' . e((string) $attributes['id']) . '">' . e($label) . '</label><select ' . uiAttrs($attributes) . '>';
     foreach ($choices as $value => $text) {
         $html .= '<option ' . uiAttrs([
             'value' => (string) $value,
             'selected' => array_key_exists('value', $options) && (string) $options['value'] === (string) $value,
         ]) . '>' . e((string) $text) . '</option>';
     }
-    return $html . '</select><span class="ui-filter-icon" aria-hidden="true">' . icon('icon_chevron') . '</span></span>';
+    return $html . '</select><span class="ui-filter-icon" aria-hidden="true">' . icon('icon_chevron') . '</span><template data-select-chevron>' . icon('icon_chevron') . '</template></span>';
 }
 
 function uiAttrs(array $attributes): string
@@ -136,13 +138,22 @@ function uiModal(string $id, string $title, string $content, array $options = []
 {
     $delete = ($options['variant'] ?? 'form') === 'delete';
     $description = (string) ($options['description'] ?? '');
-    $attributes = ['class' => 'modal-box ui-modal' . ($delete ? ' ui-modal--delete' : ''),
+    $attributes = ['class' => 'modal-box ui-modal' . ($delete ? ' ui-modal--delete' : '') . (($options['variant'] ?? '') === 'assignment' ? ' ui-modal--assignment' : ''),
         'role' => 'dialog', 'aria-modal' => 'true', 'aria-labelledby' => $id . '-title',
         'aria-describedby' => $description !== '' ? $id . '-description' : null];
     return '<div class="modal-overlay" id="' . e($id) . '"><div ' . uiAttrs($attributes) . '>'
         . '<h2 class="modal-title" id="' . e($id) . '-title">' . e($title) . '</h2>'
         . ($description !== '' ? '<p class="ui-modal-description" id="' . e($id) . '-description">' . e($description) . '</p>' : '')
         . $content . '</div></div>';
+}
+
+/** Reusable status badge, using only shared color tokens and typography. */
+function uiBadge(string $label, string $variant = 'netral'): string
+{
+    if (!in_array($variant, ['positif', 'peringatan', 'netral', 'destruktif'], true)) {
+        throw new InvalidArgumentException('Variant badge tidak tersedia: ' . $variant);
+    }
+    return '<span class="badge badge-' . $variant . '">' . e($label) . '</span>';
 }
 
 function uiClassList(array $classes): string
@@ -207,7 +218,7 @@ function uiText(string $text, string $variant = 'body-sm', array $options = []):
 function uiField(string $name, string $label, array $options = []): string
 {
     $type = $options['type'] ?? 'text';
-    $type = in_array($type, ['text', 'email', 'password', 'date', 'search', 'textarea'], true) ? $type : 'text';
+    $type = in_array($type, ['text', 'email', 'password', 'date', 'search', 'textarea', 'number', 'tel'], true) ? $type : 'text';
     $state = $options['state'] ?? 'default';
     $state = in_array($state, ['default', 'active', 'filled', 'viewonly', 'negative'], true) ? $state : 'default';
     $font = ($options['font'] ?? 'base') === 'geist' ? 'font-geist' : 'font-base';
@@ -346,6 +357,8 @@ function uiCard(string $content, string $variant = 'surface', array $options = [
 /** Read-only data card. Values remain escaped plain text, never form controls. */
 function uiSelect(string $name, string $label, array $choices, array $options = []): string
 {
+    // Compact form controls: 8px vertical / 12px horizontal; default stays unchanged.
+    $compact = ($options['variant'] ?? 'form') === 'compact';
     static $sequence = 0;
     $id = (string) ($options['id'] ?? 'ui-select-' . ++$sequence);
     $error = (string) ($options['error'] ?? '');
@@ -355,8 +368,8 @@ function uiSelect(string $name, string $label, array $choices, array $options = 
         'aria-invalid' => $error !== '' ? 'true' : null,
         'aria-describedby' => $error !== '' ? $id . '-error' : null,
     ];
-    $html = '<div class="field ui-field ui-field--form ui-select" data-ui-select>'
-        . '<label class="field-label font-geist" for="' . e($id) . '">' . e($label) . '</label>'
+    $html = '<div class="field ui-field ui-field--form ui-select' . ($compact ? ' ui-field--compact' : '') . '" data-ui-select>'
+        . '<label class="field-label font-geist' . (!empty($options['hideLabel']) ? ' ui-visually-hidden' : '') . '" for="' . e($id) . '">' . e($label) . '</label>'
         . '<select ' . uiAttrs($attrs) . '>';
     foreach ($choices as $value => $text) {
         $html .= '<option ' . uiAttrs(['value' => (string) $value, 'selected' => (string) ($options['value'] ?? '') === (string) $value]) . '>' . e((string) $text) . '</option>';

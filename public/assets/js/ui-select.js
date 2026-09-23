@@ -22,7 +22,9 @@
         var trigger = document.createElement('button');
         trigger.type = 'button';
         trigger.id = id;
-        trigger.className = 'field-input ui-select-trigger font-geist';
+        trigger.className = wrapper.hasAttribute('data-ui-filter')
+          ? 'ui-button ui-button--outline ui-select-trigger ui-filter-trigger'
+          : 'field-input ui-select-trigger font-geist';
         trigger.disabled = select.disabled;
         trigger.setAttribute('aria-haspopup', 'listbox');
         trigger.setAttribute('aria-expanded', 'false');
@@ -62,8 +64,11 @@
           buttons.push(button);
         });
         function sync() {
+          trigger.disabled = select.disabled;
           text.textContent = select.selectedOptions[0] ? select.selectedOptions[0].textContent : '';
           buttons.forEach(function (button, index) {
+            button.disabled = select.options[index].disabled;
+            button.hidden = select.options[index].hidden;
             button.setAttribute('aria-selected', String(index === select.selectedIndex));
           });
         }

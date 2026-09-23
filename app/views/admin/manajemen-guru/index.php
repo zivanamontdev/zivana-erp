@@ -22,33 +22,35 @@ ob_start();
 $headerActions = ob_get_clean() . $headerActions;
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
+<?php if (!empty($_SESSION['assignment_error'])): ?>
+    <p role="alert"><?= uiText($_SESSION['assignment_error'], 'body-sm', ['tone' => 'status-inactive']) ?></p>
+    <?php unset($_SESSION['assignment_error']); ?>
+<?php endif; ?>
 
 <?php if (empty($guruList)): ?>
-<p class="text-body-sm">Belum ada karyawan dengan role Guru. Tambahkan lewat modul Daftar Karyawan (pastikan jabatannya diberi role "Guru").</p>
+<p class="text-body-sm">Belum ada karyawan aktif dengan jabatan Guru Kelas atau Guru Shadow yang sesuai pencarian. Tambahkan atau atur jabatannya melalui Daftar Karyawan.</p>
 <?php endif; ?>
 
 <?php foreach ($guruList as $guru): ?>
-<div class="guru-murid-card">
+<div class="guru-murid-card teacher-management-card">
     <div class="guru-murid-card-header">
         <div>
             <div class="text-body-sm font-bold"><?= e($guru['nama']) ?></div>
             <div class="text-caption-md"><?= e($guru['nama_jabatan']) ?></div>
         </div>
-        <span class="badge badge-netral"><?= count($guru['murid']) ?></span>
+        <?= uiText((string) count($guru['murid']), 'body-sm', ['font' => 'geist', 'tone' => 'preview']) ?>
         <?php if ($canEdit): ?>
-        <div class="action-menu" data-action-menu>
-            <button type="button" class="action-menu-toggle" data-action-menu-toggle><?= icon('icon_more_vertical') ?></button>
-            <div class="action-menu-dropdown">
-                <button type="button" data-modal-open="modal-atur-murid-guru-<?= $guru['id'] ?>">Atur Anak Murid</button>
-            </div>
-        </div>
+        <button type="button" class="action-menu-toggle" data-modal-open="modal-atur-murid-guru-<?= (int) $guru['id'] ?>" aria-label="<?= e('Atur Anak Murid untuk ' . $guru['nama']) ?>" aria-haspopup="dialog"><?= icon('icon_more_vertical') ?></button>
         <?php endif; ?>
     </div>
     <div class="guru-murid-card-list">
         <?php foreach ($guru['murid'] as $m): ?>
         <div class="guru-murid-item">
-            <?= e($m['nama_lengkap']) ?>
-            <span class="text-caption-md">— <?= e(trim(($m['level_kelas'] ?? '') . ' ' . ($m['nama_kelas'] ?? '')) ?: 'Belum ada kelas') ?></span>
+            <?= uiText($m['nama_lengkap'], 'body-sm', ['class' => 'teacher-student-name']) ?>
+            <div class="teacher-student-class">
+                <?= uiText(trim(($m['level_kelas'] ?? '') . ' ' . ($m['nama_kelas'] ?? '')) ?: 'Belum ada kelas', 'body-sm') ?>
+                <a class="class-student-link" href="<?= BASE_PATH ?>/murid/<?= (int) $m['id'] ?>" aria-label="<?= e('Lihat detail ' . $m['nama_lengkap']) ?>"><?= icon('icon_chevron', 'teacher-student-chevron') ?></a>
+            </div>
         </div>
         <?php endforeach; ?>
         <?php if (empty($guru['murid'])): ?>
@@ -57,52 +59,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
     </div>
 </div>
 
-<?php if ($canEdit): ?>
-<div class="modal-overlay" id="modal-atur-murid-guru-<?= $guru['id'] ?>">
-    <div class="modal-box modal-lg">
-        <h2 class="modal-title">Atur Anak Murid</h2>
-        <div class="assign-guru-context">
-            <div class="text-body-sm font-bold"><?= e($guru['nama']) ?></div>
-            <div class="text-caption-md"><?= e($guru['nama_jabatan']) ?></div>
-        </div>
-        <form method="POST" action="<?= BASE_PATH ?>/manajemen-guru/<?= $guru['id'] ?>/murid" class="modal-body">
-            <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
-            <div class="assign-list-card" data-assign-list>
-                <div class="assign-list-header">
-                    <span class="text-body-sm font-bold">Daftar Murid</span>
-                    <button type="button" class="ui-button ui-button--outline" data-assign-add>+ Tambah Murid</button>
-                </div>
-                <div class="assign-list-rows" data-assign-rows>
-                    <?php foreach ($guru['murid'] as $m): ?>
-                    <div class="assign-list-row" data-assign-row>
-                        <select name="murid_ids[]" class="field-input">
-                            <?php foreach ($muridOptions as $opt): ?>
-                            <option value="<?= $opt['id'] ?>" <?= $opt['id'] == $m['id'] ? 'selected' : '' ?>><?= e($opt['nama_lengkap'] . ' — ' . $opt['level_kelas'] . ' ' . $opt['nama_kelas']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <button type="button" class="assign-list-remove" data-assign-remove><?= icon('icon_trash') ?></button>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <template data-assign-template>
-                    <div class="assign-list-row" data-assign-row>
-                        <select name="murid_ids[]" class="field-input">
-                            <?php foreach ($muridOptions as $opt): ?>
-                            <option value="<?= $opt['id'] ?>"><?= e($opt['nama_lengkap'] . ' — ' . $opt['level_kelas'] . ' ' . $opt['nama_kelas']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <button type="button" class="assign-list-remove" data-assign-remove><?= icon('icon_trash') ?></button>
-                    </div>
-                </template>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
-                <button type="submit" class="ui-button ui-button--primary">Simpan</button>
-            </div>
-        </form>
-    </div>
-</div>
-<?php endif; ?>
+<?php if ($canEdit) require __DIR__ . '/_assignment-modal.php'; ?>
 <?php endforeach; ?>
 
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

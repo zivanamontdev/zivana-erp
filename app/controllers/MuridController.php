@@ -9,6 +9,7 @@ class MuridController extends Controller
 
         $search = trim((string) $this->input('q', ''));
         $kelasId = (string) $this->input('kelas_id', '');
+        $guruId = (string) $this->input('guru_id', '');
         $status = (string) $this->input('status', '');
 
         $sql = "SELECT mu.*, k.level_kelas, k.nama_kelas,
@@ -32,6 +33,10 @@ class MuridController extends Controller
             $sql .= ' AND mu.status = :status';
             $params['status'] = $status;
         }
+        if ($guruId !== '') {
+            $sql .= ' AND EXISTS (SELECT 1 FROM kelas_guru_murid filter_guru WHERE filter_guru.murid_id = mu.id AND filter_guru.guru_id = :guru_id)';
+            $params['guru_id'] = $guruId;
+        }
 
         $sql .= ' ORDER BY mu.nama_lengkap ASC';
 
@@ -44,9 +49,14 @@ class MuridController extends Controller
             'activeNavItem' => 'manajemen-murid',
             'muridList' => $stmt->fetchAll(),
             'kelasOptions' => (new Kelas())->all('nama_kelas ASC'),
+            'guruOptions' => Database::getInstance()->query(
+                'SELECT DISTINCT ka.id, ka.nama FROM karyawan ka
+                 JOIN kelas_guru_murid kgm ON kgm.guru_id = ka.id ORDER BY ka.nama ASC'
+            )->fetchAll(),
             'canEdit' => (new RoleMiddleware())->check('Murid', 'Manajemen Murid', 'edit'),
             'search' => $search,
             'kelasId' => $kelasId,
+            'guruId' => $guruId,
             'status' => $status,
         ]);
     }
@@ -150,6 +160,7 @@ class MuridController extends Controller
             'breadcrumb' => breadcrumb('Manajemen Murid', $mode === 'tambah' ? 'Tambah Murid' : ($mode === 'ubah' ? 'Ubah Data Murid' : 'Detail Murid')),
             'activeNavItem' => 'manajemen-murid',
             'mode' => $mode,
+            'kelasOptions' => (new Kelas())->all('level_kelas ASC, nama_kelas ASC'),
             'muridId' => $id,
             'murid' => $murid,
             'old' => $old,
@@ -161,6 +172,7 @@ class MuridController extends Controller
     private function collectInput(): array
     {
         return [
+            'kelas_id' => (int) $this->input('kelas_id', 0) ?: null,
             'nama_lengkap' => trim((string) $this->input('nama_lengkap', '')),
             'nama_panggilan' => trim((string) $this->input('nama_panggilan', '')),
             'nisn' => trim((string) $this->input('nisn', '')) ?: null,
@@ -192,6 +204,12 @@ class MuridController extends Controller
     private function validate(array $data): array
     {
         $errors = [];
+        $kelas = !empty($data['kelas_id']) ? (new Kelas())->find($data['kelas_id']) : null;
+        if (!$kelas) {
+            $errors['kelas_id'] = 'Pilih kelas yang tersedia.';
+        } elseif ($this->input('level_kelas', '') !== $kelas['level_kelas']) {
+            $errors['kelas_id'] = 'Kelas tidak sesuai dengan level yang dipilih.';
+        }
         $required = [
             'nama_lengkap', 'nama_panggilan', 'agama', 'nik', 'no_registrasi_akte',
             'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat',

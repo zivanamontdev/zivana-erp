@@ -10,13 +10,11 @@ class ManajemenGuruController extends Controller
         $search = trim((string) $this->input('q', ''));
         $jabatanId = (string) $this->input('jabatan_id', '');
 
-        // Guru = karyawan aktif dengan role Guru (lihat cookbook/todo.md
-        // Fase 4: role sekarang properti Jabatan, bukan Karyawan).
+        // Teacher membership follows the employee's position, not the RBAC role.
         $sql = "SELECT k.id, k.nama, j.nama AS nama_jabatan
                 FROM karyawan k
                 JOIN jabatan j ON j.id = k.jabatan_id
-                JOIN roles r ON r.id = j.role_id
-                WHERE k.is_active = 1 AND r.nama = 'Guru'";
+                WHERE k.is_active = 1 AND j.nama IN ('Guru Kelas', 'Guru Shadow')";
         $params = [];
 
         if ($search !== '') {
@@ -45,12 +43,13 @@ class ManajemenGuruController extends Controller
             'breadcrumb' => null,
             'activeNavItem' => 'manajemen-guru',
             'guruList' => $guruList,
-            'jabatanOptions' => (new Jabatan())->where('is_active', 1),
+            'jabatanOptions' => array_values(array_filter((new Jabatan())->all('nama ASC'), static fn($j) => in_array($j['nama'], Jabatan::TEACHER_NAMES, true))),
             // Hanya murid yang sudah punya kelas — kelas_id dibutuhkan
             // untuk mengisi kelas_guru_murid.kelas_id (lihat
             // KelasGuruMurid::replaceForGuru).
             'muridOptions' => Database::getInstance()->query(
-                "SELECT mu.id, mu.nama_lengkap, k.level_kelas, k.nama_kelas
+                "SELECT mu.id, mu.nama_lengkap, k.level_kelas, k.nama_kelas,
+                 (SELECT kgm.guru_id FROM kelas_guru_murid kgm WHERE kgm.murid_id = mu.id LIMIT 1) AS assigned_guru_id
                  FROM murid mu JOIN kelas k ON k.id = mu.kelas_id
                  ORDER BY mu.nama_lengkap ASC"
             )->fetchAll(),
@@ -68,7 +67,11 @@ class ManajemenGuruController extends Controller
         $muridIds = $this->input('murid_ids', []);
 
         if (is_array($muridIds)) {
-            (new KelasGuruMurid())->replaceForGuru((int) $guruId, $muridIds);
+            try {
+                (new KelasGuruMurid())->replaceForGuru((int) $guruId, $muridIds);
+            } catch (DomainException $e) {
+                $_SESSION['assignment_error'] = $e->getMessage();
+            }
         }
 
         $this->redirect('/manajemen-guru');

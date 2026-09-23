@@ -23,6 +23,7 @@ class RoleMiddleware
      */
     public function check(string $modul, ?string $subSection = null, string $aksi = 'lihat'): bool
     {
+        if ($modul === 'Murid' && $subSection === 'Rapor Murid' && !ReportWorkflow::reviewer()) return false;
         $roleId = (int) ($_SESSION['role_id'] ?? 0);
 
         return $roleId !== 0 && $this->hasAccess($roleId, $modul, $subSection, $aksi);

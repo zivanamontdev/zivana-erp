@@ -80,7 +80,6 @@ $router->get('/kurikulum/manajemen-template/{id}/pdf', [TemplateRaporController:
 
 // --- Murid: Rapor Murid (Admin) ---
 $router->get('/rapor-murid', [RaporMuridController::class, 'index']);
-$router->post('/rapor-murid/sesi', [RaporMuridController::class, 'storeSesi']);
 $router->post('/rapor-murid/{id}/setujui', [RaporMuridController::class, 'approve']);
 $router->get('/rapor-murid/{id}/pdf', [RaporMuridController::class, 'downloadPdf']);
 $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);

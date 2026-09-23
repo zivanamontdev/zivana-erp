@@ -382,7 +382,10 @@ body {
 .breadcrumb-parent {
   color: var(--color-neutral-100);
   font-weight: 400;
+  text-decoration: none;
 }
+a.breadcrumb-parent:hover { color: var(--color-red-600); }
+a.breadcrumb-parent:focus-visible { outline: 2px solid var(--color-red-400); outline-offset: 4px; }
 
 .breadcrumb-current {
   color: var(--color-page-title);

@@ -16,7 +16,8 @@
       toggle.addEventListener('click', function () {
         var item = toggle.closest('.accordion-item');
         if (item) {
-          item.classList.toggle('is-open');
+          var expanded = item.classList.toggle('is-open');
+          toggle.setAttribute('aria-expanded', String(expanded));
         }
       });
     });

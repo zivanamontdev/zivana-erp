@@ -7,10 +7,11 @@ $formUrl = BASE_PATH . '/kurikulum/periode-penilaian' . ($editing ? '/' . (int) 
 $dateOptions = ['type' => 'date', 'variant' => 'form', 'font' => 'geist', 'required' => true, 'icon' => 'icon_calendar', 'iconCalendar' => true];
 ?>
 <?php ob_start(); ?>
-        <form method="POST" action="<?= e($formUrl) ?>" class="modal-body">
+        <form method="POST" action="<?= e($formUrl) ?>" class="modal-body" data-period-form>
             <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
             <input type="hidden" name="kategori" value="<?= e($period['kategori'] ?? 'Rapor Murid') ?>">
             <?= uiField('nama', 'Nama Periode Penilaian', ['id' => 'period-name-' . $suffix, 'variant' => 'form', 'font' => 'geist', 'value' => $period['nama'] ?? '', 'placeholder' => 'Isi nama periode penilaian', 'required' => true]) ?>
+            <?= uiSelect('semester', 'Semester', ['' => 'Pilih semester', 'ganjil' => 'Ganjil', 'genap' => 'Genap'], ['id' => 'period-semester-' . $suffix, 'value' => $period['semester'] ?? '', 'required' => true]) ?>
             <?= uiSelect('tipe', 'Tipe Periode', ['' => 'Pilih tipe periode'] + $tipeOptions, ['id' => 'period-type-' . $suffix, 'value' => $period['tipe'] ?? '', 'required' => true]) ?>
             <?= uiField('awal_periode', 'Awal Periode', array_merge($dateOptions, ['id' => 'period-start-' . $suffix, 'value' => $period['awal_periode'] ?? ''])) ?>
             <?= uiField('akhir_periode', 'Akhir Periode', array_merge($dateOptions, ['id' => 'period-end-' . $suffix, 'value' => $period['akhir_periode'] ?? ''])) ?>

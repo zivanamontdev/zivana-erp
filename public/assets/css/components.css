@@ -460,30 +460,36 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  height: calc(1.25 * var(--ui-unit));
+  height: auto;
   padding: 0 var(--space-2);
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  font-size: var(--font-size-caption-md);
-  line-height: var(--line-height-caption-md);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+  font-weight: 400;
   white-space: nowrap;
 }
 
 .badge-positif {
+  border-color: var(--color-green-100);
   background: var(--color-green-50);
   color: var(--color-green-600);
 }
 
 .badge-peringatan {
+  border-color: var(--color-orange-100);
   background: var(--color-orange-50);
   color: var(--color-orange-600);
 }
 
 .badge-netral {
+  border-color: var(--color-neutral-100);
   background: var(--color-neutral-75);
   color: var(--color-neutral-300);
 }
 
 .badge-destruktif {
+  border-color: var(--color-red-400);
   background: var(--color-red-50);
   color: var(--color-red-600);
 }
@@ -667,6 +673,22 @@ body.modal-open {
    pakai varian khusus sendiri (.rbac-role) karena ada chrome tambahan
    (icon edit, checkbox tree) di luar accordion polos ini.
    ========================================================== */
+
+/* Report-period table: a single collapsible surface, no session cards. */
+.report-period-table .accordion-header { padding: var(--space-3) var(--space-4); }
+.report-period-heading { display: grid; gap: var(--space-1); flex: 1; min-width: 0; }
+.report-period-table .accordion-chevron { margin-left: 0; }
+.report-period-table .accordion-body { padding: 0; border-top: 0; }
+.report-period-table .data-table { min-width: 0; table-layout: fixed; }
+.report-period-table .data-table tbody td { padding: 0; height: auto; background: var(--color-login-preview-row); }
+.report-student-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); color: inherit; text-decoration: none; }
+.report-student-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.report-status-pending { color: var(--color-orange-600); }
+.report-student-chevron { display: inline-flex; flex: 0 0 auto; transform: rotate(-90deg); color: var(--color-login-preview-text); }
+.report-student-chevron svg { width: calc(1.25 * var(--ui-unit)); height: calc(1.25 * var(--ui-unit)); }
+.report-student-row.is-disabled .report-student-chevron { color: var(--color-neutral-150); }
+.report-student-row:focus-visible { outline: 2px solid var(--color-red-600); outline-offset: -2px; }
+.report-period-table .data-table td.data-table-empty { padding: var(--space-3) var(--space-4); }
 
 .accordion-item {
   border: 1px solid var(--color-neutral-75);
@@ -950,11 +972,24 @@ body.modal-open {
   box-shadow: inset 0 calc(-0.25 * var(--ui-unit)) calc(0.25 * var(--ui-unit)) var(--color-login-input-shadow);
 }
 .ui-field--form .field-textarea { min-height: calc(6 * var(--ui-unit)); }
+.ui-field .field-input:disabled,
+.ui-field .field-textarea:disabled {
+  border: 1px solid var(--color-neutral-150);
+  background: var(--color-neutral-75);
+  color: var(--color-neutral-600);
+  opacity: 1;
+  -webkit-text-fill-color: var(--color-neutral-600);
+  cursor: not-allowed;
+}
+.ui-field--form.ui-field--compact .field-input { padding: var(--space-2) var(--space-3); min-height: 0; height: auto; }
 .ui-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); text-align: left; cursor: pointer; }
 .ui-select .ui-select-native.ui-visually-hidden { width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; }
 .ui-select-trigger > span { min-width: 0; overflow-wrap: anywhere; }
 .ui-select-trigger svg { width: var(--ui-unit); height: var(--ui-unit); flex-shrink: 0; color: var(--color-neutral-150); }
 .ui-select-trigger[aria-invalid="true"] { border-color: var(--color-red-300); }
+.ui-filter[data-select-ready] > .ui-filter-icon { display: none; }
+.ui-filter .ui-filter-trigger { width: 100%; margin: 0; font-family: var(--font-family-base); justify-content: space-between; }
+.ui-filter .ui-filter-trigger svg { width: calc(1.25 * var(--ui-unit)); height: calc(1.25 * var(--ui-unit)); color: currentColor; }
 .ui-select-options { position: fixed; z-index: 1100; overflow-y: auto; box-sizing: border-box; padding: var(--space-1); border: 1px solid var(--color-neutral-75); border-radius: var(--radius-sm); background: var(--color-page-background); }
 .ui-select-options[hidden] { display: none; }
 .ui-select-option { display: block; width: 100%; padding: var(--space-2); border: 0; border-radius: var(--radius-sm); text-align: left; background: transparent; color: var(--color-neutral-900); font: 400 var(--font-size-body-sm)/var(--line-height-body-sm) var(--font-family-geist); cursor: pointer; overflow-wrap: anywhere; }
@@ -1040,6 +1075,26 @@ body.modal-open {
   letter-spacing: 0;
 }
 .ui-data-card-label { margin: 0; color: var(--color-login-label); font-size: calc(0.75 * var(--ui-unit)); line-height: calc(1.125 * var(--ui-unit)); }
+.student-record-tabs { margin-top: var(--space-4); }
+.student-list-table { margin-top: var(--space-4); }
+.class-list-table { margin-top: var(--space-4); }
+.class-detail-summary { margin-top: var(--space-4); margin-bottom: var(--space-5); gap: var(--space-5) var(--space-6); }
+.class-detail-heading { margin: 0 0 var(--space-3); }
+.class-detail-teacher { margin-bottom: var(--space-4); border-radius: calc(.75 * var(--ui-unit)); }
+.class-detail-teacher .guru-murid-card-header { background: var(--color-neutral-white); }
+.class-detail-teacher .guru-murid-card-header > div:first-child { display: grid; gap: var(--space-1); }
+.class-detail-teacher .guru-murid-card-list { background: var(--color-login-preview-row); }
+.class-detail-teacher .guru-murid-item { border-color: var(--color-login-preview-divider); }
+.class-student-link { color: var(--color-neutral-900); text-decoration: none; }
+.class-student-link:hover { color: var(--color-red-600); }
+.class-student-link:focus-visible { outline: 2px solid var(--color-red-400); outline-offset: -2px; }
+.student-list-table th:first-child { width: 30%; }
+.student-list-table th:nth-child(5),
+.student-list-table td:nth-child(5) { width: 1%; white-space: nowrap; }
+.student-record-tabs .tabs-nav { gap: var(--space-3); border-bottom: 0; }
+.student-record-tabs .field-row { gap: var(--space-5) var(--space-6); margin-bottom: var(--space-5); }
+.student-record-tabs .field-row > .field { margin-bottom: 0; }
+.student-record-tabs .field-full { grid-column: 1 / -1; }
 .ui-data-card--external { position: relative; padding-right: calc(3.5 * var(--ui-unit)); }
 .ui-data-card-link { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; color: var(--color-neutral-900); }
 .ui-data-card-link span, .ui-data-card-link svg { display: block; width: calc(1.25 * var(--ui-unit)); height: calc(1.25 * var(--ui-unit)); }
@@ -1132,3 +1187,17 @@ body.modal-open {
 .modal-box.ui-modal--delete { width: calc(27.5 * var(--ui-unit)); display: flex; flex-direction: column; gap: var(--space-5); }
 .ui-modal--delete .modal-title { margin: 0; }
 .ui-modal-description { margin: 0; color: var(--color-modal-text); font-size: calc(0.75 * var(--ui-unit)); line-height: calc(1.125 * var(--ui-unit)); font-weight: 400; letter-spacing: 0; }
+
+/* Shared wide assignment modal and teacher list. */
+.modal-box.ui-modal--assignment { width: calc(42.5 * var(--ui-unit)); }
+.ui-modal--assignment .assign-guru-context { background: var(--color-orange-50); padding: var(--space-3); display: grid; gap: var(--space-1); }
+.ui-modal--assignment .assign-list-rows { gap: var(--space-3); }
+.ui-modal--assignment .assign-list-row { flex-wrap: nowrap; }
+.ui-modal--assignment .assign-list-row > .ui-select { flex: 1; min-width: 0; margin: 0; }
+.ui-modal--assignment .assign-list-row > .ui-button { flex-shrink: 0; }
+.teacher-management-card .guru-murid-card-header,
+.teacher-management-card .guru-murid-item { padding: var(--space-3) var(--space-4); }
+.teacher-management-card .guru-murid-item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.teacher-student-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.teacher-management-card .teacher-student-class { display: flex; align-items: center; flex-wrap: nowrap; gap: var(--space-3); margin-left: auto; }
+.teacher-student-chevron { width: calc(1.25 * var(--ui-unit)); height: calc(1.25 * var(--ui-unit)); flex-shrink: 0; transform: rotate(-90deg); transform-origin: center; }
