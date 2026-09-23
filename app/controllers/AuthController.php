@@ -21,7 +21,7 @@ class AuthController extends Controller
         $userModel = new User();
         $user = $userModel->whereFirst('email', $email);
 
-        if (!$user || !$user['is_active'] || !password_verify($password, $user['password_hash'])) {
+        if (!$user || !AccountAccess::active($user) || !password_verify($password, $user['password_hash'])) {
             $_SESSION['login_error'] = 'Email atau kata sandi salah.';
             $this->redirect('/login');
             return;
@@ -51,9 +51,14 @@ class AuthController extends Controller
             $this->setRememberToken($userModel, (int) $user['id']);
         }
 
-        $isGuru = $role && $role['nama'] === 'Guru';
+        $this->redirect(AccountAccess::landing());
+    }
 
-        $this->redirect($isGuru ? '/portal-guru/dashboard' : '/sekolah');
+    public function noAccess(): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        http_response_code(403);
+        $this->view('errors.403');
     }
 
     public function logout(): void

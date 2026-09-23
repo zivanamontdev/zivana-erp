@@ -19,7 +19,7 @@ class KelasController extends Controller
     public function store(): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'tambah');
 
         $levelKelas = trim((string) $this->input('level_kelas', ''));
         $namaKelas = trim((string) $this->input('nama_kelas', ''));
@@ -54,7 +54,7 @@ class KelasController extends Controller
     public function destroy(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'hapus');
 
         // Hard delete (kelas TIDAK punya is_active) — FK murid.kelas_id
         // ON DELETE SET NULL otomatis mengosongkan relasi murid terkait,
@@ -113,7 +113,7 @@ class KelasController extends Controller
     public function saveGuruMurid(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'atur_murid');
 
         $guruId = (int) $this->input('guru_id', 0);
         $muridIds = $this->input('murid_ids', []);
@@ -132,7 +132,7 @@ class KelasController extends Controller
     public function removeGuru(string $id, string $guruId): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Kelas', 'atur_murid');
 
         (new KelasGuruMurid())->removeGuruFromKelas((int) $id, (int) $guruId);
 

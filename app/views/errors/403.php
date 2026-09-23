@@ -18,7 +18,11 @@
     <div class="box">
         <h1>403 — Akses Ditolak</h1>
         <p>Anda tidak punya izin untuk mengakses halaman ini.</p>
+        <?php if (!empty($_SESSION['user_id'])): ?>
+        <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/logout">Keluar dan masuk dengan akun lain</a>
+        <?php else: ?>
         <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/login">Kembali ke Login</a>
+        <?php endif; ?>
     </div>
 </body>
 </html>

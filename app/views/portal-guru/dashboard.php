@@ -1,73 +1,72 @@
 <?php
-/**
- * Dashboard Portal Guru — cookbook/design-system.md (Portal Guru > Dashboard).
- * [FIX] Dibangun ulang dari grid 3 kartu jadi stack vertikal 1 kolom
- * sesuai assets/ss/Portal Guru - menu_dashboard.svg (lihat catatan di
- * portal-guru.css).
- *
- * Variabel dari PortalGuruController::dashboard():
- * - $agendaBerlangsung, $agendaBerikutnya (array|null), $daftarMurid
- */
 $headerActions = '';
+if (count($sessionOptions) > 1) {
+    $choices = array_column($sessionOptions, 'nama', 'id');
+    $headerActions = '<form method="GET" action="' . BASE_PATH . '/portal-guru/dashboard" class="list-filter">'
+        . uiFilter('sesi_id', 'Periode Rapor', $choices, ['value'=>$selectedSession['id'] ?? '', 'marginVertical'=>0,
+            'attributes'=>['onchange'=>'this.form.submit()']]) . '</form>';
+}
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 <?php if (!empty($_SESSION['report_error'])): ?>
 <p role="alert"><?= uiText($_SESSION['report_error'], 'body-sm', ['tone'=>'status-inactive']) ?></p>
 <?php unset($_SESSION['report_error']); endif; ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
-
 <div class="dashboard-banner">
-    <span class="text-headline-sm font-bold">Halo! <?= e($_SESSION['display_name'] ?? '') ?></span>
-    <span class="text-caption-md" data-live-datetime><?= strtoupper(date('d F Y, H:i')) ?></span>
+    <?= uiText('Halo! ' . ($_SESSION['display_name'] ?? ''), 'body-sm', ['weight'=>'bold','tone'=>'inverse']) ?>
+    <?= uiText(date('d/m/Y, H:i'), 'body-sm', ['tone'=>'inverse']) ?>
 </div>
-
 <div class="dashboard-stack">
-    <div class="dashboard-agenda-box">
-        <p class="dashboard-agenda-label">Agenda sedang berlangsung</p>
+    <?php ob_start(); ?>
+        <?= uiText('Agenda sedang berlangsung', 'body-sm', ['tag'=>'p','weight'=>'bold','class'=>'dashboard-agenda-label']) ?>
         <?php if ($agendaBerlangsung): ?>
-        <span class="text-body-sm"><?= e($agendaBerlangsung['nama']) ?> &bull; Sisa <?= (int) $agendaBerlangsung['sisa_hari'] ?> Hari</span>
+            <div class="dashboard-agenda-details"><?= uiText($agendaBerlangsung['nama']) ?><span aria-hidden="true">•</span><?= uiText('Sisa ' . $agendaBerlangsung['sisa_hari'] . ' Hari') ?></div>
         <?php else: ?>
-        <span class="text-body-sm">Belum ada agenda yang sedang berlangsung.</span>
+            <?= uiText('Belum ada agenda yang sedang berlangsung untuk murid Anda.') ?>
         <?php endif; ?>
-    </div>
-
-    <div class="dashboard-murid-card">
-        <div class="dashboard-murid-header">
-            <span>Daftar Murid</span>
-            <span class="text-caption-md">Tahun Ajaran <?= date('Y') ?>/<?= date('Y') + 1 ?></span>
-            <span class="badge badge-netral"><?= count($daftarMurid) ?></span>
+    <?php echo uiCard(ob_get_clean(), 'callout', ['class'=>'dashboard-agenda-box']); ?>
+    <?php if ($selectedSession && (!$agendaBerlangsung || $selectedSession['id'] !== $agendaBerlangsung['id'])): ?>
+        <?= uiText('Periode ditampilkan: ' . $selectedSession['nama'], 'caption-md', ['tone'=>'muted']) ?>
+    <?php endif; ?>
+    <section class="accordion-item report-period-table is-open">
+        <button class="accordion-header" type="button" data-accordion-toggle aria-expanded="true" aria-controls="teacher-student-reports">
+            <span class="report-period-heading"><?= uiText('Daftar Murid') ?><?= uiText('Tahun Ajaran ' . $tahunLabel, 'caption-md') ?></span>
+            <?= uiText((string)count($daftarMurid)) ?>
+            <span class="accordion-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span>
+        </button>
+        <div class="accordion-body" id="teacher-student-reports">
+            <table class="data-table" aria-label="Daftar rapor murid ampuan">
+                <tbody>
+                <?php foreach ($daftarMurid as $student): ?>
+                    <?php
+                    $draft = $student['rapor_status'] === 'belum_diisi';
+                    $canOpen = !empty($student['rapor_id']) && uiCan('Portal Guru','Daftar Murid',$draft ? 'edit' : 'lihat');
+                    $href = BASE_PATH . '/portal-guru/rapor/' . (int)$student['rapor_id'] . ($draft ? '' : '/pratinjau');
+                    ?>
+                    <tr><td>
+                        <?php if ($canOpen): ?><a class="report-student-row" href="<?= e($href) ?>"><?php else: ?><div class="report-student-row"><?php endif; ?>
+                            <?= uiText($student['nama_lengkap'], 'body-sm', ['class'=>'report-student-name']) ?>
+                            <?php if ($canOpen): ?>
+                                <?= uiText($draft ? 'Isi Rapor' : 'Lihat Rapor', 'body-sm', ['tone'=>$draft ? 'brand' : 'success']) ?>
+                                <span class="report-student-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span>
+                            <?php else: ?>
+                                <?= uiText(empty($student['rapor_id']) ? 'Rapor belum tersedia' : 'Akses dibatasi', 'caption-md', ['tone'=>'muted']) ?>
+                            <?php endif; ?>
+                        <?php if ($canOpen): ?></a><?php else: ?></div><?php endif; ?>
+                    </td></tr>
+                <?php endforeach; ?>
+                <?php if (!$daftarMurid): ?><tr><td class="data-table-empty">Belum ada murid yang diampu. Hubungi Admin untuk pengaturan kelas.</td></tr><?php endif; ?>
+                </tbody>
+            </table>
         </div>
-        <?php if (empty($daftarMurid)): ?>
-        <div class="dashboard-murid-row">
-            <span class="text-body-sm">Belum ada murid yang diampu. Hubungi Admin untuk pengaturan kelas.</span>
-        </div>
-        <?php endif; ?>
-        <?php foreach ($daftarMurid as $m): ?>
-        <div class="dashboard-murid-row">
-            <span><?= e($m['nama_lengkap']) ?></span>
-            <?php if (!empty($m['rapor_id'])): ?>
-            <div class="dashboard-murid-row-actions">
-                <?php if ($m['rapor_status'] === 'disetujui'): ?>
-                <a href="<?= BASE_PATH ?>/portal-guru/rapor/<?= $m['rapor_id'] ?>/pratinjau" class="dashboard-murid-link is-done">Lihat Rapor</a>
-                <?php else: ?>
-                <a href="<?= BASE_PATH ?>/portal-guru/rapor/<?= $m['rapor_id'] ?>" class="dashboard-murid-link is-pending">Isi Rapor</a>
-                <?php endif; ?>
-                <?= icon('icon_chevron') ?>
-            </div>
-            <?php endif; ?>
-        </div>
-        <?php endforeach; ?>
-    </div>
-
-    <div class="dashboard-agenda-box dashboard-agenda-box--neutral">
-        <p class="dashboard-agenda-label">Agenda Berikutnya</p>
+    </section>
+    <?php ob_start(); ?>
+        <?= uiText('Agenda Berikutnya', 'body-sm', ['tag'=>'p','weight'=>'bold','class'=>'dashboard-agenda-label']) ?>
         <?php if ($agendaBerikutnya): ?>
-        <span class="text-body-sm"><?= e($agendaBerikutnya['nama']) ?></span><br>
-        <span class="text-caption-md"><?= date('d/m/Y', strtotime($agendaBerikutnya['tanggal_mulai'])) ?> - <?= date('d/m/Y', strtotime($agendaBerikutnya['tanggal_selesai'])) ?></span>
+            <div class="dashboard-agenda-details"><?= uiText($agendaBerikutnya['nama']) ?><span aria-hidden="true">•</span><?= uiText(date('d/m/Y',strtotime($agendaBerikutnya['tanggal_mulai'])) . ' - ' . date('d/m/Y',strtotime($agendaBerikutnya['tanggal_selesai']))) ?></div>
         <?php else: ?>
-        <span class="text-body-sm" style="font-style:italic;">Belum ada agenda berikutnya yang ditambahkan oleh admin</span>
+            <?= uiText('Belum ada agenda berikutnya untuk murid Anda.') ?>
         <?php endif; ?>
-    </div>
+    <?php echo uiCard(ob_get_clean(), 'outlined', ['class'=>'dashboard-agenda-box dashboard-agenda-box--neutral']); ?>
 </div>
-
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

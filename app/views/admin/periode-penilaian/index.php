@@ -5,7 +5,12 @@
  * Variabel dari PeriodePenilaianController::index():
  * - $periodeList, $tipeOptions, $kategoriOptions, $canEdit, $tipe, $kategori
  */
-$headerActions = $canEdit
+$canCreate = uiCan('Sekolah', 'Periode Penilaian', 'tambah');
+$canDelete = uiCan('Sekolah', 'Periode Penilaian', 'hapus');
+$canStatus = uiCan('Sekolah', 'Periode Penilaian', 'status');
+$canPassword = uiCan('Sekolah', 'Periode Penilaian', 'kata_sandi');
+$canManage = $canEdit || $canCreate || $canDelete || $canStatus || $canPassword;
+$headerActions = $canCreate
     ? uiButton('Tambah Periode', 'primary', ['marginVertical' => 0, 'attributes' => ['data-modal-open' => 'modal-tambah-periode']])
     : '';
 
@@ -49,12 +54,16 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <td><?= date('d/m/Y', strtotime($p['awal_periode'])) ?></td>
                 <td><?= date('d/m/Y', strtotime($p['akhir_periode'])) ?></td>
                 <td class="col-action">
-                    <?php if ($canEdit): ?>
+                    <?php if ($canManage): ?>
                     <div class="action-menu" data-action-menu>
                         <button type="button" class="action-menu-toggle" data-action-menu-toggle><?= icon('icon_more_vertical') ?></button>
                         <div class="action-menu-dropdown">
+<?php if ($canEdit): ?>
                             <button type="button" data-modal-open="modal-ubah-periode-<?= $p['id'] ?>">Ubah</button>
+<?php endif; ?>
+<?php if ($canDelete): ?>
                             <button type="button" class="is-destructive" data-modal-open="modal-hapus-periode-<?= $p['id'] ?>">Hapus</button>
+<?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>

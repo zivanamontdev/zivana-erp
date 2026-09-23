@@ -138,3 +138,4 @@
 @media (max-width: 37.5rem) {
   .rbac-modul-body, .rbac-section-body { padding-left: var(--space-2); }
 }
+.rbac-permissions { border: 0; padding: 0; margin: 0; min-width: 0; }

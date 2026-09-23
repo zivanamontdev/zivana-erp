@@ -10,6 +10,7 @@
 // --- Auth ---
 $router->get('/', [AuthController::class, 'showLogin']);
 $router->get('/login', [AuthController::class, 'showLogin']);
+$router->get('/akses-terbatas', [AuthController::class, 'noAccess']);
 $router->post('/login', [AuthController::class, 'login']);
 $router->get('/logout', [AuthController::class, 'logout']);
 $router->get('/lupa-kata-sandi', [AuthController::class, 'showForgotPassword']);
@@ -87,6 +88,8 @@ $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);
 // --- Portal Guru ---
 $router->get('/portal-guru/dashboard', [PortalGuruController::class, 'dashboard']);
 $router->get('/portal-guru/murid', [PortalGuruController::class, 'daftarMurid']);
+$router->get('/portal-guru/murid/{id}', [PortalGuruController::class, 'showMurid']);
+$router->get('/portal-guru/rapor/{id}/pdf', [PengisianRaporController::class, 'downloadPdf']);
 $router->get('/portal-guru/rapor/{id}', [PengisianRaporController::class, 'show']);
 $router->post('/portal-guru/rapor/{id}/simpan', [PengisianRaporController::class, 'simpan']);
 $router->post('/portal-guru/rapor/{id}/selesaikan', [PengisianRaporController::class, 'selesaikan']);

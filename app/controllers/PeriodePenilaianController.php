@@ -51,7 +51,7 @@ class PeriodePenilaianController extends Controller
     public function store(): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Periode Penilaian', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Periode Penilaian', 'tambah');
 
         $data = $this->collectInput();
 
@@ -81,7 +81,7 @@ class PeriodePenilaianController extends Controller
     public function destroy(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Periode Penilaian', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Periode Penilaian', 'hapus');
 
         (new PeriodePenilaian())->delete((int) $id);
 

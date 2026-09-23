@@ -11,7 +11,7 @@ class AuthMiddleware
     {
         if (!empty($_SESSION['user_id'])) {
             $user = (new User())->find((int) $_SESSION['user_id']);
-            if ($user && $user['is_active']) return;
+            if ($user && AccountAccess::active($user)) return;
             // A deleted/deactivated account must not retain an existing session.
             $_SESSION = [];
             $this->redirectToLogin();
@@ -33,10 +33,11 @@ class AuthMiddleware
         $hashedToken = hash('sha256', $_COOKIE['remember_token']);
         $user = (new User())->whereFirst('remember_token', $hashedToken);
 
-        if (!$user || !$user['is_active']) {
+        if (!$user || !AccountAccess::active($user)) {
             return false;
         }
 
+        session_regenerate_id(true);
         $_SESSION['user_id'] = (int) $user['id'];
         $_SESSION['role_id'] = (int) $user['role_id'];
         $_SESSION['user_name'] = $user['email'];

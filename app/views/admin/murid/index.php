@@ -13,7 +13,7 @@ $statusLabel = [
 ];
 
 $headerActions = '';
-if ($canEdit) {
+if (uiCan('Murid', 'Manajemen Murid', 'tambah')) {
     $headerActions = '<button type="button" class="ui-button ui-button--outline" disabled title="[ASUMSI] Fitur Import belum dikonfirmasi user (format file/mapping kolom), lihat cookbook/prd.md poin asumsi #6">Import</button> '
         . '<a href="' . BASE_PATH . '/murid/tambah" class="ui-button ui-button--primary"><span class="ui-button-label">Tambah Murid</span><span class="ui-button-icon" aria-hidden="true">' . icon('icon_plus') . '</span></a>';
 }

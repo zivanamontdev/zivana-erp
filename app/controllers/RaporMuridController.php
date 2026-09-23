@@ -118,7 +118,7 @@ class RaporMuridController extends Controller
     public function downloadPdf(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Rapor Murid', 'lihat');
+        $this->middleware(RoleMiddleware::class, 'Murid', 'Rapor Murid', 'pdf');
 
         $db = Database::getInstance();
         $stmt = $db->prepare(

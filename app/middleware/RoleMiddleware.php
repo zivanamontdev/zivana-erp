@@ -23,10 +23,15 @@ class RoleMiddleware
      */
     public function check(string $modul, ?string $subSection = null, string $aksi = 'lihat'): bool
     {
+        if (empty($_SESSION['user_id'])) return false;
+        if (AccountAccess::isTeacher() && $modul !== 'Portal Guru') return false;
         if ($modul === 'Murid' && $subSection === 'Rapor Murid' && !ReportWorkflow::reviewer()) return false;
         $roleId = (int) ($_SESSION['role_id'] ?? 0);
 
-        return $roleId !== 0 && $this->hasAccess($roleId, $modul, $subSection, $aksi);
+        return $roleId !== 0
+            && $this->hasAccess($roleId, $modul, $subSection, 'lihat')
+            && ($aksi !== 'kirim' || $this->hasAccess($roleId, $modul, $subSection, 'edit'))
+            && ($aksi === 'lihat' || $this->hasAccess($roleId, $modul, $subSection, $aksi));
     }
 
     private function hasAccess(int $roleId, string $modul, ?string $subSection, string $aksi): bool

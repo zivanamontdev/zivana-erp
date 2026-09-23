@@ -1,5 +1,11 @@
 <?php
 
+/** Shared feature checks for buttons and their modal contents. */
+function uiCan(string $module, string $section, string $action = 'lihat'): bool
+{
+    return (new RoleMiddleware())->check($module, $section, $action);
+}
+
 /**
  * Server-rendered UI primitives.
  *
@@ -368,6 +374,7 @@ function uiSelect(string $name, string $label, array $choices, array $options = 
         'aria-invalid' => $error !== '' ? 'true' : null,
         'aria-describedby' => $error !== '' ? $id . '-error' : null,
     ];
+    $attrs = array_merge($attrs, $options['attributes'] ?? []);
     $html = '<div class="field ui-field ui-field--form ui-select' . ($compact ? ' ui-field--compact' : '') . '" data-ui-select>'
         . '<label class="field-label font-geist' . (!empty($options['hideLabel']) ? ' ui-visually-hidden' : '') . '" for="' . e($id) . '">' . e($label) . '</label>'
         . '<select ' . uiAttrs($attrs) . '>';

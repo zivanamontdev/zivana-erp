@@ -5,7 +5,7 @@ class PengisianRaporController extends Controller
     public function show(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'lihat');
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'edit');
 
         $rapor = $this->findOwnRapor((int) $raporId);
 
@@ -48,55 +48,26 @@ class PengisianRaporController extends Controller
     {
         $this->middleware(AuthMiddleware::class);
         $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'edit');
-
-        $rapor = $this->findOwnRapor((int) $raporId);
-
-        if (!$rapor || $rapor['status'] !== 'belum_diisi') {
-            $this->redirect('/portal-guru/rapor/' . $raporId);
-            return;
-        }
-
-        try { $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']); }
-        catch (DomainException $e) {
-            $_SESSION['report_error'] = $e->getMessage();
-            $this->redirect('/portal-guru/dashboard');
-            return;
-        }
-        $this->simpanNilaiDanCatatan((int) $raporId, $semester);
-
-        $this->redirect('/portal-guru/rapor/' . $raporId);
+        $this->saveEntry($raporId, false);
     }
 
     public function selesaikan(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'kirim');
+        $this->saveEntry($raporId, true);
+    }
 
-        $rapor = $this->findOwnRapor((int) $raporId);
-
-        if (!$rapor || $rapor['status'] !== 'belum_diisi') {
-            $this->redirect('/portal-guru/rapor/' . $raporId);
-            return;
-        }
-
-        try { $semester = $this->semesterUntukSesi((int) $rapor['sesi_pembagian_id']); }
-        catch (DomainException $e) {
+    private function saveEntry(string $raporId, bool $submit): void
+    {
+        try {
+            ReportEntry::save((int)$raporId, (int)($_SESSION['karyawan_id'] ?? 0), $this->input('nilai', []), $this->input('catatan', []), $submit);
+        } catch (DomainException $e) {
             $_SESSION['report_error'] = $e->getMessage();
-            $this->redirect('/portal-guru/dashboard');
+            $this->redirect('/portal-guru/rapor/' . (int)$raporId);
             return;
         }
-        $this->simpanNilaiDanCatatan((int) $raporId, $semester);
-
-        [$total, $filled] = $this->hitungProgress($this->buildStructureForPengisian((int) $rapor['template_id'], (int) $raporId, $semester));
-        if ($total === 0 || $filled !== $total) {
-            $_SESSION['report_error'] = 'Lengkapi semua nilai sebelum mengirim rapor. Jika template kosong, hubungi admin.';
-            $this->redirect('/portal-guru/rapor/' . $raporId);
-            return;
-        }
-        $stmt = Database::getInstance()->prepare("UPDATE rapor SET status='menunggu_persetujuan' WHERE id=? AND guru_id=? AND status='belum_diisi'");
-        $stmt->execute([(int) $raporId, (int) $_SESSION['karyawan_id']]);
-
-        $this->redirect('/portal-guru/rapor/' . $raporId . '/pratinjau');
+        $this->redirect('/portal-guru/rapor/' . (int)$raporId . ($submit ? '/pratinjau' : ''));
     }
 
     public function pratinjau(string $raporId): void
@@ -137,6 +108,31 @@ class PengisianRaporController extends Controller
      * (IDOR). Ini di LUAR RoleMiddleware karena RoleMiddleware cuma
      * cek role Guru secara umum, bukan kepemilikan baris spesifik.
      */
+    public function downloadPdf(string $raporId): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'pdf');
+        $rapor = $this->findOwnRapor((int)$raporId);
+        if (!$rapor) {
+            http_response_code(404);
+            require VIEW_PATH . '/errors/404.php';
+            return;
+        }
+        $areas = $this->buildStructureWithNilai((int)$rapor['template_id'], (int)$rapor['id']);
+        $legenda = (new SkalaNilai())->opsi(1);
+        $forPdf = true;
+        ob_start();
+        require VIEW_PATH . '/admin/rapor-murid/_document.php';
+        $document = ob_get_clean();
+        $css = file_get_contents(ROOT_PATH . '/public/assets/css/rapor-document-pdf.css');
+        $pdf = new \Dompdf\Dompdf(['defaultFont'=>'DejaVu Sans','isRemoteEnabled'=>false]);
+        $pdf->loadHtml('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body>' . $document . '</body></html>');
+        $pdf->setPaper('A4','portrait');
+        $pdf->render();
+        $pdf->stream('rapor-' . (int)$rapor['id'] . '.pdf', ['Attachment'=>true]);
+        exit;
+    }
+
     private function findOwnRapor(int $raporId): ?array
     {
         $guruId = (int) ($_SESSION['karyawan_id'] ?? 0);
@@ -150,7 +146,8 @@ class PengisianRaporController extends Controller
              JOIN periode_penilaian pp ON pp.id=sp.periode_id
              JOIN tahun_ajaran ta ON ta.id=pp.tahun_ajaran_id
              LEFT JOIN kelas k ON k.id = mu.kelas_id
-             WHERE r.id = :id AND r.guru_id = :guru_id'
+             WHERE r.id = :id AND r.guru_id = :guru_id
+             AND (r.status<>\'belum_diisi\' OR EXISTS (SELECT 1 FROM kelas_guru_murid kg WHERE kg.murid_id=r.murid_id AND kg.guru_id=r.guru_id))'
         );
         $stmt->execute(['id' => $raporId, 'guru_id' => $guruId]);
 
@@ -165,6 +162,7 @@ class PengisianRaporController extends Controller
             'SELECT r.id, mu.nama_lengkap
              FROM rapor r JOIN murid mu ON mu.id = r.murid_id
              WHERE r.sesi_pembagian_id = :sesi_id AND r.guru_id = :guru_id
+             AND (r.status<>\'belum_diisi\' OR EXISTS (SELECT 1 FROM kelas_guru_murid kg WHERE kg.murid_id=r.murid_id AND kg.guru_id=r.guru_id))
              ORDER BY mu.nama_lengkap ASC'
         );
         $stmt->execute(['sesi_id' => $sesiId, 'guru_id' => $guruId]);
@@ -183,61 +181,6 @@ class PengisianRaporController extends Controller
         }
 
         return $map;
-    }
-
-    private function simpanNilaiDanCatatan(int $raporId, string $semester): void
-    {
-        $db = Database::getInstance();
-        $nilaiInput = $this->input('nilai', []); // ['item_id' => opsiId] — satu dropdown per item (lihat buildStructureForPengisian)
-        $catatanInput = $this->input('catatan', []); // ['area_id' => teks]
-
-        if (!is_array($nilaiInput)) {
-            $nilaiInput = [];
-        }
-        if (!is_array($catatanInput)) {
-            $catatanInput = [];
-        }
-
-        $db->beginTransaction();
-
-        try {
-            $upsertNilai = $db->prepare(
-                'INSERT INTO rapor_nilai (rapor_id, item_id, semester, skala_nilai_opsi_id)
-                 VALUES (:rapor_id, :item_id, :semester, :opsi_id)
-                 ON DUPLICATE KEY UPDATE skala_nilai_opsi_id = VALUES(skala_nilai_opsi_id)'
-            );
-
-            foreach ($nilaiInput as $itemId => $opsiId) {
-                if ($opsiId === '' || $opsiId === null) {
-                    continue;
-                }
-                $upsertNilai->execute([
-                    'rapor_id' => $raporId,
-                    'item_id' => (int) $itemId,
-                    'semester' => $semester,
-                    'opsi_id' => (int) $opsiId,
-                ]);
-            }
-
-            $upsertCatatan = $db->prepare(
-                'INSERT INTO rapor_catatan_guru (rapor_id, area_id, catatan)
-                 VALUES (:rapor_id, :area_id, :catatan)
-                 ON DUPLICATE KEY UPDATE catatan = VALUES(catatan)'
-            );
-
-            foreach ($catatanInput as $areaId => $teks) {
-                $upsertCatatan->execute([
-                    'rapor_id' => $raporId,
-                    'area_id' => (int) $areaId,
-                    'catatan' => trim((string) $teks),
-                ]);
-            }
-
-            $db->commit();
-        } catch (Throwable $e) {
-            $db->rollBack();
-            throw $e;
-        }
     }
 
     private function hitungProgress(array $areas): array
@@ -259,15 +202,7 @@ class PengisianRaporController extends Controller
         return [$total, $terisi];
     }
 
-    /**
-     * [ASUMSI] Crawl form Pengisian Rapor hanya menunjukkan SATU
-     * dropdown per item (bukan Ganjil+Genap sekaligus seperti di
-     * dokumen/pratinjau final). Semester yang aktif diisi ditentukan
-     * otomatis dari tipe periode sesi pembagian rapor saat ini —
-     * 'Tengah Semester' → ganjil, 'Akhir Semester' → genap (nilai tipe
-     * ini persis sesuai ASUMSI di PeriodePenilaianController::TIPE_OPTIONS).
-     * Fallback 'ganjil' kalau tipe periode belum sesuai pola yang dikenal.
-     */
+    /** Semester comes exclusively from the selected period, not its middle/end type. */
     private function semesterUntukSesi(int $sesiId): string
     {
         $stmt = Database::getInstance()->prepare(

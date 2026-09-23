@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS permissions (
     modul VARCHAR(50) NOT NULL,
     section VARCHAR(100) NULL,
     sub_section VARCHAR(100) NULL,
-    aksi ENUM('lihat', 'edit') NOT NULL,
+    aksi VARCHAR(40) NOT NULL,
     display_order INT DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

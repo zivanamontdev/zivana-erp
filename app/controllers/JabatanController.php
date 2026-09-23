@@ -48,12 +48,12 @@ class JabatanController extends Controller
     public function store(): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'tambah');
 
         $nama = trim((string) $this->input('nama', ''));
         $roleId = (int) $this->input('role_id', 0);
 
-        if (in_array($nama, Jabatan::NAMES, true) && $roleId > 0 && (new Jabatan())->nameAvailable($nama)) {
+        if (in_array($nama, Jabatan::NAMES, true) && (new Role())->find($roleId) && (new Jabatan())->nameAvailable($nama)) {
             (new Jabatan())->create(['nama' => $nama, 'role_id' => $roleId, 'is_active' => 1]);
         } else {
             $_SESSION['jabatan_delete_error'] = 'Pilih salah satu dari empat jabatan yang diizinkan, pastikan belum terdaftar, dan pilih role sistem.';
@@ -70,8 +70,17 @@ class JabatanController extends Controller
         $nama = trim((string) $this->input('nama', ''));
         $roleId = (int) $this->input('role_id', 0);
 
-        if (in_array($nama, Jabatan::NAMES, true) && $roleId > 0 && (new Jabatan())->nameAvailable($nama, (int) $id)) {
-            (new Jabatan())->update((int) $id, ['nama' => $nama, 'role_id' => $roleId]);
+        if (in_array($nama, Jabatan::NAMES, true) && (new Role())->find($roleId) && (new Jabatan())->nameAvailable($nama, (int) $id)) {
+            $db = Database::getInstance();
+            $db->beginTransaction();
+            try {
+                (new Jabatan())->update((int) $id, ['nama' => $nama, 'role_id' => $roleId]);
+                $db->prepare('UPDATE users SET role_id=?, remember_token=NULL WHERE karyawan_id IN (SELECT id FROM karyawan WHERE jabatan_id=?)')->execute([$roleId, (int) $id]);
+                $db->commit();
+            } catch (Throwable $e) {
+                $db->rollBack();
+                throw $e;
+            }
         } else {
             $_SESSION['jabatan_delete_error'] = 'Pilih salah satu dari empat jabatan yang diizinkan, pastikan belum terdaftar, dan pilih role sistem.';
         }
@@ -82,7 +91,7 @@ class JabatanController extends Controller
     public function destroy(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'hapus');
 
         unset($_SESSION['jabatan_delete_error']);
         if ((new Jabatan())->hasEmployees((int) $id)) {
@@ -116,7 +125,7 @@ class JabatanController extends Controller
     private function setActive(string $id, bool $active): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'status');
         (new Jabatan())->update((int) $id, ['is_active' => $active ? 1 : 0]);
         $this->redirect('/jabatan');
     }

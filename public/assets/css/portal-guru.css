@@ -289,3 +289,13 @@
     width: auto;
   }
 }
+.dashboard-banner { padding: var(--space-3); }
+.dashboard-stack { gap: var(--space-3); }
+.dashboard-stack .dashboard-agenda-box { padding: var(--space-3) var(--space-4); }
+.dashboard-agenda-details { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); }
+.focus-column > form { display: grid; gap: var(--space-5); }
+.pengisian-item-row > .ui-select { flex: 0 1 18rem; width: 100%; }
+.pengisian-item-row > span { flex: 1; overflow-wrap: anywhere; }
+@media (max-width: 56rem) {
+  .pengisian-item-row > .ui-select { flex-basis: auto; }
+}

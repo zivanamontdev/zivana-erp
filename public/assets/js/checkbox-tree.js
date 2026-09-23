@@ -76,8 +76,9 @@
           return;
         }
         allLeaves(group).forEach(function (leaf) {
-          leaf.checked = parent.checked;
+          if (!leaf.matches(':disabled')) leaf.checked = parent.checked;
         });
+        group.querySelectorAll('[data-tree-group]').forEach(updateGroupState);
         parent.indeterminate = false;
         propagateUp(group);
       });

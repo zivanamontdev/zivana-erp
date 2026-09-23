@@ -12,11 +12,14 @@ class GuestMiddleware
             return;
         }
 
+        $user = (new User())->find((int) $_SESSION['user_id']);
+        if (!$user || !AccountAccess::active($user)) {
+            $_SESSION = [];
+            return;
+        }
         $base = defined('BASE_PATH') ? BASE_PATH : '';
-        $role = (new Role())->find((int) ($_SESSION['role_id'] ?? 0));
-        $isGuru = $role && $role['nama'] === 'Guru';
 
-        header('Location: ' . $base . ($isGuru ? '/portal-guru/dashboard' : '/sekolah'));
+        header('Location: ' . $base . AccountAccess::landing());
         exit;
     }
 }

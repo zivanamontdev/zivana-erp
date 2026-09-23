@@ -24,6 +24,7 @@ class RbacController extends Controller
             'roles' => $roles,
             'permissionTree' => $this->buildPermissionTree($permissions),
             'granted' => $granted,
+            'canEdit' => (new RoleMiddleware())->check('Sistem', 'RBAC', 'edit'),
         ]);
     }
 
@@ -39,6 +40,16 @@ class RbacController extends Controller
             $permissionIds = [];
         }
         $permissionIds = array_values(array_unique(array_map('intval', $permissionIds)));
+
+        $role = (new Role())->find($roleId);
+        $available = array_filter((new Permission())->all(), static fn($p) => PermissionCatalog::visible($p)
+            && (($role['nama'] ?? '') !== 'Guru' || $p['modul'] === 'Portal Guru'));
+        $known = array_map('intval', array_column($available, 'id'));
+        if (!$role || array_diff($permissionIds, $known)) {
+            $_SESSION['rbac_error'] = 'Role atau pilihan izin tidak valid. Tidak ada perubahan disimpan.';
+            $this->redirect('/rbac');
+            return;
+        }
 
         $db = Database::getInstance();
         $db->beginTransaction();
@@ -72,6 +83,7 @@ class RbacController extends Controller
         $tree = [];
 
         foreach ($permissions as $permission) {
+            if (!PermissionCatalog::visible($permission)) continue;
             $modul = $permission['modul'];
             $section = $permission['section'] ?? '_';
             $subSection = $permission['sub_section'] ?? '_';

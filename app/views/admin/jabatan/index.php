@@ -5,7 +5,12 @@
  * Variabel dari JabatanController::index():
  * - $jabatanList (array), $canEdit (bool), $search (string), $status (string)
  */
-$headerActions = $canEdit
+$canCreate = uiCan('Human Capital', 'Jabatan', 'tambah');
+$canDelete = uiCan('Human Capital', 'Jabatan', 'hapus');
+$canStatus = uiCan('Human Capital', 'Jabatan', 'status');
+$canPassword = uiCan('Human Capital', 'Jabatan', 'kata_sandi');
+$canManage = $canEdit || $canCreate || $canDelete || $canStatus || $canPassword;
+$headerActions = $canCreate
     ? uiButton('Tambah Jabatan', 'primary', ['icon' => 'icon_plus', 'iconPosition' => 'right', 'marginVertical' => 0, 'attributes' => ['data-modal-open' => 'modal-tambah-jabatan']])
     : '';
 
@@ -46,13 +51,19 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <td><?= e($jabatan['nama_role'] ?? '-') ?></td>
                 <td><?= uiText($jabatan['is_active'] ? 'Aktif' : 'Nonaktif', 'body-sm', ['weight' => 'regular', 'tone' => $jabatan['is_active'] ? 'status-active' : 'status-inactive']) ?></td>
                 <td class="col-action">
-                    <?php if ($canEdit): ?>
+                    <?php if ($canManage): ?>
                     <div class="action-menu" data-action-menu>
                         <button type="button" class="action-menu-toggle" data-action-menu-toggle><?= icon('icon_more_vertical') ?></button>
                         <div class="action-menu-dropdown">
+<?php if ($canEdit): ?>
                             <button type="button" data-modal-open="modal-ubah-jabatan-<?= $jabatan['id'] ?>">Ubah</button>
+<?php endif; ?>
+<?php if ($canStatus): ?>
                             <button type="button" data-modal-open="modal-status-jabatan-<?= $jabatan['id'] ?>"><?= $jabatan['is_active'] ? 'Nonaktifkan Jabatan' : 'Aktifkan Jabatan' ?></button>
+<?php endif; ?>
+<?php if ($canDelete): ?>
                             <button type="button" class="is-destructive" data-modal-open="modal-hapus-jabatan-<?= $jabatan['id'] ?>">Hapus</button>
+<?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>

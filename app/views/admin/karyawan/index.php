@@ -6,7 +6,12 @@
  * - $karyawanList, $jabatanOptions, $canEdit (bool)
  * - $search, $jabatanId, $status (filter aktif)
  */
-$headerActions = $canEdit
+$canCreate = uiCan('Human Capital', 'Daftar Karyawan', 'tambah');
+$canDelete = uiCan('Human Capital', 'Daftar Karyawan', 'hapus');
+$canStatus = uiCan('Human Capital', 'Daftar Karyawan', 'status');
+$canPassword = uiCan('Human Capital', 'Daftar Karyawan', 'kata_sandi');
+$canManage = $canEdit || $canCreate || $canDelete || $canStatus || $canPassword;
+$headerActions = $canCreate
     ? uiButton('Tambah Karyawan', 'primary', ['icon' => 'icon_plus', 'iconPosition' => 'right', 'marginVertical' => 0, 'attributes' => ['data-modal-open' => 'modal-tambah-karyawan']])
     : '';
 
@@ -23,6 +28,9 @@ ob_start();
 $headerActions = ob_get_clean() . $headerActions;
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
+<?php if (!empty($_SESSION['employee_error'])): ?>
+<p role="alert"><?= uiText($_SESSION['employee_error'], 'body-sm', ['tone'=>'status-inactive']) ?></p>
+<?php unset($_SESSION['employee_error']); endif; ?>
 
 <div class="data-table-wrapper">
     <table class="data-table">
@@ -44,14 +52,22 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <td><?= e($k['nama_jabatan']) ?></td>
                 <td><?= uiText($k['is_active'] ? 'Aktif' : 'Nonaktif', 'body-sm', ['weight' => 'regular', 'tone' => $k['is_active'] ? 'status-active' : 'status-inactive']) ?></td>
                 <td class="col-action">
-                    <?php if ($canEdit): ?>
+                    <?php if ($canManage): ?>
                     <div class="action-menu" data-action-menu>
                         <button type="button" class="action-menu-toggle" data-action-menu-toggle><?= icon('icon_more_vertical') ?></button>
                         <div class="action-menu-dropdown">
+<?php if ($canEdit): ?>
                             <button type="button" data-modal-open="modal-ubah-karyawan-<?= $k['id'] ?>">Ubah</button>
+<?php endif; ?>
+<?php if ($canPassword): ?>
                             <button type="button" data-modal-open="modal-kata-sandi-karyawan-<?= $k['id'] ?>">Ubah Kata Sandi</button>
+<?php endif; ?>
+<?php if ($canStatus): ?>
                             <button type="button" data-modal-open="modal-status-karyawan-<?= $k['id'] ?>"><?= $k['is_active'] ? 'Nonaktifkan Karyawan' : 'Aktifkan Karyawan' ?></button>
+<?php endif; ?>
+<?php if ($canDelete): ?>
                             <button type="button" class="is-destructive" data-modal-open="modal-hapus-karyawan-<?= $k['id'] ?>">Hapus</button>
+<?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>

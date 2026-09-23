@@ -34,7 +34,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
 <?php unset($_SESSION['report_error']); endif; ?>
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 
-<form method="POST" action="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/simpan">
+<form method="POST" action="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/simpan" data-report-entry>
     <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
 
     <div class="pengisian-header-card">
@@ -50,27 +50,31 @@ require VIEW_PATH . '/layouts/focus-header.php';
             }
             echo uiFilter('murid_switcher', 'Nama Murid', $muridChoices, [
                 'id' => 'rapor-murid-switcher', 'value' => $currentMuridUrl, 'marginVertical' => 0,
-                'attributes' => ['onchange' => 'if (this.value) window.location.href = this.value;'],
+                'attributes' => ['data-report-switcher' => true],
             ]);
             ?>
         </div>
 
         <p class="pengisian-rapor-warning">
-            Pastikan tiap penilaian sudah benar sebelum diselesaikan. Penilaian rapor yang telah selesai dan diapprove oleh Kepala Sekolah tidak dapat diubah kembali.
+            Pastikan tiap penilaian sudah benar sebelum diselesaikan. Rapor akan terkunci setelah dikirim untuk persetujuan Kepala Sekolah/Admin.
             Mengisi untuk: <strong><?= $semester === 'genap' ? 'TS Genap' : 'TS Ganjil' ?></strong>
         </p>
 
         <div class="pengisian-rapor-progress">
             <span class="pengisian-rapor-progress-label">Progress:</span>
             <div class="pengisian-rapor-progress-bar">
-                <div class="pengisian-rapor-progress-bar-fill" style="width:<?= $totalItem > 0 ? round($terisiItem / $totalItem * 100) : 0 ?>%"></div>
+                <div class="pengisian-rapor-progress-bar-fill" data-report-progress style="width:<?= $totalItem > 0 ? round($terisiItem / $totalItem * 100) : 0 ?>%"></div>
             </div>
-            <span class="pengisian-rapor-progress-label"><?= $terisiItem ?> dari <?= $totalItem ?></span>
+            <span class="pengisian-rapor-progress-label" data-report-count><?= $terisiItem ?> dari <?= $totalItem ?></span>
         </div>
 
         <div class="pengisian-header-actions">
-            <button type="submit" class="ui-button ui-button--outline">Arsip Rapor</button>
-            <button type="submit" formaction="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/selesaikan" class="ui-button ui-button--primary">Selesaikan Rapor</button>
+<?php if (uiCan('Portal Guru', 'Daftar Murid', 'edit')): ?>
+            <?= uiButton('Arsip Rapor', 'outline', ['type'=>'submit','marginVertical'=>0]) ?>
+<?php endif; ?>
+<?php if (uiCan('Portal Guru', 'Daftar Murid', 'kirim')): ?>
+            <?= uiButton('Selesaikan Rapor', 'primary', ['type'=>'submit','marginVertical'=>0,'disabled'=>$totalItem===0 || $terisiItem!==$totalItem,'attributes'=>['data-report-submit'=>true,'formaction'=>BASE_PATH . '/portal-guru/rapor/' . (int)$rapor['id'] . '/selesaikan']]) ?>
+<?php endif; ?>
         </div>
     </div>
 
@@ -88,27 +92,38 @@ require VIEW_PATH . '/layouts/focus-header.php';
         <?php foreach ($sub['item'] as $item): ?>
         <div class="pengisian-item-row">
             <span><?= e($item['nama_tujuan']) ?></span>
-            <select name="nilai[<?= (int) $item['id'] ?>]" class="field-input">
-                <option value="">Pilih jawaban anda</option>
-                <?php foreach ($item['opsi'] as $opsi): ?>
-                <option value="<?= (int) $opsi['id'] ?>" <?= (int) $item['nilai_opsi_id'] === (int) $opsi['id'] ? 'selected' : '' ?>><?= e(($simbolChar[$opsi['simbol']] ?? '') . ' (' . $opsi['label'] . ')') ?></option>
-                <?php endforeach; ?>
-            </select>
+            <?php
+            $choices = ['' => 'Pilih jawaban anda'];
+            foreach ($item['opsi'] as $opsi) $choices[$opsi['id']] = ($simbolChar[$opsi['simbol']] ?? '') . ' (' . $opsi['label'] . ')';
+            echo uiSelect('nilai[' . (int)$item['id'] . ']', $item['nama_tujuan'], $choices, [
+                'id'=>'report-value-' . (int)$item['id'], 'value'=>$item['nilai_opsi_id'] ?? '',
+                'hideLabel'=>true, 'attributes'=>['data-report-value'=>true],
+            ]);
+            ?>
         </div>
         <?php endforeach; ?>
         <?php endforeach; ?>
 
         <div class="pengisian-catatan-guru">
-            <label class="field-label">Catatan Guru</label>
-            <textarea name="catatan[<?= (int) $area['id'] ?>]" class="field-input" rows="3" placeholder="Masukkan jawaban anda"><?= e($catatanList[$area['id']] ?? '') ?></textarea>
+            <?= uiField('catatan[' . (int)$area['id'] . ']', 'Catatan Guru', ['type'=>'textarea','id'=>'report-note-' . (int)$area['id'],'value'=>$catatanList[$area['id']] ?? '', 'placeholder'=>'Masukkan catatan guru', 'attributes'=>['rows'=>3]]) ?>
         </div>
     </div>
     <?php endforeach; ?>
 
+    <?php if ($totalItem === 0): ?>
+    <p role="status"><?= uiText('Template rapor ini belum memiliki item penilaian. Hubungi Admin untuk melengkapi template; rapor belum dapat dikirim.', 'body-sm', ['tone'=>'muted']) ?></p>
+    <?php endif; ?>
+
     <div class="pengisian-actions">
-        <button type="submit" class="ui-button ui-button--outline">Arsip Rapor</button>
-        <button type="submit" formaction="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/selesaikan" class="ui-button ui-button--primary">Selesaikan Rapor</button>
+<?php if (uiCan('Portal Guru', 'Daftar Murid', 'edit')): ?>
+        <?= uiButton('Arsip Rapor', 'outline', ['type'=>'submit','marginVertical'=>0]) ?>
+<?php endif; ?>
+<?php if (uiCan('Portal Guru', 'Daftar Murid', 'kirim')): ?>
+        <?= uiButton('Selesaikan Rapor', 'primary', ['type'=>'submit','marginVertical'=>0,'disabled'=>$totalItem===0 || $terisiItem!==$totalItem,'attributes'=>['data-report-submit'=>true,'formaction'=>BASE_PATH . '/portal-guru/rapor/' . (int)$rapor['id'] . '/selesaikan']]) ?>
+<?php endif; ?>
     </div>
 </form>
 
+<script src="<?= BASE_PATH ?>/assets/js/ui-select.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-select.js') ?>"></script>
+<script src="<?= BASE_PATH ?>/assets/js/report-entry.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/report-entry.js') ?>"></script>
 <?php require VIEW_PATH . '/layouts/focus-footer.php'; ?>

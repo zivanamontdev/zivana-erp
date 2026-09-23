@@ -83,7 +83,7 @@ class TemplateRaporController extends Controller
     public function downloadPdf(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'lihat');
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'pdf');
 
         $template = (new TemplateRapor())->find((int) $id);
 

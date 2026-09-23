@@ -1,7 +1,8 @@
-<?php if ($canEdit): ?>
+<?php if ($canManage): ?>
     <?php foreach ($kelasList as $classRecord): ?>
-        <?php require __DIR__ . '/_form-modal.php'; ?>
-        <?php ob_start(); ?>
+        <?php if ($canEdit) require __DIR__ . '/_form-modal.php'; ?>
+        <?php if ($canDelete): ?>
+    <?php ob_start(); ?>
         <form method="POST" action="<?= BASE_PATH ?>/kelas/<?= (int) $classRecord['id'] ?>/hapus">
             <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
             <div class="modal-actions">
@@ -13,6 +14,7 @@
             'variant' => 'delete',
             'description' => 'Kelas yang telah dihapus akan menghilang dari data  kelas dan tidak dapat diakses atau digunakan kembali. Murid yang masih terkait dengan kelas yang dihapus akan mengosongkan kelas murid terkait. Pastikan data telah dibackup terlebih dahulu sebelum dihapus.',
         ]); ?>
+<?php endif; ?>
     <?php endforeach; ?>
-    <?php $classRecord = null; require __DIR__ . '/_form-modal.php'; ?>
+    <?php $classRecord = null; if ($canCreate) require __DIR__ . '/_form-modal.php'; ?>
 <?php endif; ?>

@@ -1,11 +1,12 @@
-<?php if ($canEdit): ?>
+<?php if ($canManage): ?>
 <?php foreach ($jabatanList as $position): ?>
-    <?php require VIEW_PATH . '/admin/jabatan/_form-modal.php'; ?>
+    <?php if ($canEdit) require VIEW_PATH . '/admin/jabatan/_form-modal.php'; ?>
     <?php
     $statusAction = $position['is_active'] ? 'nonaktifkan' : 'aktifkan';
     $statusLabel = $position['is_active'] ? 'Nonaktifkan Jabatan' : 'Aktifkan Jabatan';
     foreach ([$statusAction, 'hapus'] as $action):
         $deleting = $action === 'hapus';
+        if ($deleting ? !$canDelete : !$canStatus) continue;
         $label = $deleting ? 'Hapus Jabatan' : $statusLabel;
         $id = ($deleting ? 'modal-hapus-jabatan-' : 'modal-status-jabatan-') . (int) $position['id'];
         $description = $action === 'aktifkan'
@@ -26,5 +27,5 @@
     <?php echo uiModal($id, $label . '?', ob_get_clean(), ['variant' => 'delete', 'description' => $description]); ?>
     <?php endforeach; ?>
 <?php endforeach; ?>
-<?php $position = null; require VIEW_PATH . '/admin/jabatan/_form-modal.php'; ?>
+<?php $position = null; if ($canCreate) require VIEW_PATH . '/admin/jabatan/_form-modal.php'; ?>
 <?php endif; ?>

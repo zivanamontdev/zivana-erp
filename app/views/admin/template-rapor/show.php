@@ -11,7 +11,7 @@
  * PDF export retains the database-backed document separately.
  */
 $headerActions = '<button type="button" class="ui-button ui-button--outline ui-button--icon-only" aria-label="Muat ulang" onclick="location.reload()">' . icon('icon_refresh') . '</button> '
-    . '<a href="' . BASE_PATH . '/kurikulum/manajemen-template/' . $template['id'] . '/pdf" class="ui-button ui-button--primary">Simpan PDF</a>';
+    . (uiCan('Sekolah', 'Manajemen Template', 'pdf') ? '<a href="' . BASE_PATH . '/kurikulum/manajemen-template/' . $template['id'] . '/pdf" class="ui-button ui-button--primary">Simpan PDF</a>' : '');
 
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>

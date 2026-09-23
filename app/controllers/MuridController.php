@@ -64,7 +64,7 @@ class MuridController extends Controller
     public function create(): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Murid', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Murid', 'tambah');
 
         $this->renderForm('tambah', [], $_SESSION['murid_old'] ?? [], $_SESSION['murid_errors'] ?? []);
         unset($_SESSION['murid_old'], $_SESSION['murid_errors']);
@@ -73,7 +73,7 @@ class MuridController extends Controller
     public function store(): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Murid', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Murid', 'Manajemen Murid', 'tambah');
 
         $data = $this->collectInput();
         $errors = $this->validate($data);

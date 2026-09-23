@@ -76,7 +76,7 @@ class SekolahController extends Controller
     public function updateTahunAjaran(): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Data Sekolah', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Data Sekolah', 'tahun_ajaran');
 
         $tahunAwal = (int) $this->input('tahun_awal');
         $tahunAkhir = (int) $this->input('tahun_akhir');

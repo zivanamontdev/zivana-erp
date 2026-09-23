@@ -5,7 +5,12 @@
  * Variabel dari KelasController::index():
  * - $kelasList (array, sudah termasuk jumlah_murid & jumlah_guru), $canEdit (bool)
  */
-$headerActions = $canEdit
+$canCreate = uiCan('Murid', 'Manajemen Kelas', 'tambah');
+$canDelete = uiCan('Murid', 'Manajemen Kelas', 'hapus');
+$canStatus = uiCan('Murid', 'Manajemen Kelas', 'status');
+$canPassword = uiCan('Murid', 'Manajemen Kelas', 'kata_sandi');
+$canManage = $canEdit || $canCreate || $canDelete || $canStatus || $canPassword;
+$headerActions = $canCreate
     ? uiButton('Tambah Kelas', 'primary', ['icon' => 'icon_plus', 'iconPosition' => 'right', 'marginVertical' => 0, 'attributes' => ['data-modal-open' => 'modal-tambah-kelas']])
     : '';
 
@@ -37,9 +42,13 @@ require VIEW_PATH . '/layouts/shell-header.php';
                         <button type="button" class="action-menu-toggle" data-action-menu-toggle><?= icon('icon_more_vertical') ?></button>
                         <div class="action-menu-dropdown">
                             <a href="<?= BASE_PATH ?>/kelas/<?= (int) $kelas['id'] ?>">Lihat Detail</a>
-                            <?php if ($canEdit): ?>
+                            <?php if ($canManage): ?>
+<?php if ($canEdit): ?>
                             <button type="button" data-modal-open="modal-ubah-kelas-<?= $kelas['id'] ?>">Ubah</button>
+<?php endif; ?>
+<?php if ($canDelete): ?>
                             <button type="button" class="is-destructive" data-modal-open="modal-hapus-kelas-<?= $kelas['id'] ?>">Hapus</button>
+<?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>

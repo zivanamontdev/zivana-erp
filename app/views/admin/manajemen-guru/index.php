@@ -49,7 +49,9 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <?= uiText($m['nama_lengkap'], 'body-sm', ['class' => 'teacher-student-name']) ?>
             <div class="teacher-student-class">
                 <?= uiText(trim(($m['level_kelas'] ?? '') . ' ' . ($m['nama_kelas'] ?? '')) ?: 'Belum ada kelas', 'body-sm') ?>
+                <?php if (uiCan('Murid', 'Manajemen Murid')): ?>
                 <a class="class-student-link" href="<?= BASE_PATH ?>/murid/<?= (int) $m['id'] ?>" aria-label="<?= e('Lihat detail ' . $m['nama_lengkap']) ?>"><?= icon('icon_chevron', 'teacher-student-chevron') ?></a>
+                <?php endif; ?>
             </div>
         </div>
         <?php endforeach; ?>

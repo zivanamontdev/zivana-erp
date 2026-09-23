@@ -22,7 +22,7 @@ $headerActions = '<div class="action-menu" data-action-menu data-dropdown-match-
     ])
     . '<div class="action-menu-dropdown" id="school-year-dropdown">'
     . '<span class="school-year-current">Tahun Ajaran berjalan: ' . e($tahunLabel) . '</span>';
-if ($canEdit) {
+if (uiCan('Sekolah', 'Data Sekolah', 'tahun_ajaran')) {
     $headerActions .= '<button type="button" data-modal-open="modal-tahun-ajaran">Perbarui Tahun Ajaran</button>';
 }
 $headerActions .= '</div></div>';
@@ -50,6 +50,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
     <?php endif; ?>
 </div>
 
+<?php if (uiCan('Sekolah', 'Data Sekolah', 'tahun_ajaran')): ?>
 <div class="modal-overlay" id="modal-tahun-ajaran">
     <div class="modal-box modal-sm">
         <h2 class="modal-title">Perbarui Tahun Ajaran</h2>
@@ -78,4 +79,5 @@ require VIEW_PATH . '/layouts/shell-header.php';
     </div>
 </div>
 
+<?php endif; ?>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

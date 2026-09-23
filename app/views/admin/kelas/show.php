@@ -35,7 +35,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <?= uiText($group['nama_jabatan'], 'caption-md', ['tag' => 'div']) ?>
         </div>
         <?= uiText((string) count($group['murid']), 'body-sm', ['font' => 'geist', 'tone' => 'preview']) ?>
-        <?php if ($canEdit): ?>
+        <?php if (uiCan('Murid', 'Manajemen Kelas', 'atur_murid')): ?>
         <div class="action-menu" data-action-menu>
             <button type="button" class="action-menu-toggle" data-action-menu-toggle><?= icon('icon_more_vertical') ?></button>
             <div class="action-menu-dropdown">
@@ -50,10 +50,14 @@ require VIEW_PATH . '/layouts/shell-header.php';
     </div>
     <div class="guru-murid-card-list">
         <?php foreach ($group['murid'] as $m): ?>
+        <?php if (uiCan('Murid', 'Manajemen Murid')): ?>
         <a class="guru-murid-item class-student-link" href="<?= BASE_PATH ?>/murid/<?= (int) $m['id'] ?>">
             <?= uiText($m['nama_lengkap'], 'body-sm', ['class' => 'teacher-student-name']) ?>
             <?= icon('icon_chevron', 'teacher-student-chevron') ?>
         </a>
+        <?php else: ?>
+        <div class="guru-murid-item"><?= uiText($m['nama_lengkap'], 'body-sm') ?></div>
+        <?php endif; ?>
         <?php endforeach; ?>
         <?php if (empty($group['murid'])): ?>
         <div class="guru-murid-item text-caption-md">Belum ada murid diampu.</div>
@@ -61,7 +65,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
     </div>
 </div>
 
-<?php if ($canEdit) require __DIR__ . '/_assignment-modal.php'; ?>
+<?php if (uiCan('Murid', 'Manajemen Kelas', 'atur_murid')) require __DIR__ . '/_assignment-modal.php'; ?>
 <?php endforeach; ?>
 
 <?php if ($canEdit): ?>

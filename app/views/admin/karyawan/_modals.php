@@ -1,7 +1,8 @@
-<?php if ($canEdit): ?>
+<?php if ($canManage): ?>
 <?php foreach ($karyawanList as $employee): ?>
-    <?php require VIEW_PATH . '/admin/karyawan/_form-modal.php'; ?>
-    <?php require VIEW_PATH . '/admin/karyawan/_password-modal.php'; ?>
+    <?php if ($canEdit) require VIEW_PATH . '/admin/karyawan/_form-modal.php'; ?>
+    <?php if ($canPassword) require VIEW_PATH . '/admin/karyawan/_password-modal.php'; ?>
+    <?php if ($canDelete): ?>
     <?php ob_start(); ?>
     <form method="POST" action="<?= BASE_PATH ?>/karyawan/<?= (int) $employee['id'] ?>/hapus">
         <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
@@ -13,6 +14,8 @@
     <?php echo uiModal('modal-hapus-karyawan-' . (int) $employee['id'], 'Hapus Karyawan?', ob_get_clean(), [
         'variant' => 'delete', 'description' => 'Karyawan yang telah dihapus akan menghilang dari data karyawan dan tidak dapat diakses atau digunakan kembali. Pastikan data telah dibackup terlebih dahulu sebelum dihapus.',
     ]); ?>
+<?php endif; ?>
+        <?php if ($canStatus): ?>
         <?php
         $statusAction = $employee['is_active'] ? 'nonaktifkan' : 'aktifkan';
         $statusLabel = $employee['is_active'] ? 'Nonaktifkan Karyawan' : 'Aktifkan Karyawan';
@@ -31,6 +34,7 @@
                 ? 'Karyawan akan berstatus Nonaktif dan tidak dapat mengakses aplikasi. Data karyawan tetap tersimpan.'
                 : 'Karyawan akan berstatus Aktif dan dapat kembali mengakses aplikasi sesuai hak aksesnya. Data karyawan tetap tersimpan.',
         ]); ?>
+<?php endif; ?>
 <?php endforeach; ?>
-<?php $employee = null; require VIEW_PATH . '/admin/karyawan/_form-modal.php'; ?>
+<?php $employee = null; if ($canCreate) require VIEW_PATH . '/admin/karyawan/_form-modal.php'; ?>
 <?php endif; ?>

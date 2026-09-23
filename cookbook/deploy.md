@@ -49,6 +49,8 @@ Kalau cPanel tidak mendukung document root custom di luar `public_html`, alterna
 
 ## 4. Langkah Deploy
 
+Untuk revisi RBAC 23 September 2026, setelah schema tersedia jalankan `php database/migrations/20260923_granular_permissions.php` sebelum mengaktifkan kode terbaru. Migrasi ini diperlukan juga pada instalasi baru; lihat `rbac-verification.md`. Jangan memakai import ulang schema sebagai pengganti migrasi pada database yang sudah berisi data.
+
 1. **Upload kode**: via Git deploy cPanel (kalau tersedia) atau upload manual/FTP seluruh isi repo (termasuk `vendor/`) ke server
 2. **Setup environment**: copy `.env.example` → `.env` di server, isi kredensial produksi manual (DB, SMTP, dsb) — **jangan** commit `.env` berisi kredensial asli ke git
 3. **Import database**: import `database/schema.sql` via phpMyAdmin (atau tool DB management cPanel lain)

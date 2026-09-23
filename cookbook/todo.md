@@ -2,6 +2,84 @@
 
 Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell), baru modul yang bergantung padanya.
 
+## Prioritas aktif — Login, RBAC, dan Portal Guru (23 September 2026)
+
+**Pembaruan lanjutan:** smoke test HTTP login guru, pembatasan modul admin, dashboard, detail murid, pratinjau, dan PDF sudah lulus. Dashboard scoped guru, komponen pengisian, penyimpanan transaksional, dan pratinjau bersama sudah diimplementasikan dan diuji otomatis. Pemeriksaan visual browser dan E2E tulis di MySQL tetap belum tuntas; jangan menganggap seluruh roadmap sudah selesai.
+
+**Status: perbaikan login/RBAC dan tes otomatis awal sudah dikerjakan; gerbang A–C belum ditutup karena pengujian browser serta E2E positif seluruh fitur belum selesai.** Lihat hasil dan batas cakupan di [rbac-verification.md](rbac-verification.md). Kerjakan A–C sampai lolos sebelum melanjutkan D–G. Checkbox Fase 0–9 di bawah merupakan riwayat implementasi/pengujian versi lama, bukan bukti bahwa permintaan terbaru sudah selesai. Jika bertentangan, kebutuhan pada bagian prioritas aktif ini yang berlaku.
+
+### A. Akun karyawan dan login
+
+- [x] Telusuri alur Tambah Karyawan → akun `users` → role dari jabatan → login; pastikan tidak ada akun hilang, duplikat, atau role tidak sesuai.
+- [x] Uji akun baru untuk Kepala Sekolah, Admin, Guru Kelas, dan Guru Shadow; verifikasi hashing password, validasi email unik, dan aturan password yang sudah ditetapkan.
+- [ ] Uji ubah data/email, ubah kata sandi, aktifkan/nonaktifkan, dan hapus karyawan terhadap akun login terkait; password lama tidak berlaku setelah diganti dan akun nonaktif tidak boleh login.
+- [x] Verifikasi identitas `karyawan_id` dan role pada sesi serta tujuan setelah login: guru masuk Portal Guru dan hanya memperoleh modul Portal Guru sesuai izinnya.
+
+### B. Cakupan dan penegakan RBAC
+
+- [x] Inventarisasi seluruh menu, submenu, route, tombol aksi, modal, dan fitur: lihat/detail/pratinjau, tambah, ubah, hapus, aktif/nonaktif, penugasan, ubah kata sandi, simpan/kirim nilai, persetujuan, PDF, serta fitur lain yang benar-benar tersedia.
+- [x] Buat pemetaan fitur → checkbox permission → visibilitas UI → guard backend. Catat fitur yang belum tercakup; lengkapi tanpa membuat fitur produk baru yang belum diminta.
+- [ ] Pastikan checkbox mengatur sidebar, tombol, action menu, dan pemicu modal secara konsisten. Role tanpa izin tidak boleh melihat aksi terkait.
+- [ ] Pastikan akses URL langsung dan permintaan tulis tetap ditolak ketika izin tidak diberikan; menyembunyikan tombol saja tidak cukup. Pertahankan proteksi CSRF.
+- [ ] Verifikasi simpan/muat ulang matriks RBAC, centang semua/turunan, indeterminate, dan kombinasi izin kosong/lihat-saja/tulis.
+- [ ] Verifikasi guru tidak memperoleh modul administrasi atau persetujuan rapor. Kepala Sekolah/Admin dapat menyetujui hanya bila izin RBAC terkait diberikan.
+- [ ] Uji perubahan permission dengan logout lalu login ulang pada role terkait. Tidak perlu membangun pembaruan permission real-time untuk sesi yang sedang aktif.
+
+### C. Gerbang pengujian sebelum pengerjaan Portal Guru
+
+- [x] Gunakan database/akun fixture terisolasi untuk tes tulis; jangan mengganti password atau permission akun pengguna nyata demi pengujian.
+- [ ] Uji login berhasil/gagal, akun nonaktif, role tanpa izin, lihat-saja, dan izin aksi diberikan/dicabut setelah login ulang.
+- [ ] Uji tiap fitur hasil inventarisasi melalui UI serta endpoint langsung: termasuk request POST buatan, CSRF tidak valid, dan akses lintas guru/murid/rapor.
+- [ ] Pastikan penolakan aksi tidak mengubah database; bandingkan kondisi sebelum/sesudah.
+- [x] Catat matriks hasil uji per role/fitur, bug yang diperbaiki, regresi, serta keterbatasan lingkungan. Bedakan tes unit/render, integrasi HTTP/database, dan pengujian browser visual.
+- [ ] **Lulus A–C sebelum lanjut D–G.** Jangan mengklaim semua kondisi sudah aman hanya berdasarkan lint atau tes render; jika browser tidak dapat dijalankan, catat bagian UI yang belum terverifikasi.
+
+### D. Sumber data periode dan penugasan rapor
+
+- [x] Semester Ganjil/Genap terpisah dari tipe Tengah/Akhir; empat kombinasi unik per tahun ajaran.
+- [x] Delapan periode contoh dibuat untuk tahun ajaran 2024/2025 dan 2025/2026; tahun aktif 2026/2027 tidak diubah. Dua periode lama dan data rapor terkait dihapus atas izin pengguna, dengan cadangan lokal.
+- [x] Daftar Rapor Murid admin memakai satu tabel per periode, tanpa card sesi bersarang; baris rapor tersedia menuju pratinjau dan draft tidak dapat dibuka.
+- [ ] Audit sinkronisasi periode, tahun ajaran kelas, murid aktif, dan guru penanggung jawab, termasuk penugasan/perpindahan murid setelah periode dibuat. Hindari rapor duplikat dan perubahan nilai historis tanpa dasar.
+- [x] Pastikan membuka dashboard bukan pemicu membuat nilai atau memalsukan status selesai. Nilai hanya berasal dari pengisian guru; daftar berasal dari periode dan penugasan.
+- [ ] Uji periode lalu, sedang berlangsung, berikutnya, tanpa periode, tanpa murid, serta lebih dari satu agenda yang waktunya beririsan; dokumentasikan aturan pemilihan/tampilan agenda.
+- [x] Bedakan kekosongan data karena filter tahun, belum ada murid/penugasan, atau template belum lengkap. Jangan mengisi nilai/kurikulum resmi dengan data contoh tanpa persetujuan.
+
+### E. Dashboard Guru `/portal-guru/dashboard`
+
+- [ ] Sesuaikan dengan gambar acuan: sapaan dan waktu, Agenda sedang berlangsung, tabel Daftar Murid (tahun ajaran dan jumlah), serta Agenda Berikutnya.
+- [x] Gunakan komponen card/tabel/teks/tombol yang sudah ada; tambahkan varian reusable hanya jika perlu. Semua warna harus berasal dari `config/colors.php`.
+- [x] Hanya tampilkan murid/rapor milik guru yang login. `Isi Rapor` merah → form pengisian murid tersebut; `Lihat Rapor` hijau → pratinjau rapor tersebut.
+- [x] Bedakan draft, menunggu persetujuan, dan disetujui secara konsisten; guru tidak memiliki tombol maupun endpoint persetujuan.
+- [ ] Uji tampilan responsif, tanggal/countdown, expand/collapse tabel, navigasi chevron, dan empty state dengan data fixture.
+
+### F. Daftar dan Detail Murid Guru `/portal-guru/murid`
+
+- [x] Tampilkan hanya murid yang ditugaskan kepada guru login; pencarian/filter tidak boleh membuka data guru lain.
+- [x] Klik more vertical langsung menuju detail murid read-only, bukan dropdown perantara.
+- [x] Gunakan breadcrumb `Daftar Murid Guru > Detail Murid` dengan tautan kembali ke daftar Portal Guru, bukan modul administrasi.
+- [x] Pakai komponen detail data standar; verifikasi guard kepemilikan pada URL detail, termasuk ID murid guru lain/tidak ditemukan dan kondisi penugasan berubah.
+
+### G. Pengisian, pengiriman, pratinjau, dan persetujuan
+
+- [ ] Baca aset `Portal Guru - halaman_pengisian_rapor(desktop_mode).svg` dan `Portal Guru - halaman_pengisian_rapor(mobile_mode).svg` sebelum implementasi UI pengisian.
+- [ ] Form dibuka per murid dari Dashboard Guru; tampilkan identitas, periode, semester, item penilaian, progres, dan catatan berdasarkan data sebenarnya.
+- [x] Semester isian mengikuti field semester periode, **bukan** pemetaan Tengah→Ganjil/Akhir→Genap. Uji keempat kombinasi periode.
+- [x] Uji simpan draft, muat ulang nilai, validasi item/skala sesuai template, catatan, progres, dan pengiriman setelah seluruh nilai wajib terisi; template kosong tidak boleh dikirim sebagai rapor lengkap.
+- [x] Pengiriman mengubah status menjadi `menunggu_persetujuan`; pastikan klik ulang/pengiriman ganda tidak merusak nilai atau status.
+- [ ] Konfirmasi kebijakan edit setelah dikirim: apakah langsung terkunci atau boleh diedit selama menunggu persetujuan? **Belum dijawab; jangan mengubah kebijakan/kembangkan alur revisi atas asumsi.** Implementasi lama mengunci setelah dikirim dan perlu diverifikasi ulang.
+- [ ] Pratinjau guru mengikuti gambar acuan: pemilih murid yang diizinkan, refresh, Simpan PDF, dokumen horizontal berlatar abu-abu, tanpa tombol Setujui; gunakan komponen dokumen dan bank warna yang ada.
+- [ ] Uji PDF/pratinjau hanya untuk rapor milik guru; konten dan semester konsisten dengan nilai tersimpan. Periksa status yang mengizinkan pratinjau draft secara terpisah dari alur `Lihat Rapor`.
+- [ ] Persetujuan hanya dari `/rapor-murid` oleh Kepala Sekolah/Admin dengan izin terkait dan hanya untuk status menunggu persetujuan.
+- [ ] Uji end-to-end: tambah akun → login guru → murid yang ditugaskan → isi/simpan/kirim rapor → login approver → pratinjau/setujui → guru melihat rapor. Sertakan tes negatif akses lintas akun dan desktop/mobile.
+
+### Catatan yang menggantikan asumsi roadmap lama
+
+- Rapor Murid bukan lagi accordion tiga tingkat dan tidak mempunyai tombol Tambah Sesi; periodenya dikelola melalui Periode Rapor.
+- Persetujuan bukan bebas diberikan kepada sembarang role; batas bisnis saat ini Kepala Sekolah/Admin, dengan RBAC tetap ditegakkan.
+- Guru Kelas dan Guru Shadow adalah jabatan yang relevan; pemetaan jabatan ke role tetap harus diaudit, tidak diasumsikan dari nama saja.
+- Periode contoh 2024–2026 tidak otomatis menyediakan rapor untuk tahun aktif 2026/2027. Jangan mengubah tahun aktif atau menambah periode di luar permintaan hanya agar dashboard terlihat berisi.
+- Konten template resmi yang belum lengkap tetap dicatat sebagai kebutuhan data; contoh visual bukan nilai murid nyata.
+
 ---
 
 ## Fase 0 — Fondasi Teknis

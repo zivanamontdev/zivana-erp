@@ -56,7 +56,7 @@ class KaryawanController extends Controller
     public function store(): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'tambah');
 
         $nama = trim((string) $this->input('nama', ''));
         $jabatanId = (int) $this->input('jabatan_id', 0);
@@ -72,6 +72,11 @@ class KaryawanController extends Controller
         }
 
         $db = Database::getInstance();
+        if (!$this->emailAvailable($email)) {
+            $_SESSION['employee_error'] = 'Email sudah digunakan oleh akun lain.';
+            $this->redirect('/karyawan');
+            return;
+        }
         $db->beginTransaction();
 
         try {
@@ -111,10 +116,15 @@ class KaryawanController extends Controller
         }
 
         $db = Database::getInstance();
+        if (!$this->emailAvailable($email, (int) $id)) {
+            $_SESSION['employee_error'] = 'Email sudah digunakan oleh akun lain.';
+            $this->redirect('/karyawan');
+            return;
+        }
         $db->beginTransaction();
         try {
             (new Karyawan())->update((int) $id, ['jabatan_id' => $jabatanId, 'nama' => $nama]);
-            $stmt = $db->prepare('UPDATE users SET email = :email, role_id = :role_id WHERE karyawan_id = :karyawan_id');
+            $stmt = $db->prepare('UPDATE users SET email = :email, role_id = :role_id, remember_token = NULL WHERE karyawan_id = :karyawan_id');
             $stmt->execute([
                 'email' => $email, 'role_id' => $roleId,
                 'karyawan_id' => (int) $id,
@@ -131,7 +141,7 @@ class KaryawanController extends Controller
     public function updatePassword(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'kata_sandi');
 
         $password = (string) $this->input('password', '');
         $passwordConfirmation = (string) $this->input('password_confirmation', '');
@@ -149,7 +159,7 @@ class KaryawanController extends Controller
     public function destroy(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'hapus');
 
         $db = Database::getInstance();
         $db->beginTransaction();
@@ -179,7 +189,7 @@ class KaryawanController extends Controller
     private function setActive(string $id, bool $active): void
     {
         $this->middleware(AuthMiddleware::class);
-        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'edit');
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'status');
 
         $db = Database::getInstance();
         $db->beginTransaction();
@@ -206,6 +216,14 @@ class KaryawanController extends Controller
     {
         $jabatan = (new Jabatan())->find($jabatanId);
 
-        return isset($jabatan['role_id']) ? (int) $jabatan['role_id'] : null;
+        return !empty($jabatan['is_active']) && isset($jabatan['role_id']) && (new Role())->find((int) $jabatan['role_id'])
+            ? (int) $jabatan['role_id'] : null;
+    }
+
+    private function emailAvailable(string $email, int $employeeId = 0): bool
+    {
+        $stmt = Database::getInstance()->prepare('SELECT id FROM users WHERE LOWER(email)=LOWER(?) AND (karyawan_id IS NULL OR karyawan_id<>?)');
+        $stmt->execute([$email, $employeeId]);
+        return !$stmt->fetchColumn();
     }
 }

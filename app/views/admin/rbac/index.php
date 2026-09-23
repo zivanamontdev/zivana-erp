@@ -8,14 +8,16 @@
  * - $permissionTree (array) modul => section => subSection => [permission rows]
  * - $granted (array) role_id => [permission_id => true]
  */
-$headerActions = '<button type="button" class="ui-button ui-button--outline" disabled '
-    . 'title="[ASUMSI] Penambahan role custom belum didukung — 4 role saat ini bersifat tetap, lihat cookbook/prd.md poin asumsi #7">'
-    . 'Tambah Role</button>';
+$headerActions = '';
 
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/rbac.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/rbac.css') ?>">
 
+<?php if (!empty($_SESSION['rbac_error'])): ?>
+<p role="alert"><?= uiText($_SESSION['rbac_error'], 'body-sm', ['tone'=>'status-inactive']) ?></p>
+<?php unset($_SESSION['rbac_error']); endif; ?>
+<p class="text-caption-md">Izin Edit memerlukan Lihat. Guru hanya dapat mengakses Portal Guru; persetujuan rapor khusus Kepala Sekolah/Admin. Login ulang setelah perubahan izin.</p>
 <div class="rbac-list">
     <?php foreach ($roles as $role): ?>
     <?php $roleId = (int) $role['id']; ?>
@@ -30,7 +32,9 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
             <input type="hidden" name="role_id" value="<?= $roleId ?>">
 
+            <fieldset class="rbac-permissions" <?= $canEdit ? '' : 'disabled' ?>>
             <?php foreach ($permissionTree as $modul => $sections): ?>
+            <?php if ($role['nama'] === 'Guru' && $modul !== 'Portal Guru') continue; ?>
             <div class="rbac-modul" data-tree-group>
                 <label class="rbac-modul-header">
                     <input type="checkbox" class="checkbox" data-tree-parent>
@@ -49,7 +53,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
                                     <input type="checkbox" class="checkbox" data-tree-leaf name="permission_ids[]"
                                         value="<?= (int) $perm['id'] ?>"
                                         <?= isset($granted[$roleId][$perm['id']]) ? 'checked' : '' ?>>
-                                    <span class="text-caption-md"><?= ucfirst(e($perm['aksi'])) ?></span>
+                                    <span class="text-caption-md"><?= e(PermissionCatalog::label($perm)) ?></span>
                                 </label>
                                 <?php endforeach; ?>
                             </div>
@@ -72,7 +76,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
                                             <input type="checkbox" class="checkbox" data-tree-leaf name="permission_ids[]"
                                                 value="<?= (int) $perm['id'] ?>"
                                                 <?= isset($granted[$roleId][$perm['id']]) ? 'checked' : '' ?>>
-                                            <span class="text-caption-md"><?= ucfirst(e($perm['aksi'])) ?></span>
+                                            <span class="text-caption-md"><?= e(PermissionCatalog::label($perm)) ?></span>
                                         </label>
                                         <?php endforeach; ?>
                                     </div>
@@ -86,9 +90,12 @@ require VIEW_PATH . '/layouts/shell-header.php';
             </div>
             <?php endforeach; ?>
 
+            </fieldset>
+            <?php if ($canEdit): ?>
             <div class="rbac-role-actions">
                 <button type="submit" class="ui-button ui-button--primary">Simpan Perubahan</button>
             </div>
+            <?php endif; ?>
         </form>
     </div>
     <?php endforeach; ?>
