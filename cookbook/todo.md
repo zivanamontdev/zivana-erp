@@ -4,7 +4,7 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 
 ## Prioritas aktif — Login, RBAC, dan Portal Guru (23 September 2026)
 
-**Pembaruan lanjutan:** smoke test HTTP login guru, pembatasan modul admin, dashboard, detail murid, pratinjau, dan PDF sudah lulus. Dashboard scoped guru, komponen pengisian, penyimpanan transaksional, dan pratinjau bersama sudah diimplementasikan dan diuji otomatis. Pemeriksaan visual browser dan E2E tulis di MySQL tetap belum tuntas; jangan menganggap seluruh roadmap sudah selesai.
+**Pembaruan lanjutan:** alur HTTP/MySQL terisolasi tambah akun → login → periode → murid/penugasan baru → draft → kirim → persetujuan admin → PDF sudah lulus, termasuk pencabutan/pemberian izin setelah login ulang dan penonaktifan/aktivasi akun. Pemeriksaan visual browser dan audit positif seluruh aksi tetap belum tuntas; jangan menganggap seluruh roadmap sudah selesai.
 
 **Status: perbaikan login/RBAC dan tes otomatis awal sudah dikerjakan; gerbang A–C belum ditutup karena pengujian browser serta E2E positif seluruh fitur belum selesai.** Lihat hasil dan batas cakupan di [rbac-verification.md](rbac-verification.md). Kerjakan A–C sampai lolos sebelum melanjutkan D–G. Checkbox Fase 0–9 di bawah merupakan riwayat implementasi/pengujian versi lama, bukan bukti bahwa permintaan terbaru sudah selesai. Jika bertentangan, kebutuhan pada bagian prioritas aktif ini yang berlaku.
 
@@ -23,7 +23,7 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 - [ ] Pastikan akses URL langsung dan permintaan tulis tetap ditolak ketika izin tidak diberikan; menyembunyikan tombol saja tidak cukup. Pertahankan proteksi CSRF.
 - [ ] Verifikasi simpan/muat ulang matriks RBAC, centang semua/turunan, indeterminate, dan kombinasi izin kosong/lihat-saja/tulis.
 - [ ] Verifikasi guru tidak memperoleh modul administrasi atau persetujuan rapor. Kepala Sekolah/Admin dapat menyetujui hanya bila izin RBAC terkait diberikan.
-- [ ] Uji perubahan permission dengan logout lalu login ulang pada role terkait. Tidak perlu membangun pembaruan permission real-time untuk sesi yang sedang aktif.
+- [x] Uji perubahan permission dengan logout lalu login ulang: HTTP/MySQL menguji role Guru lihat-saja, PDF tersembunyi/403, lalu izin dipulihkan dan PDF kembali tersedia. Tidak membangun pembaruan permission real-time.
 
 ### C. Gerbang pengujian sebelum pengerjaan Portal Guru
 
@@ -62,6 +62,8 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 - [x] Pakai komponen detail data standar; verifikasi guard kepemilikan pada URL detail, termasuk ID murid guru lain/tidak ditemukan dan kondisi penugasan berubah.
 
 ### G. Pengisian, pengiriman, pratinjau, dan persetujuan
+
+- [x] Alur positif HTTP/MySQL dengan akun/data fixture: tambah akun guru melalui controller asli → login → buat periode/kelas/murid → penugasan → simpan draft → tolak kirim belum lengkap → kirim lengkap → admin setujui → guru unduh PDF. Akses detail/form/PDF guru lain dan CSRF salah juga ditolak. Pengujian ini bukan tes interaksi/visual browser.
 
 - [ ] Baca aset `Portal Guru - halaman_pengisian_rapor(desktop_mode).svg` dan `Portal Guru - halaman_pengisian_rapor(mobile_mode).svg` sebelum implementasi UI pengisian.
 - [ ] Form dibuka per murid dari Dashboard Guru; tampilkan identitas, periode, semester, item penilaian, progres, dan catatan berdasarkan data sebenarnya.

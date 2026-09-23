@@ -81,3 +81,24 @@ Migrasi mengubah `permissions.aksi` menjadi VARCHAR dan menambahkan 17 izin. Gra
 - Audit positif seluruh aksi melalui HTTP/database MySQL; tes semua route di atas merupakan tes penolakan, bukan pembuktian semua fitur berhasil.
 - Alur lengkap penugasan → isi → kirim → persetujuan → PDF, kepemilikan lintas guru, serta kesesuaian UI Portal Guru dengan aset desktop/mobile. Pekerjaan Portal Guru tetap mengikuti gerbang A–C pada todo.
 - Kebijakan edit sesudah kirim belum dikonfirmasi pengguna; perilaku lama terkunci tetap dipertahankan.
+
+## Pembaruan: E2E HTTP/MySQL terisolasi
+
+Jalankan secara eksplisit:
+
+```sh
+php tests/workflow-http-mysql.php --run
+```
+
+Tanpa `--run`, skrip hanya menampilkan SKIP. Tes membutuhkan PHP cURL, PDO MySQL, serta izin membuat/menghapus database uji pada server MySQL lokal yang dikonfigurasi `.env`. Skrip membuat nama acak `zivana_e2e_<16 karakter hex>`, mengimpor schema repo tanpa menyalin data aplikasi, dan menjalankan server PHP pada port loopback sementara. Router khusus berada di `tests/fixtures`, di luar document root aplikasi, dan menolak dijalankan tanpa konfigurasi database uji yang valid. Blok `finally` menghentikan server dan menghapus hanya database acak yang dibuat oleh eksekusi itu. Database aplikasi tidak menjadi target tes atau cleanup.
+
+Hasil terverifikasi 23 September 2026:
+
+- Akun guru dibuat melalui POST Karyawan dan dapat login; kelas, periode, murid baru setelah periode, serta penugasan dibuat melalui endpoint asli. Draft otomatis mempunyai guru yang benar.
+- Dashboard/detail/form guru berhasil; guru lain ditolak pada detail/form/PDF (404), modul admin ditolak (403), dan token CSRF salah ditolak (419).
+- Draft tersimpan, pengiriman belum lengkap ditolak tanpa mengubah status, pengiriman lengkap menjadi menunggu persetujuan. Admin melihat tombol Setujui dan persetujuan menyimpan identitas approver. Guru tidak berhak menggunakan endpoint persetujuan.
+- Pratinjau guru berhasil dan unduhan mengembalikan `application/pdf` dengan signature `%PDF-`, bukan sekadar HTML berstatus 200.
+- Penyimpanan RBAC melalui POST asli mengganti izin guru menjadi lihat-saja. Setelah logout/login, tombol PDF tidak ada, endpoint PDF dan form edit 403. Setelah grant dipulihkan dan login ulang, tombol dan PDF kembali tersedia.
+- Penonaktifan karyawan memutus sesi guru aktif dan menolak login berikutnya. Aktivasi memulihkan login/dashboard. Jumlah nilai tetap sesuai setelah seluruh tes akses.
+
+Tes ini menutup alur inti tulis HTTP/MySQL, **bukan seluruh kombinasi fitur**. Suite SQLite tetap melengkapi pengujian skenario negatif dan rollback. Percobaan Edge headless terbaru gagal pada peluncuran Mojo/Crashpad dengan `Access is denied (0x5)`; tidak ada bukti screenshot atau interaksi browser desktop/mobile dari tes ini. Pemeriksaan visual, seluruh aksi positif, dan kelengkapan konten template resmi tetap terbuka.
