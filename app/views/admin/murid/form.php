@@ -68,9 +68,9 @@ $formAction = $isTambah ? BASE_PATH . '/murid' : BASE_PATH . '/murid/' . $muridI
 
 $headerActions = '';
 if ($isDetail && $canEdit) {
-    $headerActions = '<a href="' . BASE_PATH . '/murid/' . $muridId . '/ubah" class="btn btn-primary">Ubah Data Murid</a>';
+    $headerActions = '<a href="' . BASE_PATH . '/murid/' . $muridId . '/ubah" class="ui-button ui-button--primary">Ubah Data Murid</a>';
 } elseif (!$isDetail) {
-    $headerActions = '<button type="submit" form="form-murid" class="btn btn-primary">'
+    $headerActions = '<button type="submit" form="form-murid" class="ui-button ui-button--primary">'
         . ($isTambah ? 'Simpan Data Murid' : 'Simpan Perubahan') . '</button>';
 }
 

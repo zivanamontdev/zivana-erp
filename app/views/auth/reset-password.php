@@ -14,7 +14,7 @@ $pageTitle = 'Atur Ulang Kata Sandi';
 <html lang="id">
 <head>
 <?php require VIEW_PATH . '/layouts/head.php'; ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/login.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/login.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/login.css') ?>">
 </head>
 <body class="login-body">
     <div class="login-wrapper login-wrapper-single">
@@ -45,10 +45,10 @@ $pageTitle = 'Atur Ulang Kata Sandi';
                         <input type="password" id="password_confirmation" name="password_confirmation" class="field-input" placeholder="Ulangi kata sandi baru" minlength="8" required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block">Simpan Kata Sandi Baru</button>
+                    <button type="submit" class="ui-button ui-button--primary ui-control--full">Simpan Kata Sandi Baru</button>
                 </form>
                 <?php else: ?>
-                <a href="<?= BASE_PATH ?>/lupa-kata-sandi" class="btn btn-primary btn-block" style="text-align:center; text-decoration:none; display:block; line-height:37px;">Minta Tautan Baru</a>
+                <a href="<?= BASE_PATH ?>/lupa-kata-sandi" class="ui-button ui-button--primary ui-control--full">Minta Tautan Baru</a>
                 <?php endif; ?>
 
                 <a href="<?= BASE_PATH ?>/login" class="login-forgot text-body-sm">&larr; Kembali ke Login</a>

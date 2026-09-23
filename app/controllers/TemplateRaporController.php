@@ -28,11 +28,28 @@ class TemplateRaporController extends Controller
         $stmt->execute($params);
 
         $this->view('admin.template-rapor.index', [
-            'pageTitle' => 'Manajemen Template',
-            'breadcrumb' => breadcrumb('Kurikulum', 'Manajemen Template'),
+            'pageTitle' => 'Manajemen Rapor',
+            'breadcrumb' => breadcrumb('Kurikulum', 'Manajemen Rapor'),
+            'search' => trim((string) $this->input('q', '')),
+            'tipe' => $tipe,
+            'kategori' => $kategori,
             'activeNavItem' => 'manajemen-template',
             'templateList' => $stmt->fetchAll(),
         ]);
+    }
+
+    public function previewSemester(string $semester): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'lihat');
+        $names = ['tengah' => 'Rapor Montessori Tengah Semester', 'akhir' => 'Rapor Montessori Akhir Semester'];
+        $template = isset($names[$semester]) ? (new TemplateRapor())->whereFirst('nama', $names[$semester]) : null;
+        if (!$template) {
+            http_response_code(404);
+            require VIEW_PATH . '/errors/404.php';
+            return;
+        }
+        $this->show((string) $template['id']);
     }
 
     public function show(string $id): void
@@ -54,8 +71,8 @@ class TemplateRaporController extends Controller
             // pratinjau_template.svg cuma "Pratinjau" (bukan "Pratinjau
             // Template") — breadcrumb-nya sendiri yang menyebut "Pratinjau
             // Template" sebagai penanda halaman.
-            'pageTitle' => 'Pratinjau',
-            'breadcrumb' => breadcrumb('Kurikulum', 'Pratinjau Template'),
+            'pageTitle' => 'Pratinjau ' . $template['nama'],
+            'breadcrumb' => breadcrumb('Kurikulum', 'Manajemen Rapor', 'Pratinjau'),
             'activeNavItem' => 'manajemen-template',
             'template' => $template,
             'areas' => $this->buildStructure((int) $id),

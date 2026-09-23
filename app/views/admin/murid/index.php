@@ -14,30 +14,23 @@ $statusLabel = [
 
 $headerActions = '';
 if ($canEdit) {
-    $headerActions = '<button type="button" class="btn btn-tertiary" disabled title="[ASUMSI] Fitur Import belum dikonfirmasi user (format file/mapping kolom), lihat cookbook/prd.md poin asumsi #6">Import</button> '
-        . '<a href="' . BASE_PATH . '/murid/tambah" class="btn btn-primary">Tambah Murid</a>';
+    $headerActions = '<button type="button" class="ui-button ui-button--outline" disabled title="[ASUMSI] Fitur Import belum dikonfirmasi user (format file/mapping kolom), lihat cookbook/prd.md poin asumsi #6">Import</button> '
+        . '<a href="' . BASE_PATH . '/murid/tambah" class="ui-button ui-button--primary">Tambah Murid</a>';
 }
 
-require VIEW_PATH . '/layouts/shell-header.php';
+ob_start();
 ?>
 <div class="list-toolbar">
     <form method="GET" action="<?= BASE_PATH ?>/murid" class="list-filter">
-        <input type="text" name="q" class="field-input" placeholder="Cari" value="<?= e($search) ?>">
-        <select name="kelas_id" class="field-input" onchange="this.form.submit()">
-            <option value="">Semua Kelas</option>
-            <?php foreach ($kelasOptions as $k): ?>
-            <option value="<?= $k['id'] ?>" <?= $kelasId == $k['id'] ? 'selected' : '' ?>><?= e($k['level_kelas'] . ' - ' . $k['nama_kelas']) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <select name="status" class="field-input" onchange="this.form.submit()">
-            <option value="">Semua Status</option>
-            <?php foreach ($statusLabel as $val => [$label, ]): ?>
-            <option value="<?= $val ?>" <?= $status === $val ? 'selected' : '' ?>><?= $label ?></option>
-            <?php endforeach; ?>
-        </select>
-        <button type="submit" class="btn btn-tertiary">Cari</button>
+        <?= uiField('q', 'Cari', ['type' => 'search', 'value' => $search, 'placeholder' => 'Cari', 'icon' => 'icon_search', 'iconPosition' => 'left', 'hideLabel' => true, 'id' => 'list-search']) ?>
+        <?= uiFilter('kelas_id', 'Kelas', ['' => 'Semua Kelas'] + array_combine(array_column($kelasOptions, 'id'), array_map(static fn($kelas) => $kelas['level_kelas'] . ' - ' . $kelas['nama_kelas'], $kelasOptions)), ['value' => $kelasId, 'id' => 'filter-kelas_id', 'marginVertical' => 0, 'attributes' => ['onchange' => 'this.form.submit()']]) ?>
+        <?= uiFilter('status', 'Status', ['' => 'Semua Status'] + array_map(static fn($item) => $item[0], $statusLabel), ['value' => $status, 'id' => 'filter-status', 'marginVertical' => 0, 'attributes' => ['onchange' => 'this.form.submit()']]) ?>
     </form>
 </div>
+<?php
+$headerActions = ob_get_clean() . $headerActions;
+require VIEW_PATH . '/layouts/shell-header.php';
+?>
 
 <div class="data-table-wrapper">
     <table class="data-table">

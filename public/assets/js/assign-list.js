@@ -16,6 +16,7 @@
  */
 (function () {
   'use strict';
+  var cloneSequence = 0;
 
   function bindRemove(row) {
     var removeBtn = row.querySelector('[data-assign-remove]');
@@ -39,6 +40,19 @@
 
     addBtn.addEventListener('click', function () {
       var fragment = template.content.cloneNode(true);
+      // Repeated field components need unique IDs and matching labels.
+      var suffix = '-clone-' + (++cloneSequence);
+      var ids = {};
+      fragment.querySelectorAll('[id]').forEach(function (element) {
+        ids[element.id] = element.id + suffix;
+        element.id += suffix;
+      });
+      fragment.querySelectorAll('[for], [aria-controls], [aria-describedby]').forEach(function (element) {
+        ['for', 'aria-controls', 'aria-describedby'].forEach(function (attribute) {
+          if (!element.hasAttribute(attribute)) return;
+          element.setAttribute(attribute, element.getAttribute(attribute).split(' ').map(function (id) { return ids[id] || id; }).join(' '));
+        });
+      });
       rowsContainer.appendChild(fragment);
       bindRemove(rowsContainer.lastElementChild);
     });

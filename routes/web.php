@@ -31,6 +31,8 @@ $router->get('/jabatan', [JabatanController::class, 'index']);
 $router->post('/jabatan', [JabatanController::class, 'store']);
 $router->post('/jabatan/{id}', [JabatanController::class, 'update']);
 $router->post('/jabatan/{id}/hapus', [JabatanController::class, 'destroy']);
+$router->post('/jabatan/{id}/nonaktifkan', [JabatanController::class, 'deactivate']);
+$router->post('/jabatan/{id}/aktifkan', [JabatanController::class, 'activate']);
 
 // --- Human Capital: Daftar Karyawan ---
 $router->get('/karyawan', [KaryawanController::class, 'index']);
@@ -38,6 +40,8 @@ $router->post('/karyawan', [KaryawanController::class, 'store']);
 $router->post('/karyawan/{id}', [KaryawanController::class, 'update']);
 $router->post('/karyawan/{id}/kata-sandi', [KaryawanController::class, 'updatePassword']);
 $router->post('/karyawan/{id}/hapus', [KaryawanController::class, 'destroy']);
+$router->post('/karyawan/{id}/nonaktifkan', [KaryawanController::class, 'deactivate']);
+$router->post('/karyawan/{id}/aktifkan', [KaryawanController::class, 'activate']);
 
 // --- Murid: Manajemen Kelas ---
 $router->get('/kelas', [KelasController::class, 'index']);
@@ -70,6 +74,7 @@ $router->post('/kurikulum/periode-penilaian/{id}/hapus', [PeriodePenilaianContro
 
 // --- Sekolah: Kurikulum > Manajemen Template ---
 $router->get('/kurikulum/manajemen-template', [TemplateRaporController::class, 'index']);
+$router->get('/kurikulum/manajemen-template/pratinjau/{semester}', [TemplateRaporController::class, 'previewSemester']);
 $router->get('/kurikulum/manajemen-template/{id}', [TemplateRaporController::class, 'show']);
 $router->get('/kurikulum/manajemen-template/{id}/pdf', [TemplateRaporController::class, 'downloadPdf']);
 

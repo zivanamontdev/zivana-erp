@@ -1,176 +1,160 @@
-/*
- * Halaman Login — cookbook/design-system.md bagian 5.1.
- * Layout 2 kolom, gap 46px, total lebar konten 1176px, desktop-first.
- */
-
+/* Login: cookbook/design-system.md 5.1. Colors come from config/colors.php. */
 .login-body {
+  --login-space: var(--layout-gap);
+  --login-panel-padding: clamp(calc(1 * var(--ui-unit)), 3.125vw, calc(2.5 * var(--ui-unit)));
+  --login-callout-overhang: clamp(calc(0.375 * var(--ui-unit)), 1.2890625vw, calc(1.03125 * var(--ui-unit)));
   margin: 0;
-  background: var(--color-neutral-white);
+  background: var(--color-page-background);
   font-family: var(--font-family-base);
   color: var(--color-neutral-900);
+  letter-spacing: 0;
 }
-
 .login-wrapper {
-  display: flex;
-  gap: 46px;
-  width: 1176px;
-  max-width: calc(100% - 48px);
-  margin: 64px auto;
-  min-height: 640px;
+  display: grid;
+  grid-template-columns: minmax(0, 620fr) minmax(0, 510fr);
+  gap: var(--login-space);
+  width: min(calc(100% - 2 * var(--page-gutter-inline)), calc(var(--layout-max-width) - 2 * var(--page-gutter-inline)));
+  margin: var(--page-gutter-block) auto;
+  min-height: calc(100svh - 2 * var(--page-gutter-block));
 }
-
-/* Varian tanpa panel kanan — dipakai di halaman lupa/reset kata sandi
-   yang belum punya desain Figma, lihat cookbook/prd.md poin asumsi #8. */
-.login-wrapper-single {
-  width: 620px;
-  justify-content: center;
-}
-
-.login-info {
-  background: var(--color-neutral-75);
-  border: 1px solid var(--color-neutral-150);
-  color: var(--color-neutral-700);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-body-sm);
-}
-
-.login-debug-link {
-  background: var(--color-orange-50);
-  border-color: var(--color-orange-300);
-  word-break: break-all;
-}
-
-.login-debug-link a {
-  color: var(--color-red-600);
-}
-
-/* ---------- Kolom kiri ---------- */
-
 .login-left {
-  width: 620px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: minmax(min-content, 1fr) auto minmax(min-content, 1fr);
+  row-gap: clamp(calc(1.5 * var(--ui-unit)), 3.75vw, calc(3 * var(--ui-unit)));
 }
-
-.login-logo {
-  height: 32px;
-  width: auto;
+.login-logo { width: calc(8.1875 * var(--ui-unit)); height: calc(3 * var(--ui-unit)); object-fit: contain; object-position: left; align-self: start; }
+.login-main {
+  min-width: 0;
+  width: 100%;
+  align-self: center;
+  padding-inline: clamp(calc(1 * var(--ui-unit)), calc(25vw - calc(13.4375 * var(--ui-unit))), calc(6.5625 * var(--ui-unit)));
 }
-
-.login-form-block {
-  width: 410px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-}
-
-.login-form-heading p {
-  color: var(--color-neutral-500);
-  margin: var(--space-1) 0 0;
-}
-
-.login-form-heading h1 {
-  margin: 0;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.login-error {
-  background: var(--color-red-50);
-  border: 1px solid var(--color-red-300);
-  color: var(--color-red-600);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-body-sm);
-}
-
-/* .field, .field-input, .field-input-wrapper, .field-icon-toggle
-   sekarang dari components.css (Fase 2) — dihapus dari sini supaya
-   tidak duplikat/konflik. */
-
+.login-form-block { width: 100%; min-width: 0; }
+.login-wrapper-split .text-display-xs { font-size: calc(2 * var(--ui-unit)); line-height: 1.5; }
+.login-wrapper-split .text-body-sm { font-size: calc(0.875 * var(--ui-unit)); line-height: 1.5; }
+.login-wrapper-split .text-caption-md { font-size: calc(0.75 * var(--ui-unit)); line-height: 1.5; }
+.login-form-heading { margin-bottom: clamp(calc(1.5 * var(--ui-unit)), 3.75vw, calc(3 * var(--ui-unit))); text-align: center; }
+.login-form-heading h1 { margin: 0; }
+.login-form-heading p { margin: calc(0.875 * var(--ui-unit)) 0 0; color: var(--color-login-muted); }
+.login-form { display: flex; flex-direction: column; gap: calc(1.5 * var(--ui-unit)); }
+/* Existing form gap 24px + 6px = 30px from the remember/forgot row. */
+.login-form .login-submit { margin-block-start: calc(0.375 * var(--ui-unit)); }
 .login-form-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: calc(0.5 * var(--ui-unit));
+  margin-top: calc(-1 * var(--ui-unit));
 }
-
-.login-remember {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-neutral-700);
-}
-
-.login-forgot {
-  color: var(--color-red-600);
-  text-decoration: none;
-}
-
-.login-forgot:hover {
-  text-decoration: underline;
-}
-
+.login-forgot { color: var(--color-red-600); text-decoration: none; }
+.login-forgot:hover { text-decoration: underline; }
 .login-footer {
+  align-self: end;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: calc(0.5 * var(--ui-unit)) calc(1 * var(--ui-unit));
+  flex-wrap: wrap;
+  color: var(--color-login-muted);
+}
+.login-footer a { color: inherit; text-decoration: none; white-space: nowrap; }
+.login-footer a:hover { text-decoration: underline; }
+.login-right {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  padding: var(--login-panel-padding);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  color: var(--color-neutral-400);
 }
-
-.login-footer a {
-  color: var(--color-neutral-400);
-  text-decoration: none;
-}
-
-/* ---------- Kolom kanan (panel brand) ---------- */
-
-.login-right {
-  width: 510px;
-  border-radius: var(--radius-xl);
-  background: var(--color-red-600);
-  position: relative;
-  overflow: hidden;
-  color: var(--color-neutral-white);
-  padding: var(--space-6);
-  display: flex;
-  align-items: flex-end;
-}
-
 .login-right-decoration {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: 105.3%;
+  height: auto;
+  aspect-ratio: 537 / 741;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+  color: var(--color-red-500);
   pointer-events: none;
 }
-
-.login-right-content {
-  position: relative;
-  z-index: 1;
+.login-right-decoration svg { width: 100%; height: 100%; }
+.login-right-content { position: relative; width: 100%; min-width: 0; }
+.login-right-content > h2 { margin: 0 0 calc(0.875 * var(--ui-unit)); }
+.login-right-content > p { margin: 0 0 calc(2 * var(--ui-unit)); }
+.login-preview { position: relative; }
+.login-preview-card { padding: calc(0.64625 * var(--ui-unit)); }
+.login-preview-table { border-radius: calc(0.375 * var(--ui-unit)); overflow: hidden; }
+.login-preview-row {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+  align-items: center;
+  padding: calc(0.323125 * var(--ui-unit)) calc(0.430625 * var(--ui-unit));
+  border-bottom: calc(0.026875 * var(--ui-unit)) solid var(--color-login-preview-divider);
+  background: var(--color-login-preview-row);
 }
-
-.login-right-content h2 {
-  margin: 0;
+.login-preview-header { background: transparent; }
+.login-preview-header p + p { margin-top: calc(0.1075 * var(--ui-unit)); }
+.login-preview-name { flex: 1; min-width: 0; }
+.login-preview-action { display: inline-flex; align-items: center; gap: calc(0.323125 * var(--ui-unit)); flex-shrink: 0; }
+.login-preview-action svg { width: calc(0.5625 * var(--ui-unit)); height: calc(0.5625 * var(--ui-unit)); flex-shrink: 0; }
+.login-chevron-right { transform: rotate(-90deg); }
+.login-next-agenda {
+  margin-top: calc(0.323125 * var(--ui-unit));
+  border: calc(0.026875 * var(--ui-unit)) solid var(--color-login-preview-divider);
+  border-radius: calc(0.323125 * var(--ui-unit));
+  padding: calc(0.323125 * var(--ui-unit)) calc(0.430625 * var(--ui-unit));
 }
-
-.login-right-content p {
-  margin: 0;
-  opacity: 0.9;
+.login-next-agenda > p { margin-bottom: calc(0.1075 * var(--ui-unit)); }
+.login-next-agenda .ui-inline-meta { gap: calc(0.323125 * var(--ui-unit)); }
+.login-next-agenda .ui-inline-meta-dot { color: var(--color-login-preview-text); }
+.login-active-agenda {
+  position: relative;
+  z-index: 2;
+  margin-inline: calc(-0.64625 * var(--ui-unit) - var(--login-callout-overhang));
+  margin-bottom: calc(0.354375 * var(--ui-unit));
+  border-width: calc(0.030625 * var(--ui-unit));
+  padding: calc(0.36625 * var(--ui-unit)) calc(0.488125 * var(--ui-unit));
 }
+.login-active-agenda > p { margin-bottom: calc(0.121875 * var(--ui-unit)); }
+.login-active-agenda .ui-inline-meta { gap: calc(0.36625 * var(--ui-unit)); }
+.login-preview .ui-inline-meta { display: flex; flex-wrap: wrap; }
+.login-preview .text-preview { font-size: calc(0.376875 * var(--ui-unit)); line-height: calc(0.565625 * var(--ui-unit)); }
+.login-preview .text-preview-callout { font-size: calc(0.4275 * var(--ui-unit)); line-height: calc(0.64125 * var(--ui-unit)); }
 
-.login-preview-card {
-  width: 100%;
-  border-radius: var(--radius-md);
-  box-shadow: 0 20px 40px rgba(4, 4, 4, 0.25);
+/* Auth recovery pages share base styling, but keep their existing controls. */
+.login-wrapper-single { display: flex; max-width: calc(38.75 * var(--ui-unit)); margin: var(--page-gutter-block) auto; width: calc(100% - 2 * var(--page-gutter-inline)); }
+.login-wrapper-single .login-left { width: 100%; }
+.login-wrapper-single .login-form-block { max-width: calc(25.625 * var(--ui-unit)); margin: auto; display: flex; flex-direction: column; gap: calc(1.5 * var(--ui-unit)); }
+.login-wrapper-single .login-form-heading { margin-bottom: 0; }
+.login-info, .login-error {
+  padding: calc(0.5 * var(--ui-unit)) calc(0.75 * var(--ui-unit));
+  border-radius: calc(0.25 * var(--ui-unit));
+  font-size: calc(0.875 * var(--ui-unit));
+  line-height: calc(1.3125 * var(--ui-unit));
+}
+.login-error {
+  margin-bottom: calc(1.5 * var(--ui-unit));
+  background: var(--color-red-50);
+  border: calc(0.0625 * var(--ui-unit)) solid var(--color-red-300);
+  color: var(--color-red-600);
+}
+.login-info { background: var(--color-neutral-75); border: calc(0.0625 * var(--ui-unit)) solid var(--color-neutral-150); color: var(--color-neutral-700); }
+.login-debug-link { background: var(--color-orange-50); border-color: var(--color-orange-300); overflow-wrap: anywhere; }
+.login-debug-link a { color: var(--color-red-600); }
+
+/* Reflow follows the CSS viewport, including changes caused by browser zoom. */
+@media (max-width: 56rem) {
+  .login-wrapper-split { grid-template-columns: minmax(0, 1fr); }
+  .login-main { padding-inline: clamp(calc(1 * var(--ui-unit)), 8vw, calc(6.5625 * var(--ui-unit))); }
+  .login-right { padding-block: clamp(calc(2 * var(--ui-unit)), 8vw, calc(4 * var(--ui-unit))); }
+}
+@media (max-width: 37.5rem) {
+  .login-form-meta { flex-wrap: wrap; }
+  .login-main { padding-inline: clamp(calc(0.5 * var(--ui-unit)), 4vw, calc(1.5 * var(--ui-unit))); }
+  .login-form-block, .login-right-content { overflow-wrap: anywhere; }
+  .login-preview-action { flex-shrink: 1; }
 }

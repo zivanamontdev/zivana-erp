@@ -10,7 +10,11 @@ class AuthMiddleware
     public function handle(): void
     {
         if (!empty($_SESSION['user_id'])) {
-            return;
+            $user = (new User())->find((int) $_SESSION['user_id']);
+            if ($user && $user['is_active']) return;
+            // A deleted/deactivated account must not retain an existing session.
+            $_SESSION = [];
+            $this->redirectToLogin();
         }
 
         if ($this->attemptRememberLogin()) {

@@ -66,7 +66,7 @@ class KaryawanController extends Controller
 
         $roleId = $this->roleIdForJabatan($jabatanId);
 
-        if ($nama === '' || $jabatanId === 0 || $email === '' || strlen($password) < 8 || $password !== $passwordConfirmation || $roleId === null) {
+        if ($nama === '' || $jabatanId === 0 || !filter_var($email, FILTER_VALIDATE_EMAIL) || !employeePasswordIsValid($password) || $password !== $passwordConfirmation || $roleId === null) {
             $this->redirect('/karyawan');
             return;
         }
@@ -105,20 +105,25 @@ class KaryawanController extends Controller
 
         $roleId = $this->roleIdForJabatan($jabatanId);
 
-        if ($nama === '' || $jabatanId === 0 || $email === '' || $roleId === null) {
+        if ($nama === '' || $jabatanId === 0 || !filter_var($email, FILTER_VALIDATE_EMAIL) || $roleId === null) {
             $this->redirect('/karyawan');
             return;
         }
 
-        (new Karyawan())->update((int) $id, ['jabatan_id' => $jabatanId, 'nama' => $nama]);
-
         $db = Database::getInstance();
-        $stmt = $db->prepare('UPDATE users SET email = :email, role_id = :role_id WHERE karyawan_id = :karyawan_id');
-        $stmt->execute([
-            'email' => $email,
-            'role_id' => $roleId,
-            'karyawan_id' => (int) $id,
-        ]);
+        $db->beginTransaction();
+        try {
+            (new Karyawan())->update((int) $id, ['jabatan_id' => $jabatanId, 'nama' => $nama]);
+            $stmt = $db->prepare('UPDATE users SET email = :email, role_id = :role_id WHERE karyawan_id = :karyawan_id');
+            $stmt->execute([
+                'email' => $email, 'role_id' => $roleId,
+                'karyawan_id' => (int) $id,
+            ]);
+            $db->commit();
+        } catch (Throwable $e) {
+            $db->rollBack();
+            throw $e;
+        }
 
         $this->redirect('/karyawan');
     }
@@ -131,7 +136,7 @@ class KaryawanController extends Controller
         $password = (string) $this->input('password', '');
         $passwordConfirmation = (string) $this->input('password_confirmation', '');
 
-        if (strlen($password) >= 8 && $password === $passwordConfirmation) {
+        if (employeePasswordIsValid($password) && $password === $passwordConfirmation) {
             $stmt = Database::getInstance()->prepare(
                 'UPDATE users SET password_hash = :hash, remember_token = NULL WHERE karyawan_id = :karyawan_id'
             );
@@ -146,13 +151,47 @@ class KaryawanController extends Controller
         $this->middleware(AuthMiddleware::class);
         $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'edit');
 
-        // Soft-delete karyawan DAN nonaktifkan akun login-nya sekaligus,
-        // supaya karyawan yang dihapus tidak bisa login lagi.
-        (new Karyawan())->update((int) $id, ['is_active' => 0]);
+        $db = Database::getInstance();
+        $db->beginTransaction();
+        try {
+            // Delete the linked login first; FK rules preserve report records.
+            $stmt = $db->prepare('DELETE FROM users WHERE karyawan_id = :id');
+            $stmt->execute(['id' => (int) $id]);
+            (new Karyawan())->delete((int) $id);
+            $db->commit();
+        } catch (Throwable $e) {
+            $db->rollBack();
+            throw $e;
+        }
+        $this->redirect('/karyawan');
+    }
 
-        $stmt = Database::getInstance()->prepare('UPDATE users SET is_active = 0 WHERE karyawan_id = :karyawan_id');
-        $stmt->execute(['karyawan_id' => (int) $id]);
+    public function deactivate(string $id): void
+    {
+        $this->setActive($id, false);
+    }
 
+    public function activate(string $id): void
+    {
+        $this->setActive($id, true);
+    }
+
+    private function setActive(string $id, bool $active): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Daftar Karyawan', 'edit');
+
+        $db = Database::getInstance();
+        $db->beginTransaction();
+        try {
+            (new Karyawan())->update((int) $id, ['is_active' => (int) $active]);
+            $stmt = $db->prepare('UPDATE users SET is_active = :is_active, remember_token = NULL WHERE karyawan_id = :id');
+            $stmt->execute(['id' => (int) $id, 'is_active' => (int) $active]);
+            $db->commit();
+        } catch (Throwable $e) {
+            $db->rollBack();
+            throw $e;
+        }
         $this->redirect('/karyawan');
     }
 

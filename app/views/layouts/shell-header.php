@@ -43,8 +43,8 @@ $navGroups = [
                 'label' => 'Kurikulum',
                 'icon' => 'icon_book_marked',
                 'items' => [
-                    ['key' => 'manajemen-template', 'label' => 'Manajemen Template', 'href' => '/kurikulum/manajemen-template', 'perm' => ['Sekolah', 'Manajemen Template']],
-                    ['key' => 'periode-penilaian', 'label' => 'Periode Penilaian', 'href' => '/kurikulum/periode-penilaian', 'perm' => ['Sekolah', 'Periode Penilaian']],
+                    ['key' => 'manajemen-template', 'label' => 'Manajemen Rapor', 'href' => '/kurikulum/manajemen-template', 'perm' => ['Sekolah', 'Manajemen Template']],
+                    ['key' => 'periode-penilaian', 'label' => 'Periode Rapor', 'href' => '/kurikulum/periode-penilaian', 'perm' => ['Sekolah', 'Periode Penilaian']],
                 ],
             ],
         ],
@@ -124,6 +124,7 @@ foreach ($navGroups as $gi => $group) {
         foreach ($entry['items'] as $item) {
             if ($item['key'] === $activeNavItem) {
                 $navGroups[$gi]['entries'][$ei]['is_open'] = true;
+                $navGroups[$gi]['entries'][$ei]['is_active'] = true;
             }
         }
     }
@@ -132,22 +133,32 @@ foreach ($navGroups as $gi => $group) {
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<script>
+// Restore before styles/body are parsed to avoid an expanded-sidebar flash.
+try {
+    document.documentElement.classList.toggle('sidebar-collapsed', localStorage.getItem('zivana-erp-sidebar-collapsed') === '1');
+} catch (_) {}
+</script>
 <?php require VIEW_PATH . '/layouts/head.php'; ?>
 </head>
 <body>
 <div class="app-shell">
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="<?= BASE_PATH ?>/assets/images/logo-colored.png" alt="<?= e(APP_NAME) ?>">
+            <img src="<?= BASE_PATH ?>/assets/images/logo-colored.png" class="sidebar-brand-logo" alt="<?= e(APP_NAME) ?>">
             <button type="button" class="sidebar-collapse-btn" data-sidebar-toggle aria-label="Ciutkan sidebar">
                 <?= icon('icon_minimize') ?>
+                <img src="data:image/png;base64,<?= base64_encode(file_get_contents(ROOT_PATH . '/public/assets/images/logo-icon.png')) ?>" class="sidebar-expand-logo" width="24" height="24" loading="eager" decoding="sync" alt="" aria-hidden="true">
             </button>
         </div>
 
-        <nav class="nav-menu">
+        <nav class="nav-menu" id="main-navigation" aria-label="Navigasi utama">
             <?php foreach ($navGroups as $group): ?>
             <?php $groupHasOpenSubmenu = !empty(array_filter($group['entries'], fn($e) => $e['type'] === 'submenu' && !empty($e['is_open']))); ?>
             <div class="nav-group<?= $groupHasOpenSubmenu ? ' is-open' : '' ?>">
+                <?= uiText($group['label'], 'body-sm', [
+                    'tag' => 'p', 'weight' => 'regular', 'tone' => 'muted', 'class' => 'nav-group-label',
+                ]) ?>
                 <?php foreach ($group['entries'] as $entry): ?>
                     <?php if ($entry['type'] === 'item'): ?>
                     <a href="<?= BASE_PATH . e($entry['href']) ?>" class="nav-item<?= $activeNavItem === $entry['key'] ? ' is-active' : '' ?>">
@@ -155,7 +166,7 @@ foreach ($navGroups as $gi => $group) {
                         <span class="nav-label"><?= e($entry['label']) ?></span>
                     </a>
                     <?php else: ?>
-                    <button type="button" class="nav-group-toggle" data-nav-toggle>
+                    <button type="button" class="nav-group-toggle<?= !empty($entry['is_active']) ? ' is-active' : '' ?>" data-nav-toggle>
                         <?= icon($entry['icon']) ?>
                         <span class="nav-label"><?= e($entry['label']) ?></span>
                         <span class="nav-chevron"><?= icon('icon_chevron') ?></span>
@@ -163,6 +174,7 @@ foreach ($navGroups as $gi => $group) {
                     <div class="nav-submenu">
                         <?php foreach ($entry['items'] as $item): ?>
                         <a href="<?= BASE_PATH . e($item['href']) ?>" class="nav-item<?= $activeNavItem === $item['key'] ? ' is-active' : '' ?>">
+                            <span class="nav-submenu-connector" aria-hidden="true"><?= icon('curved-submenu') ?></span>
                             <span class="nav-label"><?= e($item['label']) ?></span>
                         </a>
                         <?php endforeach; ?>
@@ -177,7 +189,10 @@ foreach ($navGroups as $gi => $group) {
     <div class="content">
         <header class="page-header">
             <div class="page-header-row page-header-toolbar">
-                <input type="search" class="search-field" placeholder="Cari">
+                <?= uiField('header_search', 'Cari', [
+                    'type' => 'search', 'placeholder' => 'Cari', 'hideLabel' => true,
+                    'icon' => 'icon_search', 'iconPosition' => 'left', 'class' => 'search-field',
+                ]) ?>
                 <!--
                     [FIX] Widget profil user (nama + role + avatar inisial +
                     chevron) — sebelumnya salah diimplementasikan sebagai

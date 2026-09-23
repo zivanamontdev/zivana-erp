@@ -7,7 +7,7 @@
  * - $kelas, $canEdit, $guruMuridGroups, $guruTersedia, $muridDiKelasIni, $assignedElsewhere
  */
 $headerActions = $canEdit
-    ? '<button type="button" class="btn btn-primary" data-modal-open="modal-tambah-guru">+ Tambah Guru</button>'
+    ? '<button type="button" class="ui-button ui-button--primary" data-modal-open="modal-tambah-guru">+ Tambah Guru</button>'
     : '';
 
 require VIEW_PATH . '/layouts/shell-header.php';
@@ -74,7 +74,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <div class="assign-list-card" data-assign-list>
                 <div class="assign-list-header">
                     <span class="text-body-sm font-bold">Daftar Murid</span>
-                    <button type="button" class="btn btn-tertiary" data-assign-add>+ Tambah Murid</button>
+                    <button type="button" class="ui-button ui-button--outline" data-assign-add>+ Tambah Murid</button>
                 </div>
                 <div class="assign-list-rows" data-assign-rows>
                     <?php foreach ($group['murid'] as $m): ?>
@@ -102,8 +102,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 </template>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
+                <button type="submit" class="ui-button ui-button--primary">Simpan</button>
             </div>
         </form>
     </div>
@@ -129,7 +129,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <div class="assign-list-card" data-assign-list>
                 <div class="assign-list-header">
                     <span class="text-body-sm font-bold">Daftar Murid</span>
-                    <button type="button" class="btn btn-tertiary" data-assign-add>+ Tambah Murid</button>
+                    <button type="button" class="ui-button ui-button--outline" data-assign-add>+ Tambah Murid</button>
                 </div>
                 <div class="assign-list-rows" data-assign-rows></div>
                 <template data-assign-template>
@@ -145,8 +145,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 </template>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
+                <button type="submit" class="ui-button ui-button--primary">Simpan</button>
             </div>
         </form>
     </div>

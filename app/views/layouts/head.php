@@ -15,8 +15,11 @@ $pageTitle = $pageTitle ?? APP_NAME;
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/tokens.css">
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/components.css">
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/app-shell.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/tokens.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/tokens.css') ?>">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/components.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/components.css') ?>">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/app-shell.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/app-shell.css') ?>">
+<style id="zivana-color-tokens">
+<?= colorCssVariables() ?>
+</style>

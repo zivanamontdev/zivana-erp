@@ -36,9 +36,77 @@ function icon(string $name, string $class = ''): string
 /**
  * Escape output HTML singkat.
  */
+/** Password policy for employee creation and password changes. */
+function employeePasswordIsValid(string $password): bool
+{
+    return mb_strlen($password) >= 8
+        && preg_match('/[A-Z]/', $password) === 1
+        && preg_match('/[0-9]/', $password) === 1
+        && preg_match('/[\p{P}\p{S}]/u', $password) === 1;
+}
+
 function e(?string $value): string
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Ambil seluruh token warna aplikasi. Fallback require membuat helper ini
+ * tetap bisa dipakai oleh script CLI kecil yang belum memuat config.php.
+ */
+function colorTokens(): array
+{
+    static $tokens = null;
+
+    if ($tokens === null) {
+        if (defined('COLOR_TOKENS')) {
+            $tokens = COLOR_TOKENS;
+        } else {
+            $path = defined('CONFIG_PATH')
+                ? CONFIG_PATH . '/colors.php'
+                : dirname(__DIR__, 2) . '/config/colors.php';
+            $tokens = require $path;
+        }
+    }
+
+    return $tokens;
+}
+
+/**
+ * Ambil satu token warna berdasarkan nama, mis. neutral-50 atau
+ * login-preview-divider.
+ */
+function colorToken(string $name): string
+{
+    $tokens = colorTokens();
+
+    if (!array_key_exists($name, $tokens)) {
+        throw new InvalidArgumentException("Token warna tidak ditemukan: {$name}");
+    }
+
+    return $tokens[$name];
+}
+
+/**
+ * Render token warna sebagai CSS custom properties. Nilai HEX tetap hanya
+ * berada di config/colors.php, bukan di stylesheet komponen.
+ */
+function colorCssVariables(): string
+{
+    $lines = [':root {'];
+
+    foreach (colorTokens() as $name => $value) {
+        if (!preg_match('/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/', $value)) {
+            throw new RuntimeException("Format token warna tidak valid: {$name}");
+        }
+
+        $cssName = preg_replace('/[^a-z0-9-]+/i', '-', (string) $name);
+        $lines[] = '  --color-' . $cssName . ': ' . $value . ';';
+    }
+
+    $lines[] = '}';
+
+    return implode("\n", $lines);
 }
 
 /**
@@ -71,12 +139,16 @@ function initials(string $name): string
  * tapi tidak ada tooltip/konten yang ter-crawl untuk isinya — dirender
  * statis/dekoratif, tidak ada perilaku klik/hover khusus.
  */
-function breadcrumb(string $parent, string $current): string
+function breadcrumb(string $parent, string $current, string ...$descendants): string
 {
-    return '<span class="breadcrumb-parent">' . e($parent) . '</span>'
-        . icon('icon_chevron', 'breadcrumb-separator')
-        . '<span class="breadcrumb-current">' . e($current) . '</span>'
-        . icon('icon_tooltip', 'breadcrumb-info');
+    $segments = array_merge([$parent, $current], $descendants);
+    $html = '';
+    foreach ($segments as $index => $label) {
+        if ($index > 0) $html .= icon('icon_chevron', 'breadcrumb-separator');
+        $class = $index === count($segments) - 1 ? 'breadcrumb-current' : 'breadcrumb-parent';
+        $html .= '<span class="' . $class . '">' . e($label) . '</span>';
+    }
+    return $html . icon('icon_tooltip', 'breadcrumb-info');
 }
 
 /**

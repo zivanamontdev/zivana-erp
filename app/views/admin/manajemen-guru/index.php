@@ -10,20 +10,18 @@
  */
 $headerActions = '';
 
-require VIEW_PATH . '/layouts/shell-header.php';
+ob_start();
 ?>
 <div class="list-toolbar">
     <form method="GET" action="<?= BASE_PATH ?>/manajemen-guru" class="list-filter">
-        <input type="text" name="q" class="field-input" placeholder="Cari" value="<?= e($search) ?>">
-        <select name="jabatan_id" class="field-input" onchange="this.form.submit()">
-            <option value="">Semua Jabatan</option>
-            <?php foreach ($jabatanOptions as $j): ?>
-            <option value="<?= $j['id'] ?>" <?= $jabatanId == $j['id'] ? 'selected' : '' ?>><?= e($j['nama']) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <button type="submit" class="btn btn-tertiary">Cari</button>
+        <?= uiField('q', 'Cari', ['type' => 'search', 'value' => $search, 'placeholder' => 'Cari', 'icon' => 'icon_search', 'iconPosition' => 'left', 'hideLabel' => true, 'id' => 'list-search']) ?>
+        <?= uiFilter('jabatan_id', 'Jabatan', ['' => 'Semua Jabatan'] + array_column($jabatanOptions, 'nama', 'id'), ['value' => $jabatanId, 'id' => 'filter-jabatan_id', 'marginVertical' => 0, 'attributes' => ['onchange' => 'this.form.submit()']]) ?>
     </form>
 </div>
+<?php
+$headerActions = ob_get_clean() . $headerActions;
+require VIEW_PATH . '/layouts/shell-header.php';
+?>
 
 <?php if (empty($guruList)): ?>
 <p class="text-body-sm">Belum ada karyawan dengan role Guru. Tambahkan lewat modul Daftar Karyawan (pastikan jabatannya diberi role "Guru").</p>
@@ -72,7 +70,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <div class="assign-list-card" data-assign-list>
                 <div class="assign-list-header">
                     <span class="text-body-sm font-bold">Daftar Murid</span>
-                    <button type="button" class="btn btn-tertiary" data-assign-add>+ Tambah Murid</button>
+                    <button type="button" class="ui-button ui-button--outline" data-assign-add>+ Tambah Murid</button>
                 </div>
                 <div class="assign-list-rows" data-assign-rows>
                     <?php foreach ($guru['murid'] as $m): ?>
@@ -98,8 +96,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 </template>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
+                <button type="submit" class="ui-button ui-button--primary">Simpan</button>
             </div>
         </form>
     </div>

@@ -11,7 +11,7 @@
 $headerActions = '';
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 
 <div class="dashboard-banner">
     <span class="text-headline-sm font-bold">Halo! <?= e($_SESSION['display_name'] ?? '') ?></span>

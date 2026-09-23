@@ -36,8 +36,8 @@ class PeriodePenilaianController extends Controller
         $stmt->execute($params);
 
         $this->view('admin.periode-penilaian.index', [
-            'pageTitle' => 'Periode Penilaian',
-            'breadcrumb' => breadcrumb('Kurikulum', 'Periode Penilaian'),
+            'pageTitle' => 'Periode Rapor',
+            'breadcrumb' => breadcrumb('Kurikulum', 'Periode Rapor'),
             'activeNavItem' => 'periode-penilaian',
             'periodeList' => $stmt->fetchAll(),
             'tipeOptions' => self::TIPE_OPTIONS,

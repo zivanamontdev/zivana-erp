@@ -13,7 +13,7 @@ $statusLabel = [
 ];
 
 $headerActions = $canEdit
-    ? '<button type="button" class="btn btn-primary" data-modal-open="modal-tambah-sesi">+ Tambah Sesi Pembagian</button>'
+    ? '<button type="button" class="ui-button ui-button--primary" data-modal-open="modal-tambah-sesi">+ Tambah Sesi Pembagian</button>'
     : '';
 
 require VIEW_PATH . '/layouts/shell-header.php';
@@ -111,8 +111,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
             </div>
             <p class="text-caption-md">Membuat sesi akan otomatis membuat baris rapor kosong untuk semua murid berstatus "Bersekolah", ter-assign ke guru masing-masing (dari data Manajemen Guru/Kelas).</p>
             <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Buat Sesi</button>
+                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
+                <button type="submit" class="ui-button ui-button--primary">Buat Sesi</button>
             </div>
         </form>
     </div>

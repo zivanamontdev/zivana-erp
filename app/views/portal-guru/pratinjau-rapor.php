@@ -8,12 +8,12 @@
  * Variabel dari PengisianRaporController::pratinjau(): $rapor, $areas, $legenda
  */
 $headerActions = $rapor['status'] === 'belum_diisi'
-    ? '<a href="' . BASE_PATH . '/portal-guru/rapor/' . (int) $rapor['id'] . '" class="btn btn-tertiary">Kembali Mengisi</a>'
+    ? '<a href="' . BASE_PATH . '/portal-guru/rapor/' . (int) $rapor['id'] . '" class="ui-button ui-button--outline">Kembali Mengisi</a>'
     : '';
 
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/rapor-document.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/rapor-document.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/rapor-document.css') ?>">
 
 <div class="rapor-toolbar">
     <span class="rapor-pagination">Halaman 1 dari 4</span>

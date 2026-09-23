@@ -14,7 +14,7 @@ $pageTitle = 'Lupa Kata Sandi';
 <html lang="id">
 <head>
 <?php require VIEW_PATH . '/layouts/head.php'; ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/login.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/login.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/login.css') ?>">
 </head>
 <body class="login-body">
     <div class="login-wrapper login-wrapper-single">
@@ -47,7 +47,7 @@ $pageTitle = 'Lupa Kata Sandi';
                         <input type="email" id="email" name="email" class="field-input" placeholder="Isi email anda" required autofocus>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block">Kirim Tautan Reset</button>
+                    <button type="submit" class="ui-button ui-button--primary ui-control--full">Kirim Tautan Reset</button>
                 </form>
                 <?php endif; ?>
 

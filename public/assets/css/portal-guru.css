@@ -82,8 +82,8 @@
 }
 
 .dashboard-murid-row-actions svg {
-  width: 16px;
-  height: 16px;
+  width: calc(1 * var(--ui-unit));
+  height: calc(1 * var(--ui-unit));
   color: var(--color-neutral-300);
   transform: rotate(-90deg);
 }
@@ -119,14 +119,14 @@
 
 .focus-shell {
   min-height: 100vh;
-  background: var(--color-red-50);
+  background: var(--color-page-background);
   /* 64px vertikal: tidak ada token spacing yang cocok (skala berhenti
      di --space-6/24px), dikonfirmasi dari posisi y=64 kartu di SVG. */
-  padding: 64px var(--space-6);
+  padding: calc(4 * var(--ui-unit)) var(--space-6);
 }
 
 .focus-column {
-  max-width: 980px;
+  max-width: calc(61.25 * var(--ui-unit));
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -135,7 +135,7 @@
 
 .pengisian-header-card {
   background: var(--color-neutral-white);
-  border-radius: 16px;
+  border-radius: calc(1 * var(--ui-unit));
   padding: var(--space-5) var(--space-6);
   position: relative;
 }
@@ -145,7 +145,7 @@
 }
 
 .pengisian-header-card .field {
-  max-width: 320px;
+  max-width: calc(20 * var(--ui-unit));
   margin-bottom: var(--space-3);
 }
 
@@ -154,6 +154,9 @@
   top: var(--space-5);
   right: var(--space-6);
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--space-3);
 }
 
@@ -177,7 +180,7 @@
 
 .pengisian-rapor-progress-bar {
   flex: 1;
-  height: 4px;
+  height: calc(0.25 * var(--ui-unit));
   background: var(--color-neutral-75);
   border-radius: 2px;
   overflow: hidden;
@@ -191,7 +194,7 @@
 .pengisian-kategori {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: calc(0.25 * var(--ui-unit));
 }
 
 .pengisian-kategori-header {
@@ -218,17 +221,17 @@
   justify-content: space-between;
   gap: var(--space-4);
   background: var(--color-neutral-white);
-  border-radius: 16px;
+  border-radius: calc(1 * var(--ui-unit));
   padding: var(--space-4) var(--space-6);
 }
 
 .pengisian-item-row .field-input {
-  max-width: 220px;
+  max-width: calc(13.75 * var(--ui-unit));
 }
 
 .pengisian-catatan-guru {
   background: var(--color-neutral-white);
-  border-radius: 16px;
+  border-radius: calc(1 * var(--ui-unit));
   padding: var(--space-4) var(--space-6);
 }
 
@@ -236,12 +239,23 @@
   display: none;
 }
 
-/* ---------- Responsif — Pengisian Rapor WAJIB jalan baik di HP ---------- */
-@media (max-width: 480px) {
-  .focus-shell {
-    padding: var(--space-4);
-  }
+.pengisian-header-actions > .ui-button,
+.pengisian-actions > .ui-button { margin-block: 0; }
 
+.focus-shell { min-height: 100svh; padding: var(--page-gutter-block) var(--page-gutter-inline); }
+.focus-column { width: 100%; max-width: calc(61.25 * var(--ui-unit)); min-width: 0; }
+.focus-column > *, .pengisian-item-row > * { min-width: 0; }
+.dashboard-banner, .dashboard-murid-row, .dashboard-murid-row-actions { flex-wrap: wrap; }
+.pengisian-header-actions { position: static; flex-wrap: wrap; margin-bottom: var(--space-4); }
+.pengisian-rapor-progress { flex-wrap: wrap; }
+.pengisian-rapor-progress-bar { min-width: 4rem; }
+@media (max-width: 56rem) {
+  .pengisian-item-row { flex-direction: column; align-items: stretch; }
+  .pengisian-item-row .field-input { max-width: none; }
+}
+
+/* ---------- Responsif — Pengisian Rapor WAJIB jalan baik di HP ---------- */
+@media (max-width: 30rem) {
   .pengisian-header-actions {
     display: none;
   }
@@ -259,7 +273,10 @@
      bawah HANYA di mode mobile (desktop di toolbar atas kartu header). */
   .pengisian-actions {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
     gap: var(--space-3);
     position: sticky;
     bottom: 0;
@@ -267,7 +284,8 @@
     padding: var(--space-3) 0;
   }
 
-  .pengisian-actions .btn {
-    width: 100%;
+  .pengisian-actions .ui-button {
+    flex: 1 1 auto;
+    width: auto;
   }
 }

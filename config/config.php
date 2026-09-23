@@ -53,6 +53,12 @@ function envValue(array $env, string $key, $default = null)
 
 $env = loadEnvFile(ROOT_PATH . '/.env');
 
+// Palet warna dipisahkan dari konfigurasi environment supaya semua nilai
+// warna punya satu sumber kebenaran dan dapat dipakai ulang oleh PHP maupun
+// CSS variable yang dirender di layouts/head.php.
+$colorTokens = require CONFIG_PATH . '/colors.php';
+define('COLOR_TOKENS', $colorTokens);
+
 // --- Database ---
 define('DB_HOST', envValue($env, 'DB_HOST'));
 define('DB_PORT', envValue($env, 'DB_PORT', '3306'));

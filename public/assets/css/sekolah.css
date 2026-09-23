@@ -12,7 +12,35 @@
 
 .sekolah-media-row {
   display: grid;
-  grid-template-columns: 160px 1fr 1fr auto;
+  grid-template-columns: calc(10 * var(--ui-unit)) 1fr 1fr auto;
   gap: var(--space-3);
   align-items: center;
 }
+.sekolah-tahun-ajaran { flex-wrap: wrap; }
+.sekolah-media-row > * { min-width: 0; }
+@media (max-width: 56rem) {
+  .sekolah-media-row { grid-template-columns: minmax(0, 1fr); }
+}
+.school-year-current { display: block; padding: var(--space-2) var(--space-3); font-size: var(--font-size-body-sm); color: var(--color-page-title); overflow-wrap: anywhere; }
+.sekolah-tabs-nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.sekolah-detail-grid, .sekolah-media-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-6); row-gap: var(--space-5); }
+.sekolah-detail-full { grid-column: 1 / -1; }
+.sekolah-contact-details { display: grid; gap: var(--space-5); }
+.sekolah-media-details { position: relative; padding-left: calc(1.25 * var(--ui-unit)); grid-template-columns: minmax(0, 1fr) minmax(0, calc((100% - var(--space-6) + 1.25 * var(--ui-unit)) / 2)); }
+.sekolah-media-details::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: calc(0.25 * var(--ui-unit)); background: var(--color-neutral-75); }
+.sekolah-media-identity { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); min-width: 0; }
+@media (max-width: 56rem) {
+  .sekolah-detail-grid, .sekolah-media-details { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 37.5rem) {
+  .sekolah-media-identity { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+}
+.sekolah-media-edit-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) auto; gap: var(--space-6); padding-left: calc(1.25 * var(--ui-unit)); align-items: start; }
+.sekolah-media-edit-row::before { content: ''; position: absolute; left: 0; top: calc(1.375 * var(--ui-unit)); width: calc(0.25 * var(--ui-unit)); height: calc(2.8125 * var(--ui-unit) + 2px); background: var(--color-neutral-75); }
+.sekolah-media-edit-row > .ui-button { margin-top: calc(1.375 * var(--ui-unit)); min-height: calc(2.8125 * var(--ui-unit) + 2px); }
+@media (max-width: 56rem) {
+  .sekolah-media-edit-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: var(--space-5); }
+  .sekolah-media-edit-row > .ui-field { grid-column: 1; }
+  .sekolah-media-edit-row > .ui-button { grid-column: 2; grid-row: 1; }
+}
+.sekolah-tabs { margin-top: var(--space-4); }

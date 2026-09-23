@@ -1,116 +1,64 @@
 /*
- * Design Token — Zivana ERP
- * Sumber: cookbook/design-system.md bagian 1.1 (Warna), 1.2 (Tipografi), 1.3 (Spacing & Radius)
- * Nilai di sini adalah salinan persis dari dokumen desain. Jangan ubah nilai
- * tanpa mengubah cookbook/design-system.md terlebih dahulu.
+ * Design Token - Zivana ERP
+ *
+ * Token warna tidak ditulis ulang di file ini. Nilai HEX bersumber dari
+ * config/colors.php dan di-render sebagai CSS custom properties oleh
+ * layouts/head.php. Dengan begitu PHP dan stylesheet memakai sumber warna
+ * yang sama.
  */
 
+html { font-size: 100%; }
+
 :root {
-  /* ---------- 1.1 Warna — Neutral ---------- */
-  --color-neutral-50: #FCFCFD;
-  --color-neutral-75: #E4E3E5;
-  --color-neutral-100: #CBCBCD;
-  --color-neutral-150: #B4B3B6;
-  --color-neutral-200: #9D9C9F;
-  --color-neutral-300: #868689;
-  --color-neutral-400: #717074;
-  --color-neutral-500: #5C5B5F;
-  --color-neutral-600: #47474B;
-  --color-neutral-700: #343338;
-  --color-neutral-800: #222126;
-  --color-neutral-900: #111015;
-  --color-neutral-black: #040404;
-  --color-neutral-white: #FFFFFF;
-
-  /* ---------- 1.1 Warna — Red (brand) ---------- */
-  --color-red-50: #FFF2F0;
-  --color-red-100: #FED2CD;
-  --color-red-200: #F8B3AC;
-  --color-red-300: #EE958D;
-  --color-red-400: #E3766E;
-  --color-red-500: #D7554F;
-  --color-red-600: #C92C2F;
-  --color-red-700: #910A16;
-  --color-red-800: #570107;
-  --color-red-900: #240000;
-
-  /* ---------- 1.1 Warna — Orange (peringatan) ---------- */
-  --color-orange-50: #FFF3E6;
-  --color-orange-100: #FFE6CA;
-  --color-orange-200: #FFD9AE;
-  --color-orange-300: #FECC91;
-  --color-orange-400: #FDBF72;
-  --color-orange-500: #FCB14E;
-  --color-orange-600: #FAA30F;
-  --color-orange-700: #A56B0A;
-  --color-orange-800: #583703;
-  --color-orange-900: #180900;
-
-  /* ---------- 1.1 Warna — Green (positif) ---------- */
-  --color-green-50: #ECF9F0;
-  --color-green-100: #CEEAD6;
-  --color-green-200: #B0DBBD;
-  --color-green-300: #92CBA4;
-  --color-green-400: #72BC8C;
-  --color-green-500: #4FAC74;
-  --color-green-600: #1F9D5C;
-  --color-green-700: #006B3A;
-  --color-green-800: #003C1E;
-  --color-green-900: #001305;
-
-  /* ---------- 1.1 Warna — Blue (indikator progress) ----------
-     [BARU] Ditemukan saat re-audit assets/ss/Portal Guru - halaman_
-     pengisian_rapor(desktop_mode).svg (progress bar) — tidak ada di
-     crawling design-system.md awal. Cuma 1 shade yang dikonfirmasi dari
-     SVG (bukan skala 50-900 penuh seperti red/orange/green), diberi
-     nama -600 mengikuti pola shade "utama" pada family warna lain. */
-  --color-blue-600: #4344E8;
-
-  /* ---------- 1.2 Tipografi ---------- */
+  /* Responsive contract: cookbook/design-system.md 1.4. */
+  --ui-unit: clamp(1rem, calc(0.5rem + 0.625vw), 1.25rem);
+  --layout-max-width: calc(80 * var(--ui-unit));
+  --page-gutter-inline: clamp(1rem, 3.90625vw, 5rem);
+  --page-gutter-block: clamp(1rem, 6.009615svh, 4.5rem);
+  --layout-gap: clamp(1rem, 3.90625vw, calc(3.125 * var(--ui-unit)));
+  --icon-sm: var(--ui-unit);
+  /* 1.2 Typography */
   --font-family-base: 'Plus Jakarta Sans', sans-serif;
+  --font-family-geist: 'Geist', var(--font-family-base);
 
-  --font-size-display-xxl: 52px; --line-height-display-xxl: 78px;
-  --font-size-display-xl: 48px;  --line-height-display-xl: 72px;
-  --font-size-display-lg: 44px;  --line-height-display-lg: 66px;
-  --font-size-display-md: 40px;  --line-height-display-md: 60px;
-  --font-size-display-sm: 36px;  --line-height-display-sm: 54px;
-  --font-size-display-xs: 32px;  --line-height-display-xs: 48px;
+  --font-size-display-xxl: calc(3.25 * var(--ui-unit)); --line-height-display-xxl: calc(4.875 * var(--ui-unit));
+  --font-size-display-xl: calc(3 * var(--ui-unit));  --line-height-display-xl: calc(4.5 * var(--ui-unit));
+  --font-size-display-lg: calc(2.75 * var(--ui-unit));  --line-height-display-lg: calc(4.125 * var(--ui-unit));
+  --font-size-display-md: calc(2.5 * var(--ui-unit));  --line-height-display-md: calc(3.75 * var(--ui-unit));
+  --font-size-display-sm: calc(2.25 * var(--ui-unit));  --line-height-display-sm: calc(3.375 * var(--ui-unit));
+  --font-size-display-xs: calc(2 * var(--ui-unit));  --line-height-display-xs: calc(3 * var(--ui-unit));
 
-  --font-size-headline-lg: 32px; --line-height-headline-lg: 48px;
-  --font-size-headline-md: 28px; --line-height-headline-md: 42px;
-  --font-size-headline-sm: 24px; --line-height-headline-sm: 36px;
+  --font-size-headline-lg: calc(2 * var(--ui-unit)); --line-height-headline-lg: calc(3 * var(--ui-unit));
+  --font-size-headline-md: calc(1.75 * var(--ui-unit)); --line-height-headline-md: calc(2.625 * var(--ui-unit));
+  --font-size-headline-sm: calc(1.5 * var(--ui-unit)); --line-height-headline-sm: calc(2.25 * var(--ui-unit));
 
-  --font-size-body-lg: 20px; --line-height-body-lg: 30px;
-  --font-size-body-md: 16px; --line-height-body-md: 24px;
-  --font-size-body-sm: 14px; --line-height-body-sm: 21px;
+  --font-size-body-lg: calc(1.25 * var(--ui-unit)); --line-height-body-lg: calc(1.875 * var(--ui-unit));
+  --font-size-body-md: calc(1 * var(--ui-unit)); --line-height-body-md: calc(1.5 * var(--ui-unit));
+  --font-size-body-sm: calc(0.875 * var(--ui-unit)); --line-height-body-sm: calc(1.3125 * var(--ui-unit));
 
-  --font-size-caption-lg: 14px; --line-height-caption-lg: 21px;
-  --font-size-caption-md: 12px; --line-height-caption-md: 18px;
-  --font-size-caption-sm: 10px; --line-height-caption-sm: 14px;
+  --font-size-caption-lg: calc(0.875 * var(--ui-unit)); --line-height-caption-lg: calc(1.3125 * var(--ui-unit));
+  --font-size-caption-md: calc(0.75 * var(--ui-unit)); --line-height-caption-md: calc(1.125 * var(--ui-unit));
+  --font-size-caption-sm: calc(0.625 * var(--ui-unit)); --line-height-caption-sm: calc(0.875 * var(--ui-unit));
 
   --font-weight-regular: 400;
   --font-weight-bold: 700;
 
-  /* ---------- 1.3 Spacing (basis 4px) ---------- */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
+  /* 1.3 Spacing (basis 4px) */
+  --space-1: calc(0.25 * var(--ui-unit));
+  --space-2: calc(0.5 * var(--ui-unit));
+  --space-3: calc(0.75 * var(--ui-unit));
+  --space-4: calc(1 * var(--ui-unit));
+  --space-5: calc(1.25 * var(--ui-unit));
+  --space-6: calc(1.5 * var(--ui-unit));
 
-  /* ---------- 1.3 Radius ---------- */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 20px;
+  /* 1.3 Radius */
+  --radius-sm: calc(0.25 * var(--ui-unit));
+  --radius-md: calc(0.5 * var(--ui-unit));
+  --radius-lg: calc(0.75 * var(--ui-unit));
+  --radius-xl: calc(1.25 * var(--ui-unit));
 }
 
-/*
- * Utility class type scale — pemetaan langsung dari tabel 1.2.
- * Dipakai di komponen/view supaya style-name di design-system.md
- * (mis. "Headline/Bold/SM") punya padanan class CSS yang jelas.
- */
+/* Utility class type scale. */
 .text-display-xxl { font-size: var(--font-size-display-xxl); line-height: var(--line-height-display-xxl); }
 .text-display-xl  { font-size: var(--font-size-display-xl);  line-height: var(--line-height-display-xl); }
 .text-display-lg  { font-size: var(--font-size-display-lg);  line-height: var(--line-height-display-lg); }
@@ -132,3 +80,5 @@
 
 .font-regular { font-weight: var(--font-weight-regular); }
 .font-bold { font-weight: var(--font-weight-bold); }
+.font-base { font-family: var(--font-family-base); }
+.font-geist { font-family: var(--font-family-geist); }

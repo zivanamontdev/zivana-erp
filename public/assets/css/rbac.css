@@ -29,8 +29,8 @@
 }
 
 .rbac-edit-icon {
-  width: 16px;
-  height: 16px;
+  width: calc(1 * var(--ui-unit));
+  height: calc(1 * var(--ui-unit));
   color: var(--color-red-600);
 }
 
@@ -107,7 +107,7 @@
 
 .rbac-leaf-label {
   color: var(--color-neutral-700);
-  min-width: 220px;
+  min-width: calc(13.75 * var(--ui-unit));
 }
 
 .rbac-leaf-actions {
@@ -131,4 +131,10 @@
   border-top: 1px solid var(--color-neutral-75);
   display: flex;
   justify-content: flex-end;
+}
+.rbac-leaf, .rbac-leaf-actions, .rbac-role-actions { flex-wrap: wrap; }
+.rbac-leaf-label { min-width: 0; overflow-wrap: anywhere; }
+.rbac-leaf-actions { min-width: 0; }
+@media (max-width: 37.5rem) {
+  .rbac-modul-body, .rbac-section-body { padding-left: var(--space-2); }
 }

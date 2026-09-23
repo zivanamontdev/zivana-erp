@@ -7,28 +7,22 @@
  * - $search, $jabatanId, $status (filter aktif)
  */
 $headerActions = $canEdit
-    ? '<button type="button" class="btn btn-primary" data-modal-open="modal-tambah-karyawan">Tambah Karyawan</button>'
+    ? uiButton('Tambah Karyawan', 'primary', ['icon' => 'icon_plus', 'iconPosition' => 'right', 'marginVertical' => 0, 'attributes' => ['data-modal-open' => 'modal-tambah-karyawan']])
     : '';
 
-require VIEW_PATH . '/layouts/shell-header.php';
+ob_start();
 ?>
 <div class="list-toolbar">
     <form method="GET" action="<?= BASE_PATH ?>/karyawan" class="list-filter">
-        <input type="text" name="q" class="field-input" placeholder="Cari" value="<?= e($search) ?>">
-        <select name="jabatan_id" class="field-input" onchange="this.form.submit()">
-            <option value="">Semua Jabatan</option>
-            <?php foreach ($jabatanOptions as $j): ?>
-            <option value="<?= $j['id'] ?>" <?= $jabatanId == $j['id'] ? 'selected' : '' ?>><?= e($j['nama']) ?></option>
-            <?php endforeach; ?>
-        </select>
-        <select name="status" class="field-input" onchange="this.form.submit()">
-            <option value="">Semua Status</option>
-            <option value="aktif" <?= $status === 'aktif' ? 'selected' : '' ?>>Aktif</option>
-            <option value="nonaktif" <?= $status === 'nonaktif' ? 'selected' : '' ?>>Nonaktif</option>
-        </select>
-        <button type="submit" class="btn btn-tertiary">Cari</button>
+        <?= uiField('q', 'Cari', ['type' => 'search', 'value' => $search, 'placeholder' => 'Cari', 'icon' => 'icon_search', 'iconPosition' => 'left', 'hideLabel' => true, 'id' => 'list-search']) ?>
+        <?= uiFilter('jabatan_id', 'Jabatan', ['' => 'Semua Jabatan'] + array_column($jabatanOptions, 'nama', 'id'), ['value' => $jabatanId, 'id' => 'filter-jabatan_id', 'marginVertical' => 0, 'attributes' => ['onchange' => 'this.form.submit()']]) ?>
+        <?= uiFilter('status', 'Status', ['' => 'Semua Status', 'aktif' => 'Aktif', 'nonaktif' => 'Nonaktif'], ['value' => $status, 'id' => 'filter-status', 'marginVertical' => 0, 'attributes' => ['onchange' => 'this.form.submit()']]) ?>
     </form>
 </div>
+<?php
+$headerActions = ob_get_clean() . $headerActions;
+require VIEW_PATH . '/layouts/shell-header.php';
+?>
 
 <div class="data-table-wrapper">
     <table class="data-table">
@@ -48,13 +42,15 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <tr>
                 <td><?= e($k['nama']) ?></td>
                 <td><?= e($k['nama_jabatan']) ?></td>
-                <td><span class="badge <?= $k['is_active'] ? 'badge-positif' : 'badge-netral' ?>"><?= $k['is_active'] ? 'Aktif' : 'Nonaktif' ?></span></td>
+                <td><?= uiText($k['is_active'] ? 'Aktif' : 'Nonaktif', 'body-sm', ['weight' => 'regular', 'tone' => $k['is_active'] ? 'status-active' : 'status-inactive']) ?></td>
                 <td class="col-action">
                     <?php if ($canEdit): ?>
                     <div class="action-menu" data-action-menu>
                         <button type="button" class="action-menu-toggle" data-action-menu-toggle><?= icon('icon_more_vertical') ?></button>
                         <div class="action-menu-dropdown">
                             <button type="button" data-modal-open="modal-ubah-karyawan-<?= $k['id'] ?>">Ubah</button>
+                            <button type="button" data-modal-open="modal-kata-sandi-karyawan-<?= $k['id'] ?>">Ubah Kata Sandi</button>
+                            <button type="button" data-modal-open="modal-status-karyawan-<?= $k['id'] ?>"><?= $k['is_active'] ? 'Nonaktifkan Karyawan' : 'Aktifkan Karyawan' ?></button>
                             <button type="button" class="is-destructive" data-modal-open="modal-hapus-karyawan-<?= $k['id'] ?>">Hapus</button>
                         </div>
                     </div>
@@ -66,111 +62,5 @@ require VIEW_PATH . '/layouts/shell-header.php';
     </table>
 </div>
 
-<?php foreach ($karyawanList as $k): ?>
-<div class="modal-overlay" id="modal-ubah-karyawan-<?= $k['id'] ?>">
-    <div class="modal-box modal-sm">
-        <h2 class="modal-title">Ubah Informasi Karyawan</h2>
-        <form method="POST" action="<?= BASE_PATH ?>/karyawan/<?= $k['id'] ?>" class="modal-body">
-            <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
-            <div class="field">
-                <label class="field-label">Nama Karyawan *</label>
-                <input type="text" name="nama" class="field-input" value="<?= e($k['nama']) ?>" required>
-            </div>
-            <div class="field">
-                <label class="field-label">Jabatan *</label>
-                <select name="jabatan_id" class="field-input" required>
-                    <?php foreach ($jabatanOptions as $j): ?>
-                    <option value="<?= $j['id'] ?>" <?= $k['jabatan_id'] == $j['id'] ? 'selected' : '' ?>><?= e($j['nama']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="field">
-                <label class="field-label">Email Karyawan *</label>
-                <input type="email" name="email" class="field-input" value="<?= e($k['email'] ?? '') ?>" required>
-            </div>
-            <button type="button" class="btn btn-tertiary" data-modal-open="modal-ganti-password-<?= $k['id'] ?>">Ganti Kata Sandi</button>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="modal-overlay" id="modal-ganti-password-<?= $k['id'] ?>">
-    <div class="modal-box modal-sm">
-        <h2 class="modal-title">Ganti Kata Sandi</h2>
-        <form method="POST" action="<?= BASE_PATH ?>/karyawan/<?= $k['id'] ?>/kata-sandi" class="modal-body">
-            <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
-            <div class="field">
-                <label class="field-label">Kata Sandi Baru *</label>
-                <input type="password" name="password" class="field-input" placeholder="Minimal 8 karakter" minlength="8" required>
-            </div>
-            <div class="field">
-                <label class="field-label">Ulangi Kata Sandi Baru *</label>
-                <input type="password" name="password_confirmation" class="field-input" minlength="8" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan Kata Sandi</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="modal-overlay" id="modal-hapus-karyawan-<?= $k['id'] ?>">
-    <div class="modal-box modal-sm">
-        <h2 class="modal-title">Hapus Karyawan?</h2>
-        <p class="text-body-sm">Karyawan yang telah dihapus akan menghilang dari data karyawan dan tidak dapat diakses atau digunakan kembali. Pastikan data telah dibackup terlebih dahulu sebelum dihapus.</p>
-        <form method="POST" action="<?= BASE_PATH ?>/karyawan/<?= $k['id'] ?>/hapus">
-            <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
-            <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Hapus Karyawan</button>
-            </div>
-        </form>
-    </div>
-</div>
-<?php endforeach; ?>
-
-<?php if ($canEdit): ?>
-<div class="modal-overlay" id="modal-tambah-karyawan">
-    <div class="modal-box modal-sm">
-        <h2 class="modal-title">Tambah Karyawan</h2>
-        <form method="POST" action="<?= BASE_PATH ?>/karyawan" class="modal-body">
-            <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
-            <div class="field">
-                <label class="field-label">Nama Karyawan *</label>
-                <input type="text" name="nama" class="field-input" placeholder="Isi nama karyawan" required>
-            </div>
-            <div class="field">
-                <label class="field-label">Jabatan *</label>
-                <select name="jabatan_id" class="field-input" required>
-                    <option value="">Pilih jabatan karyawan</option>
-                    <?php foreach ($jabatanOptions as $j): ?>
-                    <option value="<?= $j['id'] ?>"><?= e($j['nama']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="field">
-                <label class="field-label">Email Karyawan *</label>
-                <input type="email" name="email" class="field-input" placeholder="Isi email karyawan" required>
-            </div>
-            <div class="field">
-                <label class="field-label">Kata Sandi Karyawan *</label>
-                <input type="password" name="password" class="field-input" placeholder="Minimal 8 karakter" minlength="8" required>
-            </div>
-            <div class="field">
-                <label class="field-label">Ulangi Kata Sandi Karyawan *</label>
-                <input type="password" name="password_confirmation" class="field-input" minlength="8" required>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Tambah Karyawan</button>
-            </div>
-        </form>
-    </div>
-</div>
-<?php endif; ?>
-
+<?php require VIEW_PATH . '/admin/karyawan/_modals.php'; ?>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

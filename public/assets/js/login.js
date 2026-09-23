@@ -5,17 +5,29 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
-    var toggleBtn = document.querySelector('[data-password-toggle]');
-    var passwordInput = document.getElementById('password');
+    document.querySelectorAll('[data-password-toggle]').forEach(function (toggleBtn) {
+      var passwordInput = document.getElementById(toggleBtn.getAttribute('aria-controls') || 'password');
 
-    if (!toggleBtn || !passwordInput) {
-      return;
-    }
+      if (!passwordInput) {
+        return;
+      }
 
-    toggleBtn.addEventListener('click', function () {
-      var isHidden = passwordInput.type === 'password';
-      passwordInput.type = isHidden ? 'text' : 'password';
-      toggleBtn.setAttribute('aria-label', isHidden ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+      var showIcon = toggleBtn.querySelector('[data-password-show]');
+      var hideIcon = toggleBtn.querySelector('[data-password-hide]');
+      function syncVisibility() {
+        var isVisible = passwordInput.type === 'text';
+        toggleBtn.setAttribute('aria-pressed', String(isVisible));
+        toggleBtn.setAttribute('aria-label', isVisible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+        if (showIcon) showIcon.hidden = isVisible;
+        if (hideIcon) hideIcon.hidden = !isVisible;
+      }
+      syncVisibility();
+
+      toggleBtn.addEventListener('click', function () {
+        var isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        syncVisibility();
+      });
     });
   });
 })();

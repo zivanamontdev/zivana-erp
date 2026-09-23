@@ -111,6 +111,17 @@ POST /portal-guru/rapor/{id}/selesaikan
 
 ---
 
+### Renderer UI dan token warna
+
+`app/helpers/ui.php` menyediakan primitive server-rendered untuk teks, field,
+checkbox, card, dan inline metadata. View memakai helper ini untuk variant
+yang berulang, sementara detail visualnya tetap berada di
+`public/assets/css/components.css`.
+
+`config/colors.php` adalah sumber kebenaran seluruh token warna. `config.php`
+memuatnya sebagai `COLOR_TOKENS`, lalu `layouts/head.php` mengeksposnya
+sebagai CSS custom properties. Jangan menulis HEX baru langsung di komponen.
+
 ## 4. Konfigurasi
 
 `config/config.php` membaca `.env` (parser manual, dengan fallback kalau `parse_ini_file` gagal — penting untuk kompatibilitas berbagai versi PHP di shared hosting), lalu `define()` jadi konstanta global (`DB_HOST`, `APP_URL`, `APP_DEBUG`, dst).

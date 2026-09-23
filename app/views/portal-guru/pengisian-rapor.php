@@ -29,7 +29,7 @@ $simbolChar = [
 
 require VIEW_PATH . '/layouts/focus-header.php';
 ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 
 <form method="POST" action="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/simpan">
     <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
@@ -38,15 +38,18 @@ require VIEW_PATH . '/layouts/focus-header.php';
         <h1>Pengisian Rapor</h1>
 
         <div class="field">
-            <label class="field-label">Nama Murid</label>
-            <select class="field-input" onchange="if (this.value) window.location.href = this.value;">
-                <option value="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>" selected>
-                    <?= e($rapor['nama_lengkap']) ?> — <?= e($kelasLabel) ?>
-                </option>
-                <?php foreach ($daftarMuridLain as $lain): ?>
-                <option value="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $lain['id'] ?>"><?= e($lain['nama_lengkap']) ?></option>
-                <?php endforeach; ?>
-            </select>
+            <label class="field-label" for="rapor-murid-switcher">Nama Murid</label>
+            <?php
+            $currentMuridUrl = BASE_PATH . '/portal-guru/rapor/' . (int) $rapor['id'];
+            $muridChoices = [$currentMuridUrl => $rapor['nama_lengkap'] . ' — ' . $kelasLabel];
+            foreach ($daftarMuridLain as $lain) {
+                $muridChoices[BASE_PATH . '/portal-guru/rapor/' . (int) $lain['id']] = $lain['nama_lengkap'];
+            }
+            echo uiFilter('murid_switcher', 'Nama Murid', $muridChoices, [
+                'id' => 'rapor-murid-switcher', 'value' => $currentMuridUrl, 'marginVertical' => 0,
+                'attributes' => ['onchange' => 'if (this.value) window.location.href = this.value;'],
+            ]);
+            ?>
         </div>
 
         <p class="pengisian-rapor-warning">
@@ -63,8 +66,8 @@ require VIEW_PATH . '/layouts/focus-header.php';
         </div>
 
         <div class="pengisian-header-actions">
-            <button type="submit" class="btn btn-tertiary">Arsip Rapor</button>
-            <button type="submit" formaction="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/selesaikan" class="btn btn-primary">Selesaikan Rapor</button>
+            <button type="submit" class="ui-button ui-button--outline">Arsip Rapor</button>
+            <button type="submit" formaction="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/selesaikan" class="ui-button ui-button--primary">Selesaikan Rapor</button>
         </div>
     </div>
 
@@ -100,8 +103,8 @@ require VIEW_PATH . '/layouts/focus-header.php';
     <?php endforeach; ?>
 
     <div class="pengisian-actions">
-        <button type="submit" class="btn btn-tertiary">Arsip Rapor</button>
-        <button type="submit" formaction="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/selesaikan" class="btn btn-primary">Selesaikan Rapor</button>
+        <button type="submit" class="ui-button ui-button--outline">Arsip Rapor</button>
+        <button type="submit" formaction="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/selesaikan" class="ui-button ui-button--primary">Selesaikan Rapor</button>
     </div>
 </form>
 

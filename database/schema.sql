@@ -93,8 +93,16 @@ SELECT * FROM (
     UNION ALL SELECT 'Human Capital', 'Karyawan', 'Daftar Karyawan', 'edit', 8
     UNION ALL SELECT 'Human Capital', 'Karyawan', 'Jabatan', 'lihat', 9
     UNION ALL SELECT 'Human Capital', 'Karyawan', 'Jabatan', 'edit', 10
-    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Manajemen Guru', 'lihat', 11
-    UNION ALL SELECT 'Human Capital', 'Karyawan', 'Manajemen Guru', 'edit', 12
+    -- [FIX] Bukan child dari section 'Karyawan' — dikonfirmasi dari
+    -- assets/ss/Sistem - menu_RBAC.svg, "Manajemen Guru" adalah section
+    -- top-level tersendiri di bawah modul 'Human Capital', sejajar
+    -- dengan 'Karyawan' (sama seperti struktur sidebar, lihat fix
+    -- shell-header.php). RoleMiddleware::hasAccess() tetap match lewat
+    -- kondisi "p.section = :sub_section" (OR fallback), jadi perubahan
+    -- ini murni benerin tampilan tree RBAC, tidak mengubah perilaku
+    -- permission check yang sudah ada.
+    UNION ALL SELECT 'Human Capital', 'Manajemen Guru', NULL, 'lihat', 11
+    UNION ALL SELECT 'Human Capital', 'Manajemen Guru', NULL, 'edit', 12
     UNION ALL SELECT 'Murid', 'Manajemen Murid', NULL, 'lihat', 13
     UNION ALL SELECT 'Murid', 'Manajemen Murid', NULL, 'edit', 14
     UNION ALL SELECT 'Murid', 'Manajemen Kelas', NULL, 'lihat', 15

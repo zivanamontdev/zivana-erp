@@ -40,6 +40,10 @@ if (file_exists(HELPER_PATH . '/functions.php')) {
     require HELPER_PATH . '/functions.php';
 }
 
+if (file_exists(HELPER_PATH . '/ui.php')) {
+    require HELPER_PATH . '/ui.php';
+}
+
 // --- Konfigurasi aplikasi (.env, konstanta DB/APP) ---
 if (file_exists(CONFIG_PATH . '/config.php')) {
     require CONFIG_PATH . '/config.php';

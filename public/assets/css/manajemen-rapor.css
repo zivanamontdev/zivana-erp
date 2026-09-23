@@ -1,0 +1,10 @@
+.report-template-sections { display: grid; gap: var(--space-5); margin-top: var(--space-4); }
+.report-template-section { display: grid; gap: var(--space-3); min-width: 0; }
+.report-template-section > h2 { margin: 0; }
+.report-template-table tbody td { color: var(--color-report-template-text); }
+.report-template-table .report-stage { width: calc(11 * var(--ui-unit)); }
+.report-template-table .report-updated { width: 1%; white-space: nowrap; }
+.report-template-table .col-action button { color: var(--color-shadow-black); }
+.report-template-table .report-preview-link { display: inline-flex; align-items: center; justify-content: center; padding: var(--space-1); color: var(--color-shadow-black); }
+.report-preview-link:focus-visible { outline: 2px solid var(--color-red-400); outline-offset: 2px; }
+.report-template-table .action-menu-dropdown p { margin: 0; padding: var(--space-3); font-size: var(--font-size-body-sm); color: var(--color-neutral-400); }

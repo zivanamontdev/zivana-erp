@@ -6,7 +6,7 @@
  * - $kelasList (array, sudah termasuk jumlah_murid & jumlah_guru), $canEdit (bool)
  */
 $headerActions = $canEdit
-    ? '<button type="button" class="btn btn-primary" data-modal-open="modal-tambah-kelas">Tambah Kelas</button>'
+    ? '<button type="button" class="ui-button ui-button--primary" data-modal-open="modal-tambah-kelas">Tambah Kelas</button>'
     : '';
 
 require VIEW_PATH . '/layouts/shell-header.php';
@@ -64,8 +64,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <input type="text" name="nama_kelas" class="field-input" value="<?= e($kelas['nama_kelas']) ?>" required>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
+                <button type="submit" class="ui-button ui-button--primary">Simpan Perubahan</button>
             </div>
         </form>
     </div>
@@ -78,8 +78,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
         <form method="POST" action="<?= BASE_PATH ?>/kelas/<?= $kelas['id'] ?>/hapus">
             <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
             <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Hapus Kelas</button>
+                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
+                <button type="submit" class="ui-button ui-button--primary">Hapus Kelas</button>
             </div>
         </form>
     </div>
@@ -101,8 +101,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <input type="text" name="nama_kelas" class="field-input" placeholder="Isi nama kelas" required>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-tertiary" data-modal-close>Batal</button>
-                <button type="submit" class="btn btn-primary">Tambah Kelas</button>
+                <button type="button" class="ui-button ui-button--outline" data-modal-close>Batal</button>
+                <button type="submit" class="ui-button ui-button--primary">Tambah Kelas</button>
             </div>
         </form>
     </div>

@@ -8,13 +8,13 @@
  * - $permissionTree (array) modul => section => subSection => [permission rows]
  * - $granted (array) role_id => [permission_id => true]
  */
-$headerActions = '<button type="button" class="btn btn-tertiary" disabled '
+$headerActions = '<button type="button" class="ui-button ui-button--outline" disabled '
     . 'title="[ASUMSI] Penambahan role custom belum didukung — 4 role saat ini bersifat tetap, lihat cookbook/prd.md poin asumsi #7">'
     . 'Tambah Role</button>';
 
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/rbac.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/rbac.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/rbac.css') ?>">
 
 <div class="rbac-list">
     <?php foreach ($roles as $role): ?>
@@ -87,12 +87,12 @@ require VIEW_PATH . '/layouts/shell-header.php';
             <?php endforeach; ?>
 
             <div class="rbac-role-actions">
-                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                <button type="submit" class="ui-button ui-button--primary">Simpan Perubahan</button>
             </div>
         </form>
     </div>
     <?php endforeach; ?>
 </div>
 
-<script src="<?= BASE_PATH ?>/assets/js/rbac.js"></script>
+<script src="<?= BASE_PATH ?>/assets/js/rbac.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/rbac.js') ?>"></script>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>

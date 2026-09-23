@@ -29,7 +29,11 @@ class JabatanController extends Controller
         $stmt = Database::getInstance()->prepare($sql);
         $stmt->execute($params);
 
+        $deleteError = $_SESSION['jabatan_delete_error'] ?? null;
+        unset($_SESSION['jabatan_delete_error']);
+
         $this->view('admin.jabatan.index', [
+            'deleteError' => $deleteError,
             'pageTitle' => 'Jabatan',
             'breadcrumb' => breadcrumb('Karyawan', 'Jabatan'),
             'activeNavItem' => 'jabatan',
@@ -76,10 +80,35 @@ class JabatanController extends Controller
         $this->middleware(AuthMiddleware::class);
         $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
 
-        // Soft-delete (is_active = 0), bukan DELETE FROM — konsisten
-        // dengan pola is_active di cookbook/schema.md, bukan deleted_at.
-        (new Jabatan())->update((int) $id, ['is_active' => 0]);
+        unset($_SESSION['jabatan_delete_error']);
+        try {
+            (new Jabatan())->delete((int) $id);
+        } catch (PDOException $e) {
+            // MySQL rejects deletion while employees still reference this position.
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1451) {
+                throw $e;
+            }
+            $_SESSION['jabatan_delete_error'] = 'Jabatan masih digunakan oleh karyawan dan tidak dapat dihapus. Ubah jabatan karyawan terkait terlebih dahulu, atau gunakan Nonaktifkan Jabatan.';
+        }
 
+        $this->redirect('/jabatan');
+    }
+
+    public function deactivate(string $id): void
+    {
+        $this->setActive($id, false);
+    }
+
+    public function activate(string $id): void
+    {
+        $this->setActive($id, true);
+    }
+
+    private function setActive(string $id, bool $active): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Human Capital', 'Jabatan', 'edit');
+        (new Jabatan())->update((int) $id, ['is_active' => $active ? 1 : 0]);
         $this->redirect('/jabatan');
     }
 }

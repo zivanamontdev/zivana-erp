@@ -1,0 +1,8 @@
+.modal-box.period-modal { width: calc(28 * var(--ui-unit)); max-width: calc(100vw - 2 * var(--space-4)); padding: var(--space-6); gap: 0; }
+.period-modal .modal-title { margin: 0 0 var(--space-5); color: var(--color-modal-text); font-size: var(--ui-unit); line-height: calc(1.5 * var(--ui-unit)); font-weight: 700; letter-spacing: 0; }
+.period-modal .modal-body { gap: var(--space-5); }
+.period-modal .modal-actions { gap: var(--space-3); justify-content: flex-end; }
+.period-modal .modal-actions .ui-button { flex: 0 1 auto; }
+.modal-box.period-modal--delete { width: calc(27.5 * var(--ui-unit)); display: flex; flex-direction: column; gap: var(--space-5); }
+.period-modal--delete .modal-title { margin: 0; }
+.period-delete-description { margin: 0; color: var(--color-modal-text); font-size: calc(0.75 * var(--ui-unit)); line-height: calc(1.125 * var(--ui-unit)); font-weight: 400; letter-spacing: 0; }
