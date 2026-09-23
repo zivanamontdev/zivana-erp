@@ -1,0 +1,34 @@
+# ERP document root: /public_html/subdomain/erp/public
+# Keep .env, app/, config/, database/ and vendor/ OUTSIDE this directory.
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+DirectorySlash On
+AddDefaultCharset UTF-8
+
+# Do not inherit the legacy application's custom error pages or error routing.
+# PHP handles application errors; Apache keeps its actual HTTP error status.
+ErrorDocument 403 default
+ErrorDocument 404 default
+ErrorDocument 500 default
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Deny hidden paths, allowing ACME's .well-known directory for certificates.
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+
+    # Existing assets/uploads are served directly. All application routes go
+    # through index.php; REQUEST_URI and the original query string are retained.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Defense in depth if a configuration/backup file is accidentally copied here.
+<FilesMatch "(?i)^(?:\.env(?:\..*)?|.*\.(?:ini|log|sql|bak|old|orig|save))$">
+    Require all denied
+</FilesMatch>
+
+# Enable HTTPS using cPanel Force HTTPS Redirect after the certificate is valid.
+# No host-specific redirect here: localhost and the legacy admin remain separate.

@@ -1,5 +1,21 @@
 # Deploy — Zivana ERP (Shared Hosting)
 
+## Target subdomain ERP
+
+- Repository: `/public_html/subdomain/erp/`.
+- Document root **khusus subdomain** `erp.sekolahzivanamontessori.sch.id`: `/public_html/subdomain/erp/public/`.
+- Konfigurasi ERP: `/public_html/subdomain/erp/.env`, bukan `.env` aplikasi utama dan bukan di dalam `public/`.
+- File routing yang disertakan repo: `public/.htaccess`. Jangan menyalinnya ke document root domain utama/admin lama. Tidak membutuhkan entry point perantara; `public/index.php` tetap tidak diubah dan `BASE_PATH` tetap kosong.
+- Isi `.env` ERP: `APP_URL=https://erp.sekolahzivanamontessori.sch.id`, `APP_ENV=production`, `APP_DEBUG=false`, serta `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` khusus ERP. Jangan commit kredensial asli ke `.env.example`.
+- Aktifkan sertifikat subdomain dan Force HTTPS Redirect di cPanel. Tidak ditambahkan redirect HTTPS berbasis hostname ke file lokal agar localhost tidak ikut dipaksa HTTPS.
+- Tidak ada aturan `/admin` atau redirect ke subdomain admin di ERP; halaman login ERP adalah `/login`.
+
+`.htaccess` memakai front controller Apache: file/direktori nyata tidak ditulis ulang; route aplikasi menuju `index.php` dengan query string asli. Directory listing dan MultiViews dinonaktifkan. Hidden paths diblokir kecuali `.well-known` untuk sertifikat. Halaman error Apache memakai status asli, bukan semuanya disamarkan menjadi halaman 404. Referensi: [Apache rewrite/remapping](https://httpd.apache.org/docs/2.4/rewrite/remapping.html), [mod_dir](https://httpd.apache.org/docs/2.4/mod/mod_dir.html).
+
+Hosting perlu mengizinkan `mod_rewrite`, direktif `Options`, `DirectoryIndex`, dan `Require` dalam `.htaccess` (Apache 2.4 atau kompatibel). Bila muncul 500, periksa cPanel Errors untuk direktif yang ditolak; jangan langsung mengganti dengan `.htaccess` aplikasi lama. Periksa juga aturan `.htaccess` induk bila ada di `public_html`/`subdomain` yang mungkin memengaruhi ERP.
+
+Setelah upload, uji `/`, `/login`, aset CSS/JS, `/murid?q=demo` setelah login, POST simpan, dan URL tak dikenal (404). Pastikan `/.env`/`/.git/config` ditolak dan `/assets/` tidak menampilkan daftar file. Pengujian dengan `php -S` tidak memverifikasi `.htaccess`; verifikasi rewrite harus di Apache/hosting. Akun demo/password contoh tidak boleh dibiarkan aktif pada layanan publik.
+
 Proses ini mengikuti pola yang sudah terbukti dipakai di `zivanamontdev-php-repo`.
 
 ---
