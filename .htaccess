@@ -1,0 +1,42 @@
+# Fallback for cPanel document root: public_html/subdomain/erp
+# Preferred document root remains public_html/subdomain/erp/public.
+Options -Indexes -MultiViews
+DirectoryIndex public/index.php
+
+ErrorDocument 403 default
+ErrorDocument 404 default
+ErrorDocument 500 default
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block repository internals BEFORE forwarding requests to public/.
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+    RewriteRule ^(?:app|config|routes|database|vendor|tests|cookbook)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:composer\.(?:json|lock)|deploy\.sh|design-erapor\.md)$ - [F,L,NC]
+
+    # Let public/.htaccess handle requests already forwarded there.
+    # Also permits the preferred document-root configuration without public/public.
+    RewriteRule ^public(?:/|$) - [L]
+
+    # Allow cPanel certificate challenges stored at the document root.
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
+
+    # Do not exempt existing files here: root assets are design/source assets,
+    # while browser assets must come from public/assets.
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Fail closed rather than exposing the repository if rewrite is unavailable.
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>
+
+<FilesMatch "(?i)^(?:\..*|composer\.(?:json|lock)|.*\.(?:ini|log|sql|bak|old|orig|save|sh))$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>

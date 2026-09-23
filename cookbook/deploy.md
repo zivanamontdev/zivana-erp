@@ -2,6 +2,14 @@
 
 ## Target subdomain ERP
 
+### Alternatif jika document root masih root repository
+
+Repo juga menyediakan `.htaccess` di root untuk document root `/public_html/subdomain/erp`. Upload **keduanya**, root `.htaccess` dan `public/.htaccess`, sebagai satu perubahan. File root meneruskan request secara internal ke `public/`; URL tetap `/login`, bukan `/public/login`. `public/index.php` dan `BASE_PATH` tidak perlu diubah. `RewriteBase /` di file public dihapus supaya target relatif dapat bekerja pada kedua struktur. Lihat [aturan RewriteBase Apache](https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html#rewritebase).
+
+Folder internal, hidden paths, file konfigurasi dan backup diblokir sebelum rewrite. File desain di root `assets/` tidak dilayani; URL `/assets/...` mengambil file dari `public/assets/`. Tidak ada pengecualian `!-f`/`!-d` di file root yang dapat membuka source repository. Apabila mod_rewrite tidak tersedia, akses ditolak. Header nosniff/SAMEORIGIN ditambahkan; aturan admin dari website lama tidak disalin.
+
+Konfigurasi utama di bawah (document root langsung `public/`) tetap direkomendasikan. Fallback tidak menjamin menyelesaikan setiap 403: periksa log hosting, ownership, dan aturan folder induk. Jangan menghapus proteksi folder internal untuk mengatasi 403. Uji di hosting: `/`, `/login`, CSS/JS, route dengan query, POST login; lalu `/.env`, `/.git/config`, `/config/config.php`, `/database/`, `/vendor/` harus ditolak. Jangan mengunggah dump database ke area publik. Apache hosting belum diuji dari lingkungan lokal ini.
+
 - Repository: `/public_html/subdomain/erp/`.
 - Document root **khusus subdomain** `erp.sekolahzivanamontessori.sch.id`: `/public_html/subdomain/erp/public/`.
 - Konfigurasi ERP: `/public_html/subdomain/erp/.env`, bukan `.env` aplikasi utama dan bukan di dalam `public/`.
@@ -44,7 +52,7 @@ Ini regenerate `vendor/` dengan autoloader yang dioptimasi untuk produksi (tanpa
 
 ## 3. Struktur Document Root
 
-Document root cPanel **wajib** diarahkan ke folder `public/`, **bukan** ke root repo:
+Document root cPanel **direkomendasikan** mengarah ke folder `public/`. Jika hosting masih menunjuk root repo, gunakan fallback dua `.htaccess` yang dijelaskan di atas:
 
 ```
 public_html/                  ← document root domain utama TIDAK di sini

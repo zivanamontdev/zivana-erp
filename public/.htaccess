@@ -13,7 +13,8 @@ ErrorDocument 500 default
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+    # Relative substitutions work with both a public/ document root and the
+    # repository-root fallback. Do not force RewriteBase / for the latter.
 
     # Deny hidden paths, allowing ACME's .well-known directory for certificates.
     RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
