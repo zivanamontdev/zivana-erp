@@ -41,13 +41,22 @@ class ReportWorkflow
                 if (!$previous) throw new DomainException('Periode tidak ditemukan.');
                 $hasReports = $db->prepare('SELECT COUNT(*) FROM rapor r JOIN sesi_pembagian_rapor s ON s.id=r.sesi_pembagian_id WHERE s.periode_id=?');
                 $hasReports->execute([$id]);
-                if ($hasReports->fetchColumn() && ($previous['tipe'] !== $data['tipe'] || (!empty($previous['semester']) && $previous['semester'] !== $data['semester']))) {
-                    throw new DomainException('Semester/tipe periode yang sudah memiliki rapor tidak dapat diganti.');
+                if ($hasReports->fetchColumn() && ((int)$previous['tahun_ajaran_id'] !== (int)$data['tahun_ajaran_id'] || $previous['tipe'] !== $data['tipe'] || (!empty($previous['semester']) && $previous['semester'] !== $data['semester']))) {
+                    throw new DomainException('Tahun ajaran/semester/tipe periode yang sudah memiliki rapor tidak dapat diganti.');
                 }
                 $values = $db->prepare('SELECT COUNT(*) FROM rapor_nilai n JOIN rapor r ON r.id=n.rapor_id JOIN sesi_pembagian_rapor s ON s.id=r.sesi_pembagian_id WHERE s.periode_id=? AND n.semester<>?');
                 $values->execute([$id, $data['semester']]);
                 if ($values->fetchColumn()) throw new DomainException('Semester tidak sesuai nilai rapor lama. Periksa data terlebih dahulu.');
                 $model->update($id, $data);
+                if ($previous['tipe'] !== $data['tipe']) {
+                    // The guard above permits this only before any report exists.
+                    // Keep the existing session, but retarget it before creating new reports.
+                    $template = $db->prepare('SELECT id FROM template_rapor WHERE nama=?');
+                    $template->execute(['Rapor Montessori ' . $data['tipe']]);
+                    $templateId = $template->fetchColumn();
+                    if (!$templateId) throw new DomainException('Template rapor untuk tipe periode belum tersedia.');
+                    $db->prepare('UPDATE sesi_pembagian_rapor SET template_id=? WHERE periode_id=?')->execute([$templateId,$id]);
+                }
             } else {
                 $id = (int) $model->create($data);
             }

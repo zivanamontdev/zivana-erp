@@ -90,6 +90,14 @@ try {
         'nama'=>'Periode Fixture','semester'=>'ganjil','tipe'=>'Tengah Semester','kategori'=>'Rapor Murid',
         'awal_periode'=>date('Y-m-d'),'akhir_periode'=>date('Y-m-d',strtotime('+20 days'))],302);
     expectHttp((int)$db->query('SELECT COUNT(*) FROM sesi_pembagian_rapor')->fetchColumn()===1,'Period creates session');
+    $periodId=(int)$db->query('SELECT id FROM periode_penilaian')->fetchColumn();
+    foreach (['Akhir Semester','Tengah Semester'] as $type) {
+        $admin->request("/kurikulum/periode-penilaian/$periodId",[
+            'nama'=>'Periode Fixture','semester'=>'ganjil','tipe'=>$type,'kategori'=>'Rapor Murid',
+            'awal_periode'=>date('Y-m-d'),'akhir_periode'=>date('Y-m-d',strtotime('+20 days'))],302);
+        $templateName=$db->query('SELECT t.nama FROM sesi_pembagian_rapor s JOIN template_rapor t ON t.id=s.template_id')->fetchColumn();
+        expectHttp($templateName==='Rapor Montessori '.$type,'Empty period change updates real MySQL session template');
+    }
     $pupil=['kelas_id'=>$classId,'level_kelas'=>'Ranting','nama_lengkap'=>'Murid Fixture','nama_panggilan'=>'Fixture',
         'agama'=>'Islam','nik'=>'1234567890123456','no_registrasi_akte'=>'12345','jenis_kelamin'=>'P','tempat_lahir'=>'Makassar',
         'tanggal_lahir'=>'2020-01-01','alamat'=>'Alamat Fixture','tanggal_masuk_sekolah'=>'2026-07-01','status_kondisi'=>'Regular',
@@ -121,15 +129,44 @@ try {
     $option=(int)$db->query('SELECT id FROM skala_nilai_opsi ORDER BY id LIMIT 1')->fetchColumn();
     $teacher->request("/portal-guru/rapor/$reportId/simpan",['nilai'=>[$items[0]=>$option]],302);
     expectHttp((int)$db->query('SELECT COUNT(*) FROM rapor_nilai')->fetchColumn()===1,'Draft persists through real HTTP');
+    // Transfer a partially filled draft through the actual assignment form.
+    $otherTeacherId=(int)$db->query("SELECT karyawan_id FROM users WHERE email='other@fixture.test'")->fetchColumn();
+    $admin->request('/manajemen-guru');
+    $admin->request("/manajemen-guru/$teacherId/murid",['murid_ids'=>[]],302);
+    $teacher->request("/portal-guru/rapor/$reportId",null,404);
+    $admin->request("/manajemen-guru/$otherTeacherId/murid",['murid_ids'=>[$pupilId]],302);
+    $other->request("/portal-guru/rapor/$reportId");
+    expectHttp((int)$db->query('SELECT guru_id FROM rapor')->fetchColumn()===$otherTeacherId,'Draft owner follows new assignment');
+    expectHttp((int)$db->query('SELECT skala_nilai_opsi_id FROM rapor_nilai')->fetchColumn()===$option,'Draft transfer preserves saved mark');
+    $admin->request("/manajemen-guru/$otherTeacherId/murid",['murid_ids'=>[]],302);
+    $admin->request("/manajemen-guru/$teacherId/murid",['murid_ids'=>[$pupilId]],302);
+    $teacher->request("/portal-guru/rapor/$reportId");
     $teacher->request("/portal-guru/rapor/$reportId/selesaikan",['nilai'=>[]],302);
     expectHttp($db->query('SELECT status FROM rapor')->fetchColumn()==='belum_diisi','Incomplete submit rejected');
+    $submissionToken=$teacher->csrf;
     $teacher->request("/portal-guru/rapor/$reportId/selesaikan",['nilai'=>array_fill_keys($items,$option)],302);
     expectHttp($db->query('SELECT status FROM rapor')->fetchColumn()==='menunggu_persetujuan','Teacher submission awaits approval');
+    $teacher->request("/portal-guru/rapor/$reportId/selesaikan",['csrf_token'=>$submissionToken,'nilai'=>array_fill_keys($items,$option)],419);
+    expectHttp((int)$db->query('SELECT COUNT(*) FROM rapor_nilai')->fetchColumn()===count($items),'Double-click submission does not duplicate marks');
+    // An Admin job title alone must not bypass its approval permission.
+    $adminPermissions=array_filter($db->query('SELECT * FROM permissions')->fetchAll(),fn($p)=>PermissionCatalog::visible($p));
+    $noApproval=array_column(array_filter($adminPermissions,fn($p)=>!($p['modul']==='Murid' && $p['section']==='Rapor Murid' && $p['aksi']==='edit')),'id');
+    $admin->request('/rbac');
+    $admin->request('/rbac',['role_id'=>$adminRole,'permission_ids'=>$noApproval],302);
+    $preview=$admin->request("/rapor-murid/$reportId");
+    expectHttp(!str_contains($preview['body'],"/rapor-murid/$reportId/setujui"),'Approval action hidden without permission');
+    $admin->request("/rapor-murid/$reportId/setujui",[],403);
+    expectHttp($db->query('SELECT status FROM rapor')->fetchColumn()==='menunggu_persetujuan','Rejected approval does not alter status');
+    $admin->request('/rbac');
+    $admin->request('/rbac',['role_id'=>$adminRole,'permission_ids'=>array_column($adminPermissions,'id')],302);
     $preview=$admin->request("/rapor-murid/$reportId");
     expectHttp(str_contains($preview['body'],'Setujui'),'Approver can see approval action');
     $admin->request("/rapor-murid/$reportId/setujui",[],302);
     $approved=$db->query('SELECT * FROM rapor')->fetch();
     expectHttp($approved['status']==='disetujui' && $approved['disetujui_oleh']!==null,'Approval persists reviewer identity');
+    $admin->request('/rbac'); // obtain a fresh token for an intentionally repeated request
+    $admin->request("/rapor-murid/$reportId/setujui",[],302);
+    expectHttp($db->query('SELECT * FROM rapor')->fetch()===$approved,'Repeated approval preserves original approval metadata');
     $teacher->request("/portal-guru/rapor/$reportId/pratinjau");
     $pdf=$teacher->request("/portal-guru/rapor/$reportId/pdf");
     expectHttp(str_contains($pdf['type'],'application/pdf') && str_starts_with($pdf['body'],'%PDF-'),'Teacher receives actual PDF');

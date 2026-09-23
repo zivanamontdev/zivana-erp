@@ -36,6 +36,8 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 
 ### D. Sumber data periode dan penugasan rapor
 
+- [x] Perbaiki perubahan tipe periode kosong: sesi ikut menggunakan template Tengah/Akhir yang baru sebelum murid didaftarkan. Kunci perubahan tahun ajaran pada periode yang sudah memiliki rapor. Diuji regresi SQLite dan perubahan tipe melalui HTTP/MySQL.
+
 - [x] Sinkronisasi pada tambah/ubah murid, perubahan penugasan guru, dan hapus kelas: buat draft hanya untuk sesi berjalan/mendatang dengan tahun ajaran kelas yang cocok; lepaskan kepemilikan draft yang tidak lagi memenuhi syarat. Tes SQLite terisolasi mencakup duplikasi, perpindahan tahun, murid nonaktif, riwayat terkirim, nilai yang sudah tersimpan, dan rollback kegagalan. Integrasi tulis HTTP/MySQL masih perlu diuji.
 
 - [x] Semester Ganjil/Genap terpisah dari tipe Tengah/Akhir; empat kombinasi unik per tahun ajaran.
@@ -62,6 +64,8 @@ Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell
 - [x] Pakai komponen detail data standar; verifikasi guard kepemilikan pada URL detail, termasuk ID murid guru lain/tidak ditemukan dan kondisi penugasan berubah.
 
 ### G. Pengisian, pengiriman, pratinjau, dan persetujuan
+
+- [x] Tambahan tes HTTP/MySQL: draft bernilai berpindah guru tanpa kehilangan nilai, guru lama ditolak; request pengiriman ganda dengan token yang sudah dipakai ditolak; admin tanpa izin persetujuan tidak melihat tombol dan POST ditolak; persetujuan berulang mempertahankan metadata awal. Tes ini bukan simulasi dua request paralel.
 
 - [x] Alur positif HTTP/MySQL dengan akun/data fixture: tambah akun guru melalui controller asli → login → buat periode/kelas/murid → penugasan → simpan draft → tolak kirim belum lengkap → kirim lengkap → admin setujui → guru unduh PDF. Akses detail/form/PDF guru lain dan CSRF salah juga ditolak. Pengujian ini bukan tes interaksi/visual browser.
 

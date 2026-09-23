@@ -102,3 +102,10 @@ Hasil terverifikasi 23 September 2026:
 - Penonaktifan karyawan memutus sesi guru aktif dan menolak login berikutnya. Aktivasi memulihkan login/dashboard. Jumlah nilai tetap sesuai setelah seluruh tes akses.
 
 Tes ini menutup alur inti tulis HTTP/MySQL, **bukan seluruh kombinasi fitur**. Suite SQLite tetap melengkapi pengujian skenario negatif dan rollback. Percobaan Edge headless terbaru gagal pada peluncuran Mojo/Crashpad dengan `Access is denied (0x5)`; tidak ada bukti screenshot atau interaksi browser desktop/mobile dari tes ini. Pemeriksaan visual, seluruh aksi positif, dan kelengkapan konten template resmi tetap terbuka.
+
+### Regresi tambahan: identitas periode, penugasan, dan persetujuan
+
+- Bug terkonfirmasi: mengubah tipe periode kosong sebelumnya mempertahankan `template_id` sesi lama. Kini pergantian tipe memperbarui template sesi dalam transaksi yang sama sebelum pembuatan rapor. Periode yang telah memiliki rapor tetap tidak boleh berganti tipe/semester, dan kini tahun ajarannya juga dilindungi pada service.
+- `php tests/period-template-regression.php` menguji perubahan template sesi kosong, template rapor murid yang didaftarkan kemudian, serta penolakan pergantian tahun ajaran tanpa perubahan identitas periode. Tes ini gagal pada kode lama dan lulus setelah perbaikan.
+- Tes HTTP/MySQL diperluas untuk perubahan tipe kosong Tengah → Akhir → Tengah; perpindahan draft berisi nilai ke guru lain lalu dikembalikan; penolakan akses guru lama; pengiriman ulang dengan token yang sudah digunakan (419, tanpa duplikasi nilai); pencabutan izin persetujuan admin (tombol hilang, POST 403, status tetap menunggu); dan persetujuan berulang tanpa perubahan approver/waktu persetujuan awal.
+- Request berulang di sini diuji berurutan, bukan beban konkurensi. Database fixture dibersihkan setiap eksekusi; tidak ada perubahan data periode/nilai pada database aplikasi.
