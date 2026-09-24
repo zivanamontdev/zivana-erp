@@ -127,6 +127,7 @@ try {
     require __DIR__.'/erapor-approve-mysql.inc.php';
     require __DIR__.'/erapor-extensions-mysql.inc.php';
     require __DIR__.'/erapor-teacher-form-mysql.inc.php';
+    require __DIR__.'/erapor-http-mysql.inc.php';
     $db->exec("UPDATE erapor_migrations SET sha256=REPEAT('0',64)");
     catalogReject(fn() => EraporMigrationRunner::apply($db,$file), 'checksum');
     $db->prepare("UPDATE erapor_migrations SET sha256=?,status='applying'")->execute([$plan['sha256']]);
@@ -137,7 +138,9 @@ try {
     $db->exec($plan['steps']['erapor_rubrik_periode']);
     $db->exec('DELETE FROM erapor_migrations');
     catalogReject(fn() => EraporMigrationRunner::apply($db,$file), 'collision');
-    catalogCheck(catalogFingerprints($db, array_keys($before)) === $before, 'Legacy rows changed after negative tests');
+    $legacyAfter=catalogFingerprints($db,array_keys($before));
+    $changedLegacy=array_keys(array_filter($before,fn($rows,$table)=>($legacyAfter[$table]??null)!==$rows,ARRAY_FILTER_USE_BOTH));
+    catalogCheck($changedLegacy===[], 'Legacy rows changed after negative tests: '.implode(',',$changedLegacy));
     $live->exec('SET TRANSACTION READ ONLY'); $live->beginTransaction();
     catalogCheck(catalogFingerprints($live) === $before, 'Local DB changed during test'); $live->rollBack();
     echo "PASS: $checks checks; backup restored, legacy checksums unchanged, catalog/RTS/Ummi/PPI/BING/Agama constraints, atomic seeding, exact text, retry/drift/lock guards.\n";

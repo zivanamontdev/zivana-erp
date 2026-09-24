@@ -62,6 +62,7 @@ if ($mode==='route') {
     $_SESSION['role_id']=4;
     $_SERVER['REQUEST_METHOD']=$argv[2]; $_SERVER['REQUEST_URI']=$argv[3];
     $_POST=['csrf_token'=>getCsrfToken()];
+    if (str_starts_with($_SERVER['REQUEST_URI'],'/api/erapor/')) $_SERVER['HTTP_X_CSRF_TOKEN']=$_POST['csrf_token'];
     register_shutdown_function(function()use($db){
         ob_end_clean();
         echo json_encode(['status'=>http_response_code(), 'employees'=>(int)$db->query('SELECT COUNT(*) FROM karyawan')->fetchColumn()]);

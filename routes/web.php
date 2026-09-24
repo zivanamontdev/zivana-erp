@@ -86,6 +86,11 @@ $router->get('/rapor-murid/{id}/pdf', [RaporMuridController::class, 'downloadPdf
 $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);
 
 // --- Portal Guru ---
+// New session IDs are NOT legacy rapor IDs. Disabled by default in config.
+$router->get('/api/erapor/sesi/{id}', [EraporTeacherApiController::class, 'show']);
+$router->post('/api/erapor/sesi/{id}/dokumen/{documentId}/simpan', [EraporTeacherApiController::class, 'save']);
+$router->post('/api/erapor/sesi/{id}/konfirmasi-isi', [EraporTeacherApiController::class, 'confirmFilled']);
+$router->post('/api/erapor/sesi/{id}/konfirmasi-penerimaan', [EraporTeacherApiController::class, 'confirmReception']);
 $router->get('/portal-guru/dashboard', [PortalGuruController::class, 'dashboard']);
 $router->get('/portal-guru/murid', [PortalGuruController::class, 'daftarMurid']);
 $router->get('/portal-guru/murid/{id}', [PortalGuruController::class, 'showMurid']);

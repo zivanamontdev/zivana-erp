@@ -336,3 +336,13 @@ Berikutnya: pembacaan sesi dan data form portal guru dengan otorisasi, lalu endp
 - [ ] Belum HTTP/UI atau migrasi database aplikasi. Riwayat nilai periode lain, pembacaan approver, aktivasi schema dan rendering PDF belum termasuk reader ini.
 
 Berikutnya: adapter endpoint dengan autentikasi/RBAC/CSRF dan kontrak error/payload yang konsisten; integrasikan secara bertahap ke komponen UI portal guru tanpa mengubah rute legacy sebelum kesiapan migrasi diperiksa.
+
+### Batch adapter API guru (24 September 2026)
+
+- [x] Empat route JSON terpisah untuk baca sesi, simpan dokumen, konfirmasi isi, konfirmasi penerimaan. Tidak memakai ID/rute legacy.
+- [x] Session aktif, RoleMiddleware lihat/edit/kirim, header CSRF sekali pakai dengan token berikutnya di respons, no-store, validasi JSON/ukuran/field/ID. Actor dan jenis rubrik tidak diterima dari klien.
+- [x] Feature flag `ERAPOR_API_ENABLED` default false; tidak memigrasikan/mengaktifkan database aplikasi. Semua route legacy tetap dipertahankan.
+- [x] 25 skenario adapter terisolasi, 57 route RBAC, 1092 pemeriksaan MySQL backend serta regresi akun/portal/workflow lulus. Loopback HTTP menguji login, read, autosave, CSRF, kepemilikan lintas guru dan RBAC write.
+- [ ] Belum uji browser visual/UI. Endpoint pembuatan/list sesi, approval, perpanjangan, profil dan PDF terpisah dari adapter guru.
+
+Berikutnya: buat read model dashboard/periode dan provisioning sesi untuk halaman portal guru, kemudian integrasikan editor bertahap dengan antrean CSRF/autosave serial.

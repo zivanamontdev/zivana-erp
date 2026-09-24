@@ -1,6 +1,6 @@
 <?php
 // Test-only front controller. Never served by the application's public document root.
-if (PHP_SAPI !== 'cli-server' || !preg_match('/^zivana_e2e_[a-f0-9]{16}$/D', getenv('ZIVANA_E2E_DB') ?: '')) {
+if (PHP_SAPI !== 'cli-server' || !preg_match('/^zivana_(?:e2e|erapor_test)_[a-f0-9]{16}$/D', getenv('ZIVANA_E2E_DB') ?: '')) {
     http_response_code(404);
     exit;
 }
