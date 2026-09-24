@@ -16,7 +16,7 @@ $readonlyMessages = [
     'TENGGAT_BERAKHIR' => 'Tenggat pengisian periode ini telah berakhir. Nilai dapat dilihat, tetapi tidak dapat diubah.',
 ];
 
-$renderSelect = static function (array $document, string $type, string $key, string $label, array $choices, mixed $value, array $images = [], bool $required = true) use ($canEdit): string {
+$renderSelect = static function (array $document, string $type, string $key, string $label, array $choices, mixed $value, array $images = [], bool $required = true, array $extraAttributes = []) use ($canEdit): string {
     $attributes = [
         'data-erapor-entry' => $type,
         'data-erapor-document-id' => (int)$document['id'],
@@ -25,6 +25,7 @@ $renderSelect = static function (array $document, string $type, string $key, str
         'aria-required' => $required ? 'true' : 'false',
     ];
     if ($type === 'RTS') $attributes['data-erapor-indicator-id'] = substr($key, strlen('nilai:'));
+    $attributes = array_merge($attributes, $extraAttributes);
     return uiSelect('erapor_' . (int)$document['id'] . '_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $key), $label,
         ['' => 'Pilih jawaban Anda'] + $choices, [
             'id' => 'erapor-field-' . (int)$document['id'] . '-' . substr(hash('sha256', $key), 0, 12),
@@ -246,11 +247,103 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     </details>
                 <?php endforeach; ?>
 
-            <?php else: ?>
-                <div class="erapor-session-notice" role="status">
-                    <h3>Form <?= e($document['nama']) ?> belum tersedia di editor ini.</h3>
-                    <p>Dokumen Ummi memerlukan alur inisialisasi periode dan pencatatan tes khusus. Belum ada perubahan yang dilakukan pada dokumen ini.</p>
-                </div>
+            <?php elseif ($type === 'UMMI'): ?>
+                <?php if (!empty($definitions['initialization_required'])): ?>
+                    <div class="erapor-session-notice erapor-ummi-init" role="status">
+                        <h3>Mulai pengisian Rapor Ummi</h3>
+                        <p>Halaman ini belum memiliki setelan periode. Menekan tombol mulai akan menyimpan setelan PRA TK awal untuk periode ini. Membuka halaman saja tidak mengubah data.</p>
+                        <?php if ($canEdit): ?>
+                            <?= uiButton('Mulai pengisian Ummi', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-ummi-init'=>true, 'data-erapor-document-id'=>(int)$document['id']]]) ?>
+                        <?php else: ?>
+                            <p>Setelan periode belum dibuat dan sesi ini hanya dapat dilihat.</p>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <?php
+                    $ummiChoices = [];
+                    foreach ($definitions['scale'] as $grade) $ummiChoices[$grade['kode']] = $grade['label'];
+                    $itemsByVolume = [];
+                    foreach ($definitions['items'] as $item) $itemsByVolume[(int)$item['jilid_id']][] = $item;
+                    $existingTests = [];
+                    foreach ($values as $valueKey => $value) if (str_starts_with($valueKey, 'tes:') && is_array($value)) $existingTests[$valueKey] = $value;
+                    $filledReadings = 0;
+                    foreach ($definitions['items'] as $item) if (!empty($values['bacaan:' . $item['id']])) $filledReadings++;
+                    $praId = null;
+                    foreach ($definitions['volumes'] as $volume) if (!empty($volume['hanya_pra_tk'])) $praId = (int)$volume['id'];
+                    ?>
+                    <section class="erapor-field-group erapor-ummi-controls">
+                        <?= uiCheckbox('erapor_ummi_pra_' . (int)$document['id'], 'Murid memulai dari PRA TK', (bool)$values['mulai_pra_tk'], [
+                            'disabled'=>!$canEdit,
+                            'inputAttributes'=>[
+                                'data-erapor-entry'=>'UMMI',
+                                'data-erapor-document-id'=>(int)$document['id'],
+                                'data-erapor-key'=>'mulai_pra_tk',
+                                'data-saved-value'=>$values['mulai_pra_tk'] ? 'true' : 'false',
+                                'data-erapor-pra-toggle'=>'true',
+                            ],
+                        ]) ?>
+                        <p class="erapor-ummi-note">Bagian A bersifat informasi; materi yang belum dinilai boleh tetap kosong.</p>
+                        <p class="erapor-ummi-reading-count" data-ummi-reading-count data-filled="<?= (int)$filledReadings ?>" data-total="<?= count($definitions['items']) ?>">Terisi <?= (int)$filledReadings ?> dari <?= count($definitions['items']) ?> materi</p>
+                    </section>
+
+                    <section class="erapor-ummi-volumes" aria-label="Bacaan jilid">
+                        <?php foreach ($definitions['volumes'] as $volume): ?>
+                            <?php $isPra = !empty($volume['hanya_pra_tk']); ?>
+                            <?php if ($isPra && $praId === null) continue; ?>
+                            <details class="erapor-ummi-volume ui-disclosure" data-ummi-volume="<?= (int)$volume['id'] ?>" data-ummi-pra-tk="<?= $isPra ? 'true' : 'false' ?>"<?= $isPra && !$values['mulai_pra_tk'] ? ' hidden' : '' ?>>
+                                <summary class="pengisian-subkategori-header ui-disclosure-trigger"><span>Jilid <?= e($volume['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary>
+                                <div class="erapor-ummi-volume-items">
+                                    <?php foreach ($itemsByVolume[(int)$volume['id']] ?? [] as $item): ?>
+                                        <?= $renderSelect($document, 'UMMI', 'bacaan:' . $item['id'], $item['teks'], $ummiChoices, $values['bacaan:' . $item['id']] ?? null, [], false, ['data-ummi-reading'=>'true']) ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            </details>
+                        <?php endforeach; ?>
+                    </section>
+
+                    <section class="erapor-field-group erapor-ummi-tests" data-ummi-tests>
+                        <div class="erapor-ummi-tests-heading">
+                            <div>
+                                <h3>Nilai Tes Kenaikan Jilid</h3>
+                                <p>Tes bersifat opsional. Tambahkan baris hanya jika ada tes yang perlu dicatat.</p>
+                            </div>
+                            <?php if ($canEdit): ?>
+                                <?= uiButton('Tambah Tes', 'outline', ['marginVertical'=>0, 'attributes'=>['data-erapor-add-test'=>(int)$document['id']]]) ?>
+                            <?php endif; ?>
+                        </div>
+                        <div class="erapor-ummi-test-list" data-ummi-test-list>
+                            <?php foreach ($existingTests as $key => $test): ?>
+                                <?php $testToken = substr($key, 4); $savedTest = json_encode($test, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>
+                                <div class="erapor-ummi-test-row" data-erapor-entry="UMMI_TEST" data-erapor-document-id="<?= (int)$document['id'] ?>" data-erapor-key="<?= e($key) ?>" data-saved-value="<?= e($savedTest) ?>">
+                                    <?= uiField('erapor_ummi_test_order_' . $testToken, 'Urutan', ['type'=>'number','value'=>(string)$test['urutan'],'inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
+                                    <?= uiField('erapor_ummi_test_date_' . $testToken, 'Tanggal tes', ['type'=>'date','value'=>$test['tanggal_tes'],'inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
+                                    <?= uiField('erapor_ummi_test_volume_' . $testToken, 'Jilid yang diteskan', ['value'=>$test['jilid'],'placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
+                                    <?= uiSelect('erapor_ummi_test_grade_' . $testToken, 'Nilai tes', [''=>'Pilih nilai'] + $ummiChoices, ['font'=>'base','value'=>$test['nilai'],'attributes'=>['data-ummi-test-field'=>'nilai']]) ?>
+                                    <span class="erapor-ummi-test-status" data-ummi-test-status aria-live="polite"></span>
+                                    <?php if ($canEdit): ?><?= uiButton('Hapus', 'outline-danger', ['marginVertical'=>0,'attributes'=>['data-erapor-remove-test'=>true]]) ?><?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if (!$existingTests && !$canEdit): ?><p>Tidak ada tes yang dicatat pada periode ini.</p><?php endif; ?>
+                    </section>
+
+                    <template data-ummi-test-template data-ummi-document-id="<?= (int)$document['id'] ?>">
+                        <div class="erapor-ummi-test-row" data-erapor-entry="UMMI_TEST" data-erapor-document-id="<?= (int)$document['id'] ?>" data-erapor-key="" data-saved-value="" data-erapor-incomplete="true">
+                            <?= uiField('erapor_ummi_test_order___TOKEN__', 'Urutan', ['type'=>'number','placeholder'=>'1','inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
+                            <?= uiField('erapor_ummi_test_date___TOKEN__', 'Tanggal tes', ['type'=>'date','inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
+                            <?= uiField('erapor_ummi_test_volume___TOKEN__', 'Jilid yang diteskan', ['placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
+                            <?= uiSelect('erapor_ummi_test_grade___TOKEN__', 'Nilai tes', [''=>'Pilih nilai'] + $ummiChoices, ['font'=>'base','id'=>'erapor_ummi_test_grade___TOKEN__','attributes'=>['data-ummi-test-field'=>'nilai']]) ?>
+                            <span class="erapor-ummi-test-status" data-ummi-test-status aria-live="polite">Lengkapi semua kolom untuk menyimpan.</span>
+                            <?= uiButton('Hapus', 'outline-danger', ['marginVertical'=>0,'attributes'=>['data-erapor-remove-test'=>true]]) ?>
+                        </div>
+                    </template>
+
+                    <section class="erapor-field-group erapor-ummi-teacher-note">
+                        <h3>Catatan Guru <span aria-label="wajib diisi">*</span></h3>
+                        <p>Catatan Guru adalah satu-satunya bagian Rapor Ummi yang wajib diisi.</p>
+                        <?= $renderText($document, 'UMMI', 'catatan', 'Catatan Guru', $values['catatan'] ?? null, false, true) ?>
+                    </section>
+                <?php endif; ?>
             <?php endif; ?>
         </section>
     <?php endforeach; ?>

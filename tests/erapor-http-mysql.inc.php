@@ -100,6 +100,8 @@ try {
         AND NOT EXISTS (SELECT 1 FROM erapor_sesi s WHERE s.murid_id=m.id AND s.periode_id=p.id)
         ORDER BY p.id,m.id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
     if (!$httpCreateCandidate) throw new RuntimeException('An assigned pupil with an uninitialized middle-period session is required for HTTP provisioning test.');
+    $httpCreatePeriod=$db->query('SELECT * FROM periode_penilaian WHERE id='.(int)$httpCreateCandidate['periode_id'])->fetch(PDO::FETCH_ASSOC);
+    if ((int)$httpCreatePeriod['id']!==(int)$httpPeriod['id']) $httpRestorePeriod->execute([$httpNewDeadline,'2000-01-01 00:00:00',$httpCreatePeriod['id']]);
     $httpProvision=$httpTeacher->raw('/portal-guru/sesi/siapkan',http_build_query([
         'csrf_token'=>$httpDashboardCsrf[1], 'murid_id'=>$httpCreateCandidate['murid_id'], 'periode_id'=>$httpCreateCandidate['periode_id'],
     ]),['Content-Type: application/x-www-form-urlencoded']);
@@ -111,7 +113,49 @@ try {
     $httpSessionPage=$httpTeacher->raw('/portal-guru/sesi/'.(int)$httpNewSession['id']);
     catalogCheck($httpSessionPage['status']===200 && str_contains($httpSessionPage['body'],'data-erapor-editor')
         && str_contains($httpSessionPage['body'],'erapor-session.js')
-        && str_contains($httpSessionPage['body'],'belum tersedia di editor ini'),'New session ID opens its own protected e-Rapor editor and identifies unsupported Ummi');
+        && str_contains($httpSessionPage['body'],'data-erapor-ummi-init'),'New session ID opens its protected editor with explicit Ummi initialization control');
+
+    $httpNewSid=(int)$httpNewSession['id'];
+    $httpNewRead=$httpTeacher->api('GET',"/api/erapor/sesi/$httpNewSid");
+    catalogCheck($httpNewRead['status']===200 && $httpNewRead['json']['ok'],'New session read includes Ummi form');
+    $httpNewDocs=array_column($httpNewRead['json']['data']['documents'],null,'jenis_dokumen');
+    $httpUmmiDoc=$httpNewDocs['UMMI'];
+    $httpUmmiForm=$httpUmmiDoc['form'];
+    catalogCheck($httpUmmiForm['definitions']['initialization_required'] && $httpUmmiForm['values']['mulai_pra_tk']===null,
+        'HTTP GET keeps Ummi period uninitialized');
+    $httpInitBefore=$db->prepare('SELECT COUNT(*) FROM erapor_ummi_periode WHERE sesi_id=? AND dokumen_id=?');
+    $httpInitBefore->execute([$httpNewSid,$httpUmmiDoc['id']]);
+    catalogCheck((int)$httpInitBefore->fetchColumn()===0,'Opening Ummi editor does not create its period row');
+    $httpInitUmmi=$httpTeacher->api('POST',"/api/erapor/sesi/$httpNewSid/dokumen/".$httpUmmiDoc['id'].'/simpan',['changes'=>[]]);
+    catalogCheck($httpInitUmmi['status']===200 && $httpInitUmmi['json']['data']['initialized'],'Explicit Ummi start initializes and audits the period');
+    $httpUmmiAfterInit=$httpTeacher->api('GET',"/api/erapor/sesi/$httpNewSid");
+    $httpAfterInitDocs=array_column($httpUmmiAfterInit['json']['data']['documents'],null,'jenis_dokumen');
+    $httpUmmiForm=$httpAfterInitDocs['UMMI']['form'];
+    catalogCheck(!$httpUmmiForm['definitions']['initialization_required'] && $httpUmmiForm['values']['mulai_pra_tk']===false,
+        'Initialized Ummi form starts with PRA TK off');
+    $httpUmmiItem=$httpUmmiForm['definitions']['items'][0];
+    $httpUmmiGrade=$httpUmmiForm['definitions']['scale'][0]['kode'];
+    $httpUmmiVolume='I';
+    $httpTestToken='abcdef0123456789abcdef0123456789';
+    $httpTestValue=['urutan'=>1,'tanggal_tes'=>$httpNow,'jilid'=>$httpUmmiVolume,'nilai'=>$httpUmmiGrade];
+    $httpUmmiSave=$httpTeacher->api('POST',"/api/erapor/sesi/$httpNewSid/dokumen/".$httpUmmiDoc['id'].'/simpan',['changes'=>[
+        ['key'=>'mulai_pra_tk','value'=>true,'expected'=>false],
+        ['key'=>'bacaan:'.$httpUmmiItem['id'],'value'=>$httpUmmiGrade,'expected'=>null],
+        ['key'=>'tes:'.$httpTestToken,'value'=>$httpTestValue,'expected'=>null],
+        ['key'=>'catatan','value'=>'Catatan Ummi tersimpan lewat HTTP.','expected'=>null],
+    ]]);
+    catalogCheck($httpUmmiSave['status']===200 && $httpUmmiSave['json']['data']['changed']===4,
+        'HTTP Ummi autosave persists flag, reading grade, dynamic test, and teacher note');
+    $httpUmmiCompletion=array_values(array_filter($httpUmmiSave['json']['data']['completion']['documents'],fn($row)=>$row['jenis']==='UMMI'))[0] ?? null;
+    catalogCheck($httpUmmiCompletion && $httpUmmiCompletion['complete'] && $httpUmmiCompletion['filled']===1,
+        'Ummi completion is driven only by its required period note');
+    $httpDeleteTest=$httpTeacher->api('POST',"/api/erapor/sesi/$httpNewSid/dokumen/".$httpUmmiDoc['id'].'/simpan',['changes'=>[
+        ['key'=>'tes:'.$httpTestToken,'value'=>null,'expected'=>$httpTestValue],
+    ]]);
+    catalogCheck($httpDeleteTest['status']===200 && $httpDeleteTest['json']['data']['changed']===1
+        && (int)$db->query('SELECT COUNT(*) FROM erapor_ummi_tes WHERE sesi_id='.$httpNewSid)->fetchColumn()===0,
+        'HTTP Ummi dynamic test deletion uses the saved expected value');
+
     $httpShow=$httpTeacher->api('GET',"/api/erapor/sesi/$httpSid");
     catalogCheck($httpShow['status']===200 && $httpShow['json']['ok'],'Authenticated HTTP session read');
     catalogCheck((int)$httpShow['json']['data']['session']['id']===$httpSid && count($httpShow['json']['data']['documents'])===5,'Actual session ID and ABK package returned');
@@ -185,6 +229,8 @@ try {
     $httpTeacher->close(); if (isset($httpOther)) $httpOther->close();
     proc_terminate($httpServer); proc_close($httpServer);
     $httpRestorePeriod->execute([$httpPeriod['akhir_periode'],$httpPeriod['updated_at'],$httpPeriod['id']]);
+    if (isset($httpCreatePeriod) && (int)$httpCreatePeriod['id']!==(int)$httpPeriod['id'])
+        $httpRestorePeriod->execute([$httpCreatePeriod['akhir_periode'],$httpCreatePeriod['updated_at'],$httpCreatePeriod['id']]);
     $httpRestoreUser->execute([$httpOriginalAccount['password_hash'],$httpOriginalAccount['updated_at'],$httpActor]);
     $httpRestoreUser->execute([$httpOtherOriginalAccount['password_hash'],$httpOtherOriginalAccount['updated_at'],$httpOtherUser['id']]);
     foreach ($httpRoles as $httpRole) {

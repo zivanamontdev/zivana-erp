@@ -81,7 +81,7 @@ final class EraporTeacherForm
                 foreach (self::rows($db,'SELECT lingkup_id,isi FROM erapor_agama_catatan WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args) as $v) $values['catatan:'.$v['lingkup_id']]=$v['isi'];
                 break;
             case 'UMMI':
-                $defs['items']=self::rows($db,'SELECT m.* FROM erapor_ummi_materi m JOIN erapor_ummi_jilid j ON j.id=m.jilid_id WHERE j.rubrik_id=? AND m.aktif=1 ORDER BY j.urutan,m.urutan',[$rid]);
+                $defs['items']=self::rows($db,'SELECT m.*,j.nama AS jilid_nama,j.urutan AS jilid_urutan,j.hanya_pra_tk FROM erapor_ummi_materi m JOIN erapor_ummi_jilid j ON j.id=m.jilid_id WHERE j.rubrik_id=? AND m.aktif=1 ORDER BY j.urutan,m.urutan',[$rid]);
                 foreach (self::rows($db,'SELECT materi_id,nilai FROM erapor_ummi_bacaan WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args) as $v) $values['bacaan:'.$v['materi_id']]=$v['nilai'];
                 $values['catatan']=self::rows($db,'SELECT isi FROM erapor_ummi_catatan WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args)[0]['isi'] ?? null;
                 $flag=self::rows($db,'SELECT mulai_pra_tk FROM erapor_ummi_periode WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args)[0] ?? null;

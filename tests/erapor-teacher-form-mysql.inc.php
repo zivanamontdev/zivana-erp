@@ -19,6 +19,9 @@ catalogCheck(count($formDocs['AGAMA']['form']['definitions']['scale'])===7,'Agam
 catalogCheck(count($formDocs['AGAMA']['form']['definitions']['items'])===($formRead['period']['semester']==='GANJIL'?37:36),'Agama semester-specific items');
 foreach ($formDocs['AGAMA']['form']['definitions']['items'] as $formItem) catalogCheck($formItem['semester']===$formRead['period']['semester'],'No other semester definition');
 catalogCheck(count($formDocs['UMMI']['form']['definitions']['scale'])===12,'Ummi 12 grades');
+catalogCheck(count($formDocs['UMMI']['form']['definitions']['volumes'])===7 && count($formDocs['UMMI']['form']['definitions']['items'])===27,'Ummi form returns seven named volumes and 27 reading materials');
+catalogCheck($formDocs['UMMI']['form']['definitions']['items'][0]['jilid_nama']==='PRA TK'
+    && (bool)$formDocs['UMMI']['form']['definitions']['items'][0]['hanya_pra_tk'],'Ummi materials carry their volume and PRA visibility metadata');
 $formSavedNote=$db->query('SELECT isi FROM erapor_ummi_catatan WHERE sesi_id='.$formSid)->fetchColumn();
 catalogCheck($formDocs['UMMI']['form']['values']['catatan']===$formSavedNote,'Raw note retained exactly');
 catalogCheck(!str_contains(json_encode($formRead,JSON_THROW_ON_ERROR),'ttd_png'),'No signatures in teacher form');

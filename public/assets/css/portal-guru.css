@@ -184,6 +184,33 @@ button.teacher-report-action:focus-visible,
 .erapor-session-notice { border: 1px solid var(--color-neutral-75); border-radius: var(--radius-md); background: var(--color-neutral-50); padding: var(--space-4); color: var(--color-neutral-600); }
 .erapor-session-notice h3, .erapor-session-notice p { margin: 0; }
 .erapor-session-notice p { margin-top: var(--space-2); }
+.erapor-ummi-init { display:grid; justify-items:start; gap:var(--space-3); }
+.erapor-ummi-init p { margin:0; }
+.erapor-ummi-controls { gap:var(--space-2); }
+.erapor-ummi-note, .erapor-ummi-tests-heading p, .erapor-ummi-teacher-note > p {
+  margin:0;
+  color:var(--color-neutral-500);
+  font-size:var(--font-size-caption-md);
+}
+.erapor-ummi-reading-count { margin:0; color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
+.erapor-ummi-volumes { display:grid; gap:var(--space-3); }
+.erapor-ummi-volume { border:1px solid var(--color-neutral-75); border-radius:var(--radius-md); background:var(--color-neutral-white); overflow:hidden; }
+.erapor-ummi-volume > summary { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); cursor:pointer; list-style:none; }
+.erapor-ummi-volume > summary::-webkit-details-marker { display:none; }
+.erapor-ummi-volume-items { display:grid; gap:var(--space-3); padding:var(--space-4); }
+.erapor-ummi-volume-items > .ui-select { width:100%; }
+.erapor-ummi-tests-heading { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); }
+.erapor-ummi-tests-heading h3, .erapor-ummi-teacher-note h3 { margin:0; color:var(--color-neutral-800); font-size:var(--font-size-body-sm); font-weight:var(--font-weight-bold); }
+.erapor-ummi-tests-heading > div { display:grid; gap:var(--space-1); }
+.erapor-ummi-test-list { display:grid; gap:var(--space-3); }
+.erapor-ummi-test-row { display:grid; grid-template-columns:minmax(5rem,.55fr) minmax(10rem,1fr) minmax(9rem,1fr) minmax(8rem,.75fr) auto; align-items:end; gap:var(--space-3); border:1px solid var(--color-neutral-75); border-radius:var(--radius-md); background:var(--color-neutral-white); padding:var(--space-3); }
+.erapor-ummi-test-row .ui-field, .erapor-ummi-test-row .ui-select { width:100%; min-width:0; }
+.erapor-ummi-test-status { grid-column:1 / -2; color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
+.erapor-ummi-test-row[data-erapor-incomplete="true"] { border-color:var(--color-orange-300); }
+.erapor-ummi-test-row[data-erapor-delete-test="true"] { opacity:.65; }
+.erapor-ummi-teacher-note { gap:var(--space-2); }
+.erapor-ummi-teacher-note h3 span { color:var(--color-red-600); }
+.erapor-ummi-teacher-note .ui-field { width:100%; }
 
 /* ==========================================================
    Pengisian Rapor — layout "fokus" (TANPA sidebar/topbar)
@@ -348,6 +375,8 @@ button.teacher-report-action:focus-visible,
   .pengisian-item-row { flex-direction: column; align-items: stretch; }
   .pengisian-item-row .field-input { max-width: none; }
   .erapor-document .pengisian-item-row > .ui-select { flex-basis: auto; max-width: none; }
+  .erapor-ummi-test-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .erapor-ummi-test-status { grid-column:1 / -1; }
 }
 
 /* ---------- Responsif — Pengisian Rapor WAJIB jalan baik di HP ---------- */

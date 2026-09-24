@@ -354,7 +354,7 @@ Berikutnya: buat read model dashboard/periode dan provisioning sesi untuk halama
 - [x] Periode AKHIR yang belum memiliki RAS ditandai belum siap, tanpa membuat dokumen atau sesi parsial. Periode tidak valid dilewati, tidak ditebak.
 - [x] Aksi “Isi Rapor” memakai POST + CSRF, RBAC Dashboard/Daftar Murid, dan `EraporSessionFactory`; GET dashboard tidak membuat sesi. Sesi dibuka melalui route e-Rapor baru yang memeriksa kepemilikan/penugasan.
 - [x] 1112 pemeriksaan MySQL lolos pada DB disposable yang direstorasi dari backup; checksum tabel lama lokal tetap sama. Route-RBAC 59, adapter API 25, dan regresi Portal Guru legacy lulus.
-- [ ] Editor interaktif nilai dan antrean autosave sedang diintegrasikan; konfirmasi penerimaan/persetujuan serta uji browser masih perlu diverifikasi. Jangan aktifkan feature flag produksi sebagai rilis final sebelum seluruh editor selesai.
+- [x] Editor interaktif nilai dan antrean autosave untuk semua rubrik paket sudah diintegrasikan; konfirmasi penerimaan/persetujuan serta uji browser masih perlu diverifikasi. Jangan aktifkan feature flag produksi sebagai rilis final sebelum seluruh alur selesai.
 
 Berikutnya: lengkapi renderer Ummi (inisialisasi periode dan riwayat tes), lalu uji browser end-to-end sebelum membuka feature flag produksi.
 
@@ -364,4 +364,9 @@ Berikutnya: lengkapi renderer Ummi (inisialisasi periode dan riwayat tes), lalu 
 - [x] Autosave dibuffer dan diserialisasi memakai token CSRF terbaru. Konflik stale tidak menimpa perubahan diam-diam; capability tombol Selesaikan Rapor dan progress dihitung ulang server-side.
 - [x] RBAC edit/kirim diterapkan pada kontrol UI dan endpoint; submit memakai endpoint konfirmasi isi yang terpisah dari persetujuan kepala sekolah/admin.
 - [x] 1112 pemeriksaan MySQL pada backup restore disposable lulus termasuk autosave HTTP RTS/Agama/BING/PPI, CSRF satu kali, RBAC, dan checksum tabel legacy. Lulus juga 25 adapter API, 59 route RBAC, regresi Portal Guru legacy dan pemeriksaan markup UI.
-- [ ] Ummi masih read-only di editor: belum ada inisialisasi eksplisit `mulai_pra_tk`, input bacaan/jilid, catatan dan pengelolaan tes dinamis. Uji visual browser belum dilakukan; feature flag production tetap OFF.
+- [x] Ummi menggunakan komponen form bersama untuk 27 materi bacaan, sakelar PRA TK (menyembunyikan tanpa menghapus nilai), tes dinamis, dan catatan guru wajib.
+- [x] Inisialisasi Ummi hanya melalui tombol eksplisit; GET tetap read-only. HTTP menguji inisialisasi, autosave bacaan/catatan/tes, penghapusan tes, kelengkapan wajib, dan rotasi CSRF.
+- [x] 1122 pemeriksaan MySQL pada backup restore disposable lulus dan checksum tabel tetap sama; route-RBAC, adapter API, regresi Portal Guru dan markup UI juga lulus.
+- [ ] Uji visual/interaksi browser belum dilakukan; feature flag production tetap OFF.
+
+Berikutnya: uji browser visual/interaksi dan aksesibilitas alur Portal Guru baru. Lanjutkan lifecycle persetujuan/penerbitan serta PDF atomik setelah itu; jangan aktifkan feature flag production sebelum seluruh alur diverifikasi.

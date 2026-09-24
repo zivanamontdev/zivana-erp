@@ -49,7 +49,29 @@ $form = [
                 'scale'=>[['kolom_cetak'=>'TAHFIZH/D','label'=>'Belum berkembang']],
             ], 'values'=>[],
         ]],
-        ['id'=>103,'nama'=>'Rapor Ummi','jenis_dokumen'=>'UMMI','form'=>['definitions'=>[],'values'=>[]]],
+        ['id'=>103,'nama'=>'Rapor Ummi','jenis_dokumen'=>'UMMI','form'=>[
+            'definitions'=>[
+                'initialization_required'=>false,
+                'volumes'=>[
+                    ['id'=>11,'nama'=>'PRA TK','urutan'=>1,'hanya_pra_tk'=>1],
+                    ['id'=>12,'nama'=>'I','urutan'=>2,'hanya_pra_tk'=>0],
+                ],
+                'items'=>[
+                    ['id'=>13,'jilid_id'=>11,'jilid_nama'=>'PRA TK','teks'=>'Materi Pra TK','hanya_pra_tk'=>1],
+                    ['id'=>14,'jilid_id'=>12,'jilid_nama'=>'I','teks'=>'Materi Jilid I','hanya_pra_tk'=>0],
+                ],
+                'scale'=>[
+                    ['kode'=>'A+','label'=>'A+','peringkat'=>12],
+                    ['kode'=>'A','label'=>'A','peringkat'=>11],
+                ],
+            ],
+            'values'=>[
+                'mulai_pra_tk'=>false,
+                'catatan'=>'Catatan periode Ummi',
+                'bacaan:14'=>'A+',
+                'tes:0123456789abcdef0123456789abcdef'=>['urutan'=>1,'tanggal_tes'=>'2026-09-24','jilid'=>'I','nilai'=>'A'],
+            ],
+        ]],
         ['id'=>104,'nama'=>'Rapor Bahasa Inggris','jenis_dokumen'=>'BING','form'=>[
             'definitions'=>[
                 'items'=>[['id'=>7,'grup'=>null,'penanda_cetak'=>null,'label_cetak'=>'Attendance']],
@@ -86,7 +108,28 @@ eraporUiCheck($xpath->query('//select[@data-erapor-entry="RTS"]//option[@data-op
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="AGAMA"]')->length === 1, 'Agama choice mapped from rubric definitions');
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="BING"]')->length === 1 && $xpath->query('//textarea[@data-erapor-entry="BING"]')->length === 1, 'BING grade and comment controls rendered');
 eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="PPI" and not(@disabled)]')->length === 1, 'PPI session field is editable through shared textarea component');
-eraporUiCheck(str_contains($html, 'alur inisialisasi periode') && $xpath->query('//textarea[@data-erapor-entry="UMMI"]')->length === 0, 'Ummi is explicitly not presented as editable');
+eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="UMMI" and @data-erapor-key="catatan"]')->length === 1, 'Ummi required period note uses shared textarea component');
+eraporUiCheck($xpath->query('//select[@data-erapor-entry="UMMI" and @data-erapor-key="bacaan:14"]')->length === 1, 'Ummi reading grade uses shared select component');
+eraporUiCheck($xpath->query('//input[@data-erapor-pra-toggle and @type="checkbox"]')->length === 1 && $xpath->query('//details[@data-ummi-pra-tk="true" and @hidden]')->length === 1, 'Ummi PRA TK toggle hides its volume without removing its fields');
+eraporUiCheck($xpath->query('//div[@data-erapor-entry="UMMI_TEST" and @data-erapor-key="tes:0123456789abcdef0123456789abcdef"]')->length === 1, 'Ummi dynamic test row renders server-saved values');
+eraporUiCheck($xpath->query('//input[@data-ummi-test-field="jilid" and @value="I"]')->length === 1
+    && $xpath->query('//select[@data-ummi-test-field="nilai"]/option[@value="A" and @selected]')->length === 1,
+    'Ummi test fields preserve saved jilid and grade values');
+eraporUiCheck($xpath->query('//button[@data-erapor-add-test="103"]')->length === 1 && $xpath->query('//template[@data-ummi-test-template]')->length === 1, 'Ummi supports dynamic test creation through shared controls');
+eraporUiCheck($xpath->query('//input[@data-erapor-entry="UMMI" and @data-erapor-key="mulai_pra_tk"]')->length === 1 && str_contains($source, 'data-erapor-ummi-init'), 'Ummi editor includes explicit, user-triggered initialization behavior');
+eraporUiCheck(!str_contains($html, 'Hafalan'), 'Ummi editor does not add the excluded memorization section');
 eraporUiCheck($xpath->query('//button[@data-erapor-confirm and @disabled]')->length === 1, 'Submission starts disabled until server confirms completeness');
 eraporUiCheck($xpath->query('//details[@open]')->length === 0, 'Assessment areas start collapsed');
-echo "PASS: E-Rapor session editor markup covers RTS, Agama, BING, PPI, read-only Ummi state and server-gated submission.\n";
+
+$form['documents'][2]['form']['definitions']['initialization_required'] = true;
+$form['documents'][2]['form']['values'] = ['mulai_pra_tk'=>null,'catatan'=>null];
+ob_start();
+eval('?>' . $source);
+$uninitializedHtml = ob_get_clean();
+$uninitializedDom = new DOMDocument();
+@$uninitializedDom->loadHTML($uninitializedHtml);
+$uninitializedXPath = new DOMXPath($uninitializedDom);
+eraporUiCheck($uninitializedXPath->query('//button[@data-erapor-ummi-init]')->length === 1
+    && $uninitializedXPath->query('//input[@data-erapor-entry="UMMI"]')->length === 0,
+    'Uninitialized Ummi exposes only the explicit initialize action and no editable fields');
+echo "PASS: E-Rapor session editor markup covers RTS, Agama, BING, PPI, Ummi, and server-gated submission.\n";
