@@ -9,6 +9,8 @@ FROM (
     UNION ALL SELECT 'eRapor','Persetujuan','edit',101
     UNION ALL SELECT 'eRapor','Penugasan Penyetuju','lihat',102
     UNION ALL SELECT 'eRapor','Penugasan Penyetuju','edit',103
+    UNION ALL SELECT 'eRapor','Profil Penandatangan','lihat',104
+    UNION ALL SELECT 'eRapor','Profil Penandatangan','edit',105
 ) seed
 LEFT JOIN permissions p ON p.modul=seed.modul AND p.section=seed.section AND p.sub_section IS NULL AND p.aksi=seed.aksi
 WHERE p.id IS NULL;

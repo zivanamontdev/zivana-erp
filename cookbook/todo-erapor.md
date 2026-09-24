@@ -2,7 +2,7 @@
 
 Tanggal: 24 September 2026.
 
-Status: fondasi katalog/rubrik, alur pengisian guru, dan aksi persetujuan internal sudah diimplementasikan secara opt-in. Inbox/tinjauan persetujuan sedang disambungkan ke route dan UI; publikasi PDF final serta kesiapan produksi tetap belum selesai. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
+Status: katalog/rubrik, alur pengisian guru, persetujuan, assignment, dan profil tanda tangan pemilik sudah diimplementasikan secara opt-in. Renderer/publikasi PDF final, penyelarasan sumber dokumen, kesiapan migrasi produksi, serta uji visual browser masih belum selesai. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
 
 ## Acuan dan batas pekerjaan
 
@@ -395,4 +395,16 @@ Berikutnya: uji browser E2E memakai fixture database terisolasi, lalu inbox dan 
 - [ ] Belum ada renderer/penerbitan PDF snapshot bertanda tangan secara atomik. Sesi tetap `MENUNGGU_TTD` setelah semua approver menyetujui.
 - [ ] Uji browser visual belum dijalankan karena browser lokal ditolak sandbox Windows. Jangan mengaktifkan flag production sebelum verifikasi browser dan seluruh gerbang migrasi/pemulihan.
 
-Berikutnya: lengkapi profil tanda tangan pemilik, lalu pipeline PDF immutable/publication transaction. Feature flag production tetap OFF sampai UI browser dan seluruh gerbang migrasi/pemulihan lulus.
+Berikutnya: pipeline PDF immutable/publication transaction. Feature flag production tetap OFF sampai UI browser dan seluruh gerbang migrasi/pemulihan lulus.
+
+### Batch profil penandatangan mandiri (25 September 2026)
+
+- [x] Route profil hanya memakai ID pengguna dari sesi login; pegawai, jabatan, akun, dan permission diperiksa ulang. Tidak ada parameter target user dan tidak ada aksi admin atas nama penandatangan.
+- [x] NUPTK opsional divalidasi 16 digit, tanda tangan PNG dibatasi 2 MB/4 MP, didekode lalu dienkode ulang oleh GD untuk membuang metadata. Upload baru memerlukan checkbox consent eksplisit.
+- [x] Profil privat memakai tabel extension tanpa perubahan legacy; audit menyimpan aktor, versi consent, NUPTK, hash gambar, dan aksi setuju/cabut. Pencabutan mencegah pemakaian untuk snapshot mendatang dan tidak mengubah snapshot lama.
+- [x] Preview gambar dilayani dari route owner-only dengan no-store/nosniff/noindex; UI memakai komponen bersama dan token warna bank.
+- [x] Izin lihat/ubah masuk katalog RBAC; role Guru hanya boleh profil sendiri dan Portal Guru/Persetujuan yang memang diizinkan, bukan penugasan penyetuju.
+- [x] Tes UI, route/RBAC, akun, lint PHP, dan harness MySQL pada restore disposable lulus: 1175 pemeriksaan; checksum legacy tetap utuh.
+- [ ] Renderer/publikasi PDF final, penyelarasan ketidaksesuaian sumber dokumen, migrasi aplikasi, dan browser visual masih terbuka. Feature flag produksi tetap OFF.
+
+Berikutnya: bangun renderer immutable berbasis snapshot serta finalisasi atomik semua PDF paket; jangan menyamarkan RAS yang sumber resminya belum tersedia.

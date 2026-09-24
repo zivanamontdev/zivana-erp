@@ -15,7 +15,7 @@ foreach($router->routes as [$verb,$path,$handler]) {
     $output=stream_get_contents($pipes[1]); $error=stream_get_contents($pipes[2]);
     fclose($pipes[1]); fclose($pipes[2]); $code=proc_close($process);
     $result=json_decode($output,true);
-    $expectedStatus = str_starts_with($path, '/erapor/persetujuan') ? 404 : 403; // Opt-in approval routes stay undiscoverable while disabled.
+    $expectedStatus = str_starts_with($path, '/erapor/') ? 404 : 403; // Opt-in eRapor HTML routes stay undiscoverable while disabled.
     if($code!==0 || ($result['status']??0)!==$expectedStatus || ($result['employees']??-1)!==0) throw new RuntimeException("Route guard failed: $verb $path: $output $error");
     $count++;
 }

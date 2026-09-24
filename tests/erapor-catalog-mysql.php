@@ -130,6 +130,7 @@ try {
     require __DIR__.'/erapor-teacher-dashboard-mysql.inc.php';
     require __DIR__.'/erapor-http-mysql.inc.php';
     require __DIR__.'/erapor-approval-assignment-mysql.inc.php';
+    require __DIR__.'/erapor-signer-profile-mysql.inc.php';
     $db->exec("UPDATE erapor_migrations SET sha256=REPEAT('0',64)");
     catalogReject(fn() => EraporMigrationRunner::apply($db,$file), 'checksum');
     $db->prepare("UPDATE erapor_migrations SET sha256=?,status='applying'")->execute([$plan['sha256']]);

@@ -93,6 +93,7 @@ foreach ([1,2,3,4] as $position) {
     if($position>=3) {
         foreach($nodes as [$module,$section]) expectAccount((new RoleMiddleware())->check($module,$section)===($module==='Portal Guru'),'Teacher restricted to portal even with extra grants');
         expectAccount(!(new RoleMiddleware())->check('eRapor','Penugasan Penyetuju','lihat'),'Teacher is explicitly denied approval assignment setup');
+        expectAccount((new RoleMiddleware())->check('eRapor','Profil Penandatangan','lihat'),'Teacher may access only their own signer profile when role permission is granted');
     }
 }
 adminAccount();

@@ -1642,6 +1642,18 @@ Baris memuat nama murid di kiri, status teks dan chevron 20px di kanan dengan ga
 - Setup penugasan berada di `Sistem > Penugasan Penyetuju`, memakai `uiCard` outlined per tahap, `uiCheckbox` per akun, `uiField` textarea untuk alasan audit, `uiBadge` jumlah rapor pending, dan `uiButton` primary. Layout hanya memakai spacing/color tokens; tidak menambahkan hex di stylesheet fitur.
 - Penyetuju hanya boleh dipilih dari akun pegawai aktif dengan izin role `eRapor > Persetujuan`; tahap Kepala Sekolah khusus jabatan Kepala Sekolah. Role Guru tidak dapat mengakses setup meski checkbox setup diberikan. Setiap perubahan aktif/nonaktif wajib mencatat aktor, status sebelum/sesudah, alasan, dan waktu.
 - Tiga tahap dan scope adalah konfigurasi tetap: Koordinator Al-Qur’an (UMMI), Koordinator Bahasa Inggris (BING), lalu Kepala Sekolah (semua dokumen). UI tidak mengedit susunan/scope dan tidak pernah memilih akun otomatis. Jika konfigurasi seed/mapping tidak lengkap, halaman tampil fail-closed tanpa form simpan.
+
+### Profil penandatangan eRapor
+
+Gunakan komponen bersama `uiField` untuk NUPTK dan input PNG, `uiCheckbox`
+untuk persetujuan pemilik, `uiDataCard`/`uiCard` untuk ringkasan dan status,
+`uiBadge` untuk keadaan persetujuan, `uiButton` untuk simpan/cabut, serta
+`uiModal` untuk konfirmasi pencabutan. Warna/layout khusus hanya boleh memakai
+token bank warna. Preview harus berasal dari route privat akun yang sedang
+login; jangan menyimpan file di webroot atau menampilkan URL publik. Persetujuan
+diperlukan setiap upload tanda tangan baru. Perubahan NUPTK saja tidak mengganti
+gambar/consent, sedangkan pencabutan hanya berlaku untuk snapshot baru dan tidak
+mengubah dokumen historis.
 # Simbol penilaian bersama
 
 **Pembaruan mobile Pengisian Rapor:** pada viewport ≤40rem, header fullwidth tanpa gutter layar dan tanpa radius; padding internal tetap 20px/24px. Card penilaian tetap memiliki gutter horizontal 20px. Grup tombol header yang sama diposisikan `fixed` di bawah viewport, fullwidth, background token `page-background`, border atas `neutral-100`, dan padding 20px/24px ditambah safe-area perangkat. Tidak ada duplikasi tombol/form. Ruang bawah form mengikuti tinggi toolbar melalui ResizeObserver (fallback 7rem) agar penilaian terakhir tidak tertutup. Di desktop tombol tetap sejajar judul. Aturan ini menggantikan ketentuan sebelumnya bahwa tombol mobile tetap di bagian atas.

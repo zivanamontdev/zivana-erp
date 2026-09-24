@@ -26,12 +26,17 @@ class PermissionCatalog
         ['eRapor','Persetujuan',null,'edit',null],
         ['eRapor','Penugasan Penyetuju',null,'lihat',null],
         ['eRapor','Penugasan Penyetuju',null,'edit',null],
+        ['eRapor','Profil Penandatangan',null,'lihat',null],
+        ['eRapor','Profil Penandatangan',null,'edit',null],
     ];
 
     public static function label(array $permission): string
     {
         $action=$permission['aksi']; $section=$permission['sub_section'] ?: $permission['section'];
         if ($permission['modul']==='eRapor') {
+            if (($permission['section'] ?? '') === 'Profil Penandatangan') {
+                return $action==='edit'?'Ubah NUPTK & persetujuan tanda tangan':'Lihat profil tanda tangan sendiri';
+            }
             if (($permission['section'] ?? '') === 'Penugasan Penyetuju') {
                 return $action==='edit'?'Ubah penugasan penyetuju':'Lihat penugasan penyetuju';
             }

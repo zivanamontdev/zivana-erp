@@ -1,0 +1,20 @@
+.erapor-signer-intro { margin-block: 0 var(--space-4); }
+.erapor-signer-current,
+.erapor-signer-editor { display: grid; gap: var(--space-4); margin-block: var(--space-4); }
+.erapor-signer-status { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-4); align-items: start; }
+.erapor-signer-status p { margin: var(--space-2) 0 0; color: var(--color-neutral-600); }
+.erapor-signer-preview { display: grid; gap: var(--space-2); justify-items: start; margin: 0; }
+.erapor-signer-preview img { display: block; max-width: 100%; max-height: 12rem; object-fit: contain; padding: var(--space-2); border: 1px solid var(--color-neutral-150); border-radius: var(--radius-sm); }
+.erapor-signer-preview figcaption { color: var(--color-neutral-600); }
+.erapor-signer-form { display: grid; gap: var(--space-4); max-width: 42rem; }
+.erapor-signer-form .field { min-width: 0; }
+.erapor-signer-form .field-input[type="file"] { height: auto; min-height: calc(2.8125 * var(--ui-unit) + 2px); padding: var(--space-2); }
+.erapor-signer-form .field-input[type="file"]::file-selector-button { margin-inline-end: var(--space-3); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-neutral-150); border-radius: var(--radius-sm); background: var(--color-page-background); color: var(--color-neutral-900); font: inherit; cursor: pointer; }
+.erapor-signer-form > p { margin: calc(var(--space-3) * -1) 0 0; color: var(--color-neutral-600); }
+.erapor-signer-consent { max-width: 40rem; }
+.erapor-signer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); }
+
+@media (max-width: 760px) {
+  .erapor-signer-status { grid-template-columns: minmax(0,1fr); }
+  .erapor-signer-actions { display: grid; grid-template-columns: minmax(0,1fr); }
+}

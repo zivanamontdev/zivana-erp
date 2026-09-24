@@ -91,6 +91,10 @@ $router->get('/erapor/persetujuan/{sessionId}/{approvalId}', [EraporApprovalCont
 $router->post('/erapor/persetujuan/{sessionId}/{approvalId}/setujui', [EraporApprovalController::class, 'approve']);
 $router->get('/erapor/persetujuan/penugasan', [EraporApprovalSetupController::class, 'index']);
 $router->post('/erapor/persetujuan/penugasan', [EraporApprovalSetupController::class, 'update']);
+$router->get('/erapor/profil-penandatangan', [EraporSignerProfileController::class, 'index']);
+$router->post('/erapor/profil-penandatangan', [EraporSignerProfileController::class, 'update']);
+$router->post('/erapor/profil-penandatangan/cabut', [EraporSignerProfileController::class, 'revoke']);
+$router->get('/erapor/profil-penandatangan/tanda-tangan', [EraporSignerProfileController::class, 'signature']);
 
 // --- Portal Guru ---
 // New session IDs are NOT legacy rapor IDs. Disabled by default in config.

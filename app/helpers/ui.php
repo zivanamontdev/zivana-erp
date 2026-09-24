@@ -224,7 +224,7 @@ function uiText(string $text, string $variant = 'body-sm', array $options = []):
 function uiField(string $name, string $label, array $options = []): string
 {
     $type = $options['type'] ?? 'text';
-    $type = in_array($type, ['text', 'email', 'password', 'date', 'search', 'textarea', 'number', 'tel'], true) ? $type : 'text';
+    $type = in_array($type, ['text', 'email', 'password', 'date', 'search', 'textarea', 'number', 'tel', 'file'], true) ? $type : 'text';
     $state = $options['state'] ?? 'default';
     $state = in_array($state, ['default', 'active', 'filled', 'viewonly', 'negative'], true) ? $state : 'default';
     $font = ($options['font'] ?? 'base') === 'geist' ? 'font-geist' : 'font-base';
@@ -272,7 +272,8 @@ function uiField(string $name, string $label, array $options = []): string
         $control = '<textarea ' . uiAttrs($inputAttributes) . '>' . e($value) . '</textarea>';
     } else {
         $inputAttributes['type'] = $type;
-        $inputAttributes['value'] = $value;
+        if ($type !== 'file') $inputAttributes['value'] = $value;
+        else unset($inputAttributes['value']);
         $control = '<input ' . uiAttrs($inputAttributes) . '>';
     }
 

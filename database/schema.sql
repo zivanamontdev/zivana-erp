@@ -119,6 +119,8 @@ SELECT * FROM (
     UNION ALL SELECT 'eRapor', 'Persetujuan', NULL, 'edit', 101
     UNION ALL SELECT 'eRapor', 'Penugasan Penyetuju', NULL, 'lihat', 102
     UNION ALL SELECT 'eRapor', 'Penugasan Penyetuju', NULL, 'edit', 103
+    UNION ALL SELECT 'eRapor', 'Profil Penandatangan', NULL, 'lihat', 104
+    UNION ALL SELECT 'eRapor', 'Profil Penandatangan', NULL, 'edit', 105
 ) AS seed_data
 WHERE NOT EXISTS (SELECT 1 FROM permissions LIMIT 1);
 

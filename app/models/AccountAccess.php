@@ -35,6 +35,7 @@ class AccountAccess
             ['/erapor/persetujuan', 'eRapor', 'Persetujuan'],
             ['/portal-guru/dashboard', 'Portal Guru', 'Dashboard'],
             ['/portal-guru/murid', 'Portal Guru', 'Daftar Murid'],
+            ['/erapor/profil-penandatangan', 'eRapor', 'Profil Penandatangan'],
             ['/rbac', 'Sistem', 'RBAC'],
         ];
         $checker = new RoleMiddleware();

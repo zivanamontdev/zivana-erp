@@ -84,6 +84,7 @@ $navGroups = [
         'entries' => [
             ['type' => 'item', 'key' => 'portal-dashboard', 'label' => 'Dashboard', 'href' => '/portal-guru/dashboard', 'icon' => 'icon_layout_dashboard', 'perm' => ['Portal Guru', 'Dashboard']],
             ['type' => 'item', 'key' => 'portal-daftar-murid', 'label' => 'Daftar Murid', 'href' => '/portal-guru/murid', 'icon' => 'icon_backpack', 'perm' => ['Portal Guru', 'Daftar Murid']],
+            ['type' => 'item', 'key' => 'erapor-signer-profile', 'label' => 'Profil Penandatangan', 'href' => '/erapor/profil-penandatangan', 'icon' => 'icon_user_round_cog', 'perm' => ['eRapor', 'Profil Penandatangan']],
         ],
     ],
     [

@@ -30,6 +30,10 @@ Antrean persetujuan HTML (flag aktif, login, permission `eRapor > Persetujuan`, 
 | POST `/erapor/persetujuan/{sessionId}/{approvalId}/setujui` | edit + CSRF form | Catat persetujuan/snapshot satu tahap; tidak menerbitkan PDF atau menyelesaikan sesi |
 | GET `/erapor/persetujuan/penugasan` | `eRapor > Penugasan Penyetuju` lihat | Kelola assignment eksplisit tiga tahap; akun eligible dan assignment lama noneligible ditampilkan |
 | POST `/erapor/persetujuan/penugasan` | `eRapor > Penugasan Penyetuju` edit + CSRF form | Simpan akun terpilih per tahap, wajib alasan audit; sedikitnya satu akun valid per tahap |
+| GET `/erapor/profil-penandatangan` | `eRapor > Profil Penandatangan` lihat | Status NUPTK/consent dan preview privat milik sendiri |
+| POST `/erapor/profil-penandatangan` | `eRapor > Profil Penandatangan` edit + CSRF multipart | Update NUPTK dan/atau unggah PNG dengan consent eksplisit |
+| POST `/erapor/profil-penandatangan/cabut` | `eRapor > Profil Penandatangan` edit + CSRF | Cabut pemakaian tanda tangan untuk snapshot mendatang |
+| GET `/erapor/profil-penandatangan/tanda-tangan` | `eRapor > Profil Penandatangan` lihat | Stream PNG privat pemilik saja, no-store |
 
 Route ini terpisah dari permission `Murid > Rapor Murid` legacy. Role saja maupun assignment saja tidak cukup. Tahap kepala sekolah tetap mensyaratkan jabatan Kepala Sekolah aktif; cakupan dokumen berasal dari snapshot sesi, dan POST service kembali memvalidasi urutan, scope, status, signature evidence, serta assignment saat ini. Halaman reviewer tidak menyertakan signature bytes, memakai no-store/noindex, dan menampilkan modal konfirmasi sebelum aksi permanen.
 
@@ -37,7 +41,9 @@ Konfigurasi tetap dan cakupan disediakan oleh `database/seeds/20260925_erapor_ap
 
 Dashboard baru hanya mengeluarkan tombol Isi Rapor jika kalender valid dan semua rubrik paket siap. RAS yang belum tersedia memblokir paket AKHIR tanpa membuat data parsial. Editor sesi mendukung autosave untuk RTS, Agama, BING, PPI, dan Ummi. Form Ummi baru menampilkan nilai setelah tindakan eksplisit “Mulai pengisian Ummi”; GET tidak membuat baris `erapor_ummi_periode`. Setelah inisialisasi, guru dapat mengisi 27 materi bacaan (opsional), sakelar PRA TK, tes dinamis, dan catatan guru (wajib). Jangan aktifkan flag production sebelum uji browser, seluruh rubrik dan alur penutupan diverifikasi.
 
-Wajib cookie session login aktif; tidak melakukan remember-login otomatis pada API. Actor diambil dari session, bukan body. Layanan internal tetap memeriksa penugasan guru/murid/kelas aktif. JSON API belum menyediakan pembuatan sesi, perpanjangan, upload profil atau PDF; provisioning sesi tersedia melalui POST form UI, sedangkan approval melalui rute HTML di atas.
+Profil penandatangan menyimpan NUPTK opsional dan PNG privat pada extension akun pegawai. Upload dibatasi 2 MB, 4096x2048 dan 4 megapiksel; PHP GD mendekode lalu mengodekan ulang gambar sebelum disimpan. Consent pemilik wajib eksplisit setiap upload baru. NUPTK dapat diedit tanpa mengganti gambar; pencabutan menghapus gambar/consent aktif tetapi mempertahankan audit hash serta snapshot historis. Hosting harus mengaktifkan ekstensi GD. Route stream hanya mengirim gambar akun login dan melarang cache publik.
+
+Wajib cookie session login aktif; tidak melakukan remember-login otomatis pada API. Actor diambil dari session, bukan body. Layanan internal tetap memeriksa penugasan guru/murid/kelas aktif. JSON API belum menyediakan pembuatan sesi, perpanjangan, atau PDF; provisioning sesi, profil, dan approval memakai rute HTML terproteksi di atas.
 
 Penutupan di editor memakai dua aksi berurutan yang berbeda. `BELUM_DIISI` menawarkan **Selesaikan Rapor** (validasi lengkap, sesi tetap dapat diedit); setelah itu `TELAH_DIISI` menawarkan **Konfirmasi Penerimaan** (membuat snapshot/alur approval dan mengunci sesi). Tombol menggunakan komponen UI bersama dan capability read-model. Status `MENUNGGU_TTD`/`SELESAI` tidak menawarkan aksi guru. Konfirmasi penerimaan menampilkan peringatan bahwa penguncian tidak dapat dibatalkan.
 
