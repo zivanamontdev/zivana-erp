@@ -29,7 +29,7 @@ final class EraporApprove
             $reception=self::one($db,'SELECT sesi_id FROM erapor_sesi_penerimaan WHERE sesi_id=?',[$sessionId]);
             $event=self::one($db,"SELECT id FROM erapor_sesi_log WHERE sesi_id=? AND aksi='KONFIRMASI_PENERIMAAN' LIMIT 1",[$sessionId]);
             if (!$reception || !$event) throw new DomainException('Jejak penerimaan tidak lengkap.');
-            self::validateScope($db,$session,$rows);
+            self::assertSnapshotScope($db,$session,$rows);
             $existing=self::one($db,'SELECT * FROM erapor_persetujuan_snapshot WHERE sesi_penyetuju_id=?',[$approvalId]);
             if ($target['status']==='DISETUJUI') {
                 if (!$existing || (int)$existing['user_id']!==$actorId) throw new DomainException('Persetujuan telah diberikan oleh akun lain atau jejak tidak lengkap.');
@@ -62,7 +62,8 @@ final class EraporApprove
             if ($db->inTransaction()) $db->rollBack(); throw $e;
         } finally { $q=$db->prepare('SELECT RELEASE_LOCK(?)'); $q->execute([$lock]); }
     }
-    private static function validateScope(PDO $db,array $session,array $rows): void
+    /** Ensure the immutable approval/document snapshot still exactly matches the package before display or action. */
+    public static function assertSnapshotScope(PDO $db,array $session,array $rows): void
     {
         EraporSessionFactory::assertPackage($db,$session);
         $q=$db->prepare('SELECT d.id,d.rubrik_id,r.jenis_dokumen FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan');

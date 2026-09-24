@@ -619,6 +619,22 @@ body.modal-open {
   font-size: var(--font-size-body-sm);
 }
 
+/* Scoped eRapor approval inbox and read-only review use the shared table/cards. */
+.erapor-approval-intro { margin: 0 0 var(--space-4); color: var(--color-neutral-600); }
+.erapor-approval-notice { margin: 0 0 var(--space-4); }
+.erapor-approval-table { margin-top: var(--space-4); }
+.erapor-approval-review-link { white-space: nowrap; text-decoration: none; }
+.erapor-approval-summary { margin: var(--space-4) 0; gap: var(--space-4); }
+.erapor-approval-state { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin: 0 0 var(--space-4); }
+.erapor-approval-document { margin: 0 0 var(--space-4); padding: var(--space-4); }
+.erapor-approval-document-title { margin: 0 0 var(--space-3); }
+.erapor-approval-values { min-width: calc(38 * var(--ui-unit)); }
+.erapor-approval-values tbody td:last-child { overflow-wrap: anywhere; }
+@media (max-width: 37.5rem) {
+  .erapor-approval-summary { grid-template-columns: minmax(0, 1fr); }
+  .erapor-approval-document { padding: var(--space-3); }
+}
+
 /* ==========================================================
    4.5 Pattern: Assign Many-to-Many
    Dipakai di "Atur Anak Murid" (Manajemen Guru & Detail Kelas).

@@ -1,5 +1,8 @@
 <?php
 require_once ROOT_PATH.'/app/models/EraporApprove.php';
+require_once ROOT_PATH.'/app/models/EraporApprovalReview.php';
+require_once ROOT_PATH.'/app/models/EraporApprovalInbox.php';
+require_once ROOT_PATH.'/app/models/EraporTeacherForm.php';
 $approveFile=ROOT_PATH.'/database/migrations/20260924_erapor_approval_actions.sql';
 catalogCheck(EraporMigrationRunner::apply($db,$approveFile)==='applied','Approval actions schema');
 catalogCheck(EraporMigrationRunner::apply($db,$approveFile)==='already_applied','Approval actions retry');
@@ -15,6 +18,14 @@ catalogReject(fn()=>$approveFn(2147483647),'bukan bagian sesi');
 catalogReject(fn()=>EraporApprove::approve($db,(int)$nextAbk['id'],$approveQ,$approveActor),'belum menunggu');
 $approveAssign=$db->prepare('INSERT INTO erapor_penyetuju_user(penyetuju_id,user_id) VALUES(?,?)');
 foreach (['KOORDINATOR_BING','KEPALA_SEKOLAH'] as $approveCode) $approveAssign->execute([$approveRows[$approveCode]['penyetuju_id'],$approveActor]);
+$approvalReadBefore=catalogFingerprints($db);
+$approvalReview=EraporApprovalReview::read($db,$approveSid,$approveB,$approveActor);
+catalogCheck(array_values(array_unique(array_column($approvalReview['documents'],'jenis_dokumen')))==['BING'], 'Review projection exposes only the explicitly assigned BING scope');
+catalogCheck($approvalReview['can_approve'] && !$approvalReview['all_approved'], 'Parallel coordinator approval is actionable before head stage');
+$approvalInbox=EraporApprovalInbox::read($db,$approveActor);
+$approvalBingTask=array_values(array_filter($approvalInbox['tasks'],fn($task)=>$task['approval_id']===$approveB))[0]??null;
+catalogCheck($approvalBingTask && $approvalBingTask['can_approve'] && !$approvalBingTask['integrity_error'], 'Inbox projects assigned pending approval and readiness');
+catalogCheck(catalogFingerprints($db)===$approvalReadBefore, 'Approval inbox and review are strictly read-only');
 catalogReject(fn()=>$approveFn($approveH),'tidak berwenang'); // Explicit assignment alone cannot make a teacher head.
 $approveEmployee=$db->query('SELECT k.id,k.jabatan_id FROM karyawan k JOIN users u ON u.karyawan_id=k.id WHERE u.id='.$approveActor)->fetch();
 $approveHeadJob=(int)$db->query("SELECT id FROM jabatan WHERE nama='Kepala Sekolah' AND is_active=1 LIMIT 1")->fetchColumn();

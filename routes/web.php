@@ -85,6 +85,11 @@ $router->post('/rapor-murid/{id}/setujui', [RaporMuridController::class, 'approv
 $router->get('/rapor-murid/{id}/pdf', [RaporMuridController::class, 'downloadPdf']);
 $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);
 
+// --- eRapor: explicit multi-stage approval (opt-in; never mixed with legacy rapor IDs) ---
+$router->get('/erapor/persetujuan', [EraporApprovalController::class, 'index']);
+$router->get('/erapor/persetujuan/{sessionId}/{approvalId}', [EraporApprovalController::class, 'review']);
+$router->post('/erapor/persetujuan/{sessionId}/{approvalId}/setujui', [EraporApprovalController::class, 'approve']);
+
 // --- Portal Guru ---
 // New session IDs are NOT legacy rapor IDs. Disabled by default in config.
 $router->get('/api/erapor/sesi/{id}', [EraporTeacherApiController::class, 'show']);

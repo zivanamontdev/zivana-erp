@@ -17,7 +17,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
 <?php if (!empty($_SESSION['rbac_error'])): ?>
 <p role="alert"><?= uiText($_SESSION['rbac_error'], 'body-sm', ['tone'=>'status-inactive']) ?></p>
 <?php unset($_SESSION['rbac_error']); endif; ?>
-<p class="text-caption-md">Izin Edit memerlukan Lihat. Guru hanya dapat mengakses Portal Guru; persetujuan rapor khusus Kepala Sekolah/Admin. Login ulang setelah perubahan izin.</p>
+<p class="text-caption-md">Izin Edit memerlukan Lihat. Guru hanya dapat mengakses Portal Guru dan persetujuan eRapor bila ditugaskan secara eksplisit. Hak role dan penugasan approver sama-sama diperlukan. Login ulang setelah perubahan izin.</p>
 <div class="rbac-list">
     <?php foreach ($roles as $role): ?>
     <?php $roleId = (int) $role['id']; ?>
@@ -34,7 +34,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
 
             <fieldset class="rbac-permissions" <?= $canEdit ? '' : 'disabled' ?>>
             <?php foreach ($permissionTree as $modul => $sections): ?>
-            <?php if ($role['nama'] === 'Guru' && $modul !== 'Portal Guru') continue; ?>
+            <?php if ($role['nama'] === 'Guru' && !in_array($modul, ['Portal Guru','eRapor'], true)) continue; ?>
             <div class="rbac-modul" data-tree-group>
                 <label class="rbac-modul-header">
                     <input type="checkbox" class="checkbox" data-tree-parent>

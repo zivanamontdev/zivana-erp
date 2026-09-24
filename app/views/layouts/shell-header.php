@@ -76,6 +76,7 @@ $navGroups = [
             ['type' => 'item', 'key' => 'manajemen-murid', 'label' => 'Manajemen Murid', 'href' => '/murid', 'icon' => 'icon_graduation_cap', 'perm' => ['Murid', 'Manajemen Murid']],
             ['type' => 'item', 'key' => 'manajemen-kelas', 'label' => 'Manajemen Kelas', 'href' => '/kelas', 'icon' => 'icon_backpack', 'perm' => ['Murid', 'Manajemen Kelas']],
             ['type' => 'item', 'key' => 'rapor-murid', 'label' => 'Rapor Murid', 'href' => '/rapor-murid', 'icon' => 'icon_book_user', 'perm' => ['Murid', 'Rapor Murid']],
+            ['type' => 'item', 'key' => 'erapor-approval', 'label' => 'Persetujuan eRapor', 'href' => '/erapor/persetujuan', 'icon' => 'icon_book_user', 'perm' => ['eRapor', 'Persetujuan']],
         ],
     ],
     [

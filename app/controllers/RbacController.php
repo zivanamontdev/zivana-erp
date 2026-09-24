@@ -43,7 +43,7 @@ class RbacController extends Controller
 
         $role = (new Role())->find($roleId);
         $available = array_filter((new Permission())->all(), static fn($p) => PermissionCatalog::visible($p)
-            && (($role['nama'] ?? '') !== 'Guru' || $p['modul'] === 'Portal Guru'));
+            && (($role['nama'] ?? '') !== 'Guru' || in_array($p['modul'], ['Portal Guru','eRapor'], true)));
         $known = array_map('intval', array_column($available, 'id'));
         if (!$role || array_diff($permissionIds, $known)) {
             $_SESSION['rbac_error'] = 'Role atau pilihan izin tidak valid. Tidak ada perubahan disimpan.';

@@ -15,7 +15,8 @@ foreach($router->routes as [$verb,$path,$handler]) {
     $output=stream_get_contents($pipes[1]); $error=stream_get_contents($pipes[2]);
     fclose($pipes[1]); fclose($pipes[2]); $code=proc_close($process);
     $result=json_decode($output,true);
-    if($code!==0 || ($result['status']??0)!==403 || ($result['employees']??-1)!==0) throw new RuntimeException("Route guard failed: $verb $path: $output $error");
+    $expectedStatus = str_starts_with($path, '/erapor/persetujuan') ? 404 : 403; // Opt-in approval routes stay undiscoverable while disabled.
+    if($code!==0 || ($result['status']??0)!==$expectedStatus || ($result['employees']??-1)!==0) throw new RuntimeException("Route guard failed: $verb $path: $output $error");
     $count++;
 }
-echo "PASS: $count private routes reject an authenticated role with no permissions via actual router and middleware.\n";
+echo "PASS: $count private routes reject roles with no permissions; disabled eRapor approval routes return 404.\n";

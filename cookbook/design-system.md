@@ -1631,6 +1631,14 @@ Baris memuat nama murid di kiri, status teks dan chevron 20px di kanan dengan ga
 - Pengisian tetap memakai layout fokus tanpa sidebar. Nilai memakai `uiSelect`, catatan memakai `uiField` textarea, aksi memakai `uiButton`. `uiSelect` menerima `attributes` untuk atribut native seperti data hook; komponen tidak menyimpan state nilai terpisah dari select native.
 - Tombol Kirim/Selesaikan nonaktif jika template kosong atau nilai belum lengkap. Progres mengikuti perubahan dropdown; simpan draft tetap diperbolehkan. Aksi desktop berada di kartu header, aksi mobile di bawah. Peringatan keluar melindungi perubahan yang belum disimpan.
 - Pratinjau guru memakai komponen kertas horizontal yang sama dengan admin, refresh dan PDF sesuai izin, tanpa Setujui. Jumlah halaman mengikuti konten nyata; jangan menduplikasi nilai atau halaman agar terlihat empat halaman.
+
+### Persetujuan eRapor
+
+- Antrean persetujuan menggunakan `.data-table` bersama di dalam `.data-table-wrapper`; aksi Tinjau memakai variant outline. Status memakai `uiBadge` yang sudah ada, dan pesan keadaan memakai `uiText`.
+- Detail tinjauan menampilkan identitas murid/periode melalui `uiDataCard`, lalu satu `uiCard` outlined per dokumen dalam cakupan penyetuju. Rincian isian hanya tabel baca-saja; jangan render field form, data dokumen di luar cakupan, atau bytes tanda tangan.
+- Tombol Setujui menggunakan `uiButton` primary dan membuka `uiModal` konfirmasi bersama. Konfirmasi menjelaskan aksi tidak dapat dibatalkan; form POST selalu menyertakan token CSRF. Tombol tidak ditampilkan saat izin Edit tidak ada, tahap sebelumnya belum selesai, atau persetujuan sudah tercatat.
+- Halaman tinjauan memakai `Cache-Control: private, no-store` dan `X-Robots-Tag: noindex, nofollow`. Semua warna dari `config/colors.php` melalui CSS variables; style khusus hanya mengatur layout/spacing dan memakai token komponen.
+- Menu/route memerlukan sekaligus permission role `eRapor > Persetujuan` dan assignment approver aktif yang eksplisit. Feature flag eRapor mati berarti route HTML 404; ini tidak mengubah akses modul Rapor Murid legacy.
 # Simbol penilaian bersama
 
 **Pembaruan mobile Pengisian Rapor:** pada viewport ≤40rem, header fullwidth tanpa gutter layar dan tanpa radius; padding internal tetap 20px/24px. Card penilaian tetap memiliki gutter horizontal 20px. Grup tombol header yang sama diposisikan `fixed` di bawah viewport, fullwidth, background token `page-background`, border atas `neutral-100`, dan padding 20px/24px ditambah safe-area perangkat. Tidak ada duplikasi tombol/form. Ruang bawah form mengikuti tinggi toolbar melalui ResizeObserver (fallback 7rem) agar penilaian terakhir tidak tertutup. Di desktop tombol tetap sejajar judul. Aturan ini menggantikan ketentuan sebelumnya bahwa tombol mobile tetap di bagian atas.

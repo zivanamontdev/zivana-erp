@@ -2,7 +2,7 @@
 
 Tanggal: 24 September 2026.
 
-Status: spesifikasi sudah dipelajari; implementasi baru belum dimulai. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
+Status: fondasi katalog/rubrik, alur pengisian guru, dan aksi persetujuan internal sudah diimplementasikan secara opt-in. Inbox/tinjauan persetujuan sedang disambungkan ke route dan UI; publikasi PDF final serta kesiapan produksi tetap belum selesai. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
 
 ## Acuan dan batas pekerjaan
 
@@ -380,3 +380,16 @@ Berikutnya: uji browser visual/interaksi dan aksesibilitas alur Portal Guru baru
 - [ ] Uji browser visual/interaksi masih belum mencakup halaman editor dengan akun/fixture aktif; layar persetujuan koordinator/kepala sekolah dan PDF juga belum tersedia.
 
 Berikutnya: uji browser E2E memakai fixture database terisolasi, lalu inbox dan HTTP/UI persetujuan eksplisit. Penerbitan PDF tetap tidak tersedia dan feature flag production tetap OFF.
+
+### Batch inbox dan tinjauan persetujuan (24 September 2026)
+
+- [x] Route HTML antrean/tinjauan memerlukan flag aktif, autentikasi, izin role `eRapor > Persetujuan`, dan penugasan aktif pengguna yang sama. Saat flag mati route HTML 404; permission Rapor Murid legacy tidak diperluas.
+- [x] Inbox hanya memproyeksikan assignment `MENUNGGU_TTD`; halaman tinjauan memakai transaksi read-only, scope snapshot, kelengkapan, serta form baca-saja bersama tanpa signature bytes.
+- [x] Aksi POST memakai token CSRF global, role Edit, service approval yang mengulang validasi server-side, dan modal UI yang menjelaskan persetujuan permanen. Seluruh approval tidak mengubah sesi menjadi SELESAI atau menerbitkan PDF.
+- [x] Permission eRapor tersedia sebagai checkbox RBAC; role Guru hanya dapat memilih Portal Guru/eRapor. Permission role dan assignment approver sama-sama diperlukan.
+- [x] Uji render UI, scope/read-only MySQL, HTTP loopback untuk inbox/review/approval retry/CSRF/RBAC, dan route-RBAC flag-off ditambahkan. Nilai lokal tetap diuji hanya lewat database disposable yang dipulihkan.
+- [ ] Belum ada layar pengelolaan assignment penyetuju dan profil tanda tangan/NUPTK; tidak ada assignment akun yang ditebak atau dibuat otomatis.
+- [ ] Belum ada renderer/penerbitan PDF snapshot bertanda tangan secara atomik. Sesi tetap `MENUNGGU_TTD` setelah semua approver menyetujui.
+- [ ] Uji browser visual belum dijalankan karena browser lokal ditolak sandbox Windows. Jangan mengaktifkan flag production sebelum verifikasi browser dan seluruh gerbang migrasi/pemulihan.
+
+Berikutnya: selesaikan pengelolaan penugasan approver secara eksplisit (tanpa delegasi), lalu pipeline PDF immutable dan publication transaction; setelah itu uji browser pada lingkungan yang mengizinkan browser.

@@ -34,7 +34,7 @@ final class EraporTeacherForm
             $locked=!in_array($session['status'],['BELUM_DIISI','TELAH_DIISI'],true);
             $reason=$locked?'STATUS_TERKUNCI':($today>$period['akhir_periode']?'TENGGAT_BERAKHIR':null);
             $docs=self::rows($db,'SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,sd.urutan FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan',[$sessionId]);
-            foreach ($docs as &$doc) $doc['form']=self::form($db,$session,$doc);
+            foreach ($docs as &$doc) $doc['form']=self::documentForm($db,$session,$doc);
             unset($doc);
             $result=['session'=>['id'=>$sessionId,'status'=>$session['status'],'kondisi'=>$session['kondisi']],
                 'student'=>$student,'period'=>$period,'documents'=>$docs,'completion'=>$completion,
@@ -44,7 +44,8 @@ final class EraporTeacherForm
             $db->commit(); return $result;
         } catch (Throwable $e) { if ($db->inTransaction()) $db->rollBack(); throw $e; }
     }
-    private static function form(PDO $db,array $s,array $d): array
+    /** Reusable read-only rubric projection; callers must already authorize the session/document scope. */
+    public static function documentForm(PDO $db,array $s,array $d): array
     {
         $rid=(int)$d['rubrik_id']; $args=[$s['id'],$d['id'],$rid]; $defs=[]; $values=[];
         // Identifiers below are fixed server-owned lists, never request input.

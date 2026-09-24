@@ -11,12 +11,18 @@ final class EraporHttpClient
     }
     public function raw(string $path,?string $body=null,array $headers=[]): array
     {
-        $options=[CURLOPT_URL=>$this->base.$path,CURLOPT_HTTPGET=>true,CURLOPT_HTTPHEADER=>$headers];
+        $responseHeaders=[];
+        $options=[CURLOPT_URL=>$this->base.$path,CURLOPT_HTTPGET=>true,CURLOPT_HTTPHEADER=>$headers,
+            CURLOPT_HEADERFUNCTION=>function($curl,string $line)use(&$responseHeaders):int {
+                $parts=explode(':',$line,2);
+                if (count($parts)===2) $responseHeaders[strtolower(trim($parts[0]))]=trim($parts[1]);
+                return strlen($line);
+            }];
         if ($body!==null) { $options[CURLOPT_POST]=true; $options[CURLOPT_POSTFIELDS]=$body; }
         curl_setopt_array($this->curl,$options);
         $raw=curl_exec($this->curl); $status=curl_getinfo($this->curl,CURLINFO_RESPONSE_CODE);
         if ($raw===false) throw new RuntimeException('Loopback HTTP request failed: '.curl_error($this->curl));
-        return ['status'=>$status,'body'=>$raw,'json'=>json_decode($raw,true),'type'=>curl_getinfo($this->curl,CURLINFO_CONTENT_TYPE)];
+        return ['status'=>$status,'body'=>$raw,'json'=>json_decode($raw,true),'type'=>curl_getinfo($this->curl,CURLINFO_CONTENT_TYPE),'headers'=>$responseHeaders];
     }
     public function login(string $email): void
     {
@@ -42,7 +48,8 @@ $httpSid=(int)$nextAbk['id']; $httpActor=(int)$abkStudent['actor_id'];
 $httpUser=$db->query('SELECT email,role_id FROM users WHERE id='.$httpActor)->fetch(PDO::FETCH_ASSOC);
 $httpOtherUserQuery=$db->prepare("SELECT u.id,u.email,u.role_id FROM users u JOIN karyawan k ON k.id=u.karyawan_id JOIN jabatan j ON j.id=k.jabatan_id
     WHERE u.id<>? AND u.is_active=1 AND k.is_active=1 AND j.is_active=1 AND j.nama IN ('Guru Kelas','Guru Shadow')
-    AND NOT EXISTS (SELECT 1 FROM kelas_guru_murid a WHERE a.murid_id=? AND a.guru_id=k.id) ORDER BY u.id LIMIT 1");
+    AND NOT EXISTS (SELECT 1 FROM kelas_guru_murid a WHERE a.murid_id=? AND a.guru_id=k.id)
+    AND NOT EXISTS (SELECT 1 FROM erapor_penyetuju_user au WHERE au.user_id=u.id AND au.aktif=1) ORDER BY u.id LIMIT 1");
 $httpOtherUserQuery->execute([$httpActor,$nextAbk['murid_id'] ?? 0]);
 $httpOtherUser=$httpOtherUserQuery->fetch(PDO::FETCH_ASSOC);
 if (!$httpOtherUser) throw new RuntimeException('A second active, unassigned teacher fixture is required for HTTP ownership testing.');
@@ -53,11 +60,26 @@ $httpRestoreUser=$db->prepare('UPDATE users SET password_hash=?,updated_at=? WHE
 $httpRestorePeriod=$db->prepare('UPDATE periode_penilaian SET akhir_periode=?,updated_at=? WHERE id=?');
 $httpOriginalAccount=$db->query('SELECT password_hash,updated_at FROM users WHERE id='.$httpActor)->fetch(PDO::FETCH_ASSOC);
 $httpPermissionIds=$db->query("SELECT aksi,id FROM permissions WHERE modul='Portal Guru' AND section='Daftar Murid' AND aksi IN ('lihat','edit','kirim')")->fetchAll(PDO::FETCH_KEY_PAIR);
+$httpApprovalPermissionIds=[];
+$httpAddedApprovalPermissionIds=[];
+foreach (['lihat','edit'] as $httpApprovalAction) {
+    $httpPermission=$db->prepare('SELECT id FROM permissions WHERE modul=? AND section=? AND sub_section IS NULL AND aksi=? LIMIT 1');
+    $httpPermission->execute(['eRapor','Persetujuan',$httpApprovalAction]);
+    $httpPermissionId=$httpPermission->fetchColumn();
+    if (!$httpPermissionId) {
+        $db->prepare('INSERT INTO permissions(modul,section,sub_section,aksi,display_order) VALUES(?,?,NULL,?,100)')
+            ->execute(['eRapor','Persetujuan',$httpApprovalAction]);
+        $httpPermissionId=$db->lastInsertId();
+        $httpAddedApprovalPermissionIds[]=(int)$httpPermissionId;
+    }
+    $httpApprovalPermissionIds[$httpApprovalAction]=(int)$httpPermissionId;
+}
 $httpRoles=array_values(array_unique([(int)$httpUser['role_id'],(int)$httpOtherUser['role_id']])); $httpPrior=[];
 $httpPriorPermissions=$db->prepare('SELECT id,permission_id,created_at FROM role_permissions WHERE role_id=? ORDER BY id');
 foreach ($httpRoles as $httpRole) { $httpPriorPermissions->execute([$httpRole]); $httpPrior[$httpRole]=$httpPriorPermissions->fetchAll(PDO::FETCH_ASSOC); }
 $httpGrant=$db->prepare('INSERT IGNORE INTO role_permissions(role_id,permission_id) VALUES(?,?)');
 foreach ($httpRoles as $httpRole) foreach ($httpPermissionIds as $httpPermissionId) $httpGrant->execute([$httpRole,$httpPermissionId]);
+foreach ($httpRoles as $httpRole) foreach ($httpApprovalPermissionIds as $httpApprovalPermissionId) $httpGrant->execute([$httpRole,$httpApprovalPermissionId]);
 $httpRestoreUser->execute([password_hash('EraporFixture123$',PASSWORD_DEFAULT),'2000-01-01 00:00:00',$httpActor]);
 $httpOtherOriginalAccount=$db->query('SELECT password_hash,updated_at FROM users WHERE id='.(int)$httpOtherUser['id'])->fetch(PDO::FETCH_ASSOC);
 $httpRestoreUser->execute([password_hash('EraporFixture123$',PASSWORD_DEFAULT),'2000-01-01 00:00:00',$httpOtherUser['id']]);
@@ -85,6 +107,48 @@ try {
     }
     $httpGuest->close();
     $httpTeacher->login($httpUser['email']);
+    $httpApprovalIndex=$httpTeacher->raw('/erapor/persetujuan');
+    catalogCheck($httpApprovalIndex['status']===200 && str_contains($httpApprovalIndex['body'],'Antrean Persetujuan')
+        && str_contains($httpApprovalIndex['body'],'data-table'), 'Assigned teacher with RBAC can open the approval inbox over HTTP');
+    $httpApprovalTarget=(int)$approveB;
+    $httpApprovalReview=$httpTeacher->raw('/erapor/persetujuan/'.(int)$approveSid.'/'.$httpApprovalTarget);
+    $httpScopedCount=$db->prepare('SELECT COUNT(*) FROM erapor_sesi_penyetuju_dokumen WHERE sesi_penyetuju_id=?');
+    $httpScopedCount->execute([$httpApprovalTarget]);
+    catalogCheck($httpApprovalReview['status']===200 && str_contains($httpApprovalReview['body'],'Rapor Bahasa Inggris')
+        && substr_count($httpApprovalReview['body'],'class="data-table erapor-approval-values"')===(int)$httpScopedCount->fetchColumn(),
+        'Reviewer HTTP page renders only documents assigned to this approval stage');
+    catalogCheck(str_contains(strtolower($httpApprovalReview['headers']['cache-control'] ?? ''),'no-store')
+        && str_contains(strtolower($httpApprovalReview['headers']['x-robots-tag'] ?? ''),'noindex'),
+        'Reviewer page disables private-data caching and indexing');
+    $httpApprovalDbBefore=catalogFingerprints($db);
+    $httpTeacher->api('GET',"/api/erapor/sesi/$httpSid"); // Rotates a valid session CSRF token for the HTML POST.
+    $httpApprovalPost=$httpTeacher->raw('/erapor/persetujuan/'.(int)$approveSid.'/'.$httpApprovalTarget.'/setujui',
+        http_build_query(['csrf_token'=>$httpTeacher->csrf]),['Content-Type: application/x-www-form-urlencoded']);
+    catalogCheck($httpApprovalPost['status']===302 && catalogFingerprints($db)===$httpApprovalDbBefore,
+        'Authorized approval route accepts CSRF and safely retries already-recorded approval without duplicate writes');
+    $httpApprovalAfter=$httpTeacher->raw('/erapor/persetujuan/'.(int)$approveSid.'/'.$httpApprovalTarget);
+    catalogCheck($httpApprovalAfter['status']===200 && str_contains($httpApprovalAfter['body'],'Seluruh persetujuan tercatat'),
+        'Approval route reports completed signature chain while leaving publication separate');
+    $httpApprovalSnapshot=$db->prepare('SELECT log_id FROM erapor_persetujuan_snapshot WHERE sesi_penyetuju_id=?');
+    $httpApprovalSnapshot->execute([$httpApprovalTarget]);
+    $httpApprovalLog=(int)$httpApprovalSnapshot->fetchColumn();
+    $db->prepare('DELETE FROM erapor_persetujuan_snapshot WHERE sesi_penyetuju_id=?')->execute([$httpApprovalTarget]);
+    $db->prepare('DELETE FROM erapor_sesi_log WHERE id=?')->execute([$httpApprovalLog]);
+    $db->prepare("UPDATE erapor_sesi_penyetuju SET status='MENUNGGU' WHERE id=?")->execute([$httpApprovalTarget]);
+    $db->prepare('DELETE FROM role_permissions WHERE role_id=? AND permission_id=?')
+        ->execute([(int)$httpUser['role_id'],$httpApprovalPermissionIds['edit']]);
+    $httpReadOnlyApproval=$httpTeacher->raw('/erapor/persetujuan/'.(int)$approveSid.'/'.$httpApprovalTarget);
+    catalogCheck($httpReadOnlyApproval['status']===200 && str_contains($httpReadOnlyApproval['body'],'Siap ditinjau')
+        && !str_contains($httpReadOnlyApproval['body'],'data-modal-open="modal-setujui-erapor-'),
+        'View-only RBAC can inspect an actionable assignment but has no approval control');
+    $httpTeacher->api('GET',"/api/erapor/sesi/$httpSid");
+    $httpNoApprovalEdit=$httpTeacher->raw('/erapor/persetujuan/'.(int)$approveSid.'/'.$httpApprovalTarget.'/setujui',
+        http_build_query(['csrf_token'=>$httpTeacher->csrf]),['Content-Type: application/x-www-form-urlencoded']);
+    catalogCheck($httpNoApprovalEdit['status']===403, 'Approval endpoint enforces the distinct eRapor edit permission');
+    $httpOther->login($httpOtherUser['email']);
+    $httpUnassignedApproval=$httpOther->raw('/erapor/persetujuan');
+    catalogCheck($httpUnassignedApproval['status']===403 && !str_contains($httpUnassignedApproval['body'],'Rapor Bahasa Inggris'),
+        'Role permission without any explicit approver assignment cannot access the inbox');
     $httpDashboardBefore=catalogFingerprints($db);
     $httpDashboard=$httpTeacher->raw('/portal-guru/dashboard?periode_id='.(int)$middle['id']);
     catalogCheck($httpDashboard['status']===200 && str_contains($httpDashboard['body'],'Daftar Murid')
@@ -217,7 +281,6 @@ try {
     $httpReceptionRetry=$httpTeacher->api('POST',"/api/erapor/sesi/".(int)$abkSession['id']."/konfirmasi-penerimaan",new stdClass());
     catalogCheck($httpReceptionRetry['status']===200 && ($httpReceptionRetry['json']['data']['result'] ?? '')==='already_confirmed',
         'Authenticated teacher can reach the distinct reception API action; exact retry is idempotent');
-    $httpOther->login($httpOtherUser['email']);
     $httpForeign=$httpOther->api('GET',"/api/erapor/sesi/$httpSid");
     catalogCheck($httpForeign['status']===409 && !str_contains($httpForeign['body'],'nama_lengkap'),'Foreign session receives generic denial');
     $httpOther->close();
@@ -240,4 +303,6 @@ try {
         $db->prepare('DELETE FROM role_permissions WHERE role_id=?')->execute([$httpRole]);
         foreach ($httpPrior[$httpRole] as $httpGrantRow) $db->prepare('INSERT INTO role_permissions(id,role_id,permission_id,created_at) VALUES(?,?,?,?)')->execute([$httpGrantRow['id'],$httpRole,$httpGrantRow['permission_id'],$httpGrantRow['created_at']]);
     }
+    foreach ($httpAddedApprovalPermissionIds as $httpPermissionId)
+        $db->prepare('DELETE FROM permissions WHERE id=?')->execute([$httpPermissionId]);
 }

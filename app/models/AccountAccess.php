@@ -31,6 +31,7 @@ class AccountAccess
             ['/murid', 'Murid', 'Manajemen Murid'],
             ['/kelas', 'Murid', 'Manajemen Kelas'],
             ['/rapor-murid', 'Murid', 'Rapor Murid'],
+            ['/erapor/persetujuan', 'eRapor', 'Persetujuan'],
             ['/portal-guru/dashboard', 'Portal Guru', 'Dashboard'],
             ['/portal-guru/murid', 'Portal Guru', 'Daftar Murid'],
             ['/rbac', 'Sistem', 'RBAC'],
