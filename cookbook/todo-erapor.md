@@ -325,3 +325,14 @@ Berikutnya: perpanjangan tenggat dengan audit dan kewenangan kepala sekolah; kem
 - [ ] Belum diterapkan ke database aplikasi/HTTP/UI. Pengujian hanya mengubah kalender pada database disposable lalu memulihkannya; checksum database lokal asli tidak berubah.
 
 Berikutnya: pembacaan sesi dan data form portal guru dengan otorisasi, lalu endpoint dan integrasi UI. Penyiapan/publikasi seluruh PDF secara atomik tetap belum tersedia.
+
+### Batch pembacaan form guru (24 September 2026)
+
+- [x] `EraporTeacherForm::read`: kepemilikan sesi, penugasan guru/kelas dan akun/pegawai/jabatan aktif; validasi identitas kalender serta paket. Tidak memberi akses otomatis kepada admin atau guru lain.
+- [x] Transaksi MySQL READ ONLY + REPEATABLE READ untuk snapshot konsisten tanpa mutasi. Membaca form tidak membuat sesi, inisialisasi Ummi, atau audit.
+- [x] Definisi terurut, pilihan nilai dan nilai tersimpan RTS/Agama/Ummi/BING/PPI per sesi. Agama hanya semester terkait; PPI hanya ABK dan tanpa Hasil Capaian; dokumen tahunan tidak mencampur nilai sesi lain.
+- [x] Status kemampuan edit/konfirmasi dan alasan read-only, kelengkapan serta label isian kosong. Tidak mengirim PNG tanda tangan atau kredensial ke payload form.
+- [x] Total 1080 pemeriksaan MySQL dan regresi sebelumnya lulus, termasuk nilai teks utuh, read/save no-op, akses ditolak, batas waktu/status, drift paket, dan GET tanpa inisialisasi flag.
+- [ ] Belum HTTP/UI atau migrasi database aplikasi. Riwayat nilai periode lain, pembacaan approver, aktivasi schema dan rendering PDF belum termasuk reader ini.
+
+Berikutnya: adapter endpoint dengan autentikasi/RBAC/CSRF dan kontrak error/payload yang konsisten; integrasikan secara bertahap ke komponen UI portal guru tanpa mengubah rute legacy sebelum kesiapan migrasi diperiksa.

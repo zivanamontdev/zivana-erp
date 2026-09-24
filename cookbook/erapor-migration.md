@@ -239,6 +239,18 @@ Actor harus berasal dari autentikasi dan memiliki akun, pegawai serta jabatan Ke
 
 Harness restore mencapai 1015 pemeriksaan dan regresi sebelumnya lulus. Kalender legacy pada database disposable dipulihkan setelah pengujian sehingga pemeriksaan checksum tetap berlaku; database aplikasi asli tidak dimodifikasi. Endpoint/UI perpanjangan belum diaktifkan. Jalur edit kalender legacy perlu ditinjau/dibatasi sebelum aktivasi workflow baru agar tidak menjadi jalan pintas tanpa audit.
 
+## Read model form portal guru
+
+`EraporTeacherForm::read(PDO, sessionId, actorId, clock)` memakai koneksi MySQL khusus di luar transaksi lain. Ia memulai transaksi READ ONLY dengan isolasi REPEATABLE READ, sehingga seluruh SELECT melihat snapshot yang sama tanpa mengambil row lock penulisan. Ini berbeda dari pemanggil guard paket pada jalur write: konsistensi reader dijamin transaksi snapshot, bukan FOR UPDATE. Tidak ada pembuatan sesi, default tersimpan, tanda tangan, atau audit pada operasi baca.
+
+Otorisasi memerlukan guru pemilik sesi yang masih aktif dan ditugaskan pada murid/kelas terkait. Identitas kalender, hash paket, metadata dan komposisi rubrik diperiksa. Guru lain/admin tidak mendapat bypass. Respons memuat identitas minimal murid/kelas, periode, status/kondisi sesi, dokumen berurutan, definisi dan nilai per dokumen, kelengkapan, serta capabilities. Capabilities merupakan petunjuk status/kelengkapan/tenggat untuk UI, bukan pengganti validasi server atas konfigurasi approval, jejak, profil, RBAC, atau kondisi yang berubah sebelum save.
+
+`documents[].form.definitions` berisi data rubrik terurut untuk rendering. `values` memetakan key ke nilai tersimpan; key absent berarti NULL. RTS memakai `nilai:<indikator_id>` dengan integer; adapter autosave RTS harus mengubah key itu ke `indikator_id`, bukan mengirim format structured langsung. BING memakai nilai/komentar, Agama nilai/catatan, PPI aspek:kolom; Ummi memakai bacaan/catatan/mulai_pra_tk/tes:<token>. Teks tidak di-trim; UI wajib meng-escape ketika merender. Nilai tes Ummi berbentuk urutan/tanggal_tes/jilid/nilai dan diurutkan urutan lalu token.
+
+Flag Ummi yang belum diinisialisasi dikembalikan NULL dengan initialization_required=true, bukan ditebak false atau diwariskan saat GET. Inisialisasi eksplisit tetap melalui layanan write yang diaudit; UI tidak boleh memperlakukannya sebagai save otomatis pada sesi read-only. Materi PRA dan nilainya tetap tersedia dengan metadata hanya_pra_tk agar toggle dapat menyembunyikan tanpa menghapus. PPI hanya mengirim kolom diisi_di_sesi; Agama membatasi definisi/nilai/nama anggota kelompok ke semester sesi. Nilai sesi lain tidak dikirim, termasuk dokumen tahunan yang sama. Riwayat/kolom periode sebelumnya memerlukan reader terpisah berikutnya.
+
+Tidak ada migrasi baru. Harness restore mencapai 1080 pemeriksaan; unit/regresi sebelumnya lulus. GET tidak mengubah hash data/timestamp, tidak membawa signature bytes, dan nilai yang dibaca bisa menjadi expected-value pada autosave tanpa menulis ulang. Belum endpoint/HTTP/UI atau pengujian visual. Tidak ada aktivasi database aplikasi.
+
 ## Kelengkapan paket dan transisi konfirmasi isi
 
 `EraporCompleteness::inspect(PDO, session)` adalah pembacaan internal di dalam transaksi dengan session lock dan otorisasi milik pemanggil. Ia memeriksa hash paket serta komposisi dokumen wajib sebelum menghitung. Missing fields membawa key dan label definisi, termasuk lingkup catatan Agama. Nilai hanya dihitung jika pasangan skala/rubrik valid; teks NULL/whitespace tidak lengkap. Paket parsial atau definisi wajib kosong ditolak, bukan dianggap 100%. RAS tidak mendapat implementasi dummy.
