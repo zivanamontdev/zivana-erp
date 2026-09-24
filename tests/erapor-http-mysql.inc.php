@@ -74,12 +74,21 @@ foreach (['lihat','edit'] as $httpApprovalAction) {
     }
     $httpApprovalPermissionIds[$httpApprovalAction]=(int)$httpPermissionId;
 }
+$httpSetupPermission=$db->prepare("SELECT id FROM permissions WHERE modul='eRapor' AND section='Penugasan Penyetuju' AND sub_section IS NULL AND aksi='lihat' LIMIT 1");
+$httpSetupPermission->execute(); $httpSetupPermissionId=$httpSetupPermission->fetchColumn();
+if (!$httpSetupPermissionId) {
+    $db->prepare('INSERT INTO permissions(modul,section,sub_section,aksi,display_order) VALUES(?,?,NULL,?,102)')
+        ->execute(['eRapor','Penugasan Penyetuju','lihat']);
+    $httpSetupPermissionId=(int)$db->lastInsertId();
+    $httpAddedApprovalPermissionIds[]=$httpSetupPermissionId;
+} else $httpSetupPermissionId=(int)$httpSetupPermissionId;
 $httpRoles=array_values(array_unique([(int)$httpUser['role_id'],(int)$httpOtherUser['role_id']])); $httpPrior=[];
 $httpPriorPermissions=$db->prepare('SELECT id,permission_id,created_at FROM role_permissions WHERE role_id=? ORDER BY id');
 foreach ($httpRoles as $httpRole) { $httpPriorPermissions->execute([$httpRole]); $httpPrior[$httpRole]=$httpPriorPermissions->fetchAll(PDO::FETCH_ASSOC); }
 $httpGrant=$db->prepare('INSERT IGNORE INTO role_permissions(role_id,permission_id) VALUES(?,?)');
 foreach ($httpRoles as $httpRole) foreach ($httpPermissionIds as $httpPermissionId) $httpGrant->execute([$httpRole,$httpPermissionId]);
 foreach ($httpRoles as $httpRole) foreach ($httpApprovalPermissionIds as $httpApprovalPermissionId) $httpGrant->execute([$httpRole,$httpApprovalPermissionId]);
+foreach ($httpRoles as $httpRole) $httpGrant->execute([$httpRole,$httpSetupPermissionId]); // Deliberate accidental grant to test hard teacher denial.
 $httpRestoreUser->execute([password_hash('EraporFixture123$',PASSWORD_DEFAULT),'2000-01-01 00:00:00',$httpActor]);
 $httpOtherOriginalAccount=$db->query('SELECT password_hash,updated_at FROM users WHERE id='.(int)$httpOtherUser['id'])->fetch(PDO::FETCH_ASSOC);
 $httpRestoreUser->execute([password_hash('EraporFixture123$',PASSWORD_DEFAULT),'2000-01-01 00:00:00',$httpOtherUser['id']]);
@@ -107,6 +116,9 @@ try {
     }
     $httpGuest->close();
     $httpTeacher->login($httpUser['email']);
+    $httpTeacherSetup=$httpTeacher->raw('/erapor/persetujuan/penugasan');
+    catalogCheck($httpTeacherSetup['status']===403 && !str_contains($httpTeacherSetup['body'],'Simpan Penugasan'),
+        'Teacher is denied approver setup even when the role permission is accidentally granted');
     $httpApprovalIndex=$httpTeacher->raw('/erapor/persetujuan');
     catalogCheck($httpApprovalIndex['status']===200 && str_contains($httpApprovalIndex['body'],'Antrean Persetujuan')
         && str_contains($httpApprovalIndex['body'],'data-table'), 'Assigned teacher with RBAC can open the approval inbox over HTTP');

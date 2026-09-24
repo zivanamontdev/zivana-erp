@@ -90,7 +90,10 @@ foreach ([1,2,3,4] as $position) {
     $target=requestAccount(LoginHarness::class,'login',['email'=>$email,'password'=>$password]);
     expectAccount($target===($position>=3?'/portal-guru/dashboard':'/sekolah'),'Login landing by allowed modules');
     expectAccount($_SESSION['karyawan_id']==$user['karyawan_id'],'Employee identity in session');
-    if($position>=3) foreach($nodes as [$module,$section]) expectAccount((new RoleMiddleware())->check($module,$section)===($module==='Portal Guru'),'Teacher restricted to portal even with extra grants');
+    if($position>=3) {
+        foreach($nodes as [$module,$section]) expectAccount((new RoleMiddleware())->check($module,$section)===($module==='Portal Guru'),'Teacher restricted to portal even with extra grants');
+        expectAccount(!(new RoleMiddleware())->check('eRapor','Penugasan Penyetuju','lihat'),'Teacher is explicitly denied approval assignment setup');
+    }
 }
 adminAccount();
 $count=$db->query('SELECT COUNT(*) FROM karyawan')->fetchColumn();
@@ -120,6 +123,10 @@ requestAccount(RbacHarness::class,'update',['role_id'=>2,'permission_ids'=>[9999
 expectAccount($db->query('SELECT COUNT(*) FROM role_permissions WHERE role_id=2')->fetchColumn()===$before,'Unknown permission does not erase grants');
 $rbacView=(int)$db->query("SELECT id FROM permissions WHERE section='RBAC' AND aksi='lihat'")->fetchColumn();
 requestAccount(RbacHarness::class,'update',['role_id'=>2,'permission_ids'=>[$rbacView]]);
+$setupPermission=(int)$db->query("SELECT id FROM permissions WHERE modul='eRapor' AND section='Penugasan Penyetuju' AND aksi='lihat'")->fetchColumn();
+$db->prepare('DELETE FROM role_permissions WHERE role_id=3 AND permission_id=?')->execute([$setupPermission]);
+requestAccount(RbacHarness::class,'update',['role_id'=>3,'permission_ids'=>[$setupPermission]]);
+expectAccount((int)$db->query('SELECT COUNT(*) FROM role_permissions WHERE role_id=3 AND permission_id='.$setupPermission)->fetchColumn()===0,'RBAC cannot grant setup permission to the Guru role');
 $_SESSION=['user_id'=>$created[2]['id'],'role_id'=>2,'role_name'=>'Admin'];
 $_SERVER['REQUEST_METHOD']='GET'; $_POST=[];
 $page=new RbacHarness(); $page->index(); expectAccount(!$page->viewData['canEdit'],'Read-only RBAC has no editing permission');

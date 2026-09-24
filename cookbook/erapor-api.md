@@ -28,8 +28,12 @@ Antrean persetujuan HTML (flag aktif, login, permission `eRapor > Persetujuan`, 
 | GET `/erapor/persetujuan` | lihat | Antrean sesi `MENUNGGU_TTD` yang ditugaskan langsung |
 | GET `/erapor/persetujuan/{sessionId}/{approvalId}` | lihat | Tinjauan baca-saja atas dokumen yang tercakup pada baris persetujuan sesi |
 | POST `/erapor/persetujuan/{sessionId}/{approvalId}/setujui` | edit + CSRF form | Catat persetujuan/snapshot satu tahap; tidak menerbitkan PDF atau menyelesaikan sesi |
+| GET `/erapor/persetujuan/penugasan` | `eRapor > Penugasan Penyetuju` lihat | Kelola assignment eksplisit tiga tahap; akun eligible dan assignment lama noneligible ditampilkan |
+| POST `/erapor/persetujuan/penugasan` | `eRapor > Penugasan Penyetuju` edit + CSRF form | Simpan akun terpilih per tahap, wajib alasan audit; sedikitnya satu akun valid per tahap |
 
 Route ini terpisah dari permission `Murid > Rapor Murid` legacy. Role saja maupun assignment saja tidak cukup. Tahap kepala sekolah tetap mensyaratkan jabatan Kepala Sekolah aktif; cakupan dokumen berasal dari snapshot sesi, dan POST service kembali memvalidasi urutan, scope, status, signature evidence, serta assignment saat ini. Halaman reviewer tidak menyertakan signature bytes, memakai no-store/noindex, dan menampilkan modal konfirmasi sebelum aksi permanen.
+
+Konfigurasi tetap dan cakupan disediakan oleh `database/seeds/20260925_erapor_approval_setup.sql`, setelah migrasi flow dan seed rubrik resmi. Seed idempotent, tidak mengubah flow yang sudah ada, dan tidak membuat assignment user. Jika menambah versi rubrik UMMI/BING, jalankan ulang seed untuk melengkapi mapping. Jalankan juga migrasi additive `20260925_erapor_approval_assignment_audit.sql`. Perubahan assignment dicatat di `erapor_penugasan_penyetuju_audit`; assignment yang dicabut berhenti mengakses pekerjaan pending, sedangkan bukti approval terdahulu tidak berubah.
 
 Dashboard baru hanya mengeluarkan tombol Isi Rapor jika kalender valid dan semua rubrik paket siap. RAS yang belum tersedia memblokir paket AKHIR tanpa membuat data parsial. Editor sesi mendukung autosave untuk RTS, Agama, BING, PPI, dan Ummi. Form Ummi baru menampilkan nilai setelah tindakan eksplisit “Mulai pengisian Ummi”; GET tidak membuat baris `erapor_ummi_periode`. Setelah inisialisasi, guru dapat mengisi 27 materi bacaan (opsional), sakelar PRA TK, tes dinamis, dan catatan guru (wajib). Jangan aktifkan flag production sebelum uji browser, seluruh rubrik dan alur penutupan diverifikasi.
 

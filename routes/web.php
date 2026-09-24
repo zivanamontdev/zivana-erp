@@ -89,6 +89,8 @@ $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);
 $router->get('/erapor/persetujuan', [EraporApprovalController::class, 'index']);
 $router->get('/erapor/persetujuan/{sessionId}/{approvalId}', [EraporApprovalController::class, 'review']);
 $router->post('/erapor/persetujuan/{sessionId}/{approvalId}/setujui', [EraporApprovalController::class, 'approve']);
+$router->get('/erapor/persetujuan/penugasan', [EraporApprovalSetupController::class, 'index']);
+$router->post('/erapor/persetujuan/penugasan', [EraporApprovalSetupController::class, 'update']);
 
 // --- Portal Guru ---
 // New session IDs are NOT legacy rapor IDs. Disabled by default in config.

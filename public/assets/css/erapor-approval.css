@@ -1,0 +1,17 @@
+.erapor-assignment-intro { margin-block: 0 var(--space-4); }
+.erapor-assignment-warning { margin-block: var(--space-4); }
+.erapor-assignment-form { display: grid; gap: var(--space-4); }
+.erapor-assignment-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-4); }
+.erapor-assignment-flow { display: grid; align-content: start; gap: var(--space-3); }
+.erapor-assignment-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.erapor-assignment-heading h2 { margin: 0; }
+.erapor-assignment-scope,
+.erapor-assignment-impact { margin: 0; color: var(--color-neutral-600); }
+.erapor-assignment-options { display: grid; gap: var(--space-3); }
+.erapor-assignment-options .ui-checkbox { align-items: flex-start; }
+.erapor-assignment-actions { display: flex; justify-content: flex-end; }
+
+@media (max-width: 760px) {
+  .erapor-assignment-grid { grid-template-columns: minmax(0,1fr); }
+  .erapor-assignment-actions .ui-button { width: 100%; }
+}

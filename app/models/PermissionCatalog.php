@@ -24,12 +24,19 @@ class PermissionCatalog
         ['Portal Guru','Daftar Murid',null,'pdf','lihat'],
         ['eRapor','Persetujuan',null,'lihat',null],
         ['eRapor','Persetujuan',null,'edit',null],
+        ['eRapor','Penugasan Penyetuju',null,'lihat',null],
+        ['eRapor','Penugasan Penyetuju',null,'edit',null],
     ];
 
     public static function label(array $permission): string
     {
         $action=$permission['aksi']; $section=$permission['sub_section'] ?: $permission['section'];
-        if ($permission['modul']==='eRapor') return $action==='edit'?'Setujui persetujuan yang ditugaskan':'Lihat antrean & pratinjau persetujuan';
+        if ($permission['modul']==='eRapor') {
+            if (($permission['section'] ?? '') === 'Penugasan Penyetuju') {
+                return $action==='edit'?'Ubah penugasan penyetuju':'Lihat penugasan penyetuju';
+            }
+            return $action==='edit'?'Setujui persetujuan yang ditugaskan':'Lihat antrean & pratinjau persetujuan';
+        }
         if ($action==='lihat') return 'Lihat daftar, detail & pratinjau';
         if ($action==='edit') return match($section) {
             'Rapor Murid'=>'Setujui Rapor', 'Manajemen Guru'=>'Atur Anak Murid',

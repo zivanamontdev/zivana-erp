@@ -90,6 +90,7 @@ $navGroups = [
         'label' => 'Sistem',
         'entries' => [
             ['type' => 'item', 'key' => 'rbac', 'label' => 'RBAC', 'href' => '/rbac', 'icon' => 'icon_user_cog', 'perm' => ['Sistem', 'RBAC']],
+            ['type' => 'item', 'key' => 'erapor-assignments', 'label' => 'Penugasan Penyetuju', 'href' => '/erapor/persetujuan/penugasan', 'icon' => 'icon_users', 'perm' => ['eRapor', 'Penugasan Penyetuju']],
         ],
     ],
 ];

@@ -24,8 +24,17 @@ class RoleMiddleware
     public function check(string $modul, ?string $subSection = null, string $aksi = 'lihat'): bool
     {
         if (empty($_SESSION['user_id'])) return false;
-        if ($modul === 'eRapor' && !EraporApprovalAccess::assigned((int)$_SESSION['user_id'])) return false;
-        if (AccountAccess::isTeacher() && !in_array($modul, ['Portal Guru', 'eRapor'], true)) return false;
+        if ($modul === 'eRapor') {
+            if ($subSection === 'Persetujuan') {
+                if (!EraporApprovalAccess::assigned((int)$_SESSION['user_id'])) return false;
+            } elseif ($subSection === 'Penugasan Penyetuju') {
+                if (AccountAccess::isTeacher()) return false;
+            } else {
+                return false;
+            }
+        }
+        if (AccountAccess::isTeacher() && !($modul === 'Portal Guru'
+            || ($modul === 'eRapor' && $subSection === 'Persetujuan'))) return false;
         if ($modul === 'Murid' && $subSection === 'Rapor Murid' && !ReportWorkflow::reviewer()) return false;
         $roleId = (int) ($_SESSION['role_id'] ?? 0);
 

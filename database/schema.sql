@@ -115,6 +115,10 @@ SELECT * FROM (
     UNION ALL SELECT 'Portal Guru', 'Daftar Murid', NULL, 'edit', 22
     UNION ALL SELECT 'Sistem', 'RBAC', NULL, 'lihat', 23
     UNION ALL SELECT 'Sistem', 'RBAC', NULL, 'edit', 24
+    UNION ALL SELECT 'eRapor', 'Persetujuan', NULL, 'lihat', 100
+    UNION ALL SELECT 'eRapor', 'Persetujuan', NULL, 'edit', 101
+    UNION ALL SELECT 'eRapor', 'Penugasan Penyetuju', NULL, 'lihat', 102
+    UNION ALL SELECT 'eRapor', 'Penugasan Penyetuju', NULL, 'edit', 103
 ) AS seed_data
 WHERE NOT EXISTS (SELECT 1 FROM permissions LIMIT 1);
 

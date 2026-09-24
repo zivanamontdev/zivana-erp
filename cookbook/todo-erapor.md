@@ -388,8 +388,11 @@ Berikutnya: uji browser E2E memakai fixture database terisolasi, lalu inbox dan 
 - [x] Aksi POST memakai token CSRF global, role Edit, service approval yang mengulang validasi server-side, dan modal UI yang menjelaskan persetujuan permanen. Seluruh approval tidak mengubah sesi menjadi SELESAI atau menerbitkan PDF.
 - [x] Permission eRapor tersedia sebagai checkbox RBAC; role Guru hanya dapat memilih Portal Guru/eRapor. Permission role dan assignment approver sama-sama diperlukan.
 - [x] Uji render UI, scope/read-only MySQL, HTTP loopback untuk inbox/review/approval retry/CSRF/RBAC, dan route-RBAC flag-off ditambahkan. Nilai lokal tetap diuji hanya lewat database disposable yang dipulihkan.
-- [ ] Belum ada layar pengelolaan assignment penyetuju dan profil tanda tangan/NUPTK; tidak ada assignment akun yang ditebak atau dibuat otomatis.
+- [x] Layar `Sistem > Penugasan Penyetuju` memakai komponen UI bersama dan checkbox assignment eksplisit untuk tiga tahap; akun tidak dipilih otomatis. Simpan memerlukan izin setup, alasan wajib, satu akun eligible per tahap, status akun/pegawai/role aktif, dan validasi jabatan Kepala Sekolah.
+- [x] Migrasi audit additive mencatat actor, akun, tahap, status sebelum/sesudah, alasan, dan waktu. Pencabutan assignment tidak menghapus snapshot persetujuan lama.
+- [x] Seed permission, konfigurasi flow dan mapping rubrik idempotent non-overwriting; tidak membuat assignment. Role Guru ditolak di setup meski permission setup tercentang. Harness restore disposable lulus 1153 pemeriksaan dan checksum legacy tetap utuh.
+- [ ] Profil tanda tangan/NUPTK dan persetujuan pemilik untuk upload/update; tidak boleh admin menandatangani atas nama orang lain.
 - [ ] Belum ada renderer/penerbitan PDF snapshot bertanda tangan secara atomik. Sesi tetap `MENUNGGU_TTD` setelah semua approver menyetujui.
 - [ ] Uji browser visual belum dijalankan karena browser lokal ditolak sandbox Windows. Jangan mengaktifkan flag production sebelum verifikasi browser dan seluruh gerbang migrasi/pemulihan.
 
-Berikutnya: selesaikan pengelolaan penugasan approver secara eksplisit (tanpa delegasi), lalu pipeline PDF immutable dan publication transaction; setelah itu uji browser pada lingkungan yang mengizinkan browser.
+Berikutnya: lengkapi profil tanda tangan pemilik, lalu pipeline PDF immutable/publication transaction. Feature flag production tetap OFF sampai UI browser dan seluruh gerbang migrasi/pemulihan lulus.
