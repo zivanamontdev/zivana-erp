@@ -27,7 +27,7 @@ Status: spesifikasi sudah dipelajari; implementasi baru belum dimulai. Dokumen i
 - [ ] Petakan tabel, model, controller, route, UI, PDF, dan tes rapor saat ini terhadap spesifikasi baru; catat bagian reusable dan yang harus diganti. Audit model penyimpanan/status dan controller awal ada di [erapor-migration.md](erapor-migration.md); audit UI/PDF/seluruh route masih berlanjut.
 - [ ] Inventarisasi data nyata, data dummy, template placeholder, nilai, status, serta relasi guru/murid/kelas. Bedakan `sesi_pembagian_rapor` lama dari sesi baru per murid/periode.
 - [x] Tetapkan aturan pemetaan ID/status dan pengecualian legacy di [erapor-migration.md](erapor-migration.md). Ini aturan transisi, bukan backfill yang telah dijalankan; pemetaan data aktual dan persetujuan kasus ambigu masih diperlukan.
-- [ ] Siapkan cadangan dan uji restore ke database terisolasi; catat jumlah baris/checksum sebelum dan sesudah migrasi.
+- [x] Siapkan cadangan lokal terbaru dan uji restore ke database terisolasi. Batch katalog 24 September: hitungan serta checksum isi seluruh 24 tabel legacy cocok sebelum/sesudah DDL baru, database sumber tidak berubah. Tetap buat cadangan baru sebelum migrasi berikutnya/produksi.
 - [ ] Rancang migrasi bertahap, dry-run, pemeriksaan prasyarat, pengulangan aman, dan pemulihan kegagalan. Tidak memakai reset database atau mengimpor seed dengan menimpa nilai lama.
 - [ ] Siapkan langkah deployment cPanel tanpa SSH: migrasi terkontrol melalui mekanisme yang sesuai hosting, bukan endpoint publik bebas menjalankan SQL/PHP.
 
@@ -141,3 +141,74 @@ Mulai **Fase 1: audit gap implementasi dan rencana migrasi**, lalu Fase 2–3 se
 - [ ] Commit/push: dicoba sesuai instruksi pengguna, tetapi `.git/index.lock` ditolak permission dan koneksi GitHub gagal melalui proxy lingkungan. Belum ada commit atau push berhasil; jangan mengakali proteksi filesystem/proxy.
 
 Lanjutan terdekat: investigasi pengecualian preflight dan verifikasi backup/restore; tetapkan DDL additive tanpa collision, lalu seeder rubrik resmi dan tes integrasi. Aturan murni baru digunakan oleh layanan penyimpanan transaksional sebelum UI baru diaktifkan. Folder spesifikasi milik pengguna tetap belum dimasukkan ke staging secara massal; berisi contoh data murid.
+
+### Batch katalog dan verifikasi restore (24 September 2026)
+
+- [x] Verifikasi push pengguna: working tree awal bersih pada `f224283`.
+- [x] Perinci pengecualian tanpa menampilkan identitas: lima rapor tanpa guru adalah `belum_diisi`, tanpa nilai dan tanpa penugasan murid saat ini. Tiga template system kosong: ID 2 dipakai enam rapor, ID 3/4 belum dipakai. Tidak diperbaiki dengan penghapusan atau penugasan tebakan.
+- [x] Backup lokal baru berhasil diekspor dan direstore: `database/backups/zivana-local-20260924-034137-b72e2a.sql` (beserta gzip/manifest), tetap diabaikan Git.
+- [x] Tambahkan DDL empat tabel katalog `erapor_rubrik`, `erapor_rubrik_bagian`, `erapor_rubrik_periode`, `erapor_rubrik_penandatangan`; prefix mencegah collision dengan struktur lama. Ini baru bagian katalog dari Fase 2, bukan seluruh fondasi data sesi.
+- [x] Tambahkan migration runner dengan ledger checksum, advisory lock, pengulangan aman, dan penolakan migrasi parsial/collision. Tidak melakukan rollback DDL semu atau mengadopsi tabel asing.
+- [x] Tambahkan CLI rencana read-only `php database/plan-erapor-migration.php`, tanpa koneksi database; tidak ada endpoint migrasi publik.
+- [x] Tes MySQL `tests/erapor-catalog-mysql.php --run --backup=...sql` lulus 17 pemeriksaan pada database disposable. Restore dibandingkan isi (bukan hanya jumlah); seluruh 24 tabel legacy dan sumber lokal tidak berubah.
+- [x] Ulangi tes policy (65 assertion), audit legacy, serta workflow lama: lulus. Database disposable dibersihkan setelah tes; backup tetap disimpan.
+- [ ] Terapkan katalog ke database aplikasi: **belum dilakukan**. Belum ada seed resmi, perubahan UI, cutover route, atau deployment hosting.
+
+Lanjutan: tabel rubrik khusus beserta validasi seed, adapter periode dari sumber kalender yang sama, kemudian data dokumen/sesi dan guard transaksional. Perbedaan teks sumber/seed BING/Agama/Ummi tetap dicatat sebelum seeding final; tidak mengubah teks sepihak.
+
+### Batch struktur dan seeder RTS (24 September 2026)
+
+- [x] Tambahkan migrasi additive `20260924_erapor_rts.sql`: area, subarea, grup opsional, indikator, skala, dan seed history. FK komposit menolak grup dari subarea berbeda; kode indikator unik, teks tujuan tidak wajib unik.
+- [x] Implementasikan `EraporRtsSeed` khusus RTS V1: validasi struktur/jumlah sebelum tulis, transaksi seluruh impor, lock bersama runner migrasi, checksum sumber dan isi tersimpan, retry no-op, tanpa update/upsert rubrik lama.
+- [x] Seed resmi di database uji menghasilkan 175 indikator, 8 area, 21 subarea bernama + 4 implisit, 2 grup, dan 4 skala. Setiap tujuan/aparatus dibandingkan dengan sumber, bukan hanya hitungan total.
+- [x] Uji rollback impor gagal di tengah, sumber berubah, drift data, retry rubrik terkunci, FK grup salah, serta teks tujuan sama dengan kode berbeda. `tests/erapor-catalog-mysql.php` kini lulus 214 pemeriksaan; validator RTS mandiri lulus 11 skenario.
+- [x] Tambahkan CLI `database/validate-erapor-rts.php` tanpa akses DB dan perluas rencana migrasi untuk katalog + RTS.
+- [ ] Seed/migrasi RTS pada database aplikasi belum dijalankan. Guard perubahan saat penilaian pertama, tabel nilai, API, serta penggunaan pada UI belum selesai; checksum seeder bukan pengganti guard penyimpanan penilaian.
+
+Lanjutan batch berikutnya: struktur/seeder Ummi dan PPI, kemudian Agama/BING sambil menyelaraskan perbedaan versi sumber. RAS tetap menunggu spesifikasi. Tidak ada kurikulum atau nilai legacy yang ditimpa.
+
+### Batch struktur dan seeder Ummi/PPI (24 September 2026)
+
+- [x] Tambahkan enam tabel definisi melalui `20260924_erapor_ummi_ppi.sql`, setelah katalog dan RTS (seed history bersama). Tidak membuat tabel nilai atau mengubah tabel legacy.
+- [x] `EraporUmmiPpiSeed`: validasi V1, transaksi impor, advisory lock bersama, retry no-op, penolakan perubahan sumber/drift, termasuk rubrik berstatus terkunci.
+- [x] Ummi: tujuh jilid, 27 materi persis seed resmi, 12 skala A+ sampai D-, A/B opsional dan C wajib. Urutan bagian mengikuti posisi array resmi; PRA TK hanya penanda definisi, belum sakelar penilaian per periode. Tidak mengimpor Hafalan.
+- [x] PPI: lima aspek, delapan kolom cetak; enam kolom sesi menghasilkan 30 isian wajib. Dua kolom Hasil Capaian tetap di luar sesi. Simpan label multiline, grup, lebar kolom, dan snapshot sumber untuk metadata cetak/identitas.
+- [x] Validator mandiri lulus 20 skenario. Integrasi MySQL kini lulus 291 pemeriksaan: rollback, lock, constraint, teks/metadata sumber, retry, drift, dan checksum legacy/sumber lokal tidak berubah. Regresi policy (65), RTS (11), audit dan workflow lama lulus.
+- [x] CLI read-only `database/validate-erapor-ummi-ppi.php`; rencana migrasi kini katalog → RTS → Ummi/PPI.
+- [ ] Migrasi/seed database aplikasi, penyimpanan nilai, kelengkapan sesi, UI/PDF dan tinjauan PPI belum diterapkan. Perbedaan ketentuan cetak baris tes Ummi kosong masih menunggu penyelarasan; tidak diputuskan oleh seeder ini.
+
+Berikutnya: struktur/seeder Agama dan BING, dengan mempertahankan catatan perbedaan versi sumber. Setelah definisi siap, lanjut identitas dokumen/sesi dan penyimpanan penilaian transaksional. RAS tetap membutuhkan spesifikasi resmi.
+
+### Batch struktur dan seeder BING (24 September 2026)
+
+- [x] Tambahkan tiga tabel definisi BING: skala, indikator, komentar; tidak menambah tabel nilai murid atau mengubah tabel lama.
+- [x] Seeder BING V1 mempertahankan teks/kode seed resmi, termasuk perbedaan ejaan dan definisi dengan PDF revisi. Snapshot menyimpan identitas, grup, teks tetap dan metadata cetak. Tidak mengimpor narasi murid contoh.
+- [x] Validasi 5 indikator nilai, 4 komentar wajib, 4 skala berurutan Excellent > Outstanding > Good > Fair. Kehadiran tetap skala, bukan angka; Speaking Test Result hanya kepala kelompok.
+- [x] Uji validator 19 skenario; harness MySQL kini 328 pemeriksaan lulus (rollback impor, lock, retry, perubahan sumber, drift isi, status terkunci, FK/unique/check, teks persis sumber). Regresi policy, audit, RTS, Ummi/PPI dan workflow lama lulus.
+- [x] Rencana migrasi read-only ditambah BING setelah Ummi/PPI; tersedia CLI validasi tanpa DB `database/validate-erapor-bing.php`.
+- [ ] Aktivasi BING ke aplikasi/PDF tetap belum dilakukan. Selaraskan teks PDF revisi dan seed sebelum seeding final; jangan mengubah kode indikator yang dibekukan.
+
+Berikutnya: struktur/seeder Agama (73 butir terikat semester, tujuh pilihan tahapan, 99 nama Asmaul Husna dalam 10 kelompok, enam catatan wajib). Setelah itu lanjut fondasi dokumen/sesi dan penyimpanan nilai. Batch BING belum mengubah UI atau database aplikasi.
+
+### Batch struktur dan seeder Agama (24 September 2026)
+
+- [x] Tambahkan tujuh tabel definisi Agama: lingkup, sub, item, nama dalam kelompok, tahapan, subtingkat, dan pemetaan pilihan dropdown ke kolom cetak.
+- [x] Seeder V1 memvalidasi 73 butir (37 Ganjil/36 Genap), 6 lingkup, 8 sub (3 bernama/5 implisit), 99 nama dalam 10 butir Asmaul Husna, 5 tahapan, 3 subtingkat, 7 pilihan. Teks resmi dan kode tidak diubah.
+- [x] Tahapan/subtingkat disimpan terpisah. FK komposit dan CHECK menolak subtingkat di luar Tahfizh, Tahfizh tanpa subtingkat, kode subtingkat yang tidak cocok, dan referensi lintas rubrik.
+- [x] Keenam lingkup memiliki penanda catatan wajib (berdasarkan spesifikasi bagian 5.2/7.2); belum menyimpan catatan murid atau merangkai paragraf narasi.
+- [x] Validator 22 skenario lulus; harness MySQL 514 pemeriksaan lulus termasuk rollback impor, lock, retry, perubahan sumber/drift, rubrik terkunci, seluruh teks butir/semester/nama kelompok, dan constraint relasi. Checksum database asli/legacy tetap identik.
+- [x] CLI validasi read-only `database/validate-erapor-agama.php`; rencana migrasi mencakup kelima batch katalog/rubrik.
+- [ ] Integrasi penilaian Agama, kelengkapan sesi, narasi/cetakan, dan penerapan ke database aplikasi belum dilakukan. Konflik perbaikan narasi historis versus pembekuan dokumen final tetap dicatat; tidak mengubah rapor lama.
+
+Berikutnya: adapter kalender dari tahun_ajaran/periode_penilaian yang sudah ada, identitas dokumen dan sesi/paket Regular–ABK, kemudian penyimpanan penilaian transaksional. Kelima seeder definisi sudah diuji; ini belum berarti alur rapor baru aktif. RAS dan penyelarasan teks BING/aturan cetak Ummi tetap terbuka.
+
+### Batch preflight kalender dan paket (24 September 2026)
+
+- [x] Adapter read-only `EraporCalendar` memakai kalender lama tanpa tabel duplikat; normalisasi empat slot, validasi tahun/tanggal, penolakan semester kosong dan slot duplikat. Slot yang belum ada dilaporkan, tidak dibuat atau ditebak.
+- [x] Komposisi awal berversi ditetapkan dalam `config/erapor-package.php`; binding RAS sengaja kosong. Ini data bootstrap internal, belum aktivasi atau pengganti snapshot sesi-dokumen.
+- [x] `EraporPackagePlan` menghasilkan rencana identitas sesi murid/periode dan dokumen murid/tahun/rubrik/semester. RTS/Agama memakai TAHUNAN, Ummi/BING/PPI semester konkret. PPI hanya untuk ABK.
+- [x] Rubrik hilang menyebabkan daftar dokumen kosong dan daftar blocker eksplisit; tidak mengembalikan paket parsial yang bisa dianggap lengkap. Rubrik arsip, metadata tidak cocok, kode duplikat, kondisi murid tidak dikenal ditolak.
+- [x] 29 pemeriksaan unit/SQLite serta total 552 pemeriksaan MySQL lulus. Kalender/paket dibaca dari salinan database nyata, checksum tidak berubah. Policy 65 assertion dan regresi workflow lama juga lulus.
+- [ ] Persistensi dokumen/sesi, unique constraint antiduplikasi, snapshot paket/penugasan, transaksi dan izin pembuatan belum diimplementasikan. Rencana deterministik bukan pengganti constraint database atau guard concurrency.
+
+Berikutnya: DDL additive dokumen/sesi/sesi-dokumen dan layanan pembentukan transaksional memakai preflight ini. Belum ada route UI baru atau sesi rapor yang dibuat pada database aplikasi.

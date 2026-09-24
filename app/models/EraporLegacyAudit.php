@@ -26,7 +26,17 @@ final class EraporLegacyAudit
             $counts[$name] = (int) $db->query($sql)->fetchColumn();
         }
         $statuses = $db->query('SELECT status, COUNT(*) AS total FROM rapor GROUP BY status ORDER BY status')->fetchAll(PDO::FETCH_ASSOC);
+        $unassigned = $db->query("SELECT r.status, COUNT(*) AS reports,
+            SUM(CASE WHEN EXISTS (SELECT 1 FROM rapor_nilai n WHERE n.rapor_id=r.id) THEN 1 ELSE 0 END) AS with_grades,
+            SUM(CASE WHEN EXISTS (SELECT 1 FROM kelas_guru_murid kg WHERE kg.murid_id=r.murid_id) THEN 1 ELSE 0 END) AS with_current_assignment
+            FROM rapor r WHERE r.guru_id IS NULL GROUP BY r.status ORDER BY r.status")->fetchAll(PDO::FETCH_ASSOC);
+        $empty = $db->query('SELECT t.id, t.tipe,
+            (SELECT COUNT(*) FROM rapor r WHERE r.template_id=t.id) AS reports
+            FROM template_rapor t WHERE NOT EXISTS (SELECT 1 FROM template_rapor_area a
+            JOIN template_rapor_subkategori s ON s.area_id=a.id JOIN template_rapor_item i ON i.subkategori_id=s.id
+            WHERE a.template_id=t.id) ORDER BY t.id')->fetchAll(PDO::FETCH_ASSOC);
         return ['counts' => $counts, 'legacy_statuses' => $statuses,
+            'unassigned_breakdown' => $unassigned, 'empty_template_usage' => $empty,
             'automatic_conversion_allowed' => false,
             'notice' => 'Audit only. Even zero anomalies does not authorize mapping legacy grades or approvals to official rubrics.'];
     }
