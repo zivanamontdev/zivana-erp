@@ -132,4 +132,36 @@ $uninitializedXPath = new DOMXPath($uninitializedDom);
 eraporUiCheck($uninitializedXPath->query('//button[@data-erapor-ummi-init]')->length === 1
     && $uninitializedXPath->query('//input[@data-erapor-entry="UMMI"]')->length === 0,
     'Uninitialized Ummi exposes only the explicit initialize action and no editable fields');
+
+$form['session']['status'] = 'TELAH_DIISI';
+$form['capabilities']['can_confirm_filled'] = false;
+$form['capabilities']['can_confirm_reception'] = true;
+ob_start();
+eval('?>' . $source);
+$receptionHtml = ob_get_clean();
+$receptionDom = new DOMDocument();
+@$receptionDom->loadHTML($receptionHtml);
+$receptionXPath = new DOMXPath($receptionDom);
+eraporUiCheck($receptionXPath->query('//button[@data-erapor-confirm-reception and not(@disabled)]')->length === 1
+    && $receptionXPath->query('//button[@data-erapor-confirm]')->length === 0,
+    'After completion, teacher receives the separate server-gated permanent reception action');
+
+$form['session']['status'] = 'MENUNGGU_TTD';
+$form['capabilities']['can_edit'] = false;
+$form['capabilities']['can_confirm_reception'] = false;
+ob_start();
+eval('?>' . $source);
+$pendingHtml = ob_get_clean();
+$pendingDom = new DOMDocument();
+@$pendingDom->loadHTML($pendingHtml);
+$pendingXPath = new DOMXPath($pendingDom);
+eraporUiCheck($pendingXPath->query('//button[@data-erapor-confirm or @data-erapor-confirm-reception]')->length === 0
+    && str_contains($pendingHtml, 'Menunggu proses persetujuan'),
+    'Once received, teacher cannot submit again and sees the pending approval state');
+
+$script = file_get_contents(ROOT_PATH . '/public/assets/js/erapor-session.js');
+eraporUiCheck(str_contains($script, "'/konfirmasi-penerimaan'")
+    && str_contains($script, 'data-erapor-confirm-reception')
+    && str_contains($script, 'tidak dapat diubah'),
+    'Client routes reception separately and warns about the irreversible lock');
 echo "PASS: E-Rapor session editor markup covers RTS, Agama, BING, PPI, Ummi, and server-gated submission.\n";

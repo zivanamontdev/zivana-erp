@@ -370,3 +370,13 @@ Berikutnya: lengkapi renderer Ummi (inisialisasi periode dan riwayat tes), lalu 
 - [ ] Uji visual/interaksi browser belum dilakukan; feature flag production tetap OFF.
 
 Berikutnya: uji browser visual/interaksi dan aksesibilitas alur Portal Guru baru. Lanjutkan lifecycle persetujuan/penerbitan serta PDF atomik setelah itu; jangan aktifkan feature flag production sebelum seluruh alur diverifikasi.
+
+### Batch konfirmasi penerimaan di editor guru (24 September 2026)
+
+- [x] Editor memakai tombol bersama untuk aksi bertahap: `BELUM_DIISI` menampilkan Selesaikan Rapor; `TELAH_DIISI` menampilkan Konfirmasi Penerimaan; status terkunci hanya menampilkan status persetujuan.
+- [x] Konfirmasi penerimaan menjelaskan lock permanen. Tombol hanya aktif dari capability server; perubahan pending dan save menonaktifkan aksi sampai state server terbaru diterima.
+- [x] Aksi mengarah ke endpoint penerimaan tersendiri; konfirmasi kelengkapan dan penerimaan tidak digabung.
+- [x] Uji markup status, JS syntax, dan HTTP retry penerimaan terotorisasi/idempoten; suite MySQL disposable lulus dan memulihkan backup.
+- [ ] Uji browser visual/interaksi masih belum mencakup halaman editor dengan akun/fixture aktif; layar persetujuan koordinator/kepala sekolah dan PDF juga belum tersedia.
+
+Berikutnya: uji browser E2E memakai fixture database terisolasi, lalu inbox dan HTTP/UI persetujuan eksplisit. Penerbitan PDF tetap tidak tersedia dan feature flag production tetap OFF.

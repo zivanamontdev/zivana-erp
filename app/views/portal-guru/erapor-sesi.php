@@ -11,6 +11,7 @@ $kelasLabel = trim(($student['level_kelas'] ?? '') . ' ' . ($student['nama_kelas
 $canEdit = uiCan('Portal Guru', 'Daftar Murid', 'edit') && !empty($form['capabilities']['can_edit']);
 $canSend = uiCan('Portal Guru', 'Daftar Murid', 'kirim');
 $canSubmit = $canSend && !empty($form['capabilities']['can_confirm_filled']);
+$canReceive = $canSend && !empty($form['capabilities']['can_confirm_reception']);
 $readonlyMessages = [
     'STATUS_TERKUNCI' => 'Sesi ini sudah terkunci. Nilai dapat dilihat, tetapi tidak dapat diubah.',
     'TENGGAT_BERAKHIR' => 'Tenggat pengisian periode ini telah berakhir. Nilai dapat dilihat, tetapi tidak dapat diubah.',
@@ -71,10 +72,12 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <p class="pengisian-student-name"><?= e($student['nama_lengkap']) ?></p>
             </div>
             <div class="pengisian-header-actions">
-                <?php if ($canSend): ?>
+                <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
                     <?= uiButton('Selesaikan Rapor', $canSubmit ? 'primary' : 'disabled', ['marginVertical'=>0, 'disabled'=>!$canSubmit, 'attributes'=>['data-erapor-confirm'=>true]]) ?>
-                <?php elseif ($session['status'] === 'TELAH_DIISI'): ?>
-                    <span class="teacher-report-action teacher-report-action--pending">Menunggu proses persetujuan</span>
+                <?php elseif ($canSend && $session['status'] === 'TELAH_DIISI'): ?>
+                    <?= uiButton('Konfirmasi Penerimaan', $canReceive ? 'primary' : 'disabled', ['marginVertical'=>0, 'disabled'=>!$canReceive, 'attributes'=>['data-erapor-confirm-reception'=>true]]) ?>
+                <?php elseif (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
+                    <span class="teacher-report-action teacher-report-action--pending"><?= $session['status'] === 'SELESAI' ? 'Rapor telah disetujui' : 'Menunggu proses persetujuan' ?></span>
                 <?php endif; ?>
                 <?= uiButton('Kembali ke Dashboard', 'outline', ['marginVertical'=>0, 'attributes'=>['onclick'=>'window.location.href=\''.BASE_PATH.'/portal-guru/dashboard\'']]) ?>
             </div>

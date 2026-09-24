@@ -14,6 +14,7 @@
     var saving = false;
     var blocked = false;
     var serverCanConfirm = false;
+    var serverCanReceive = false;
 
     function testRowValue(row) {
       var read = function (key) {
@@ -37,7 +38,17 @@
     }
 
     function updateConfirmState() {
-      setConfirmDisabled(!serverCanConfirm || pending.size > 0 || saving || hasIncompleteTestRows());
+      var busy = pending.size > 0 || saving || hasIncompleteTestRows();
+      setConfirmDisabled(!serverCanConfirm || busy);
+      setReceptionDisabled(!serverCanReceive || busy);
+    }
+
+    function setReceptionDisabled(disabled) {
+      root.querySelectorAll('[data-erapor-confirm-reception]').forEach(function (button) {
+        button.disabled = disabled;
+        button.classList.toggle('ui-button--disabled', disabled);
+        button.classList.toggle('ui-button--primary', !disabled);
+      });
     }
 
     function updateUmmiReadingCount(card) {
@@ -95,6 +106,7 @@
       if (blocked || field.disabled) return;
       pending.set(field, true);
       setConfirmDisabled(true);
+      setReceptionDisabled(true);
       setStatus('Ada perubahan yang belum disimpan…', 'pending');
       schedule();
     }
@@ -141,8 +153,11 @@
           statusLine.textContent += ' · Status ' + data.session.status.replaceAll('_', ' ');
         }
       }
-      serverCanConfirm = root.dataset.canSubmit === 'true'
+      var currentStatus = data.session && data.session.status;
+      serverCanConfirm = root.dataset.canSubmit === 'true' && currentStatus === 'BELUM_DIISI'
         && data.capabilities && data.capabilities.can_confirm_filled === true;
+      serverCanReceive = root.dataset.canSubmit === 'true' && currentStatus === 'TELAH_DIISI'
+        && data.capabilities && data.capabilities.can_confirm_reception === true;
       updateConfirmState();
     }
 
@@ -183,6 +198,7 @@
       var url = apiUrl + '/dokumen/' + encodeURIComponent(documentId) + '/simpan';
       saving = true;
       setConfirmDisabled(true);
+      setReceptionDisabled(true);
       setStatus('Menyimpan perubahan…', 'saving');
 
       try {
@@ -329,6 +345,7 @@
         saving = true;
         initUmmi.disabled = true;
         setConfirmDisabled(true);
+        setReceptionDisabled(true);
         setStatus('Menyiapkan setelan periode Ummi…', 'saving');
         try {
           await request(apiUrl + '/dokumen/' + encodeURIComponent(initUmmi.dataset.eraporDocumentId) + '/simpan', {changes: []});
@@ -360,15 +377,22 @@
         return;
       }
       var confirmButton = event.target.closest('[data-erapor-confirm]');
-      if (!confirmButton || confirmButton.disabled || pending.size || saving || blocked) return;
+      var receiveButton = event.target.closest('[data-erapor-confirm-reception]');
+      if ((!confirmButton && !receiveButton) || (confirmButton && confirmButton.disabled)
+        || (receiveButton && receiveButton.disabled) || pending.size || saving || blocked) return;
       if (hasIncompleteTestRows()) {
-        setStatus('Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum menyelesaikan rapor.', 'error');
+        setStatus('Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum melanjutkan.', 'error');
         return;
       }
-      if (!window.confirm('Kirim rapor ini untuk menandai bahwa pengisian guru telah selesai?')) return;
+      var receiving = Boolean(receiveButton);
+      var confirmation = receiving
+        ? 'Konfirmasi penerimaan akan mengunci seluruh isian rapor dan mengirimkannya ke antrean persetujuan. Setelah dilanjutkan, nilai tidak dapat diubah. Lanjutkan?'
+        : 'Konfirmasi ini menandai pengisian guru telah selesai. Anda masih dapat meninjau dan mengubah isian sebelum konfirmasi penerimaan. Lanjutkan?';
+      if (!window.confirm(confirmation)) return;
       setConfirmDisabled(true);
+      setReceptionDisabled(true);
       try {
-        var result = await request(apiUrl + '/konfirmasi-isi', {});
+        var result = await request(apiUrl + (receiving ? '/konfirmasi-penerimaan' : '/konfirmasi-isi'), {});
         if (result.result === 'confirmed' || result.result === 'already_confirmed') {
           window.location.reload();
           return;
@@ -376,8 +400,12 @@
         applyState(result);
         setStatus('Masih ada isian wajib yang belum lengkap. Periksa kembali progress tiap dokumen.', 'error');
       } catch (error) {
+        if (error.status === 401) { window.location.assign(root.dataset.loginUrl); return; }
+        blocked = error.status === 403 || error.status === 409 || error.status === 419 || error.status === 422;
+        if (blocked) recovery.hidden = false;
         setStatus(error.message || 'Konfirmasi belum dapat dilakukan.', 'error');
-        setConfirmDisabled(!serverCanConfirm);
+        setConfirmDisabled(blocked || !serverCanConfirm);
+        setReceptionDisabled(blocked || !serverCanReceive);
       }
     });
 

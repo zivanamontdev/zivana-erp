@@ -214,6 +214,9 @@ try {
     catalogCheck($httpMalformed['status']===422,'Malformed change rejected');
     $httpReceive=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/konfirmasi-penerimaan",new stdClass());
     catalogCheck($httpReceive['status']===409,'Wrong reception transition rejected');
+    $httpReceptionRetry=$httpTeacher->api('POST',"/api/erapor/sesi/".(int)$abkSession['id']."/konfirmasi-penerimaan",new stdClass());
+    catalogCheck($httpReceptionRetry['status']===200 && ($httpReceptionRetry['json']['data']['result'] ?? '')==='already_confirmed',
+        'Authenticated teacher can reach the distinct reception API action; exact retry is idempotent');
     $httpOther->login($httpOtherUser['email']);
     $httpForeign=$httpOther->api('GET',"/api/erapor/sesi/$httpSid");
     catalogCheck($httpForeign['status']===409 && !str_contains($httpForeign['body'],'nama_lengkap'),'Foreign session receives generic denial');
