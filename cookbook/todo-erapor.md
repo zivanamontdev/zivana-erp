@@ -212,3 +212,105 @@ Berikutnya: adapter kalender dari tahun_ajaran/periode_penilaian yang sudah ada,
 - [ ] Persistensi dokumen/sesi, unique constraint antiduplikasi, snapshot paket/penugasan, transaksi dan izin pembuatan belum diimplementasikan. Rencana deterministik bukan pengganti constraint database atau guard concurrency.
 
 Berikutnya: DDL additive dokumen/sesi/sesi-dokumen dan layanan pembentukan transaksional memakai preflight ini. Belum ada route UI baru atau sesi rapor yang dibuat pada database aplikasi.
+
+### Batch persistensi identitas dan pembentukan sesi (24 September 2026)
+
+- [x] Migrasi additive `20260924_erapor_sessions.sql`: dokumen tanpa status, sesi, penghubung sesi-dokumen, log sesi. Identitas dokumen/sesi memiliki UNIQUE; FK komposit penghubung menolak murid/tahun/semester yang tidak sesuai.
+- [x] `EraporSessionFactory` memakai transaksi dan lock bersama migrasi/seeder. Membaca penugasan/kalender/katalog dari database; hanya guru aktif yang ditugaskan di kelas murid dapat membentuk sesi. Katalog tanpa seed history tidak dipilih.
+- [x] Snapshot komposisi, kondisi, kelas, dan akun guru saat pembuatan; hash komposisi memeriksa drift ketika diulang. Dokumen tahunan dipakai ulang; semester konkret menghasilkan identitas berbeda. Referensi pertama menandai rubrik terkunci.
+- [x] Pembuatan gagal di tengah membatalkan dokumen, sesi, penghubung, perubahan status rubrik dan log. Retry tidak menulis log/timestamp baru, tidak membuka sesi SELESAI, dan tidak merekonstruksi paket historis dari konfigurasi terbaru.
+- [x] Total 579 pemeriksaan MySQL lulus: Regular/ABK, dua semester, rollback lewat trigger log, competing advisory lock, unique constraint, relasi lintas murid, guru tidak ditugaskan, paket drift, dan RAS hilang. Regresi kalender/policy/seed/audit/workflow lama lulus.
+- [ ] Belum dipasang ke route/UI/database aplikasi. Route harus memakai actor dari autentikasi dan memeriksa permission RBAC; factory bukan endpoint dan tidak mengizinkan admin membypass kepemilikan.
+- [ ] Sebelum aktivasi: guard edit/hapus kalender/penugasan legacy terhadap sesi baru, seluruh guard edit definisi, snapshot penerimaan/approval/signature, audit nilai, serta layanan pengisian/status masih diperlukan. FK RESTRICT baru dapat memengaruhi penghapusan murid/kelas/periode; tampilkan pesan penolakan yang sesuai saat integrasi.
+
+Berikutnya: fondasi penyimpanan nilai per periode dan jejak perubahan secara transaksional, dengan guard kepemilikan/sesi/tenggat dan kelengkapan. Belum ada nilai, approval atau PDF baru yang diaktifkan pada aplikasi.
+
+### Batch penyimpanan dan audit nilai RTS (24 September 2026)
+
+- [x] Migrasi `20260924_erapor_rts_values.sql`: nilai RTS per sesi/dokumen/indikator serta log isian lama/baru, aktor, waktu dan status sesi. FK penghubung memastikan dokumen berada di sesi yang dituju.
+- [x] Service internal `EraporRtsEntry` menyimpan batch secara atomik dengan lock, validasi guru snapshot + penugasan aktif, konsistensi kalender/paket, dokumen RTS dan indikator/skala rubrik tersebut.
+- [x] Guard BELUM_DIISI/TELAH_DIISI dan tenggat memakai policy. MENUNGGU_TTD/SELESAI ditolak; clear menjadi DELETE tanpa menurunkan status. Tanggal server Asia/Makassar; clock khusus pengujian tidak boleh berasal dari request.
+- [x] Expected-value check menolak autosave basi yang berbeda; retry nilai identik no-op tanpa log/timestamp baru. Batch dengan satu item tidak sah atau audit gagal dirollback seluruhnya.
+- [x] Kelengkapan RTS dihitung dari indikator aktif rubrik (175 pada V1); nilai sesi/semester lain tidak terhitung atau ditimpa. Tidak menghitung rata-rata.
+- [x] Total 609 pemeriksaan integrasi MySQL lulus, termasuk update/clear, 175 nilai lengkap, tenggat, sesi terkunci, guru lain, dokumen lain, paket drift, audit rollback, expected-value conflict, lock, UNIQUE/FK dan isolasi semester. Regresi policy/kalender/seed/audit/workflow lama serta lint lulus.
+- [ ] Belum terhubung HTTP/UI/database aplikasi. Permission RBAC/CSRF di route, pembacaan form, perpanjangan tenggat teraudit, penilaian dokumen lain, kelengkapan paket dan transisi status transaksional masih perlu dikerjakan.
+
+Berikutnya: storage nilai/teks BING dan PPI dengan preservasi teks mentah, lalu Ummi/Agama, sebelum penggabungan kelengkapan paket dan integrasi portal guru.
+
+### Batch penyimpanan BING/PPI (24 September 2026)
+
+- [x] Migrasi additive tiga tabel: nilai BING, komentar BING, isian PPI; seluruh isian terikat sesi/dokumen, tidak memodifikasi nilai legacy.
+- [x] Service internal `EraporStructuredEntry` memakai transaksi, lock, kepemilikan guru/penugasan aktif, kalender, hash paket, status dan tenggat. Actor/clock hanya dari konteks server tepercaya; belum route publik.
+- [x] BING memakai kode skala resmi (bukan angka kehadiran); 5 nilai + 4 komentar wajib. PPI memakai 5 aspek × 6 kolom sesi = 30 isian; Hasil Capaian ditolak, termasuk permintaan clear.
+- [x] Teks UTF-8 disimpan persis (spasi, CRLF/newline, tanda baca, aksara Arab, emoji). Whitespace-only dihapus; tipe salah, UTF-8 tidak sah dan teks melampaui kapasitas TEXT ditolak. Audit nilai lama/baru, actor, waktu dan status mengikuti transaksi.
+- [x] Expected-value conflict, retry no-op, clear tanpa downgrade, rollback audit/batch, deadline, sesi terkunci, lock bersaing, kondisi Regular vs ABK, FK/unique dan isolasi dua semester teruji. Kelengkapan tidak menghitung nilai/teks sesi lain.
+- [x] Total 715 pemeriksaan integrasi MySQL lulus; seluruh regresi kalender/policy/seed/audit/workflow lama lulus. Checksum database asli dan tabel legacy tetap identik.
+- [ ] Belum menerapkan migrasi pada database aplikasi atau menghubungkan UI/HTTP. Pembacaan form, RBAC/CSRF route, perpanjangan tenggat, kelengkapan paket/transisi, PDF dan tinjauan PPI tetap belum aktif.
+
+Berikutnya: penyimpanan Ummi (bacaan, tes dinamis, catatan, sakelar PRA TK) dan Agama (tahapan/subtingkat dan catatan per lingkup), kemudian kelengkapan paket sebelum integrasi portal guru.
+
+### Batch penyimpanan Agama (24 September 2026)
+
+- [x] Migrasi `20260924_erapor_agama_values.sql`: nilai dengan tahapan/subtingkat terpisah dan catatan per lingkup, terikat sesi/dokumen. CHECK/FK menolak Tahfizh tanpa subtingkat, subtingkat pada tahap lain, dan pasangan kode/ID yang tidak cocok.
+- [x] Service internal `EraporAgamaEntry` menyimpan batch nilai + catatan + audit secara atomik, memakai guard kepemilikan/penugasan, kalender/paket, status dan tenggat seperti service sebelumnya.
+- [x] Pilihan dropdown dipetakan dari data definisi, bukan tujuh boolean. Nilai hanya diterima untuk butir aktif semester sesi; enam catatan wajib disimpan mentah per sesi, bukan satu paragraf hasil rangkaian.
+- [x] Kelengkapan V1: Ganjil 37 nilai + 6 catatan = 43; Genap 36 + 6 = 42. Dokumen tahunan tetap sama, nilai/catatan periode berbeda tidak saling menimpa.
+- [x] Total 818 pemeriksaan MySQL lulus: seluruh pilihan, update keluar/masuk Tahfizh, clear/refill tanpa downgrade, whitespace Unicode, teks utuh, stale write/retry, audit/batch rollback, deadline/status/actor, semester salah, lock, FK/unique dan isolasi Ganjil/Genap.
+- [ ] Belum diterapkan ke database aplikasi/HTTP/UI. Perangkaian narasi, print seluruh butir, approval, perpanjangan, dan kelengkapan paket tetap belum aktif.
+
+Berikutnya: penyimpanan Ummi beserta tes dinamis dan sakelar PRA TK, lalu agregasi kelengkapan paket/transisi status transaksional sebelum integrasi portal guru.
+
+### Batch penyimpanan Ummi (24 September 2026)
+
+- [x] Migrasi empat tabel: bacaan per materi, catatan, flag PRA TK per sesi, dan kejadian tes dinamis. Skala bacaan/tes memakai dua belas kode resmi; tidak menambahkan Hafalan.
+- [x] Service internal `EraporUmmiEntry` menangani batch atomik, expected-value conflict, retry no-op, audit, kepemilikan/penugasan, kalender/paket, status dan tenggat.
+- [x] Catatan Guru satu-satunya wajib. Bacaan boleh kosong dan tes boleh nol atau lebih dari dua. Teks mentah dipertahankan; whitespace-only dihapus tanpa menurunkan status.
+- [x] Flag default false, tidak ditebak dari umur/kelas. Inisialisasi eksplisit saat membuka sesi memakai write yang diaudit; Akhir mengambil flag Tengah pada dokumen/semester sama sekali saja. Perubahan berikutnya tidak merambat; mematikan flag tidak menghapus nilai PRA.
+- [x] Baris tes memiliki token retry, tanggal, jilid, skala dan urutan. Tambah/ubah/hapus teraudit, termasuk payload lama/baru; token dan isi yang sama tidak menghasilkan baris ganda.
+- [x] Total 884 pemeriksaan MySQL lulus, termasuk seluruh 12 skala, optional completion, raw text, dynamic tests, audit/batch rollback, FK/unique, lock, status/tenggat/kepemilikan, isolasi semester dan pewarisan flag. Seluruh regresi terdahulu lulus.
+- [ ] Pewarisan Akhir diuji dengan fixture Ummi-only khusus, bukan paket akhir lengkap. Factory produksi masih menolak AKHIR tanpa RAS. Belum diterapkan ke database aplikasi/HTTP/UI.
+
+Berikutnya: agregasi kelengkapan semua dokumen dan perpindahan status transaksional. Pembacaan form, perpanjangan, snapshot penerimaan/approval, dan integrasi portal guru tetap belum aktif.
+
+### Batch kelengkapan paket dan konfirmasi isi (24 September 2026)
+
+- [x] `EraporCompleteness` membaca nilai tersimpan seluruh dokumen wajib dan mengembalikan required/filled/complete serta key/label isian kosong per dokumen. Tidak menerima boolean lengkap dari klien atau memanggil autosave untuk menghitung.
+- [x] Memeriksa hash/komposisi paket, metadata dokumen dan definisi kosong. Regular empat dokumen, ABK lima; paket Ummi-only sintetis tidak dapat lolos sebagai paket akhir lengkap. RAS belum didukung.
+- [x] `EraporConfirmFilled` melakukan BELUM_DIISI → TELAH_DIISI dengan kepemilikan/penugasan aktif, konsistensi kalender, advisory lock dan transaksi status + audit. Tidak memblokir konfirmasi lengkap setelah tenggat.
+- [x] Retry sah TELAH_DIISI memerlukan jejak KONFIRMASI_ISI dan tidak membuat log ganda. Clear saat diskusi dapat membuat completeness false tanpa menurunkan status. Sesi MENUNGGU_TTD/SELESAI tidak bisa dibuka oleh operasi ini.
+- [x] Total 913 pemeriksaan MySQL lulus: paket Regular/ABK, missing field labels, optional Ummi, PPI tanpa outcomes, rollback audit, lock, actor salah, retry, deadline lewat, clear/refill, drift dan paket parsial. Seluruh regresi sebelumnya lulus.
+- [ ] Belum aktivasi database aplikasi/HTTP/UI. Konfirmasi penerimaan TELAH_DIISI → MENUNGGU_TTD harus menambahkan snapshot guru/TTD dan pembentukan alur persetujuan; belum tersedia dalam service ini.
+
+Berikutnya: snapshot penerimaan dan alur approver per sesi, lalu perpanjangan tenggat serta endpoint pembacaan/form sebelum integrasi portal guru.
+
+### Batch fondasi alur persetujuan (24 September 2026)
+
+- [x] Migrasi lima tabel konfigurasi alur/cakupan, penugasan user eksplisit, dan salinan alur/cakupan dokumen per sesi. Tidak menunjuk akun atau mengubah jabatan secara otomatis.
+- [x] `EraporApprovalPlan` memvalidasi koordinator Quran hanya Ummi, koordinator BING hanya BING (paralel urutan 1), kepala sekolah seluruh paket (urutan 2). Konfigurasi wajib tidak aktif/tidak lengkap ditolak.
+- [x] Relasi komposit mencegah cakupan dokumen lintas sesi. Salinan label/urutan/cakupan tidak mengikuti perubahan konfigurasi selanjutnya.
+- [x] 16 pemeriksaan planner dan total 927 pemeriksaan MySQL lulus; seluruh regresi sebelumnya lulus. Fixture approval hanya di database disposable; data aplikasi tidak berubah.
+- [ ] Belum konfirmasi penerimaan, snapshot identitas/NUPTK/TTD guru/penyetuju, layanan approval, maupun UI penugasan. Planner bukan otorisasi dan tidak memeriksa kelengkapan nilai sendiri.
+
+Berikutnya: lengkapi sumber profil tanda tangan dan snapshot penerimaan transaksional sebelum mengaktifkan perpindahan TELAH_DIISI ke MENUNGGU_TTD. Penugasan koordinator harus eksplisit, bukan disimpulkan dari akun admin/guru yang tersedia.
+
+### Batch konfirmasi penerimaan (24 September 2026)
+
+- [x] Migrasi additive profil penandatangan dan snapshot penerimaan. Profil memperluas akun pegawai tanpa mengubah tabel legacy; NUPTK dan tanda tangan boleh kosong.
+- [x] `EraporSignerSnapshot`: nama UTF-8, NUPTK opsional 16 digit (nol awal dipertahankan), gambar PNG privat maksimal 2 MB/4096 px dan waktu persetujuan pemilik; salinan bytes dan SHA-256 tidak bergantung pada URL/path yang berubah.
+- [x] `EraporConfirmReception`: guru aktif dan masih ditugaskan, status TELAH_DIISI dengan jejak konfirmasi isi, kalender/paket valid dan seluruh nilai wajib lengkap. Snapshot guru, tiga alur/cakupan persetujuan, status MENUNGGU_TTD dan audit disimpan atomik.
+- [x] Tenggat tidak menghalangi konfirmasi lengkap. Retry tidak mengambil ulang profil/konfigurasi; tidak membuka penilaian yang sudah terkunci. Tidak memilih akun koordinator secara otomatis.
+- [x] 956 pemeriksaan MySQL, 16 pemeriksaan snapshot serta regresi sebelumnya lulus. Termasuk rollback audit, isian kosong, guru salah/nonaktif, perubahan nama/profil, konfigurasi tidak aktif, lock, retry, batas status dan penguncian autosave.
+- [ ] Belum diterapkan ke database aplikasi/route/UI. Form profil/unggah PNG dan persetujuan pemilik belum tersedia; data gambar pada pengujian hanya fixture. Layanan persetujuan koordinator/kepala sekolah dan PDF belum aktif.
+
+Berikutnya: layanan approval dengan otorisasi penugasan eksplisit, urutan paralel/sekuensial dan snapshot penyetuju; kemudian perpanjangan tenggat serta endpoint/UI portal guru.
+
+### Batch aksi persetujuan (24 September 2026)
+
+- [x] `EraporApprove::approve`: akun/pegawai/jabatan aktif dan penugasan penyetuju eksplisit; jabatan Kepala Sekolah diperlukan untuk persetujuan kepala sekolah. Tidak ada bypass admin.
+- [x] Memakai alur dan cakupan yang disalin saat penerimaan, bukan konfigurasi flow terbaru. Mapping kepala sekolah harus memuat seluruh paket; mapping koordinator hanya bidangnya. Hash paket dan jejak penerimaan diperiksa.
+- [x] Koordinator paralel, kepala sekolah setelah seluruh koordinator. Status DISETUJUI sebelumnya wajib memiliki snapshot dan jejak audit, bukan flag saja.
+- [x] Snapshot nama/NUPTK/PNG/hash/consent, waktu dan aktor persetujuan serta relasi log disimpan atomik. Retry aktor yang sama tidak menandatangani ulang; penugasan yang dicabut tetap ditolak.
+- [x] 985 pemeriksaan MySQL dan seluruh regresi sebelumnya lulus: otorisasi, urutan, cakupan, lock, rollback snapshot/audit, tanda tangan opsional, retry, profil berubah, FK dan tidak terbit prematur.
+- [ ] Belum aktivasi DB aplikasi/HTTP/UI. Setelah semua menyetujui, sesi tetap MENUNGGU_TTD sampai seluruh PDF siap diterbitkan atomik. Belum layanan publikasi/PDF atau pengelolaan assignment/profil.
+
+Berikutnya: perpanjangan tenggat dengan audit dan kewenangan kepala sekolah; kemudian pembacaan sesi/endpoint portal guru dan integrasi UI. Publikasi PDF tetap tahap terpisah.

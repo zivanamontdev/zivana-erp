@@ -116,6 +116,15 @@ try {
     require __DIR__.'/erapor-bing-mysql.inc.php';
     require __DIR__.'/erapor-agama-mysql.inc.php';
     require __DIR__.'/erapor-package-mysql.inc.php';
+    require __DIR__.'/erapor-sessions-mysql.inc.php';
+    require __DIR__.'/erapor-rts-entry-mysql.inc.php';
+    require __DIR__.'/erapor-structured-entry-mysql.inc.php';
+    require __DIR__.'/erapor-agama-entry-mysql.inc.php';
+    require __DIR__.'/erapor-ummi-entry-mysql.inc.php';
+    require __DIR__.'/erapor-completeness-mysql.inc.php';
+    require __DIR__.'/erapor-approval-flow-mysql.inc.php';
+    require __DIR__.'/erapor-reception-mysql.inc.php';
+    require __DIR__.'/erapor-approve-mysql.inc.php';
     $db->exec("UPDATE erapor_migrations SET sha256=REPEAT('0',64)");
     catalogReject(fn() => EraporMigrationRunner::apply($db,$file), 'checksum');
     $db->prepare("UPDATE erapor_migrations SET sha256=?,status='applying'")->execute([$plan['sha256']]);
