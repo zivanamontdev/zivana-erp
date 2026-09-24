@@ -31,13 +31,20 @@ class EraporTeacherApiController extends Controller
                 $allowed=$type==='RTS'?['indikator_id','nilai','expected']:['key','value','expected'];
                 if (!is_array($change) || array_diff(array_keys($change),$allowed) || array_diff($allowed,array_keys($change))) throw new InvalidArgumentException('Struktur isian tidak valid.');
             }
-            return match ($type) {
+            $saved = match ($type) {
                 'RTS'=>EraporRtsEntry::save($db,$sid,$did,$actor,$body['changes']),
                 'BING','PPI'=>EraporStructuredEntry::save($db,$type,$sid,$did,$actor,$body['changes']),
                 'AGAMA'=>EraporAgamaEntry::save($db,$sid,$did,$actor,$body['changes']),
                 'UMMI'=>EraporUmmiEntry::save($db,$sid,$did,$actor,$body['changes']),
                 default=>throw new DomainException('Rubrik belum didukung.'),
             };
+            // Send authoritative session completion/capabilities after the atomic entry save.
+            // The browser may display progress, but never decides whether submission is allowed.
+            $state=EraporTeacherForm::read($db,$sid,$actor);
+            $saved['completion']=$state['completion'];
+            $saved['capabilities']=$state['capabilities'];
+            $saved['session']=$state['session'];
+            return $saved;
         });
     }
     public function confirmFilled(string $id): void

@@ -24,7 +24,7 @@
         trigger.id = id;
         trigger.className = wrapper.hasAttribute('data-ui-filter')
           ? 'ui-button ui-button--outline ui-select-trigger ui-filter-trigger'
-          : 'field-input ui-select-trigger font-geist';
+          : 'field-input ui-select-trigger ' + (select.classList.contains('font-geist') ? 'font-geist' : 'font-base');
         trigger.disabled = select.disabled;
         trigger.setAttribute('aria-haspopup', 'listbox');
         trigger.setAttribute('aria-expanded', 'false');

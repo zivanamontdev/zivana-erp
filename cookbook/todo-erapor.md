@@ -353,7 +353,15 @@ Berikutnya: buat read model dashboard/periode dan provisioning sesi untuk halama
 - [x] Read model daftar periode/murid memvalidasi akun guru, relasi kelas aktif, kalender, kondisi Regular/ABK, status sesi, integritas hash paket, dan kesiapan paket. Kalender/GET tidak menulis.
 - [x] Periode AKHIR yang belum memiliki RAS ditandai belum siap, tanpa membuat dokumen atau sesi parsial. Periode tidak valid dilewati, tidak ditebak.
 - [x] Aksi “Isi Rapor” memakai POST + CSRF, RBAC Dashboard/Daftar Murid, dan `EraporSessionFactory`; GET dashboard tidak membuat sesi. Sesi dibuka melalui route e-Rapor baru yang memeriksa kepemilikan/penugasan.
-- [x] 1107 pemeriksaan MySQL lolos pada DB disposable yang direstorasi dari backup; checksum tabel lama lokal tetap sama. Route-RBAC 59, adapter API 25, dan regresi Portal Guru legacy lulus.
-- [ ] Editor interaktif nilai, antrean autosave, navigasi dokumen, dan konfirmasi isi/penerimaan belum ditautkan ke halaman sesi. Halaman sesi saat ini hanya ringkasan aman; jangan aktifkan feature flag produksi sebagai rilis final sebelum editor dan uji browser selesai.
+- [x] 1112 pemeriksaan MySQL lolos pada DB disposable yang direstorasi dari backup; checksum tabel lama lokal tetap sama. Route-RBAC 59, adapter API 25, dan regresi Portal Guru legacy lulus.
+- [ ] Editor interaktif nilai dan antrean autosave sedang diintegrasikan; konfirmasi penerimaan/persetujuan serta uji browser masih perlu diverifikasi. Jangan aktifkan feature flag produksi sebagai rilis final sebelum seluruh editor selesai.
 
-Berikutnya: bangun renderer/komponen editor RTS, Agama, Ummi, BING, dan PPI dari definisi snapshot, lalu integrasikan autosave serial dan konfirmasi status.
+Berikutnya: lengkapi renderer Ummi (inisialisasi periode dan riwayat tes), lalu uji browser end-to-end sebelum membuka feature flag produksi.
+
+### Batch editor sesi guru (24 September 2026)
+
+- [x] Halaman sesi menampilkan field definisi resmi RTS, Agama, BING dan PPI lewat `uiSelect`/`uiField`; RTS memakai empat aset simbol penilaian dan kategori/subkategori dapat dicollapse.
+- [x] Autosave dibuffer dan diserialisasi memakai token CSRF terbaru. Konflik stale tidak menimpa perubahan diam-diam; capability tombol Selesaikan Rapor dan progress dihitung ulang server-side.
+- [x] RBAC edit/kirim diterapkan pada kontrol UI dan endpoint; submit memakai endpoint konfirmasi isi yang terpisah dari persetujuan kepala sekolah/admin.
+- [x] 1112 pemeriksaan MySQL pada backup restore disposable lulus termasuk autosave HTTP RTS/Agama/BING/PPI, CSRF satu kali, RBAC, dan checksum tabel legacy. Lulus juga 25 adapter API, 59 route RBAC, regresi Portal Guru legacy dan pemeriksaan markup UI.
+- [ ] Ummi masih read-only di editor: belum ada inisialisasi eksplisit `mulai_pra_tk`, input bacaan/jilid, catatan dan pengelolaan tes dinamis. Uji visual browser belum dilakukan; feature flag production tetap OFF.

@@ -365,18 +365,19 @@ function uiSelect(string $name, string $label, array $choices, array $options = 
 {
     // Compact form controls: 8px vertical / 12px horizontal; default stays unchanged.
     $compact = ($options['variant'] ?? 'form') === 'compact';
+    $fontClass = ($options['font'] ?? 'base') === 'geist' ? 'font-geist' : 'font-base';
     static $sequence = 0;
     $id = (string) ($options['id'] ?? 'ui-select-' . ++$sequence);
     $error = (string) ($options['error'] ?? '');
     $attrs = [
-        'id' => $id, 'name' => $name, 'class' => 'field-input ui-select-native font-geist',
+        'id' => $id, 'name' => $name, 'class' => 'field-input ui-select-native ' . $fontClass,
         'disabled' => !empty($options['disabled']), 'required' => !empty($options['required']),
         'aria-invalid' => $error !== '' ? 'true' : null,
         'aria-describedby' => $error !== '' ? $id . '-error' : null,
     ];
     $attrs = array_merge($attrs, $options['attributes'] ?? []);
     $html = '<div class="field ui-field ui-field--form ui-select' . ($compact ? ' ui-field--compact' : '') . '" data-ui-select>'
-        . '<label class="field-label font-geist' . (!empty($options['hideLabel']) ? ' ui-visually-hidden' : '') . '" for="' . e($id) . '">' . e($label) . '</label>'
+        . '<label class="field-label ' . $fontClass . (!empty($options['hideLabel']) ? ' ui-visually-hidden' : '') . '" for="' . e($id) . '">' . e($label) . '</label>'
         . '<select ' . uiAttrs($attrs) . '>';
     foreach ($choices as $value => $text) {
         $html .= '<option ' . uiAttrs(['value' => (string) $value, 'selected' => (string) ($options['value'] ?? '') === (string) $value, 'data-option-image' => $options['optionImages'][$value] ?? null]) . '>' . e((string) $text) . '</option>';

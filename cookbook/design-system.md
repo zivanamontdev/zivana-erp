@@ -913,6 +913,10 @@ Catatan penting, di Figma state active dan default warnanya identik. Untuk imple
 - **Field read-only computed** (contoh: "Umur" di form Murid, auto-calculated dari Tanggal Lahir): pakai visual state `viewonly` walau berada di form yang sedang mode edit — bukan field yang benar-benar bisa diketik user
 - **Field repeatable row** (contoh: Media Sosial di Data Sekolah, baris murid di modal assign): field dalam satu baris + tombol hapus (icon trash) di ujung kanan, tombol "+ Tambah [X]" di atas list untuk menambah baris baru
 
+`uiSelect()` mengikuti font default Plus Jakarta Sans. Gunakan opsi `font => 'geist'`
+hanya bila desain secara eksplisit meminta Geist; trigger dropdown custom dan
+native select fallback harus memakai font yang sama.
+
 ### 3.2 Buttons dan dropdown filter
 
 Spesifikasi terbaru memakai `uiButton(label, variant, options)` di
@@ -1552,6 +1556,17 @@ Header: "Pengisian Rapor" + dropdown "Nama Murid" + peringatan teks "Pastikan ti
 Isi form berjenjang: **Kategori besar** (band merah — contoh: "Area Keterampilan Hidup", "Laporan Perkembangan", "Ruang Lingkup Pendidikan Agama Islam", "Bacaan Jilid") → **Sub-kategori/Tujuan** (band oranye) → baris item skill individual dengan satu dropdown skala penilaian per baris. Tiap kategori besar diakhiri textarea "Catatan Guru".
 
 **Perbedaan desktop vs mobile:** layout struktural identik, mobile full-width single column, tombol aksi pindah ke sticky bar bawah (bukan toolbar atas).
+
+Workflow e-Rapor berbasis sesi (`/portal-guru/sesi/{id}`) adalah alur baru yang
+terpisah dari form legacy `/portal-guru/rapor/{id}`. Sesi menampilkan nama murid
+sebagai identitas, dokumen paket per periode sebagai section yang bisa dibuka/
+ditutup, dan autosave serial. RTS memakai empat aset `penilaian-*.svg`; pilihan
+grade dan kelengkapan selalu berasal dari definisi/snapshot server. Jangan
+membuat tombol penyelesaian aktif dari hitungan browser: API mengirim ulang
+capability setelah menyimpan. API juga memakai token CSRF sekali pakai, jadi
+request autosave tidak boleh paralel. Feature flag tetap mati di production
+sampai seluruh editor, termasuk inisialisasi dan tes Ummi, serta uji browser
+siap.
 
 ---
 

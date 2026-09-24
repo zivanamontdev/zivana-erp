@@ -109,8 +109,9 @@ try {
     $httpNewSession=$httpNewSessionQuery->fetch(PDO::FETCH_ASSOC);
     catalogCheck($httpNewSession && (int)$httpNewSession['guru_user_id']===$httpActor && $httpNewSession['status']==='BELUM_DIISI','Provisioned session has authenticated teacher snapshot and initial state');
     $httpSessionPage=$httpTeacher->raw('/portal-guru/sesi/'.(int)$httpNewSession['id']);
-    catalogCheck($httpSessionPage['status']===200 && str_contains($httpSessionPage['body'],'Pengisian Rapor')
-        && str_contains($httpSessionPage['body'],'Editor nilai untuk format e-Rapor'),'New session ID opens its own protected e-Rapor page');
+    catalogCheck($httpSessionPage['status']===200 && str_contains($httpSessionPage['body'],'data-erapor-editor')
+        && str_contains($httpSessionPage['body'],'erapor-session.js')
+        && str_contains($httpSessionPage['body'],'belum tersedia di editor ini'),'New session ID opens its own protected e-Rapor editor and identifies unsupported Ummi');
     $httpShow=$httpTeacher->api('GET',"/api/erapor/sesi/$httpSid");
     catalogCheck($httpShow['status']===200 && $httpShow['json']['ok'],'Authenticated HTTP session read');
     catalogCheck((int)$httpShow['json']['data']['session']['id']===$httpSid && count($httpShow['json']['data']['documents'])===5,'Actual session ID and ABK package returned');
@@ -123,10 +124,44 @@ try {
     $httpChanges=[['key'=>$httpKey,'value'=>'Penilaian fixture melalui HTTP.','expected'=>$httpExpected]];
     $httpOldToken=$httpTeacher->csrf;
     $httpSave=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/dokumen/".$httpDocs['BING']['id'].'/simpan',['changes'=>$httpChanges]);
-    catalogCheck($httpSave['status']===200 && $httpSave['json']['ok'] && $httpSave['json']['data']['changed']===1,'Real HTTP autosave persists via service');
+    catalogCheck($httpSave['status']===200 && $httpSave['json']['ok'] && $httpSave['json']['data']['changed']===1,'Real HTTP BING autosave persists via service');
+    catalogCheck(isset($httpSave['json']['data']['completion']['documents'])
+        && array_key_exists('can_confirm_filled',$httpSave['json']['data']['capabilities'] ?? []),
+        'Autosave response includes authoritative package completion and submission capability');
     $httpStored=$db->prepare('SELECT isi FROM erapor_bing_isian WHERE sesi_id=? AND dokumen_id=? AND komentar_id=?');
     $httpStored->execute([$httpSid,$httpDocs['BING']['id'],$httpComment['id']]);
     catalogCheck($httpStored->fetchColumn()==='Penilaian fixture melalui HTTP.','Autosave persisted exact text');
+
+    $httpRtsItem=$httpDocs['RTS']['form']['definitions']['items'][0];
+    $httpRtsKey='nilai:'.$httpRtsItem['id'];
+    $httpRtsExpected=$httpDocs['RTS']['form']['values'][$httpRtsKey] ?? null;
+    $httpRtsValue=$httpRtsExpected===1?2:1;
+    $httpRtsSave=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/dokumen/".$httpDocs['RTS']['id'].'/simpan',[
+        'changes'=>[['indikator_id'=>(int)$httpRtsItem['id'],'nilai'=>$httpRtsValue,'expected'=>$httpRtsExpected]],
+    ]);
+    catalogCheck($httpRtsSave['status']===200 && $httpRtsSave['json']['data']['changed']===1,'Real HTTP RTS image-scale selection autosaves');
+
+    $httpAgamaItem=$httpDocs['AGAMA']['form']['definitions']['items'][0];
+    $httpAgamaKey='nilai:'.$httpAgamaItem['id'];
+    $httpAgamaExpected=$httpDocs['AGAMA']['form']['values'][$httpAgamaKey] ?? null;
+    $httpAgamaChoice=null;
+    foreach ($httpDocs['AGAMA']['form']['definitions']['scale'] as $choice) {
+        if ($choice['kolom_cetak']!==$httpAgamaExpected) { $httpAgamaChoice=$choice['kolom_cetak']; break; }
+    }
+    if ($httpAgamaChoice===null) throw new RuntimeException('Agama grade fixture is unavailable.');
+    $httpAgamaSave=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/dokumen/".$httpDocs['AGAMA']['id'].'/simpan',[
+        'changes'=>[['key'=>$httpAgamaKey,'value'=>$httpAgamaChoice,'expected'=>$httpAgamaExpected]],
+    ]);
+    catalogCheck($httpAgamaSave['status']===200 && $httpAgamaSave['json']['data']['changed']===1,'Real HTTP Agama semester choice autosaves');
+
+    $httpPpiAspect=$httpDocs['PPI']['form']['definitions']['aspects'][0];
+    $httpPpiColumn=$httpDocs['PPI']['form']['definitions']['columns'][0];
+    $httpPpiKey=$httpPpiAspect['id'].':'.$httpPpiColumn['id'];
+    $httpPpiExpected=$httpDocs['PPI']['form']['values'][$httpPpiKey] ?? null;
+    $httpPpiSave=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/dokumen/".$httpDocs['PPI']['id'].'/simpan',[
+        'changes'=>[['key'=>$httpPpiKey,'value'=>'PPI fixture melalui HTTP.','expected'=>$httpPpiExpected]],
+    ]);
+    catalogCheck($httpPpiSave['status']===200 && $httpPpiSave['json']['data']['changed']===1,'Real HTTP PPI session text autosaves');
     $httpReplay=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/dokumen/".$httpDocs['BING']['id'].'/simpan',['changes'=>$httpChanges],$httpOldToken);
     catalogCheck($httpReplay['status']===419 && ($httpReplay['json']['error']['code'] ?? '')==='CSRF_INVALID','Single-use CSRF token rejected on replay');
     $httpBadDoc=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/dokumen/2147483647/simpan",['changes'=>$httpChanges]);

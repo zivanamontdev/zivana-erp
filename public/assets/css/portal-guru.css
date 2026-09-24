@@ -156,6 +156,35 @@ button.teacher-report-action:focus-visible,
 }
 .teacher-session-back { align-self:flex-start; }
 
+.erapor-session { display: grid; gap: var(--space-5); }
+.erapor-document { display: grid; gap: var(--space-4); }
+.erapor-document > .teacher-session-document-header { margin-bottom: var(--space-1); }
+.erapor-document .teacher-session-document-header p { margin: var(--space-1) 0 0; }
+.erapor-area { margin: 0; }
+.erapor-area .pengisian-disclosure-content { gap: var(--space-3); }
+.erapor-area .pengisian-subkategori { margin: 0; }
+.erapor-area .pengisian-subkategori-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.erapor-area .pengisian-item-row > span { display: grid; gap: var(--space-1); }
+.erapor-area .pengisian-item-row small { color: var(--color-neutral-500); font-size: var(--font-size-caption-md); }
+.erapor-fields-grid, .erapor-text-grid, .erapor-ppi-fields { display: grid; gap: var(--space-4); }
+.erapor-field-group { display: grid; gap: var(--space-3); }
+.erapor-field-group h3, .erapor-subheading { margin: 0; color: var(--color-neutral-800); font-size: var(--font-size-body-sm); font-weight: var(--font-weight-bold); }
+.erapor-ppi-aspect { border: 1px solid var(--color-neutral-75); border-radius: var(--radius-md); background: var(--color-neutral-white); padding: var(--space-3) var(--space-4); }
+.erapor-ppi-aspect > summary { list-style: none; cursor: pointer; }
+.erapor-ppi-aspect > summary::-webkit-details-marker { display: none; }
+.erapor-ppi-fields { padding-top: var(--space-4); }
+.erapor-document .pengisian-item-row > .ui-select { flex: 0 1 22rem; width: 100%; max-width: 22rem; }
+.erapor-document .ui-field--form { width: 100%; }
+.erapor-document .field-textarea { min-height: 5rem; }
+.erapor-save-status { margin: var(--space-2) 0 0; color: var(--color-neutral-500); font-size: var(--font-size-caption-md); }
+.erapor-save-status[data-state="success"] { color: var(--color-green-600); }
+.erapor-save-status[data-state="pending"], .erapor-save-status[data-state="saving"] { color: var(--color-orange-600); }
+.erapor-save-status[data-state="error"] { color: var(--color-red-600); }
+.erapor-save-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
+.erapor-session-notice { border: 1px solid var(--color-neutral-75); border-radius: var(--radius-md); background: var(--color-neutral-50); padding: var(--space-4); color: var(--color-neutral-600); }
+.erapor-session-notice h3, .erapor-session-notice p { margin: 0; }
+.erapor-session-notice p { margin-top: var(--space-2); }
+
 /* ==========================================================
    Pengisian Rapor — layout "fokus" (TANPA sidebar/topbar)
    [FIX TOTAL] Ditemukan lewat re-audit langsung assets/ss/Portal Guru
@@ -318,6 +347,7 @@ button.teacher-report-action:focus-visible,
 @media (max-width: 56rem) {
   .pengisian-item-row { flex-direction: column; align-items: stretch; }
   .pengisian-item-row .field-input { max-width: none; }
+  .erapor-document .pengisian-item-row > .ui-select { flex-basis: auto; max-width: none; }
 }
 
 /* ---------- Responsif — Pengisian Rapor WAJIB jalan baik di HP ---------- */

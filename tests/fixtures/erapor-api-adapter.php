@@ -18,7 +18,10 @@ class EraporTeacherForm {
     public static function read($db,$id,$actor): array {
         if ($id===99) throw new DomainException('secret student identity');
         if ($id===98) throw new RuntimeException('secret database credentials');
-        return ['actor'=>$actor,'documents'=>[['id'=>2,'jenis_dokumen'=>'UMMI']]];
+        return ['actor'=>$actor,'documents'=>[['id'=>2,'jenis_dokumen'=>'UMMI']],
+            'completion'=>['complete'=>false,'documents'=>[]],
+            'capabilities'=>['can_confirm_filled'=>false],
+            'session'=>['id'=>$id,'status'=>'BELUM_DIISI']];
     }
 }
 class EraporUmmiEntry { public static function save($db,$sid,$did,$actor,$changes): array { return ['actor'=>$actor,'session'=>$sid,'document'=>$did,'changes'=>$changes]; } }
