@@ -102,6 +102,60 @@
   color: var(--color-green-600);
 }
 
+/* New e-Rapor dashboard keeps the same single-table period pattern. */
+.teacher-report-alert {
+  margin: 0 0 var(--space-4);
+  color: var(--color-red-600);
+}
+.teacher-report-action-form,
+.teacher-report-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  margin: 0;
+  text-decoration: none;
+}
+.teacher-report-action {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-body-sm);
+  line-height: inherit;
+  white-space: nowrap;
+}
+.teacher-report-action--brand { color: var(--color-red-600); }
+.teacher-report-action--success { color: var(--color-green-600); }
+.teacher-report-action--pending { color: var(--color-orange-600); }
+.teacher-report-action--muted { color: var(--color-neutral-400); }
+button.teacher-report-action { cursor: pointer; }
+button.teacher-report-action:focus-visible,
+.teacher-report-open:focus-visible {
+  outline: 2px solid var(--color-red-600);
+  outline-offset: 3px;
+}
+.report-student-name { display: grid; gap: var(--space-1); }
+.report-student-name small { color: var(--color-neutral-400); font-size: var(--font-size-caption-md); }
+.teacher-session-documents { display: grid; gap: var(--space-4); }
+.teacher-session-document {
+  border: 1px solid var(--color-neutral-75);
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-white);
+  padding: var(--space-4) var(--space-5);
+}
+.teacher-session-document-header { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); }
+.teacher-session-document-header h2 { margin:0; font-size:var(--font-size-body-md); }
+.teacher-session-document-progress { color:var(--color-neutral-400); white-space:nowrap; }
+.teacher-session-phase-note {
+  border: 1px solid var(--color-neutral-75);
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-50);
+  padding: var(--space-4) var(--space-5);
+}
+.teacher-session-back { align-self:flex-start; }
+
 /* ==========================================================
    Pengisian Rapor — layout "fokus" (TANPA sidebar/topbar)
    [FIX TOTAL] Ditemukan lewat re-audit langsung assets/ss/Portal Guru

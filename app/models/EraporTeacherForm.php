@@ -21,9 +21,12 @@ final class EraporTeacherForm
                 WHERE m.id=? AND m.kelas_id=? AND u.id=? AND u.is_active=1 AND k.is_active=1 AND j.is_active=1
                 AND j.nama IN ('Guru Kelas','Guru Shadow')",[$session['murid_id'],$session['kelas_id'],$actorId])[0] ?? null;
             if (!$student) throw new DomainException('Penugasan guru tidak aktif atau berubah.');
-            $period=self::rows($db,'SELECT * FROM periode_penilaian WHERE id=?',[$session['periode_id']])[0] ?? null;
+            $period=self::rows($db,'SELECT p.*,t.tahun_awal,t.tahun_akhir FROM periode_penilaian p JOIN tahun_ajaran t ON t.id=p.tahun_ajaran_id WHERE p.id=?',[$session['periode_id']])[0] ?? null;
             if (!$period) throw new DomainException('Periode tidak tersedia.');
-            $period=EraporCalendar::normalize($period);
+            $periodRow=$period;
+            $period=EraporCalendar::normalize($periodRow);
+            $period['nama']=(string)$periodRow['nama'];
+            $period['tahun_label']=(int)$periodRow['tahun_awal'].'/'.(int)$periodRow['tahun_akhir'];
             if ($period['tahun_ajaran_id']!==(int)$session['tahun_ajaran_id'] || $period['semester']!==$session['semester'] || $period['jenis']!==$session['jenis']) throw new DomainException('Identitas periode berubah.');
             $completion=EraporCompleteness::inspect($db,$session);
             $today=($clock ?? new DateTimeImmutable('now',new DateTimeZone('Asia/Makassar')))->setTimezone(new DateTimeZone('Asia/Makassar'))->format('Y-m-d');

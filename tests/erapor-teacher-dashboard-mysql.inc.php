@@ -1,0 +1,21 @@
+<?php
+require_once ROOT_PATH.'/app/models/EraporTeacherDashboard.php';
+$dashBefore=catalogFingerprints($db);
+$dashRead=EraporTeacherDashboard::read($db,(int)$regular['actor_id'],(int)$middle['id'],new DateTimeImmutable($middle['awal_periode'].' 12:00:00',new DateTimeZone('Asia/Makassar')));
+catalogCheck(!$db->inTransaction(),'Dashboard reader closes its read transaction');
+catalogCheck(catalogFingerprints($db)===$dashBefore,'Dashboard GET model performs no writes');
+catalogCheck($dashRead['selectedPeriod']['id']===(int)$middle['id'],'Requested valid report period is selected');
+catalogCheck(count($dashRead['periodOptions'])>=2,'Dashboard offers normalized academic periods');
+$dashStudentIds=array_column($dashRead['students'],'id');
+catalogCheck(in_array((int)$regular['murid_id'],$dashStudentIds,true),'Assigned teacher sees the assigned student');
+$dashRegularRow=null;
+foreach ($dashRead['students'] as $dashRow) if ((int)$dashRow['id']===(int)$regular['murid_id']) $dashRegularRow=$dashRow;
+catalogCheck($dashRegularRow!==null && $dashRegularRow['kondisi']==='Regular','Dashboard normalizes Regular condition');
+catalogCheck($dashRegularRow['action']==='open' && (int)$dashRegularRow['sesi_id']===(int)$sid,'Existing owned session opens by its new session ID');
+$dashEndPeriod=$db->query("SELECT * FROM periode_penilaian WHERE tipe='Akhir Semester' AND semester IN ('ganjil','genap') ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+$dashEnd=EraporTeacherDashboard::read($db,(int)$regular['actor_id'],(int)$dashEndPeriod['id']);
+$dashEndRows=array_values(array_filter($dashEnd['students'],fn($row)=>$row['reason']==='RUBRIK_BELUM_TERSEDIA'));
+$dashEndReasons=array_count_values(array_column($dashEnd['students'],'reason'));
+catalogCheck(count($dashEndRows)>0,'Final report without RAS is clearly unavailable, not provisioned partially: '.json_encode($dashEndReasons));
+catalogReject(fn()=>EraporTeacherDashboard::read($db,2147483647,(int)$middle['id']),'Akun guru tidak aktif');
+catalogCheck(catalogFingerprints($db)===$dashBefore,'Dashboard and package preflight leave all rows unchanged');

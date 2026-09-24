@@ -85,6 +85,32 @@ try {
     }
     $httpGuest->close();
     $httpTeacher->login($httpUser['email']);
+    $httpDashboardBefore=catalogFingerprints($db);
+    $httpDashboard=$httpTeacher->raw('/portal-guru/dashboard?periode_id='.(int)$middle['id']);
+    catalogCheck($httpDashboard['status']===200 && str_contains($httpDashboard['body'],'Daftar Murid')
+        && str_contains($httpDashboard['body'],'Tahun Ajaran'),'New teacher dashboard renders selected calendar period');
+    catalogCheck(catalogFingerprints($db)===$httpDashboardBefore,'Dashboard GET does not provision sessions or write assessment data');
+    if (!preg_match('/name="csrf_token" value="([^"]+)"/',$httpDashboard['body'],$httpDashboardCsrf)) throw new RuntimeException('Teacher dashboard CSRF token missing.');
+    $httpCreateCandidate=$db->query("SELECT m.id AS murid_id,p.id AS periode_id FROM kelas_guru_murid a
+        JOIN murid m ON m.id=a.murid_id AND m.kelas_id=a.kelas_id
+        JOIN karyawan k ON k.id=a.guru_id JOIN users u ON u.karyawan_id=k.id
+        JOIN jabatan j ON j.id=k.jabatan_id
+        JOIN periode_penilaian p ON p.tipe='Tengah Semester' AND p.semester IN ('ganjil','genap')
+        WHERE u.id=".(int)$httpActor." AND u.is_active=1 AND k.is_active=1 AND j.is_active=1
+        AND NOT EXISTS (SELECT 1 FROM erapor_sesi s WHERE s.murid_id=m.id AND s.periode_id=p.id)
+        ORDER BY p.id,m.id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    if (!$httpCreateCandidate) throw new RuntimeException('An assigned pupil with an uninitialized middle-period session is required for HTTP provisioning test.');
+    $httpProvision=$httpTeacher->raw('/portal-guru/sesi/siapkan',http_build_query([
+        'csrf_token'=>$httpDashboardCsrf[1], 'murid_id'=>$httpCreateCandidate['murid_id'], 'periode_id'=>$httpCreateCandidate['periode_id'],
+    ]),['Content-Type: application/x-www-form-urlencoded']);
+    catalogCheck($httpProvision['status']===302,'Session provisioning is an explicit CSRF-protected POST');
+    $httpNewSessionQuery=$db->prepare('SELECT id,guru_user_id,status FROM erapor_sesi WHERE murid_id=? AND periode_id=?');
+    $httpNewSessionQuery->execute([(int)$httpCreateCandidate['murid_id'],(int)$httpCreateCandidate['periode_id']]);
+    $httpNewSession=$httpNewSessionQuery->fetch(PDO::FETCH_ASSOC);
+    catalogCheck($httpNewSession && (int)$httpNewSession['guru_user_id']===$httpActor && $httpNewSession['status']==='BELUM_DIISI','Provisioned session has authenticated teacher snapshot and initial state');
+    $httpSessionPage=$httpTeacher->raw('/portal-guru/sesi/'.(int)$httpNewSession['id']);
+    catalogCheck($httpSessionPage['status']===200 && str_contains($httpSessionPage['body'],'Pengisian Rapor')
+        && str_contains($httpSessionPage['body'],'Editor nilai untuk format e-Rapor'),'New session ID opens its own protected e-Rapor page');
     $httpShow=$httpTeacher->api('GET',"/api/erapor/sesi/$httpSid");
     catalogCheck($httpShow['status']===200 && $httpShow['json']['ok'],'Authenticated HTTP session read');
     catalogCheck((int)$httpShow['json']['data']['session']['id']===$httpSid && count($httpShow['json']['data']['documents'])===5,'Actual session ID and ABK package returned');
@@ -114,6 +140,9 @@ try {
     catalogCheck($httpForeign['status']===409 && !str_contains($httpForeign['body'],'nama_lengkap'),'Foreign session receives generic denial');
     $httpOther->close();
     $db->prepare('DELETE FROM role_permissions WHERE role_id=? AND permission_id=?')->execute([$httpUser['role_id'],$httpPermissionIds['edit']]);
+    $httpDashboardNoEdit=$httpTeacher->raw('/portal-guru/dashboard?periode_id='.(int)$httpCreateCandidate['periode_id']);
+    catalogCheck($httpDashboardNoEdit['status']===200 && !str_contains($httpDashboardNoEdit['body'],'/portal-guru/sesi/'.(int)$httpNewSession['id'])
+        && str_contains($httpDashboardNoEdit['body'],'Akses dibatasi'),'Dashboard hides editable session action when RBAC edit is revoked');
     $httpNoEdit=$httpTeacher->api('POST',"/api/erapor/sesi/$httpSid/dokumen/".$httpDocs['BING']['id'].'/simpan',['changes'=>$httpChanges]);
     catalogCheck($httpNoEdit['status']===403,'Actual API enforces RBAC on write');
     catalogCheck(!$db->inTransaction(),'HTTP API requests leave connection clean');

@@ -346,3 +346,14 @@ Berikutnya: adapter endpoint dengan autentikasi/RBAC/CSRF dan kontrak error/payl
 - [ ] Belum uji browser visual/UI. Endpoint pembuatan/list sesi, approval, perpanjangan, profil dan PDF terpisah dari adapter guru.
 
 Berikutnya: buat read model dashboard/periode dan provisioning sesi untuk halaman portal guru, kemudian integrasikan editor bertahap dengan antrean CSRF/autosave serial.
+
+### Batch dashboard dan provisioning sesi Portal Guru (24 September 2026)
+
+- [x] Dashboard e-Rapor baru menjadi cabang opt-in saat `ERAPOR_API_ENABLED=true`; dashboard/route legacy tetap menjadi default dan tidak dicampur dengan ID sesi baru.
+- [x] Read model daftar periode/murid memvalidasi akun guru, relasi kelas aktif, kalender, kondisi Regular/ABK, status sesi, integritas hash paket, dan kesiapan paket. Kalender/GET tidak menulis.
+- [x] Periode AKHIR yang belum memiliki RAS ditandai belum siap, tanpa membuat dokumen atau sesi parsial. Periode tidak valid dilewati, tidak ditebak.
+- [x] Aksi “Isi Rapor” memakai POST + CSRF, RBAC Dashboard/Daftar Murid, dan `EraporSessionFactory`; GET dashboard tidak membuat sesi. Sesi dibuka melalui route e-Rapor baru yang memeriksa kepemilikan/penugasan.
+- [x] 1107 pemeriksaan MySQL lolos pada DB disposable yang direstorasi dari backup; checksum tabel lama lokal tetap sama. Route-RBAC 59, adapter API 25, dan regresi Portal Guru legacy lulus.
+- [ ] Editor interaktif nilai, antrean autosave, navigasi dokumen, dan konfirmasi isi/penerimaan belum ditautkan ke halaman sesi. Halaman sesi saat ini hanya ringkasan aman; jangan aktifkan feature flag produksi sebagai rilis final sebelum editor dan uji browser selesai.
+
+Berikutnya: bangun renderer/komponen editor RTS, Agama, Ummi, BING, dan PPI dari definisi snapshot, lalu integrasikan autosave serial dan konfirmasi status.

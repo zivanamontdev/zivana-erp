@@ -72,7 +72,9 @@ define('APP_URL', envValue($env, 'APP_URL', ''));
 define('APP_ENV', envValue($env, 'APP_ENV', 'production'));
 define('APP_DEBUG', filter_var(envValue($env, 'APP_DEBUG', 'false'), FILTER_VALIDATE_BOOLEAN));
 // Opt-in only after the new e-rapor schema/catalog has been migrated and verified.
-define('ERAPOR_API_ENABLED', filter_var(getenv('ERAPOR_API_ENABLED') ?: envValue($env, 'ERAPOR_API_ENABLED', 'false'), FILTER_VALIDATE_BOOLEAN));
+$eraporApiEnabled = getenv('ERAPOR_API_ENABLED');
+if ($eraporApiEnabled === false) $eraporApiEnabled = envValue($env, 'ERAPOR_API_ENABLED', 'false');
+define('ERAPOR_API_ENABLED', filter_var($eraporApiEnabled, FILTER_VALIDATE_BOOLEAN));
 define('SESSION_LIFETIME', (int) envValue($env, 'SESSION_LIFETIME', 120));
 
 // --- Upload ---
