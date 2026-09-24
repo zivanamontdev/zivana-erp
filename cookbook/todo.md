@@ -2,7 +2,15 @@
 
 Urutan disusun berdasarkan dependency logis: fondasi dulu (auth, RBAC, app shell), baru modul yang bergantung padanya.
 
-## Prioritas aktif — Login, RBAC, dan Portal Guru (23 September 2026)
+## Prioritas aktif — Implementasi spesifikasi eRapor (24 September 2026)
+
+Roadmap aktif: **[TODO Implementasi eRapor](todo-erapor.md)**, berdasarkan seluruh berkas di `eRapor_Zivana_Spesifikasi/`.
+
+Spesifikasi terbaru menggantikan asumsi rapor pada roadmap lama: sesi per murid/periode, paket empat dokumen untuk Regular atau lima untuk ABK, empat status sesi, dan persetujuan koordinator bidang sebelum kepala sekolah. Persetujuan langsung oleh Admin dan alur tiga status di bawah adalah riwayat implementasi, bukan target baru.
+
+Checklist lama tetap dipertahankan sebagai bukti pekerjaan terdahulu, **bukan bukti penerimaan implementasi baru**. Kekurangan pengujian login/RBAC/browser tetap harus dituntaskan sebagai regresi. Pertanyaan lama tentang skala Agama/Ummi dan penguncian sudah dijawab spesifikasi; kebutuhan RAS dan ketidaksamaan antarberkas dicatat pada roadmap baru. Belum ada migrasi atau perubahan aplikasi yang dilakukan dalam penyusunan TODO ini.
+
+## Riwayat prioritas — Login, RBAC, dan Portal Guru (23 September 2026)
 
 **Pembaruan lanjutan:** alur HTTP/MySQL terisolasi tambah akun → login → periode → murid/penugasan baru → draft → kirim → persetujuan admin → PDF sudah lulus, termasuk pencabutan/pemberian izin setelah login ulang dan penonaktifan/aktivasi akun. Pemeriksaan visual browser dan audit positif seluruh aksi tetap belum tuntas; jangan menganggap seluruh roadmap sudah selesai.
 
@@ -276,7 +284,9 @@ Ada akun uji tersimpan di DB lokal untuk lanjut testing: `superadmin@zivana-erp.
 
 ---
 
-## Item yang Butuh Konfirmasi User Sebelum Dikerjakan
+## Riwayat item konfirmasi sebelum spesifikasi eRapor diterima
+
+Daftar berikut bersifat historis. Untuk rapor, gunakan status keputusan pada [TODO Implementasi eRapor](todo-erapor.md); jangan menanyakan ulang keputusan yang sudah dijawab spesifikasi.
 
 Dikumpulkan dari seluruh dokumen `cookbook/` — sebaiknya dikonfirmasi di awal Fase 1 supaya tidak menghambat fase-fase berikutnya:
 

@@ -1,0 +1,1615 @@
+{
+  "rubrik": {
+    "kode": "RTS_MONTESSORI_V1",
+    "jenis_dokumen": "RTS",
+    "nama": "Rapor Tengah Semester - Montessori",
+    "judul_cetak": "LAPORAN PERKEMBANGAN TENGAH SEMESTER",
+    "versi": 1,
+    "cakupan": "TAHUNAN",
+    "jenis_periode": "TENGAH",
+    "cetak_gabung_periode": true,
+    "khusus_abk": false,
+    "kolom_periode": [
+      {
+        "kode": "TS_GANJIL",
+        "label": "TS Ganjil",
+        "urutan": 1,
+        "semester": "GANJIL",
+        "jenis": "TENGAH"
+      },
+      {
+        "kode": "TS_GENAP",
+        "label": "TS Genap",
+        "urutan": 2,
+        "semester": "GENAP",
+        "jenis": "TENGAH"
+      }
+    ],
+    "penandatangan": [
+      {
+        "urutan": 1,
+        "peran": "KEPALA_SEKOLAH",
+        "jabatan_cetak": "Kepala Sekolah",
+        "prefiks": null,
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      },
+      {
+        "urutan": 2,
+        "peran": "GURU_KELAS",
+        "jabatan_cetak": "Guru Kelas {nama_kelas}",
+        "prefiks": null,
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      },
+      {
+        "urutan": 3,
+        "peran": "ORANG_TUA",
+        "jabatan_cetak": "Orang Tua Siswa",
+        "prefiks": null,
+        "cetak_nuptk": false,
+        "posisi_cetak": null
+      }
+    ],
+    "sumber": "RAPOR_TENGAH_SEMESTER_RTS_1.pdf (8 halaman, revisi 23 September 2026)",
+    "skala": [
+      {
+        "nilai": 1,
+        "kode": "BD",
+        "label": "Baru dikenalkan",
+        "simbol": "/",
+        "simbol_unicode": "U+002F",
+        "deskripsi_bentuk": "satu garis miring"
+      },
+      {
+        "nilai": 2,
+        "kode": "MB",
+        "label": "Mulai Berkembang",
+        "simbol": "∠",
+        "simbol_unicode": "U+2220",
+        "deskripsi_bentuk": "dua garis membentuk sudut"
+      },
+      {
+        "nilai": 3,
+        "kode": "BSH",
+        "label": "Berkembang Sesuai Harapan",
+        "simbol": "△",
+        "simbol_unicode": "U+25B3",
+        "deskripsi_bentuk": "segitiga garis luar"
+      },
+      {
+        "nilai": 4,
+        "kode": "BSB",
+        "label": "Berkembang Sangat Baik",
+        "simbol": "▲",
+        "simbol_unicode": "U+25B2",
+        "deskripsi_bentuk": "segitiga terisi penuh"
+      }
+    ],
+    "statistik": {
+      "jumlah_area": 8,
+      "jumlah_sub_area_bernama": 21,
+      "jumlah_grup": 2,
+      "jumlah_indikator": 175,
+      "jumlah_sel_penilaian_per_murid": 350
+    },
+    "bagian": [
+      {
+        "kode": "RTS",
+        "judul": "Seluruh indikator",
+        "jenis": "rubrik",
+        "wajib": true,
+        "urutan": 1
+      }
+    ]
+  },
+  "area": [
+    {
+      "kode": "keterampilan_hidup",
+      "nama": "AREA KETERAMPILAN HIDUP",
+      "urutan": 1,
+      "sub_area": [
+        {
+          "kode": "keterampilan_hidup__a",
+          "huruf": "a",
+          "nama": "Perawatan Diri",
+          "urutan": 1,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "keterampilan_hidup__a__menutup_mulut_saat_batuk_dan_bersin",
+              "tujuan": "Menutup mulut saat batuk dan bersin",
+              "aparatus": "Role model guru, situasi nyata, cermin",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "keterampilan_hidup__a__membersihkan_hidung",
+              "tujuan": "Membersihkan hidung",
+              "aparatus": "Tisu, tempat sampah, role model guru",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "keterampilan_hidup__a__dapat_mengelap_keringat",
+              "tujuan": "Dapat mengelap keringat",
+              "aparatus": "Sapu tangan/tisu, role model guru",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "keterampilan_hidup__a__menggunakan_keran_air_dengan_benar",
+              "tujuan": "Menggunakan keran air dengan benar",
+              "aparatus": "Keran air nyata, wastafel",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "keterampilan_hidup__a__mencuci_tangan_dengan_benar",
+              "tujuan": "Mencuci tangan dengan benar",
+              "aparatus": "Keran air, sabun cair, handuk kecil/tisu",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "keterampilan_hidup__a__memakai_dan_melepas_sepatu_dan_kaus_kaki",
+              "tujuan": "Memakai dan melepas sepatu dan kaus kaki",
+              "aparatus": "Sepatu & kaus kaki anak, kursi kecil",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "keterampilan_hidup__a__makan_sendiri",
+              "tujuan": "Makan sendiri",
+              "aparatus": "Peralatan makan anak",
+              "grup": null,
+              "urutan": 7
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memasang_velcro",
+              "tujuan": "Membuka dan memasang Velcro",
+              "aparatus": "Bingkai pakaian velcro",
+              "grup": null,
+              "urutan": 8
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_menutup_resleting",
+              "tujuan": "Membuka dan menutup resleting",
+              "aparatus": "Bingkai pakaian resleting",
+              "grup": null,
+              "urutan": 9
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memasang_kancing_besar",
+              "tujuan": "Membuka dan memasang kancing besar",
+              "aparatus": "Bingkai pakaian kancing besar",
+              "grup": null,
+              "urutan": 10
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memasang_kancing_kecil",
+              "tujuan": "Membuka dan memasang kancing kecil",
+              "aparatus": "Bingkai pakaian kancing kecil",
+              "grup": null,
+              "urutan": 11
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memasang_kancing_tekan",
+              "tujuan": "Membuka dan memasang kancing tekan",
+              "aparatus": "Bingkai pakaian kancing tekan",
+              "grup": null,
+              "urutan": 12
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memasang_sabuk",
+              "tujuan": "Membuka dan memasang sabuk",
+              "aparatus": "Bingkai pakaian sabuk",
+              "grup": null,
+              "urutan": 13
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memasang_kancing_kait",
+              "tujuan": "Membuka dan memasang kancing kait",
+              "aparatus": "Bingkai pakaian kancing kait",
+              "grup": null,
+              "urutan": 14
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memasang_tali_sepatu",
+              "tujuan": "Membuka dan memasang tali sepatu",
+              "aparatus": "Bingkai pakaian tali sepatu",
+              "grup": null,
+              "urutan": 15
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memakai_jaket",
+              "tujuan": "Membuka dan memakai jaket",
+              "aparatus": "Bingkai pakaian jaket",
+              "grup": null,
+              "urutan": 16
+            },
+            {
+              "kode": "keterampilan_hidup__a__membuka_dan_memakai_pakaian",
+              "tujuan": "Membuka dan memakai pakaian",
+              "aparatus": "Pakaian",
+              "grup": null,
+              "urutan": 17
+            },
+            {
+              "kode": "keterampilan_hidup__a__melipat_baju",
+              "tujuan": "Melipat baju",
+              "aparatus": "Baju",
+              "grup": null,
+              "urutan": 18
+            },
+            {
+              "kode": "keterampilan_hidup__a__mengikat_pita",
+              "tujuan": "Mengikat pita",
+              "aparatus": "Bingkai pakaian pita",
+              "grup": null,
+              "urutan": 19
+            },
+            {
+              "kode": "keterampilan_hidup__a__dapat_menggunakan_toilet",
+              "tujuan": "Dapat menggunakan toilet",
+              "aparatus": "Toilet/kamar mandi, role model guru",
+              "grup": null,
+              "urutan": 20
+            }
+          ]
+        },
+        {
+          "kode": "keterampilan_hidup__b",
+          "huruf": "b",
+          "nama": "Motorik Halus",
+          "urutan": 2,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "keterampilan_hidup__b__menyendok_objek_kering",
+              "tujuan": "Menyendok objek kering",
+              "aparatus": "Menyendok dari satu wadah ke wadah yang berukuran sama",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "keterampilan_hidup__b__menuang_objek_kering",
+              "tujuan": "Menuang objek kering",
+              "aparatus": "Menuang dari satu wadah ke wadah yang berukuran sama",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "keterampilan_hidup__b__membuka_dan_menutup_botol",
+              "tujuan": "Membuka dan menutup botol",
+              "aparatus": "Botol",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "keterampilan_hidup__b__menuang_objek_cair",
+              "tujuan": "Menuang objek cair",
+              "aparatus": "Menuang cair dari satu wadah ke wadah yang berukuran sama",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "keterampilan_hidup__b__menggunting_kertas",
+              "tujuan": "Menggunting kertas",
+              "aparatus": "Gunting dan kertas",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "keterampilan_hidup__b__menjahit",
+              "tujuan": "Menjahit",
+              "aparatus": "Bingkai jahit",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "keterampilan_hidup__b__meronce",
+              "tujuan": "Meronce",
+              "aparatus": "Manik ronce",
+              "grup": null,
+              "urutan": 7
+            },
+            {
+              "kode": "keterampilan_hidup__b__membungkus_kado",
+              "tujuan": "Membungkus kado",
+              "aparatus": "Pembungkus kado",
+              "grup": null,
+              "urutan": 8
+            }
+          ]
+        },
+        {
+          "kode": "keterampilan_hidup__c",
+          "huruf": "c",
+          "nama": "Motorik Kasar",
+          "urutan": 3,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "keterampilan_hidup__c__membawa_baki_dengan_seimbang",
+              "tujuan": "Membawa baki dengan seimbang",
+              "aparatus": "Baki/tray, benda konkret ringan",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "keterampilan_hidup__c__berjalan_mengikuti_garis",
+              "tujuan": "Berjalan mengikuti garis",
+              "aparatus": "Garis pada lantai",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "keterampilan_hidup__c__mengangkat_kursi_dengan_benar",
+              "tujuan": "Mengangkat kursi dengan benar",
+              "aparatus": "Kursi anak, role model guru",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "keterampilan_hidup__c__melempar_dan_menangkap_bola",
+              "tujuan": "Melempar dan menangkap bola",
+              "aparatus": "Bola karet berbagai ukuran",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "keterampilan_hidup__c__melompat_ke_depan_dan_belakang",
+              "tujuan": "Melompat ke depan dan belakang",
+              "aparatus": "Matras/evamat, garis lantai sebagai batas",
+              "grup": null,
+              "urutan": 5
+            }
+          ]
+        },
+        {
+          "kode": "keterampilan_hidup__d",
+          "huruf": "d",
+          "nama": "Kepedulian Terhadap Lingkungan",
+          "urutan": 4,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "keterampilan_hidup__d__merapikan_alas_kerja",
+              "tujuan": "Merapikan alas kerja",
+              "aparatus": "Alas kerja (work mat), rak penyimpanan, role model guru",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "keterampilan_hidup__d__membuang_sampah_pada_tempatnya",
+              "tujuan": "Membuang sampah pada tempatnya",
+              "aparatus": "Tempat sampah kecil, tisu/kertas bekas, role model guru",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "keterampilan_hidup__d__merapikan_meja_dan_kursi",
+              "tujuan": "Merapikan meja dan kursi",
+              "aparatus": "Meja & kursi anak, lingkungan kelas nyata, role model guru",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "keterampilan_hidup__d__menggunakan_sapu_kecil_dan_besar",
+              "tujuan": "Menggunakan sapu kecil dan besar",
+              "aparatus": "Sapu besar dan kecil",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "keterampilan_hidup__d__mengepel_lantai",
+              "tujuan": "Mengepel lantai",
+              "aparatus": "Kain pel",
+              "grup": null,
+              "urutan": 5
+            }
+          ]
+        },
+        {
+          "kode": "keterampilan_hidup__e",
+          "huruf": "e",
+          "nama": "Tata Krama",
+          "urutan": 5,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "keterampilan_hidup__e__mengucap_dan_menjawab_salam",
+              "tujuan": "Mengucap dan menjawab salam",
+              "aparatus": "Role model guru, interaksi dengan teman, situasi nyata",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "keterampilan_hidup__e__mengucap_permisi_pada_situasi_yang_tepat",
+              "tujuan": "Mengucap permisi pada situasi yang tepat",
+              "aparatus": "Role model guru, simulasi situasi, lingkungan kelas",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "keterampilan_hidup__e__mengucap_terima_kasih_dan_menjawabnya",
+              "tujuan": "Mengucap terima kasih dan menjawabnya",
+              "aparatus": "Role model guru, interaksi sosial nyata",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "keterampilan_hidup__e__meminta_maaf_pada_situasi_yang_tepat",
+              "tujuan": "Meminta maaf pada situasi yang tepat",
+              "aparatus": "Role model guru, situasi nyata (simulasi/kejadian sehari-hari)",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "keterampilan_hidup__e__dapat_meminta_bantuan_jika_membutuhkan",
+              "tujuan": "Dapat meminta bantuan jika membutuhkan",
+              "aparatus": "Role model guru, kegiatan kelompok, interaksi nyata",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "keterampilan_hidup__e__dapat_meminta_izin",
+              "tujuan": "Dapat meminta izin",
+              "aparatus": "Role model guru, aturan kelas, situasi nyata",
+              "grup": null,
+              "urutan": 6
+            }
+          ]
+        },
+        {
+          "kode": "keterampilan_hidup__f",
+          "huruf": "f",
+          "nama": "Kebiasaan Bekerja",
+          "urutan": 6,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "keterampilan_hidup__f__mengembalikan_material_pada_tempatnya",
+              "tujuan": "Mengembalikan material pada tempatnya",
+              "aparatus": "Rak penyimpanan, material/aparatus yang digunakan, role model guru",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "keterampilan_hidup__f__bekerja_secara_mandiri",
+              "tujuan": "Bekerja secara mandiri",
+              "aparatus": "Role model guru, situasi nyata",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "keterampilan_hidup__f__bekerja_dengan_rapi_dan_teratur",
+              "tujuan": "Bekerja dengan rapi dan teratur",
+              "aparatus": "Role model guru, aturan kelas, situasi nyata",
+              "grup": null,
+              "urutan": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "sensorial",
+      "nama": "AREA SENSORIAL",
+      "urutan": 2,
+      "sub_area": [
+        {
+          "kode": "sensorial__a",
+          "huruf": "a",
+          "nama": "Indra Penglihatan",
+          "urutan": 1,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "sensorial__a__mengenal_ukuran_besar_kecil",
+              "tujuan": "Mengenal ukuran besar kecil",
+              "aparatus": "Pink Tower, Knobbed cylinders, knobless cylinder, broad stair",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "sensorial__a__mengenal_ukuran_panjang_pendek",
+              "tujuan": "Mengenal ukuran panjang pendek",
+              "aparatus": "Long Rods",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "sensorial__a__mengenal_warna_primer",
+              "tujuan": "Mengenal warna primer",
+              "aparatus": "Kotak warna 1",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "sensorial__a__mengenal_warna_sekunder",
+              "tujuan": "Mengenal warna sekunder",
+              "aparatus": "Kotak warna 2",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "sensorial__a__mengurutkan_gradasi_warna",
+              "tujuan": "Mengurutkan gradasi warna",
+              "aparatus": "Kotak warna 3",
+              "grup": null,
+              "urutan": 5
+            }
+          ]
+        },
+        {
+          "kode": "sensorial__b",
+          "huruf": "b",
+          "nama": "Indra Peraba",
+          "urutan": 2,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "sensorial__b__mengenal_tekstur_kasar_halus",
+              "tujuan": "Mengenal tekstur kasar halus",
+              "aparatus": "Touch board, touch tablet",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "sensorial__b__menyamakan_tekstur",
+              "tujuan": "Menyamakan tekstur",
+              "aparatus": "Touch fabric, touch tablet",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "sensorial__b__mengenal_berat_ringan",
+              "tujuan": "Mengenal berat ringan",
+              "aparatus": "Baric tablets, Thermic tablet",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "sensorial__b__mengenal_suhu",
+              "tujuan": "Mengenal suhu",
+              "aparatus": "Thermic tablets, thermic bottles",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "sensorial__b__mengenal_bentuk_bangun_ruang",
+              "tujuan": "Mengenal bentuk bangun ruang",
+              "aparatus": "Geometry solid, stereognostic bags",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "sensorial__b__mengenal_bentuk_bangun_datar",
+              "tujuan": "Mengenal bentuk bangun datar",
+              "aparatus": "Geometry cabinet, constructive triangle, tessellation",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "sensorial__b__mengenal_bentuk_kubus_dan_aljabar",
+              "tujuan": "Mengenal bentuk kubus dan aljabar",
+              "aparatus": "Binomial cube, trinomial cube",
+              "grup": null,
+              "urutan": 7
+            }
+          ]
+        },
+        {
+          "kode": "sensorial__c",
+          "huruf": "c",
+          "nama": "Indra Penciuman",
+          "urutan": 3,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "sensorial__c__mengenal_aroma",
+              "tujuan": "Mengenal aroma",
+              "aparatus": "Smelling bottle",
+              "grup": null,
+              "urutan": 1
+            }
+          ]
+        },
+        {
+          "kode": "sensorial__d",
+          "huruf": "d",
+          "nama": "Indra Perasa",
+          "urutan": 4,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "sensorial__d__mengenal_rasa",
+              "tujuan": "Mengenal rasa",
+              "aparatus": "Tasting solution",
+              "grup": null,
+              "urutan": 1
+            }
+          ]
+        },
+        {
+          "kode": "sensorial__e",
+          "huruf": "e",
+          "nama": "Indra Pendengaran",
+          "urutan": 5,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "sensorial__e__mengenal_bunyi",
+              "tujuan": "Mengenal bunyi",
+              "aparatus": "Sound boxes",
+              "grup": null,
+              "urutan": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "matematika",
+      "nama": "AREA MATEMATIKA",
+      "urutan": 3,
+      "sub_area": [
+        {
+          "kode": "matematika",
+          "huruf": null,
+          "nama": null,
+          "urutan": 1,
+          "implisit": true,
+          "indikator": [
+            {
+              "kode": "matematika__menghitung_objek_1_10",
+              "tujuan": "Menghitung objek (1-10)",
+              "aparatus": "Spindel box, number rods",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "matematika__mengenal_angka_dengan_tulisan_dan_kuantitas_1_10",
+              "tujuan": "Mengenal angka dengan tulisan dan kuantitas (1-10)",
+              "aparatus": "Sandpaper numbers, cards & counters, bird's eye view",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "matematika__mengenal_angka_dengan_tulisan_dan_kuantitas_11_19",
+              "tujuan": "Mengenal angka dengan tulisan dan kuantitas (11-19)",
+              "aparatus": "Seguin board A kombinasi short bead stairs, bird's eye view",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "matematika__mengenal_angka_dengan_tulisan_dan_kuantitas_10_20_30_90",
+              "tujuan": "Mengenal angka dengan tulisan dan kuantitas (10, 20, 30, …, 90)",
+              "aparatus": "Seguin board B kombinasi short bead stairs, bird's eye view",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "matematika__mengenal_angka_dengan_tulisan_dan_kuantitas_100_200_300_900",
+              "tujuan": "Mengenal angka dengan tulisan dan kuantitas (100, 200, 300, …, 900)",
+              "aparatus": "Manik emas kombinasi number cards, bird's eye view",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "matematika__mengenal_angka_dengan_tulisan_dan_kuantitas_1000_2000_3000_9000",
+              "tujuan": "Mengenal angka dengan tulisan dan kuantitas (1000, 2000, 3000, …, 9000)",
+              "aparatus": "Manik emas kombinasi number cards, bird's eye view",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "matematika__penjumlahan_tanpa_menyimpan",
+              "tujuan": "Penjumlahan tanpa menyimpan",
+              "aparatus": "Addition strip board, Stamp game, small number rods, short bead stairs",
+              "grup": null,
+              "urutan": 7
+            },
+            {
+              "kode": "matematika__penjumlahan_dengan_menyimpan",
+              "tujuan": "Penjumlahan dengan menyimpan",
+              "aparatus": "Stamp game",
+              "grup": null,
+              "urutan": 8
+            },
+            {
+              "kode": "matematika__perkalian_tanpa_menyimpan",
+              "tujuan": "Perkalian tanpa menyimpan",
+              "aparatus": "Multiplication board, Stamp game, short bead stairs",
+              "grup": null,
+              "urutan": 9
+            },
+            {
+              "kode": "matematika__perkalian_dengan_menyimpan",
+              "tujuan": "Perkalian dengan menyimpan",
+              "aparatus": "Stamp game",
+              "grup": null,
+              "urutan": 10
+            },
+            {
+              "kode": "matematika__pengurangan_tanpa_menyimpan",
+              "tujuan": "Pengurangan tanpa menyimpan",
+              "aparatus": "Subtraction strip board, Stamp game, small number rods, short bead stairs",
+              "grup": null,
+              "urutan": 11
+            },
+            {
+              "kode": "matematika__pengurangan_dengan_menyimpan",
+              "tujuan": "Pengurangan dengan menyimpan",
+              "aparatus": "Stamp game",
+              "grup": null,
+              "urutan": 12
+            },
+            {
+              "kode": "matematika__pembagian_tanpa_menyimpan",
+              "tujuan": "Pembagian tanpa menyimpan",
+              "aparatus": "Division board, Stamp game",
+              "grup": null,
+              "urutan": 13
+            },
+            {
+              "kode": "matematika__pembagian_dengan_menyimpan",
+              "tujuan": "Pembagian dengan menyimpan",
+              "aparatus": "Stamp game",
+              "grup": null,
+              "urutan": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "bahasa",
+      "nama": "AREA BAHASA",
+      "urutan": 4,
+      "sub_area": [
+        {
+          "kode": "bahasa__a",
+          "huruf": "a",
+          "nama": "Komunikasi",
+          "urutan": 1,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "bahasa__a__dapat_mengekspresikan_keinginan",
+              "tujuan": "Dapat mengekspresikan keinginan",
+              "aparatus": "Role model guru, situasi nyata di kelas, kartu bergambar",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "bahasa__a__berbicara_dengan_kalimat_jelas",
+              "tujuan": "Berbicara dengan kalimat jelas",
+              "aparatus": "Role model guru, interaksi nyata, cermin (untuk melatih artikulasi/opsional)",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "bahasa__a__dapat_menyampaikan_pesan",
+              "tujuan": "Dapat menyampaikan pesan",
+              "aparatus": "Role model guru, kegiatan kelompok, situasi nyata (misalnya menyampaikan pesan dari guru ke teman)",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "bahasa__a__dapat_bergantian_berbicara",
+              "tujuan": "Dapat bergantian berbicara",
+              "aparatus": "Role model guru, circle time, kegiatan kelompok",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "bahasa__a__dapat_bercerita",
+              "tujuan": "Dapat bercerita",
+              "aparatus": "Buku cerita bergambar, kartu bergambar, role model guru",
+              "grup": null,
+              "urutan": 5
+            }
+          ]
+        },
+        {
+          "kode": "bahasa__b",
+          "huruf": "b",
+          "nama": "Persiapan Menulis",
+          "urutan": 2,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "bahasa__b__menarik_garis_lurus",
+              "tujuan": "Menarik garis lurus",
+              "aparatus": "Insert design",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "bahasa__b__menarik_garis_membuat_pola",
+              "tujuan": "Menarik garis membuat pola",
+              "aparatus": "Insert design",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "bahasa__b__menggambar_bentuk",
+              "tujuan": "Menggambar bentuk",
+              "aparatus": "Insert design",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "bahasa__b__menyalin_tulisan_orang_dewasa",
+              "tujuan": "Menyalin tulisan orang dewasa",
+              "aparatus": "Buku cerita",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "bahasa__b__menulis_nama_diri",
+              "tujuan": "Menulis nama diri",
+              "aparatus": "Buku dan alat tulis",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "bahasa__b__ketebalan_tulisan",
+              "tujuan": "Ketebalan tulisan",
+              "aparatus": "Tracing Cards",
+              "grup": null,
+              "urutan": 6
+            }
+          ]
+        },
+        {
+          "kode": "bahasa__c",
+          "huruf": "c",
+          "nama": "Persiapan Membaca",
+          "urutan": 3,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "bahasa__c__1_a_i_u_e_o",
+              "tujuan": "1. a, i, u, e, o",
+              "aparatus": "Sandpaper letter",
+              "grup": "Huruf Raba",
+              "urutan": 1
+            },
+            {
+              "kode": "bahasa__c__2_m_p_t_r_s",
+              "tujuan": "2. m, p, t, r, s",
+              "aparatus": "Sandpaper letter",
+              "grup": "Huruf Raba",
+              "urutan": 2
+            },
+            {
+              "kode": "bahasa__c__3_b_k_l_h_n",
+              "tujuan": "3. b, k, l, h, n",
+              "aparatus": "Sandpaper letter",
+              "grup": "Huruf Raba",
+              "urutan": 3
+            },
+            {
+              "kode": "bahasa__c__4_d_f_g_j_w",
+              "tujuan": "4. d, f, g, j, w",
+              "aparatus": "Sandpaper letter",
+              "grup": "Huruf Raba",
+              "urutan": 4
+            },
+            {
+              "kode": "bahasa__c__5_c_q_v_x_y_z",
+              "tujuan": "5. c, q, v, x, y, z",
+              "aparatus": "Sandpaper letter",
+              "grup": "Huruf Raba",
+              "urutan": 5
+            },
+            {
+              "kode": "bahasa__c__mengenal_bunyi_huruf_awal",
+              "tujuan": "Mengenal bunyi huruf awal",
+              "aparatus": "Fonik",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "bahasa__c__mengenal_bunyi_huruf_akhir",
+              "tujuan": "Mengenal bunyi huruf akhir",
+              "aparatus": "Fonik",
+              "grup": null,
+              "urutan": 7
+            }
+          ]
+        },
+        {
+          "kode": "bahasa__d",
+          "huruf": "d",
+          "nama": "Membangun Kata",
+          "urutan": 4,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "bahasa__d__lma_kotak_objek_dan_gambar",
+              "tujuan": "LMA, kotak objek, dan gambar",
+              "aparatus": "LMA, kotak objek, dan gambar",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "bahasa__d__dua_suku_kata",
+              "tujuan": "Dua suku kata",
+              "aparatus": "LMA, kotak objek, dan gambar",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "bahasa__d__tiga_suku_kata",
+              "tujuan": "Tiga suku kata",
+              "aparatus": "LMA, kotak objek, dan gambar",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "bahasa__d__satu_suku_kata",
+              "tujuan": "Satu suku kata",
+              "aparatus": "LMA, kotak objek, dan gambar",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "bahasa__d__kata_dengan_ng",
+              "tujuan": "Kata dengan 'ng'",
+              "aparatus": "LMA, kotak objek, dan gambar",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "bahasa__d__kata_dengan_ny",
+              "tujuan": "Kata dengan 'ny'",
+              "aparatus": "LMA, kotak objek, dan gambar",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "bahasa__d__kata_diftong",
+              "tujuan": "Kata diftong",
+              "aparatus": "LMA, kotak objek, dan gambar",
+              "grup": null,
+              "urutan": 7
+            }
+          ]
+        },
+        {
+          "kode": "bahasa__e",
+          "huruf": "e",
+          "nama": "Membaca Kata",
+          "urutan": 5,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "bahasa__e__dua_suku_kata",
+              "tujuan": "Dua suku kata",
+              "aparatus": "Buku montessori",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "bahasa__e__tiga_suku_kata",
+              "tujuan": "Tiga suku kata",
+              "aparatus": "Buku montessori",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "bahasa__e__satu_suku_kata",
+              "tujuan": "Satu suku kata",
+              "aparatus": "Buku montessori",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "bahasa__e__kata_dengan_ng",
+              "tujuan": "Kata dengan 'ng'",
+              "aparatus": "Blue word list",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "bahasa__e__kata_dengan_ny",
+              "tujuan": "Kata dengan 'ny'",
+              "aparatus": "Blue word list",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "bahasa__e__kata_diftong",
+              "tujuan": "Kata diftong",
+              "aparatus": "Green word list",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "bahasa__e__daftar_kata",
+              "tujuan": "Daftar kata",
+              "aparatus": "Buku montessori",
+              "grup": null,
+              "urutan": 7
+            },
+            {
+              "kode": "bahasa__e__buku_kata",
+              "tujuan": "Buku Kata",
+              "aparatus": "Buku montessori",
+              "grup": null,
+              "urutan": 8
+            },
+            {
+              "kode": "bahasa__e__frasa",
+              "tujuan": "Frasa",
+              "aparatus": "Attached sentence strips",
+              "grup": null,
+              "urutan": 9
+            },
+            {
+              "kode": "bahasa__e__kalimat",
+              "tujuan": "Kalimat",
+              "aparatus": "Buku montessori",
+              "grup": null,
+              "urutan": 10
+            },
+            {
+              "kode": "bahasa__e__menulis_cerita_sederhana",
+              "tujuan": "Menulis cerita sederhana",
+              "aparatus": "Buku dan alat tulis",
+              "grup": null,
+              "urutan": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "budaya",
+      "nama": "AREA BUDAYA",
+      "urutan": 5,
+      "sub_area": [
+        {
+          "kode": "budaya__a",
+          "huruf": "a",
+          "nama": "Botani",
+          "urutan": 1,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "budaya__a__mengenal_nama_buah_buahan",
+              "tujuan": "Mengenal nama buah-buahan",
+              "aparatus": "Objek buah & gambar besar buah",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "budaya__a__mengenal_nama_sayuran",
+              "tujuan": "Mengenal nama sayuran",
+              "aparatus": "Objek sayur & gambar besar sayur",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "budaya__a__mengenal_bagian_tumbuhan",
+              "tujuan": "Mengenal bagian tumbuhan",
+              "aparatus": "Puzzle bagian tumbuhan",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "budaya__a__mengenal_bagian_bunga",
+              "tujuan": "Mengenal bagian bunga",
+              "aparatus": "Puzzle bagian bunga",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "budaya__a__mengenal_siklus_hidup_tumbuhan",
+              "tujuan": "Mengenal siklus hidup tumbuhan",
+              "aparatus": "Siklus tumbuhan",
+              "grup": null,
+              "urutan": 5
+            }
+          ]
+        },
+        {
+          "kode": "budaya__b",
+          "huruf": "b",
+          "nama": "Zoologi",
+          "urutan": 2,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "budaya__b__mengenal_binatang_liar",
+              "tujuan": "Mengenal binatang liar",
+              "aparatus": "Objek binatang liar",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "budaya__b__mengenal_binatang_ternak",
+              "tujuan": "Mengenal binatang ternak",
+              "aparatus": "Objek binatang ternak",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "budaya__b__mengenal_binatang_peliharaan",
+              "tujuan": "Mengenal binatang peliharaan",
+              "aparatus": "Objek binatang peliharaan",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "budaya__b__mengenal_binatang_laut",
+              "tujuan": "Mengenal binatang laut",
+              "aparatus": "Objek binatang laut",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "budaya__b__mengenal_siklus_hidup_katak",
+              "tujuan": "Mengenal siklus hidup katak",
+              "aparatus": "Siklus hidup katak",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "budaya__b__mengenal_siklus_hidup_kupu_kupu",
+              "tujuan": "Mengenal siklus hidup kupu-kupu",
+              "aparatus": "Siklus hidup kupu-kupu",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "budaya__b__mamalia",
+              "tujuan": "Mamalia",
+              "aparatus": "Objek binatang mamalia",
+              "grup": "Klasifikasi binatang",
+              "urutan": 7
+            },
+            {
+              "kode": "budaya__b__reptil",
+              "tujuan": "Reptil",
+              "aparatus": "Objek binatang reptil",
+              "grup": "Klasifikasi binatang",
+              "urutan": 8
+            },
+            {
+              "kode": "budaya__b__unggas",
+              "tujuan": "Unggas",
+              "aparatus": "Objek binatang unggas",
+              "grup": "Klasifikasi binatang",
+              "urutan": 9
+            },
+            {
+              "kode": "budaya__b__amfibi",
+              "tujuan": "Amfibi",
+              "aparatus": "Objek binatang amfibi",
+              "grup": "Klasifikasi binatang",
+              "urutan": 10
+            },
+            {
+              "kode": "budaya__b__serangga",
+              "tujuan": "Serangga",
+              "aparatus": "Objek binatang serangga",
+              "grup": "Klasifikasi binatang",
+              "urutan": 11
+            }
+          ]
+        },
+        {
+          "kode": "budaya__c",
+          "huruf": "c",
+          "nama": "Geografi",
+          "urutan": 3,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "budaya__c__mengenal_pentingnya_matahari",
+              "tujuan": "Mengenal pentingnya matahari",
+              "aparatus": "Permainan kartu rantai makanan",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "budaya__c__mengenal_benda_langit",
+              "tujuan": "Mengenal benda langit",
+              "aparatus": "Kartu terminologi planet",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "budaya__c__mengenal_7_benua",
+              "tujuan": "Mengenal 7 benua",
+              "aparatus": "Continent globe",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "budaya__c__mengenal_binatang_dari_benua",
+              "tujuan": "Mengenal binatang dari benua",
+              "aparatus": "Puzzle benua dan objek",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "budaya__c__mengenal_3_elemen_darat_laut_udara",
+              "tujuan": "Mengenal 3 elemen (darat, laut, udara)",
+              "aparatus": "Kotak 3 elemen",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "budaya__c__mengenal_jenis_perairan_dan_daratan",
+              "tujuan": "Mengenal jenis perairan dan daratan",
+              "aparatus": "Jenis perairan & daratan",
+              "grup": null,
+              "urutan": 6
+            }
+          ]
+        },
+        {
+          "kode": "budaya__d",
+          "huruf": "d",
+          "nama": "Sejarah",
+          "urutan": 4,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "budaya__d__mengenal_nama_hari",
+              "tujuan": "Mengenal nama hari",
+              "aparatus": "Kalender Montessori / kalender harian, kartu nama hari, lagu hari",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "budaya__d__mengenal_nama_bulan",
+              "tujuan": "Mengenal nama bulan",
+              "aparatus": "Kalender Montessori, kartu nama bulan, lagu bulan",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "budaya__d__mengenal_waktu_pagi_siang_malam",
+              "tujuan": "Mengenal waktu (pagi, siang, malam)",
+              "aparatus": "Kartu bergambar aktivitas pagi, siang, malam",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "budaya__d__mengenal_usia",
+              "tujuan": "Mengenal usia",
+              "aparatus": "Permainan Birthday Walking",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "budaya__d__mengenal_jam",
+              "tujuan": "Mengenal jam",
+              "aparatus": "Jam, kartu aktivitas harian, situasi nyata",
+              "grup": null,
+              "urutan": 5
+            }
+          ]
+        },
+        {
+          "kode": "budaya__e",
+          "huruf": "e",
+          "nama": "Ilmu Pengetahuan Alam",
+          "urutan": 5,
+          "implisit": false,
+          "indikator": [
+            {
+              "kode": "budaya__e__mencampur_warna",
+              "tujuan": "Mencampur warna",
+              "aparatus": "Cat air, palet, kertas",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "budaya__e__benda_terapung_dan_tenggelam",
+              "tujuan": "Benda terapung dan tenggelam",
+              "aparatus": "Benda terapung dan tenggelam",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "budaya__e__gaya_magnet",
+              "tujuan": "Gaya Magnet",
+              "aparatus": "Magnet",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "budaya__e__benda_hidup_dan_benda_mati",
+              "tujuan": "Benda hidup dan benda mati",
+              "aparatus": "Objek dan lingkungan nyata, role model guru",
+              "grup": null,
+              "urutan": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "agama",
+      "nama": "AREA AGAMA",
+      "urutan": 6,
+      "sub_area": [
+        {
+          "kode": "agama",
+          "huruf": null,
+          "nama": null,
+          "urutan": 1,
+          "implisit": true,
+          "indikator": [
+            {
+              "kode": "agama__sikap_berdoa",
+              "tujuan": "Sikap berdoa",
+              "aparatus": "Situasi nyata, role model guru",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "agama__mengucapkan_basmalah_dan_hamdalah",
+              "tujuan": "Mengucapkan basmalah dan hamdalah",
+              "aparatus": "Role model guru, situasi nyata (sebelum & sesudah aktivitas)",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "agama__rukun_islam",
+              "tujuan": "Rukun islam",
+              "aparatus": "Puzzle rukun islam, kartu terminologi, audio",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "agama__rukun_iman",
+              "tujuan": "Rukun iman",
+              "aparatus": "Puzzle rukun iman, kartu terminologi, audio",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "agama__idul_fitri",
+              "tujuan": "Idul fitri",
+              "aparatus": "Role model guru, simulasi/situasi nyata, kartu terminologi",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "agama__idul_adha_dan_tata_cara_berkurban",
+              "tujuan": "Idul adha dan tata cara berkurban",
+              "aparatus": "Role model guru, simulasi/situasi nyata, kartu terminologi",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "agama__mengenalkan_tata_cara_berwudhu",
+              "tujuan": "Mengenalkan tata cara berwudhu",
+              "aparatus": "Role model guru, simulasi/situasi nyata, puzzle gerakan berwudhu",
+              "grup": null,
+              "urutan": 7
+            },
+            {
+              "kode": "agama__mengenalkan_gerakan_shalat",
+              "tujuan": "Mengenalkan gerakan shalat",
+              "aparatus": "Role model guru, simulasi/situasi nyata, puzzle gerakan sholat",
+              "grup": null,
+              "urutan": 8
+            },
+            {
+              "kode": "agama__mengenalkan_huruf_hijaiyah",
+              "tujuan": "Mengenalkan huruf hijaiyah",
+              "aparatus": "Hijaiyyah ronce, huruf raba hijaiyyah, role model guru, kegiatan mengaji setiap hari, pohon hijaiyyah",
+              "grup": null,
+              "urutan": 9
+            },
+            {
+              "kode": "agama__mengenalkan_rukun_islam_yang_kelima",
+              "tujuan": "Mengenalkan rukun islam yang kelima",
+              "aparatus": "Miniatur ka'bah, kegiatan manasik haji",
+              "grup": null,
+              "urutan": 10
+            },
+            {
+              "kode": "agama__mengenal_malaikat_dan_tugasnya",
+              "tujuan": "Mengenal malaikat dan tugasnya",
+              "aparatus": "Kartu terminologi, puzzle malaikat dan tugasnya",
+              "grup": null,
+              "urutan": 11
+            },
+            {
+              "kode": "agama__mengenal_bulan_hijriah",
+              "tujuan": "Mengenal bulan hijriah",
+              "aparatus": "Kartu terminologi, audio",
+              "grup": null,
+              "urutan": 12
+            },
+            {
+              "kode": "agama__mengenal_sejarah_islam",
+              "tujuan": "Mengenal sejarah islam",
+              "aparatus": "Kartu terminologi sejarah islam",
+              "grup": null,
+              "urutan": 13
+            },
+            {
+              "kode": "agama__mengenal_perbuatan_baik_dan_buruk",
+              "tujuan": "Mengenal perbuatan baik dan buruk",
+              "aparatus": "Matching cards",
+              "grup": null,
+              "urutan": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "sosial_emosional",
+      "nama": "SOSIAL EMOSIONAL",
+      "urutan": 7,
+      "sub_area": [
+        {
+          "kode": "sosial_emosional",
+          "huruf": null,
+          "nama": null,
+          "urutan": 1,
+          "implisit": true,
+          "indikator": [
+            {
+              "kode": "sosial_emosional__bertutur_kata_sopan",
+              "tujuan": "Bertutur kata sopan",
+              "aparatus": "Role model guru, situasi nyata (percakapan di kelas)",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "sosial_emosional__dapat_berinteraksi_dengan_teman",
+              "tujuan": "Dapat berinteraksi dengan teman",
+              "aparatus": "Kegiatan kelompok, role model guru, permainan kooperatif",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "sosial_emosional__dapat_berinteraksi_dengan_orang_dewasa",
+              "tujuan": "Dapat berinteraksi dengan orang dewasa",
+              "aparatus": "Role model guru, situasi nyata (menyapa tamu/guru lain), simulasi percakapan",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "sosial_emosional__mudah_berteman",
+              "tujuan": "Mudah berteman",
+              "aparatus": "Role model guru, kegiatan kelompok, permainan kooperatif",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "sosial_emosional__dapat_bekerja_dalam_kelompok",
+              "tujuan": "Dapat bekerja dalam kelompok",
+              "aparatus": "Kegiatan kelompok terstruktur, aparatus untuk kerja berpasangan/kelompok",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "sosial_emosional__mengungkapkan_perasaan_dengan_tepat",
+              "tujuan": "Mengungkapkan perasaan dengan tepat",
+              "aparatus": "Emotion cards / kartu ekspresi, role model guru, situasi nyata",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "sosial_emosional__dapat_menunggu_giliran",
+              "tujuan": "Dapat menunggu giliran",
+              "aparatus": "Permainan bergiliran, role model guru, circle time",
+              "grup": null,
+              "urutan": 7
+            },
+            {
+              "kode": "sosial_emosional__dapat_berbagi",
+              "tujuan": "Dapat berbagi",
+              "aparatus": "Material yang terbatas (1 set alat untuk beberapa anak), role model guru, kegiatan kelompok",
+              "grup": null,
+              "urutan": 8
+            },
+            {
+              "kode": "sosial_emosional__dapat_menyelesaikan_masalah",
+              "tujuan": "Dapat menyelesaikan masalah",
+              "aparatus": "Role model guru, simulasi situasi, diskusi kelompok kecil",
+              "grup": null,
+              "urutan": 9
+            },
+            {
+              "kode": "sosial_emosional__dapat_memimpin_kelompok",
+              "tujuan": "Dapat memimpin kelompok",
+              "aparatus": "Kegiatan kelompok dengan rotasi pemimpin, role model guru, proyek sederhana",
+              "grup": null,
+              "urutan": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "sikap",
+      "nama": "SIKAP",
+      "urutan": 8,
+      "sub_area": [
+        {
+          "kode": "sikap",
+          "huruf": null,
+          "nama": null,
+          "urutan": 1,
+          "implisit": true,
+          "indikator": [
+            {
+              "kode": "sikap__bekerja_dengan_percaya_diri",
+              "tujuan": "Bekerja dengan percaya diri",
+              "aparatus": "Anak memilih sendiri pekerjaan tanpa dipaksa.",
+              "grup": null,
+              "urutan": 1
+            },
+            {
+              "kode": "sikap__memiliki_rasa_empati",
+              "tujuan": "Memiliki rasa empati",
+              "aparatus": "Role model guru, kegiatan berbagi, membaca cerita bergambar tentang empati, atau situasi dalam kelas dengan teman yang beragam",
+              "grup": null,
+              "urutan": 2
+            },
+            {
+              "kode": "sikap__memiliki_rasa_ingin_tahu",
+              "tujuan": "Memiliki rasa ingin tahu",
+              "aparatus": "Kegiatan Rabu Eksplorasi, rasa penasaran terhadap aparatus",
+              "grup": null,
+              "urutan": 3
+            },
+            {
+              "kode": "sikap__tertib_pada_aturan_di_kelas",
+              "tujuan": "Tertib pada aturan di kelas",
+              "aparatus": "Lingkungan terstruktur, aturan kelas yang disepakati.",
+              "grup": null,
+              "urutan": 4
+            },
+            {
+              "kode": "sikap__menghargai_pekerjaan_teman",
+              "tujuan": "Menghargai pekerjaan teman",
+              "aparatus": "Tidak mengganggu pekerjaan teman, menunggu giliran, memberi apresiasi.",
+              "grup": null,
+              "urutan": 5
+            },
+            {
+              "kode": "sikap__memiliki_inisiatif_untuk_bekerja",
+              "tujuan": "Memiliki inisiatif untuk bekerja",
+              "aparatus": "Kebebasan memilih dalam batasan setiap material sesuai minat.",
+              "grup": null,
+              "urutan": 6
+            },
+            {
+              "kode": "sikap__merapikan_kembali_material_setelah_digunakan",
+              "tujuan": "Merapikan kembali material setelah digunakan",
+              "aparatus": "Latihan membawa & mengembalikan aparatus, membersihkan, role model guru",
+              "grup": null,
+              "urutan": 7
+            },
+            {
+              "kode": "sikap__menggunakan_material_dengan_baik",
+              "tujuan": "Menggunakan material dengan baik",
+              "aparatus": "Presentasi dari guru, anak diberi kesempatan mencoba",
+              "grup": null,
+              "urutan": 8
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_catatan_skema": "Kolom rubrik mengikuti SPEK_ALUR_PENGISIAN.md bagian 7.3. kolom_periode hanya nama kolom cetakan; setiap baris isian memakai periode_id konkret dari tabel periode."
+}

@@ -1,0 +1,143 @@
+# TODO Implementasi eRapor Zivana
+
+Tanggal: 24 September 2026.
+
+Status: spesifikasi sudah dipelajari; implementasi baru belum dimulai. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
+
+## Acuan dan batas pekerjaan
+
+- [README spesifikasi](../eRapor_Zivana_Spesifikasi/README.md) dan [alur pengisian](../eRapor_Zivana_Spesifikasi/SPEK_ALUR_PENGISIAN.md): aturan bersama, sesi, status, penyimpanan, persetujuan, dan penerbitan.
+- Spesifikasi RTS, Agama, Ummi, Bahasa Inggris, dan PPI: struktur serta aturan khusus setiap dokumen. Gunakan lima JSON seed sebagai sumber data, bukan transkripsi tabel Markdown.
+- PDF, DOCX, dan XLSX dalam folder spesifikasi: acuan dokumen asli. Perbedaan versi harus dicatat dan diselaraskan, bukan diperbaiki sepihak.
+- [Design system](design-system.md): komponen UI aplikasi tetap digunakan. Setiap warna harus dicari di `config/colors.php`; tambahkan token jika belum tersedia, jangan menulis hex langsung di halaman/komponen.
+- Jangan mengubah data produksi, menghapus nilai lama, atau menjalankan migrasi destruktif tanpa persetujuan. Tidak membuat CRUD editor kurikulum, reminder, delegasi persetujuan, atau fitur salin otomatis yang tidak diminta.
+
+## 0. Pemahaman dan keputusan
+
+- [x] Pelajari 18 berkas: tujuh Markdown, lima JSON, tiga PDF, satu DOCX, satu XLSX (empat sheet), dan satu skrip Python.
+- [x] Periksa jumlah seed: RTS 175 indikator/8 area/21 subarea bernama/2 grup; Agama 73 butir (37 Ganjil, 36 Genap)/99 nama; Ummi 27 materi/7 jilid/12 nilai; BING 5 nilai/4 komentar; PPI 5 aspek/30 isian wajib.
+- [x] Jalankan `uji_tinjauan_ppi.py` dan enam assertion tambahan pencarian periode dengan SQLite in-memory; tidak menyentuh database aplikasi. Ini bukan tes implementasi PHP.
+- [x] Tetapkan paket Regular = RTS atau RAS + Agama + Ummi + BING. Paket ABK = paket Regular + PPI. Identitas otomatis bukan tahap penilaian; RTS ABK tetap 175 indikator yang sama.
+- [ ] Catat keputusan penyelarasan versi sebelum seeding final/PDF: PDF BING sudah mengubah `Pronunciation` dan definisi skala, seed belum; Word Agama masih memuat beberapa ejaan lama; aturan Ummi tentang baris tes kosong berbeda antara seed dan spesifikasi.
+- [ ] Selaraskan kalimat Agama tentang perubahan narasi rapor lama dengan kewajiban pembekuan rubrik/rapor terbit. Jangan mengubah dokumen historis secara diam-diam.
+- [ ] Terima spesifikasi dan seed RAS. **Menahan implementasi lengkap paket akhir semester, bukan fondasi atau rubrik lain.** Jangan menggunakan RTS sebagai pengganti RAS atau menganggap paket tanpa RAS lengkap.
+
+## 1. Audit aplikasi dan rencana migrasi — mulai di sini
+
+- [ ] Petakan tabel, model, controller, route, UI, PDF, dan tes rapor saat ini terhadap spesifikasi baru; catat bagian reusable dan yang harus diganti. Audit model penyimpanan/status dan controller awal ada di [erapor-migration.md](erapor-migration.md); audit UI/PDF/seluruh route masih berlanjut.
+- [ ] Inventarisasi data nyata, data dummy, template placeholder, nilai, status, serta relasi guru/murid/kelas. Bedakan `sesi_pembagian_rapor` lama dari sesi baru per murid/periode.
+- [x] Tetapkan aturan pemetaan ID/status dan pengecualian legacy di [erapor-migration.md](erapor-migration.md). Ini aturan transisi, bukan backfill yang telah dijalankan; pemetaan data aktual dan persetujuan kasus ambigu masih diperlukan.
+- [ ] Siapkan cadangan dan uji restore ke database terisolasi; catat jumlah baris/checksum sebelum dan sesudah migrasi.
+- [ ] Rancang migrasi bertahap, dry-run, pemeriksaan prasyarat, pengulangan aman, dan pemulihan kegagalan. Tidak memakai reset database atau mengimpor seed dengan menimpa nilai lama.
+- [ ] Siapkan langkah deployment cPanel tanpa SSH: migrasi terkontrol melalui mekanisme yang sesuai hosting, bukan endpoint publik bebas menjalankan SQL/PHP.
+
+Gerbang: pemetaan data dan strategi pemulihan terbukti pada salinan database sebelum migrasi database pengguna.
+
+## 2. Fondasi data bersama
+
+- [ ] Tahun ajaran memiliki urutan stabil; periode memiliki semester, jenis Tengah/Akhir, urutan 1–4, tanggal mulai/akhir, dan batasan empat kombinasi unik per tahun ajaran.
+- [ ] Implementasikan metadata rubrik, bagian wajib, kolom periode cetak, penandatangan, dan konfigurasi alur penyetuju sebagai data.
+- [ ] Terapkan versi rubrik; kode tetap sejak seeding pertama, definisi terkunci setelah dipakai, indikator historis tidak dihapus. Revisi berikutnya memakai versi baru.
+- [ ] Pisahkan identitas dokumen `rapor` dari `rapor_sesi`: unik murid/tahun/rubrik/semester pada dokumen; unik murid/periode pada sesi. Gunakan `TAHUNAN`, bukan NULL, untuk semester dokumen tahunan.
+- [ ] Buat `rapor_sesi_dokumen` dengan urutan dan penanda wajib. Paket Regular/ABK dibentuk dari data, tidak di-hardcode terpisah di setiap halaman.
+- [ ] Buat tabel persetujuan, log status, log perubahan isian, dan perpanjangan periode. Salin urutan penyetuju ketika sesi diajukan.
+- [ ] Siapkan berkas tanda tangan, persetujuan penggunaan gambar, NUPTK opsional, serta sumber tempat pengesahan dari Data Sekolah. Simpan berkas secara terlindungi.
+- [ ] Pasang FK, uniqueness, validasi lintas rubrik/periode/semester, dan transaksi. Setiap isian harus dapat ditelusuri ke satu sesi yang benar.
+
+## 3. Tabel khusus dan seeding rubrik
+
+- [ ] RTS: area → subarea eksplisit/implisit → grup opsional → indikator, aparatus, empat skala BD/MB/BSH/BSB. Grup bukan isian; teks tujuan yang sama tidak dijadikan kunci.
+- [ ] RTS: satu dokumen tahunan, dua periode Tengah Ganjil/Genap; 175 nilai wajib per sesi, bukan 350. Gunakan SVG penilaian yang sudah tersedia pada UI dan PDF.
+- [ ] Agama: enam lingkup, subbagian, 73 butir terikat semester, dan 99 nama Asmaul Husna dalam sepuluh baris penilaian; jangan deduplikasi nama berdasarkan teks.
+- [ ] Agama: dropdown tujuh pilihan, penyimpanan tahapan dan subtingkat Tahfizh terpisah; enforce kombinasi sah di database. Enam potongan narasi wajib per periode, bukan satu teks hasil rangkaian.
+- [ ] Ummi: satu rubrik tujuh jilid/27 materi, skala A+ sampai D-, bacaan opsional, daftar tes dinamis opsional, catatan guru wajib.
+- [ ] Ummi: `mulai_pra_tk` per periode; awal periode Akhir mengikuti Tengah. Menyembunyikan PRA TK tidak menghapus nilai. Jangan seed atau tampilkan blok Hafalan dari Excel.
+- [ ] BING: lima indikator dan empat komentar wajib, `Excellent > Outstanding > Good > Fair`; Speaking Test Result hanya judul kelompok. Kehadiran tetap skala sesuai spesifikasi saat ini.
+- [ ] PPI: lima aspek berbasis data, enam kolom isian sesi per aspek = 30 textarea wajib. Diagnosa boleh kosong; Hasil Capaian tidak masuk tabel isian sesi atau kelengkapan.
+- [ ] Jalankan seeder berurutan sesuai FK dan verifikasi seluruh jumlah, kode unik, urutan, relasi, serta hasil pengulangan. Jangan seed nama/nilai/narasi murid contoh dari dokumen asli.
+- [ ] Uji isolasi antarperiode: RTS/Agama tahunan; Ummi/BING/PPI per semester; setiap nilai tetap memakai ID periode konkret. Nilai ordinal tidak dirata-ratakan.
+
+## 4. Layanan pengisian, kelengkapan, dan status
+
+- [ ] Implementasikan empat status sesi: `BELUM_DIISI → TELAH_DIISI → MENUNGGU_TTD → SELESAI`; label UI status ketiga `Menunggu Disetujui`.
+- [ ] Buat layanan kelengkapan bersama: NULL, kosong, dan whitespace dianggap kosong; isian kosong dihapus barisnya. Teks nonkosong disimpan mentah tanpa normalisasi isi.
+- [ ] Kelengkapan mengikuti bagian/kolom wajib dan semester butir. Ummi kosong pada bagian opsional tidak menjadi peringatan atau menghalangi konfirmasi.
+- [ ] Pisahkan status dan kelengkapan: menyunting/mengosongkan isian saat `TELAH_DIISI` tidak menurunkan status, tetapi memblokir konfirmasi penerimaan sampai lengkap kembali.
+- [ ] Terapkan guard di lapisan penyimpanan: akses guru, keanggotaan dokumen, periode sesi, status 1/2, dan tenggat. Tolak perubahan periode lewat manipulasi request.
+- [ ] Autosave berupa batch perubahan saja; transaksi isian dan audit log harus bersama. Tangani request gagal, request terlambat, retry, dan konflik saat konfirmasi/lock.
+- [ ] Arsip menyimpan posisi tahap terakhir dan menjeda sesi tanpa membuat status draft tambahan. Pastikan perubahan tersimpan sebelum navigasi/konfirmasi.
+- [ ] Konfirmasi isi dan konfirmasi penerimaan menghitung ulang kelengkapan di server. Periode kedaluwarsa menolak tulis, tetapi tidak menolak transisi bila isian sudah lengkap.
+- [ ] Perpanjangan hanya kepala sekolah, wajib alasan, tanggal baru lebih besar dari tanggal lama dan hari ini; audit tercatat. Tidak membuka status 3/4.
+- [ ] Tidak menyediakan pembatalan persetujuan, pengembalian status, revisi, atau bypass admin/superadmin untuk membuka nilai terkunci.
+
+## 5. Login, RBAC, dan persetujuan
+
+- [ ] Petakan tugas Koordinator Al-Quran dan Koordinator Bahasa Inggris ke model akun/role yang ada tanpa diam-diam mengubah empat jabatan karyawan. Bedakan jabatan, role, permission, dan cakupan dokumen.
+- [ ] Audit akun karyawan → login → role → menu; perubahan permission berlaku setelah login ulang. Pertahankan tes akun nonaktif, perubahan password, dan regresi modul nonrapor.
+- [ ] Guru kelas mengisi seluruh paket muridnya; tidak membuat guru mata pelajaran terpisah. Cocokkan kewenangan Guru Shadow dengan penanggung jawab sesi, jangan otomatis memperluas akses.
+- [ ] Buat persetujuan koordinator Quran khusus Ummi dan koordinator BING khusus BING secara paralel pada urutan 1; kepala sekolah seluruh paket pada urutan 2 setelah keduanya selesai.
+- [ ] Jangan mempertahankan persetujuan langsung Admin dari alur lama atau mengizinkan kepala sekolah melewati koordinator. Terapkan cakupan baca/tulis di backend, bukan hanya tombol.
+- [ ] Snapshot guru saat konfirmasi penerimaan; snapshot approver ketika menyetujui: nama, NUPTK, dan referensi gambar tanda tangan. Gambar tidak tersedia boleh nama saja sesuai spesifikasi.
+- [ ] Tolak persetujuan salah urutan, lintas cakupan, tanpa izin, CSRF salah, dan request ganda/paralel. Hasil final ditentukan seluruh baris persetujuan, bukan nama role hardcoded.
+
+## 6. UI wizard dan integrasi halaman
+
+- [ ] Integrasikan daftar template dengan jenis dokumen dan periode; PPI tersedia dalam katalog tetapi hanya masuk paket ABK. Hindari placeholder dianggap rubrik resmi/RAS.
+- [ ] Dashboard dan Daftar Murid Guru menampilkan sesi milik guru, agenda, progres/status, dan navigasi pengisian/pratinjau yang sesuai. Membuka halaman tidak menciptakan nilai atau status palsu.
+- [ ] Wizard empat/lima tahap dengan nama murid tetap, periode, kemajuan per bagian, status autosave, Arsip, konfirmasi isi, dan konfirmasi penerimaan sebagai aksi berbeda.
+- [ ] Gunakan komponen select/textarea/card/button/modal/teks yang ada, collapse area/subarea, pilihan panjang yang terbaca, header serta action bar mobile yang telah disepakati.
+- [ ] Saat RTS Genap diisi, nilai Ganjil tampil berdampingan read-only tanpa harus pindah tab. Tampilkan nilai/catatan periode terdahulu sesuai aturan tiap dokumen tanpa autofill atau tombol salin khusus.
+- [ ] Pesan kelengkapan menunjuk tahap, bagian, jumlah kosong, dan tautan lompat ke isian. Status dan progres ditampilkan terpisah.
+- [ ] Rapor Murid admin memakai satu tabel per periode, tanpa card bertumpuk; pratinjau/aksi mengikuti status dan cakupan approver. Konfirmasi final menyebut murid, periode, serta sifat permanennya.
+- [ ] Uji desktop/mobile, keyboard/fokus, dropdown panjang, collapse, reload, koneksi terputus, dan navigasi saat autosave belum selesai. Catat jika tes browser belum dapat dijalankan.
+
+## 7. Pratinjau, PDF, dan penerbitan
+
+- [ ] Rancang renderer per dokumen sejak skema, implementasikan setelah penyimpanan dan alur stabil. Pratinjau dan PDF memakai sumber data yang sama; jangan hardcode identitas, tanggal, kota, atau nilai.
+- [ ] RTS: A4 tegak, acuan delapan halaman, pagination mengalir; kop/identitas/header tabel berulang, legenda hanya halaman pertama, dua blok tanda tangan sesuai sesi masing-masing.
+- [ ] Agama: cetak seluruh 73 butir dengan nilai semester sebelumnya, tujuh kolom per periode, header bertingkat, dan enam catatan yang dirangkai untuk periode terbit.
+- [ ] Ummi: dua kolom Tengah/Akhir pada bacaan; daftar tes kumulatif semester sampai periode terbit; catatan periode terbit; blok PRA mengikuti sakelar periode; tanpa Hafalan.
+- [ ] BING: satu periode per cetakan, lima nilai, empat komentar, remarks dan penandatangan sesuai versi teks yang diselaraskan.
+- [ ] PPI: A4 dengan margin/lebar kolom dari seed, tabel berulang, teks mentah diubah menjadi butir hanya saat render. Usia dihitung pada tanggal pengesahan, bukan tanggal cetak ulang. Hasil Capaian kosong saat pilot.
+- [ ] Prefinal hanya pratinjau bertanda draft tanpa cap tanda tangan; unduhan final per dokumen/paket hanya setelah `SELESAI`. Cegah nilai periode mendatang bocor ke cetak ulang periode lama.
+- [ ] Terbitkan paket secara atomik: kegagalan salah satu PDF tidak memfinalkan sebagian paket. Simpan artefak final, snapshot, tempat, dan tanggal pengesahan konsisten; retry tidak menggandakan persetujuan/penerbitan.
+- [ ] Siapkan pengiriman PDF melalui email dan WhatsApp sesuai spesifikasi; tentukan integrasi dan konfigurasi yang tersedia, catat kegagalan/retry tanpa membuka kembali nilai. Jangan mengklaim kanal aktif sebelum diuji; pengujian tidak mengirim ke orang tua nyata.
+- [ ] Periksa visual PDF, simbol SVG, font, pemenggalan tabel, watermark, ukuran berkas, cetak ulang historis, dan kompatibilitas shared hosting.
+
+## 8. Gerbang pengujian dan rilis
+
+- [ ] Buat fixture terisolasi berurutan: tahun/periode → akun/role → kelas/murid/penugasan → rubrik → sesi/paket → nilai → persetujuan → artefak. Sertakan Regular, ABK, guru kosong, dan beberapa guru/kelas.
+- [ ] Uji CRUD/validasi tiap jenis isian, clear whitespace, skala tidak sah, lintas rubrik/semester, dan log lama/baru beserta aktor/status. Uji semua jumlah kelengkapan tepat.
+- [ ] E2E Regular dan ABK: autosave parsial → lanjut → konfirmasi isi → sunting saat diskusi → konfirmasi penerimaan → koordinator paralel → kepala sekolah → PDF paket.
+- [ ] Uji empat periode; E2E akhir semester baru dapat dinyatakan lengkap setelah RAS tersedia. Nilai/rubrik dummy bukan pengganti validasi RAS resmi.
+- [ ] Uji tenggat/perpanjangan, nilai Ganjil tetap ketika Genap diisi, pergantian guru/kepala sekolah, rubrik berversi, dan cetak ulang tanpa perubahan historis.
+- [ ] Uji request bersamaan: autosave vs lock, dua konfirmasi, dua persetujuan, serta kegagalan PDF di tengah paket. Pastikan rollback, idempotensi, dan penolakan tidak mengubah data.
+- [ ] Uji matriks izin setiap menu/aksi melalui UI dan HTTP langsung, termasuk akses lintas guru/murid/dokumen dan pembatasan approver.
+- [ ] Jalankan regresi modul Sekolah, Karyawan, Jabatan, Guru, Murid, Kelas, Periode, login, dan RBAC. Periksa navigasi/sidebar serta design system tetap konsisten.
+- [ ] Bedakan bukti lint/unit, integrasi database, HTTP, browser visual, dan PDF visual. Checkbox hanya ditutup untuk pengujian yang benar-benar dijalankan.
+- [ ] Uji restore+migrasi pada salinan data, backup produksi, rencana pemulihan, konfigurasi hosting, dan smoke test setelah deploy dengan izin pengguna.
+- [ ] Perbarui schema/architecture, design system untuk komponen baru, panduan guru/approver, deployment, serta laporan hasil pengujian dan batas cakupan.
+
+## 9. Setelah pilot — bukan syarat rilis awal
+
+- [ ] Implementasikan tinjauan PPI: jangka pendek dari periode tepat sebelumnya; jangka panjang dari slot yang sama pada tahun ajaran sebelumnya, bukan mundur empat baris.
+- [ ] Simpan Hasil Capaian terpisah di `ppi_capaian`, per aspek/horizon/pengisi. Tidak membuka rencana atau mengubah status sesi final; tetap diaudit.
+- [ ] Tentukan UI guru, kanal/pemicu pengiriman tautan orang tua, masa berlaku, kebijakan tidak diisi, dan cara mengambil PDF PPI terbaru.
+- [ ] Tautan orang tua tanpa akun dibatasi satu murid/rencana/horizon, token acak kedaluwarsa dan sekali pakai setelah submit; tidak membuka dokumen lain atau isian guru.
+- [ ] Uji pergantian tahun/guru, periode tanpa rencana, murid baru ABK, token salah/kedaluwarsa/dipakai ulang, dan versi PDF setelah capaian diperbarui.
+
+## Langkah pengerjaan berikutnya
+
+Mulai **Fase 1: audit gap implementasi dan rencana migrasi**, lalu Fase 2–3 sebelum mengubah form guru. Pemetaan RBAC/persetujuan dapat dirancang bersamaan dengan fondasi; implementasi UI bergantung pada layanan data yang sudah teruji. Belum ada instruksi untuk menjalankan migrasi atau deployment melalui TODO ini.
+
+### Hasil batch awal implementasi (24 September 2026)
+
+- [x] Tambahkan `EraporLegacyAudit` dan CLI `database/audit-erapor.php`: agregat read-only, validasi relasi/identitas legacy, tanpa konversi otomatis.
+- [x] Tambahkan fondasi aturan murni `EraporSessionPolicy`: empat status, tanggal/tenggat, teks mentah, identitas periode, urutan approval paralel, dan gerbang finalisasi. **Belum terhubung ke route/storage; bukan pengganti guard transaksi/RBAC.**
+- [x] `php tests/erapor-legacy-audit.php` lulus pada SQLite in-memory.
+- [x] `php tests/erapor-session-policy.php` lulus 65 assertion.
+- [x] `php tests/report-workflow-regression.php` lulus; lint ketiga file PHP implementasi lulus.
+- [x] Audit agregat database lokal setelah MySQL dinyalakan: 57 rapor, 1.000 nilai, 56 catatan; 45 belum diisi, 2 menunggu persetujuan, 10 disetujui. Ditemukan 5 rapor tanpa guru dan 3 template kosong; pengecekan identitas/duplikasi/tanggal periode serta relasi nilai yang tersedia tidak menemukan anomali. Ini bukan izin konversi otomatis; investigasi pengecualian, backup/restore dan mapping rubrik masih diperlukan.
+- [ ] Commit/push: dicoba sesuai instruksi pengguna, tetapi `.git/index.lock` ditolak permission dan koneksi GitHub gagal melalui proxy lingkungan. Belum ada commit atau push berhasil; jangan mengakali proteksi filesystem/proxy.
+
+Lanjutan terdekat: investigasi pengecualian preflight dan verifikasi backup/restore; tetapkan DDL additive tanpa collision, lalu seeder rubrik resmi dan tes integrasi. Aturan murni baru digunakan oleh layanan penyimpanan transaksional sebelum UI baru diaktifkan. Folder spesifikasi milik pengguna tetap belum dimasukkan ke staging secara massal; berisi contoh data murid.
