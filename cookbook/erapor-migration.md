@@ -229,6 +229,16 @@ Log SETUJUI, snapshot dan update status approval atomik. Pengulangan sah oleh ak
 
 Harness restore mencapai 985 pemeriksaan dan seluruh unit/regresi sebelumnya lulus. Fixture menguji BING sebelum Quran, kepala sekolah prematur, penugasan/akun tidak aktif, rollback kegagalan snapshot, cakupan tidak lengkap, retry, tanda tangan kosong/tersimpan, profil berubah, FK dan sesi tetap MENUNGGU_TTD. Fixture sementara mengganti jabatan satu akun lalu memulihkannya di database disposable saja; tidak memilih pejabat produksi. Uji lock bukan stress test paralel multiproses. Database aplikasi, UI, upload consent, dan PDF belum diaktifkan.
 
+## Perpanjangan tenggat periode
+
+Migrasi `20260924_erapor_extensions.sql` menambahkan audit perpanjangan dengan FK ke kalender `periode_penilaian` yang sudah ada. Tidak ada kalender alternatif. `EraporExtendPeriod::extend` memperbarui `akhir_periode` dan menambahkan audit tanggal lama/baru, alasan mentah, aktor dan waktu dalam satu transaksi. Kegagalan audit membatalkan update tanggal. Layanan memakai advisory lock yang sama dengan autosave/migrasi dan row lock periode/aktor.
+
+Actor harus berasal dari autentikasi dan memiliki akun, pegawai serta jabatan Kepala Sekolah aktif. Route mendatang tetap wajib RBAC/CSRF. Tanggal baru harus lebih besar dari maksimum tenggat lama dan hari ini dalam zona Asia/Makassar. Alasan wajib UTF-8 non-whitespace, maksimal 65535 byte. `expectedDate` berasal dari periode yang ditampilkan; bila tenggat telah berubah, request ditolak agar kepala sekolah memuat ulang. Retry identik berdasarkan catatan terakhir, tanggal, alasan dan aktor mengembalikan already_extended tanpa menulis ulang; retry tidak memberi waktu tambahan walaupun dilakukan hari berikutnya.
+
+`preview` adalah pembacaan berotorisasi tanpa mutasi untuk menampilkan jumlah sesi per status dan jumlah yang dapat diisi/tetap terkunci. Angka preview bukan reservasi; saat menyimpan dampak dihitung ulang di transaksi. Perpanjangan berlaku untuk semua murid dalam periode dan tidak mengubah status sesi. Layanan autosave yang sudah membaca kalender langsung otomatis memakai tenggat baru, tetapi status MENUNGGU_TTD/SELESAI tetap menolak penulisan.
+
+Harness restore mencapai 1015 pemeriksaan dan regresi sebelumnya lulus. Kalender legacy pada database disposable dipulihkan setelah pengujian sehingga pemeriksaan checksum tetap berlaku; database aplikasi asli tidak dimodifikasi. Endpoint/UI perpanjangan belum diaktifkan. Jalur edit kalender legacy perlu ditinjau/dibatasi sebelum aktivasi workflow baru agar tidak menjadi jalan pintas tanpa audit.
+
 ## Kelengkapan paket dan transisi konfirmasi isi
 
 `EraporCompleteness::inspect(PDO, session)` adalah pembacaan internal di dalam transaksi dengan session lock dan otorisasi milik pemanggil. Ia memeriksa hash paket serta komposisi dokumen wajib sebelum menghitung. Missing fields membawa key dan label definisi, termasuk lingkup catatan Agama. Nilai hanya dihitung jika pasangan skala/rubrik valid; teks NULL/whitespace tidak lengkap. Paket parsial atau definisi wajib kosong ditolak, bukan dianggap 100%. RAS tidak mendapat implementasi dummy.

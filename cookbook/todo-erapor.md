@@ -314,3 +314,14 @@ Berikutnya: layanan approval dengan otorisasi penugasan eksplisit, urutan parale
 - [ ] Belum aktivasi DB aplikasi/HTTP/UI. Setelah semua menyetujui, sesi tetap MENUNGGU_TTD sampai seluruh PDF siap diterbitkan atomik. Belum layanan publikasi/PDF atau pengelolaan assignment/profil.
 
 Berikutnya: perpanjangan tenggat dengan audit dan kewenangan kepala sekolah; kemudian pembacaan sesi/endpoint portal guru dan integrasi UI. Publikasi PDF tetap tahap terpisah.
+
+### Batch perpanjangan tenggat (24 September 2026)
+
+- [x] `EraporExtendPeriod`: hanya akun/pegawai/jabatan Kepala Sekolah aktif, alasan UTF-8 wajib, tanggal baru setelah maksimum tenggat lama dan hari ini (Asia/Makassar).
+- [x] Tanggal akhir pada kalender yang sudah ada dan audit `erapor_periode_perpanjangan` diubah atomik. Tidak membuat kalender kedua atau membuka kunci per murid.
+- [x] Preview read-only jumlah sesi per status; simpan memeriksa expected deadline untuk menolak perubahan berbenturan. Retry identik oleh aktor yang sama tidak membuat audit ganda.
+- [x] Perpanjangan tidak mengubah status sesi. Autosave dapat kembali bekerja untuk step 1/2, tetap menolak step 3/4.
+- [x] Total 1015 pemeriksaan MySQL dan regresi sebelumnya lulus: otorisasi/nonaktif, alasan/tanggal invalid, stale write, rollback audit, lock, retry, preview dan penguncian seluruh status.
+- [ ] Belum diterapkan ke database aplikasi/HTTP/UI. Pengujian hanya mengubah kalender pada database disposable lalu memulihkannya; checksum database lokal asli tidak berubah.
+
+Berikutnya: pembacaan sesi dan data form portal guru dengan otorisasi, lalu endpoint dan integrasi UI. Penyiapan/publikasi seluruh PDF secara atomik tetap belum tersedia.
