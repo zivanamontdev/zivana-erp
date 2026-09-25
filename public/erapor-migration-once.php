@@ -61,7 +61,9 @@ try {
     $db = Database::getInstance();
     $roleQuery = $db->prepare('SELECT r.nama FROM users u JOIN roles r ON r.id=u.role_id WHERE u.id=?');
     $roleQuery->execute([(int)($_SESSION['user_id'] ?? 0)]);
-    if ($roleQuery->fetchColumn() !== 'Admin') {
+    // Both application-level administrator roles may run this one-off setup.
+    // Keep all other roles denied even if RBAC grants menu permissions.
+    if (!in_array($roleQuery->fetchColumn(), ['Admin', 'Superadmin'], true)) {
         eraporInstallerRespond(404, 'Halaman tidak ditemukan', 'Halaman tidak tersedia.');
     }
 } catch (Throwable $error) {
