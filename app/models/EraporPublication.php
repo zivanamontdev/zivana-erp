@@ -137,30 +137,8 @@ final class EraporPublication
                 if ($doc['jenis_dokumen']==='RTS' && $relatedSession['period_type']==='TENGAH') $signatures[$relatedSession['period_semester']]=$block;
             }
             $doc['period_values']=$periodValues; $doc['signature_periods']=$signatures;
-            $doc['signature_current']=$signatureCurrent; $doc['signers']=self::all($db,'SELECT * FROM erapor_rubrik_penandatangan WHERE rubrik_id=? ORDER BY urutan',[$doc['rubrik_id']]);
-            $doc['tests']=$tests; $doc['items']=$defs['items'] ?? [];
-            $doc['show_pra_tk']=!empty($doc['form']['values']['mulai_pra_tk']);
-            if ($doc['jenis_dokumen']==='AGAMA') {
-                $doc['all_items']=self::all($db,"SELECT i.*,s.lingkup_id,s.huruf AS sub_huruf,s.nama AS sub_nama,s.implisit AS sub_implisit
-                    FROM erapor_agama_item i JOIN erapor_agama_sub s ON s.id=i.sub_id
-                    JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? AND i.aktif=1
-                    ORDER BY CASE i.semester WHEN 'GANJIL' THEN 1 ELSE 2 END,l.urutan,s.urutan,i.urutan",[$doc['rubrik_id']]);
-                $seenGenap=false;
-                foreach ($doc['all_items'] as $item) {
-                    if ($item['semester']==='GENAP') $seenGenap=true;
-                    elseif ($seenGenap) throw new DomainException('Urutan capaian Agama tidak konsisten antarsemester.');
-                }
-                $doc['item_names']=[];
-                foreach (self::all($db,'SELECT n.item_id,n.nama FROM erapor_agama_item_nama n JOIN erapor_agama_item i ON i.id=n.item_id JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? ORDER BY n.urutan',[$doc['rubrik_id']]) as $name) $doc['item_names'][(int)$name['item_id']][]=$name['nama'];
-                $notes=[]; foreach ($defs['scopes'] ?? [] as $scope) $notes[]=$doc['form']['values']['catatan:'.$scope['id']] ?? '';
-                $doc['narrative_version']=self::AGAMA_NARRATIVE_VERSION;
-                $doc['narrative']=self::agamaNarrative($student['nama_lengkap'],$session['semester'],$notes);
-            }
-            if ($doc['jenis_dokumen']==='PPI') $doc['all_columns']=self::all($db,"SELECT * FROM erapor_ppi_kolom WHERE rubrik_id=? AND bagian='C' AND cetak=1 ORDER BY urutan",[$doc['rubrik_id']]);
-            // RTS stores the immutable source hash in seed history; newer rubrics also keep JSON.
-            $seed=self::one($db,'SELECT source_sha256 FROM erapor_seed_history WHERE rubrik_id=?',[$doc['rubrik_id']]);
-            if (!$seed) throw new DomainException('Snapshot sumber rubrik tidak tersedia.');
-            $doc['seed_sha256']=$seed['source_sha256'];
+            $doc['signature_current']=$signatureCurrent;
+            $doc=self::describeDocument($db,$doc,$tests,$student['nama_lengkap'],$session['semester']);
             unset($doc['status']); $documents[]=$doc;
         }
         return ['session'=>$session,'period'=>['jenis'=>$cal['jenis'],'semester'=>$cal['semester'],
@@ -170,6 +148,85 @@ final class EraporPublication
             'student'=>$student,'school'=>['snapshot'=>$schoolSnapshot,'logo_data_uri'=>$logoData],
             'published_at'=>$now->format('Y-m-d H:i:s'),'published_date'=>self::indonesianDate($now),
             'documents'=>$documents];
+    }
+
+    /** Definisi cetak per dokumen (penandatangan, butir, kolom, narasi, hash seed). Dipakai paket terbit, draf, dan template. */
+    private static function describeDocument(PDO $db,array $doc,array $tests,string $studentName,string $semester): array
+    {
+        $defs=$doc['form']['definitions'];
+        $doc['signers']=self::all($db,'SELECT * FROM erapor_rubrik_penandatangan WHERE rubrik_id=? ORDER BY urutan',[$doc['rubrik_id']]);
+        $doc['tests']=$tests; $doc['items']=$defs['items'] ?? [];
+        $doc['show_pra_tk']=!empty($doc['form']['values']['mulai_pra_tk']);
+        if ($doc['jenis_dokumen']==='AGAMA') {
+            $doc['all_items']=self::all($db,"SELECT i.*,s.lingkup_id,s.huruf AS sub_huruf,s.nama AS sub_nama,s.implisit AS sub_implisit
+                FROM erapor_agama_item i JOIN erapor_agama_sub s ON s.id=i.sub_id
+                JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? AND i.aktif=1
+                ORDER BY CASE i.semester WHEN 'GANJIL' THEN 1 ELSE 2 END,l.urutan,s.urutan,i.urutan",[$doc['rubrik_id']]);
+            $seenGenap=false;
+            foreach ($doc['all_items'] as $item) {
+                if ($item['semester']==='GENAP') $seenGenap=true;
+                elseif ($seenGenap) throw new DomainException('Urutan capaian Agama tidak konsisten antarsemester.');
+            }
+            $doc['item_names']=[];
+            foreach (self::all($db,'SELECT n.item_id,n.nama FROM erapor_agama_item_nama n JOIN erapor_agama_item i ON i.id=n.item_id JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? ORDER BY n.urutan',[$doc['rubrik_id']]) as $name) $doc['item_names'][(int)$name['item_id']][]=$name['nama'];
+            $notes=[]; foreach ($defs['scopes'] ?? [] as $scope) $notes[]=$doc['form']['values']['catatan:'.$scope['id']] ?? '';
+            $doc['narrative_version']=self::AGAMA_NARRATIVE_VERSION;
+            $doc['narrative']=self::agamaNarrative($studentName,$semester,$notes);
+        }
+        if ($doc['jenis_dokumen']==='PPI') $doc['all_columns']=self::all($db,"SELECT * FROM erapor_ppi_kolom WHERE rubrik_id=? AND bagian='C' AND cetak=1 ORDER BY urutan",[$doc['rubrik_id']]);
+        // RTS stores the immutable source hash in seed history; newer rubrics also keep JSON.
+        $seed=self::one($db,'SELECT source_sha256 FROM erapor_seed_history WHERE rubrik_id=?',[$doc['rubrik_id']]);
+        if (!$seed) throw new DomainException('Snapshot sumber rubrik tidak tersedia.');
+        $doc['seed_sha256']=$seed['source_sha256'];
+        return $doc;
+    }
+
+    /** Pratinjau PDF draf dari nilai terkini (belum tentu disetujui). Tidak menulis apa pun; renderer menandai DRAF. */
+    public static function draftPackage(PDO $db,int $sessionId,?DateTimeImmutable $clock=null): array
+    {
+        $session=self::one($db,'SELECT * FROM erapor_sesi WHERE id=?',[$sessionId]);
+        if (!$session) throw new DomainException('Sesi tidak tersedia.');
+        $approvals=self::all($db,'SELECT * FROM erapor_sesi_penyetuju WHERE sesi_id=? ORDER BY urutan,id',[$sessionId]);
+        $now=($clock ?? new DateTimeImmutable('now',new DateTimeZone('Asia/Makassar')))->setTimezone(new DateTimeZone('Asia/Makassar'));
+        $data=self::capture($db,$session,$approvals,$now);
+        $data['draft']=true;
+        return $data;
+    }
+
+    /** Template kosong 5 rubrik (Tengah Semester) dengan identitas placeholder, untuk Manajemen Template. */
+    public static function templatePackage(PDO $db,string $kondisi,string $semester='GANJIL',?string $only=null): array
+    {
+        if (!in_array($kondisi,['Regular','ABK'],true) || !in_array($semester,['GANJIL','GENAP'],true)) throw new DomainException('Pilihan template tidak valid.');
+        $school=self::one($db,'SELECT * FROM sekolah ORDER BY id LIMIT 1',[]);
+        $address=(string)($school['alamat'] ?? '');
+        $logo=ROOT_PATH.'/public/assets/images/logo-colored.png';
+        $order=['RTS','AGAMA','UMMI','BING']; if ($kondisi==='ABK') $order[]='PPI';
+        if ($only!==null) {
+            if (!in_array($only,$order,true)) throw new DomainException('Rubrik template tidak tersedia untuk kondisi ini.');
+            $order=[$only];
+        }
+        $rubrics=[];
+        foreach (self::all($db,"SELECT id AS rubrik_id,kode,nama,jenis_dokumen,judul_cetak,versi FROM erapor_rubrik WHERE status='terkunci'",[]) as $r) $rubrics[$r['jenis_dokumen']]=$r;
+        $student=['id'=>0,'nama_lengkap'=>'{Nama Siswa}','nama_panggilan'=>'{Nama Panggilan}','nisn'=>'{NISN}','tanggal_lahir'=>'{Tanggal Lahir}','tempat_lahir'=>'{Tempat Lahir}',
+            'status_kondisi'=>$kondisi,'jenis_kebutuhan'=>null,'level_kelas'=>'','nama_kelas'=>'{Kelas}','usia'=>'{Usia}'];
+        $session=['id'=>0,'semester'=>$semester,'jenis'=>'TENGAH','kondisi'=>$kondisi];
+        $documents=[];
+        foreach ($order as $type) {
+            if (!isset($rubrics[$type])) throw new DomainException('Rubrik '.$type.' belum tersedia. Jalankan migrasi eRapor.');
+            $doc=['id'=>0]+$rubrics[$type];
+            $doc['form']=EraporTeacherForm::documentForm($db,$session,$doc);
+            // Narasi Agama dirangkai dari catatan per lingkup; template menampilkan penanda posisinya.
+            if ($type==='AGAMA') foreach ($doc['form']['definitions']['scopes'] ?? [] as $scope) $doc['form']['values']['catatan:'.$scope['id']]='{Catatan '.$scope['nama'].'}';
+            $doc['period_values']=[]; $doc['signature_periods']=[];
+            $doc['signature_current']=['signers'=>[],'tempat'=>'','tanggal'=>null];
+            $documents[]=self::describeDocument($db,$doc,[],$student['nama_lengkap'],$semester);
+        }
+        return ['session'=>$session,'period'=>['jenis'=>'TENGAH','semester'=>$semester,'semester_label'=>$semester,
+            'label'=>'Tengah Semester '.($semester==='GANJIL'?'Ganjil':'Genap'),'tahun_label'=>'{Tahun Ajaran}'],
+            'student'=>$student,'school'=>['snapshot'=>['id'=>(int)($school['id'] ?? 0),'nama_legal'=>$school['nama_legal'] ?? '{Nama Legal Sekolah}',
+                'nama_komersial'=>$school['nama_komersial'] ?? '{Nama Sekolah}','alamat'=>$address,'tempat_pengesahan'=>self::extractPlace($address) ?: '{Kota}',
+                'npsn'=>$school['npsn'] ?? '{NPSN}'],'logo_data_uri'=>is_file($logo)?'data:image/png;base64,'.base64_encode(file_get_contents($logo)):''],
+            'published_at'=>null,'published_date'=>'{Tanggal Pengesahan}','documents'=>$documents,'template'=>true];
     }
 
     private static function extractPlace(string $address): string

@@ -706,6 +706,11 @@ body.modal-open {
 .report-student-row.is-disabled .report-student-chevron { color: var(--color-neutral-150); }
 .report-student-row:focus-visible { outline: 2px solid var(--color-red-600); outline-offset: -2px; }
 .report-period-table .data-table td.data-table-empty { padding: var(--space-3) var(--space-4); }
+/* Ringkasan eRapor (Rapor Murid saat eRapor aktif): tabel data biasa di dalam akordeon periode. */
+.report-period-table .erapor-overview-table { table-layout: auto; min-width: 60rem; }
+.report-period-table .erapor-overview-table tbody td { padding: var(--space-3) var(--space-4); background: var(--color-neutral-white); vertical-align: middle; }
+.report-period-table .erapor-overview-table .col-action { width: 1%; white-space: nowrap; }
+.report-period-table .erapor-overview-table .col-action .ui-button { margin: 0; }
 
 .accordion-item {
   border: 1px solid var(--color-neutral-75);

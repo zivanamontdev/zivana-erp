@@ -8,3 +8,14 @@
 .report-template-table .report-preview-link { display: inline-flex; align-items: center; justify-content: center; padding: var(--space-1); color: var(--color-shadow-black); }
 .report-preview-link:focus-visible { outline: 2px solid var(--color-red-400); outline-offset: 2px; }
 .report-template-table .action-menu-dropdown p { margin: 0; padding: var(--space-3); font-size: var(--font-size-body-sm); color: var(--color-neutral-400); }
+
+/* Template eRapor (rubrik spesifikasi) */
+.report-template-code { margin-left: var(--space-2); color: var(--color-neutral-500); font-size: var(--font-size-caption-md); }
+.report-template-actions { white-space: nowrap; }
+.report-template-actions .ui-button { margin: 0 0 0 var(--space-2); }
+.report-template-note { margin: 0; color: var(--color-neutral-500); font-size: var(--font-size-body-sm); }
+.report-template-frame { display: block; width: 100%; height: calc(100svh - 14rem); min-height: 32rem; margin-top: var(--space-3); border: 1px solid var(--color-neutral-75); border-radius: var(--radius-md); background: var(--color-neutral-50); }
+@media (max-width: 40rem) {
+  .report-template-actions { white-space: normal; }
+  .report-template-actions .ui-button { margin: var(--space-1) 0 0; }
+}

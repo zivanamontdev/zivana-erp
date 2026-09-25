@@ -25,17 +25,27 @@ class RoleMiddleware
     {
         if (empty($_SESSION['user_id'])) return false;
         if ($modul === 'eRapor') {
+            // Selama ERAPOR_API_ENABLED mati semua halaman eRapor 404; menu tidak boleh menawarkannya.
+            if (!defined('ERAPOR_API_ENABLED') || !ERAPOR_API_ENABLED) return false;
             if ($subSection === 'Persetujuan') {
                 if (!EraporApprovalAccess::assigned((int)$_SESSION['user_id'])) return false;
             } elseif ($subSection === 'Penugasan Penyetuju') {
                 if (AccountAccess::isTeacher()) return false;
-            } elseif ($subSection !== 'Profil Penandatangan') {
+            } elseif ($subSection === 'Profil Penandatangan') {
+                // Tanda tangan hanya milik akun pegawai (EraporSignerProfile::owner); Superadmin tanpa karyawan tidak punya profil.
+                if (empty($_SESSION['karyawan_id'])) return false;
+            } else {
                 return false;
             }
         }
         if (AccountAccess::isTeacher() && !($modul === 'Portal Guru'
             || ($modul === 'eRapor' && in_array($subSection,['Persetujuan','Profil Penandatangan'],true)))) return false;
-        if ($modul === 'Murid' && $subSection === 'Rapor Murid' && !ReportWorkflow::reviewer()) return false;
+        if ($modul === 'Murid' && $subSection === 'Rapor Murid') {
+            // Saat eRapor aktif, Rapor Murid menjadi ringkasan eRapor khusus Superadmin; alur rapor lama tidak dipakai.
+            if (defined('ERAPOR_API_ENABLED') && ERAPOR_API_ENABLED) {
+                if (($_SESSION['role_name'] ?? '') !== 'Superadmin') return false;
+            } elseif (!ReportWorkflow::reviewer()) return false;
+        }
         $roleId = (int) ($_SESSION['role_id'] ?? 0);
 
         return $roleId !== 0

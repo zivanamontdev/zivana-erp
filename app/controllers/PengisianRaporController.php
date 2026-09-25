@@ -2,6 +2,17 @@
 
 class PengisianRaporController extends Controller
 {
+    /** Alur rapor lama tidak dipakai saat eRapor aktif; guru mengisi lewat /portal-guru/sesi/{id}. */
+    public function __construct()
+    {
+        if (defined('ERAPOR_API_ENABLED') && ERAPOR_API_ENABLED) {
+            http_response_code(404);
+            require VIEW_PATH . '/errors/404.php';
+            exit;
+        }
+        if (method_exists(Controller::class, '__construct')) parent::__construct(); // harness tes memakai Controller tanpa konstruktor
+    }
+
     public function show(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);

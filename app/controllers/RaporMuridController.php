@@ -10,6 +10,20 @@ class RaporMuridController extends Controller
         $db = Database::getInstance();
 
         $years = (new TahunAjaran())->all('tahun_awal DESC');
+        if (defined('ERAPOR_API_ENABLED') && ERAPOR_API_ENABLED) {
+            // eRapor aktif: ringkasan hanya-baca seluruh sesi eRapor (RoleMiddleware membatasi ke Superadmin).
+            $active = array_values(array_filter($years, static fn($y) => $y['is_active']));
+            $yearId = (int) $this->input('tahun_ajaran_id', $active[0]['id'] ?? ($years[0]['id'] ?? 0));
+            $this->view('admin.rapor-murid.erapor-index', [
+                'pageTitle' => 'Rapor Murid',
+                'breadcrumb' => breadcrumb('Murid', 'Rapor Murid'),
+                'activeNavItem' => 'rapor-murid',
+                'tahunOptions' => $years,
+                'tahunId' => $yearId,
+                'periodeList' => EraporOverview::forYear($db, $yearId),
+            ]);
+            return;
+        }
         $active = array_values(array_filter($years, static fn($y) => $y['is_active']));
         $yearId = (int) $this->input('tahun_ajaran_id', $active[0]['id'] ?? ($years[0]['id'] ?? 0));
         $periods = $db->prepare('SELECT * FROM periode_penilaian WHERE tahun_ajaran_id=? ORDER BY awal_periode DESC');

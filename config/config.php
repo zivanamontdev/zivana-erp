@@ -77,6 +77,8 @@ if ($eraporApiEnabled === false) $eraporApiEnabled = envValue($env, 'ERAPOR_API_
 define('ERAPOR_API_ENABLED', filter_var($eraporApiEnabled, FILTER_VALIDATE_BOOLEAN));
 // Kosong = halaman /sistem/migrasi-erapor 404. Isi (min. 32 karakter) hanya saat migrasi, lalu hapus lagi.
 define('ERAPOR_MIGRATION_TOKEN', trim((string) envValue($env, 'ERAPOR_MIGRATION_TOKEN', '')));
+// Sama: kosong = /sistem/reset-data 404. Isi hanya saat reset data, lalu hapus lagi.
+define('DATA_RESET_TOKEN', trim((string) envValue($env, 'DATA_RESET_TOKEN', '')));
 define('SESSION_LIFETIME', (int) envValue($env, 'SESSION_LIFETIME', 120));
 
 // --- Upload ---

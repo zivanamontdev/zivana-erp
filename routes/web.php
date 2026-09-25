@@ -76,6 +76,8 @@ $router->post('/kurikulum/periode-penilaian/{id}/hapus', [PeriodePenilaianContro
 // --- Sekolah: Kurikulum > Manajemen Template ---
 $router->get('/kurikulum/manajemen-template', [TemplateRaporController::class, 'index']);
 $router->get('/kurikulum/manajemen-template/pratinjau/{semester}', [TemplateRaporController::class, 'previewSemester']);
+$router->get('/kurikulum/manajemen-template/erapor/{jenis}', [TemplateRaporController::class, 'eraporPreview']);
+$router->get('/kurikulum/manajemen-template/erapor/{jenis}/pdf', [TemplateRaporController::class, 'eraporPdf']);
 $router->get('/kurikulum/manajemen-template/{id}', [TemplateRaporController::class, 'show']);
 $router->get('/kurikulum/manajemen-template/{id}/pdf', [TemplateRaporController::class, 'downloadPdf']);
 
@@ -95,9 +97,14 @@ $router->get('/erapor/profil-penandatangan', [EraporSignerProfileController::cla
 $router->post('/erapor/profil-penandatangan', [EraporSignerProfileController::class, 'update']);
 $router->post('/erapor/profil-penandatangan/cabut', [EraporSignerProfileController::class, 'revoke']);
 $router->get('/erapor/profil-penandatangan/tanda-tangan', [EraporSignerProfileController::class, 'signature']);
+// PDF paket per sesi: artefak resmi bila sudah disetujui, draf bila belum (EraporPdfAccess).
+$router->get('/erapor/sesi/{id}/pdf', [EraporPdfController::class, 'show']);
 // Migrasi skema pilot via browser (hosting tanpa SSH). 404 kecuali ERAPOR_MIGRATION_TOKEN diisi di .env.
 $router->get('/sistem/migrasi-erapor', [EraporMigrationController::class, 'index']);
 $router->post('/sistem/migrasi-erapor', [EraporMigrationController::class, 'run']);
+// Kosongkan data operasional + seed uji coba. 404 kecuali DATA_RESET_TOKEN diisi di .env.
+$router->get('/sistem/reset-data', [DataResetController::class, 'index']);
+$router->post('/sistem/reset-data', [DataResetController::class, 'run']);
 
 // --- Portal Guru ---
 // New session IDs are NOT legacy rapor IDs. Disabled by default in config.

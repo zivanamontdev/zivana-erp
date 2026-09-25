@@ -2,10 +2,25 @@
 
 class TemplateRaporController extends Controller
 {
+    /** Urutan tahapan paket rapor (SPEK_ALUR_PENGISIAN bagian 6). */
+    private const ERAPOR_ORDER = ['RTS' => 1, 'AGAMA' => 2, 'UMMI' => 3, 'BING' => 4, 'PPI' => 5];
+
     public function index(): void
     {
         $this->middleware(AuthMiddleware::class);
         $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'lihat');
+
+        $rubrics = $this->eraporRubrics();
+        if ($rubrics) {
+            $this->view('admin.template-rapor.erapor-index', [
+                'pageTitle' => 'Manajemen Rapor',
+                'breadcrumb' => breadcrumb('Kurikulum', 'Manajemen Rapor'),
+                'activeNavItem' => 'manajemen-template',
+                'rubrics' => $rubrics,
+                'canPdf' => (new RoleMiddleware())->check('Sekolah', 'Manajemen Template', 'pdf'),
+            ]);
+            return;
+        }
 
         $tipe = (string) $this->input('tipe', '');
         $kategori = (string) $this->input('kategori', '');
@@ -114,6 +129,70 @@ class TemplateRaporController extends Controller
 
         $dompdf->stream($filename, ['Attachment' => true]);
         exit;
+    }
+
+    /** Pratinjau template satu rubrik eRapor (PDF yang sama dengan rapor terbit, identitas placeholder). */
+    public function eraporPreview(string $jenis): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'lihat');
+        $rubric = $this->eraporRubric($jenis);
+        if (!$rubric) { http_response_code(404); require VIEW_PATH . '/errors/404.php'; return; }
+        $semester = $this->semester();
+        $this->view('admin.template-rapor.erapor-preview', [
+            'pageTitle' => 'Pratinjau ' . $rubric['nama'],
+            'breadcrumb' => breadcrumb('Kurikulum', ['Manajemen Rapor', '/kurikulum/manajemen-template'], 'Pratinjau'),
+            'activeNavItem' => 'manajemen-template',
+            'rubric' => $rubric,
+            'semester' => $semester,
+            'canPdf' => (new RoleMiddleware())->check('Sekolah', 'Manajemen Template', 'pdf'),
+        ]);
+    }
+
+    public function eraporPdf(string $jenis): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'lihat');
+        $download = (string) $this->input('unduh', '') === '1';
+        if ($download) $this->middleware(RoleMiddleware::class, 'Sekolah', 'Manajemen Template', 'pdf');
+        $rubric = $this->eraporRubric($jenis);
+        if (!$rubric) { http_response_code(404); require VIEW_PATH . '/errors/404.php'; return; }
+        $type = $rubric['jenis_dokumen'];
+        $semester = $this->semester();
+        $package = EraporPublication::templatePackage(Database::getInstance(), $type === 'PPI' ? 'ABK' : 'Regular', $semester, $type);
+        $pdf = EraporPackagePdfRenderer::render($package);
+        $filename = 'template-' . strtolower($rubric['kode']) . '-' . strtolower($semester) . '.pdf';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="' . $filename . '"');
+        header('Content-Length: ' . strlen($pdf));
+        header('Cache-Control: private, no-store');
+        echo $pdf;
+        exit;
+    }
+
+    private function semester(): string
+    {
+        return strtolower((string) $this->input('semester', 'ganjil')) === 'genap' ? 'GENAP' : 'GANJIL';
+    }
+
+    /** Rubrik eRapor terkunci hasil seed spesifikasi; kosong bila migrasi eRapor belum dijalankan. */
+    private function eraporRubrics(): array
+    {
+        try {
+            $rows = Database::getInstance()->query("SELECT r.id,r.kode,r.nama,r.jenis_dokumen,r.versi,h.seeded_at
+                FROM erapor_rubrik r LEFT JOIN erapor_seed_history h ON h.rubrik_id=r.id WHERE r.status='terkunci'")->fetchAll();
+        } catch (PDOException $e) {
+            return [];
+        }
+        $rows = array_values(array_filter($rows, fn($r) => isset(self::ERAPOR_ORDER[$r['jenis_dokumen']])));
+        usort($rows, fn($a, $b) => self::ERAPOR_ORDER[$a['jenis_dokumen']] <=> self::ERAPOR_ORDER[$b['jenis_dokumen']]);
+        return $rows;
+    }
+
+    private function eraporRubric(string $jenis): ?array
+    {
+        foreach ($this->eraporRubrics() as $rubric) if (strtolower($rubric['jenis_dokumen']) === strtolower($jenis)) return $rubric;
+        return null;
     }
 
     /**

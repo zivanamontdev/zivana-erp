@@ -46,6 +46,8 @@ final class EraporApprovalController extends Controller
             'activeNavItem' => 'erapor-approval',
             'review' => $review,
             'canApprove' => $canApprove,
+            // PDF memuat seluruh paket: hanya penyetuju bercakupan SEMUA (Kepala Sekolah) atau Superadmin.
+            'canPdf' => EraporPdfAccess::canView(Database::getInstance(), (int) $sessionId, (int) $_SESSION['user_id']),
             'notice' => $this->takeNotice(),
         ]);
     }

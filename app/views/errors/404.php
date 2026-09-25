@@ -18,7 +18,8 @@
     <div class="box">
         <h1>404 — Halaman Tidak Ditemukan</h1>
         <p>URL yang diminta tidak ada.</p>
-        <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/login">Kembali ke Login</a>
+        <?php // /login mengarahkan akun yang sudah masuk ke halaman awal sesuai izinnya (GuestMiddleware). ?>
+        <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/login"><?= empty($_SESSION['user_id']) ? 'Kembali ke Login' : 'Kembali ke Beranda' ?></a>
     </div>
 </body>
 </html>

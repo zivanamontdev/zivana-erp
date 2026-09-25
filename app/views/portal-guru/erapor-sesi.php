@@ -79,6 +79,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <?php elseif (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
                     <span class="teacher-report-action teacher-report-action--pending"><?= $session['status'] === 'SELESAI' ? 'Rapor telah disetujui' : 'Menunggu proses persetujuan' ?></span>
                 <?php endif; ?>
+                <a class="ui-button ui-button--outline" href="<?= BASE_PATH ?>/erapor/sesi/<?= (int)$session['id'] ?>/pdf" target="_blank" rel="noopener" data-erapor-pdf><?= !empty($hasOfficialPdf) ? 'Lihat PDF Resmi' : 'Pratinjau PDF' ?></a>
                 <?= uiButton('Kembali ke Dashboard', 'outline', ['marginVertical'=>0, 'attributes'=>['onclick'=>'window.location.href=\''.BASE_PATH.'/portal-guru/dashboard\'']]) ?>
             </div>
         </div>

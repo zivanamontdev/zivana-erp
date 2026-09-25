@@ -5,6 +5,7 @@ $sessionId = (int) $review['session']['id'];
 $approvalId = (int) $approval['id'];
 $modalId = 'modal-setujui-erapor-' . $sessionId . '-' . $approvalId;
 $headerActions = '<a class="ui-button ui-button--outline" href="' . BASE_PATH . '/erapor/persetujuan">Kembali ke Antrean</a>';
+if (!empty($canPdf)) $headerActions .= ' <a class="ui-button ui-button--outline" href="' . BASE_PATH . '/erapor/sesi/' . (int) $sessionId . '/pdf" target="_blank" rel="noopener">Pratinjau PDF</a>';
 if ($canApprove) {
     $headerActions .= ' ' . uiButton('Setujui', 'primary', ['marginVertical' => 0, 'attributes' => ['data-modal-open' => $modalId]]);
 }

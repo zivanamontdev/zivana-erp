@@ -58,6 +58,8 @@ function adminAccount(): void { $_SESSION=['user_id'=>1,'role_id'=>1,'role_name'
 adminAccount();
 // Isolated subprocess modes exercise actual exit-based rejection paths.
 $mode=$argv[1] ?? '';
+// Route mode checks the disabled default (eRapor routes 404, menus hidden); permission logic below runs with eRapor enabled.
+if ($mode!=='route') define('ERAPOR_API_ENABLED', true);
 if ($mode==='route') {
     $_SESSION['role_id']=4;
     $_SERVER['REQUEST_METHOD']=$argv[2]; $_SERVER['REQUEST_URI']=$argv[3];
