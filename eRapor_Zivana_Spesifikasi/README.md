@@ -103,10 +103,12 @@ Kalau cuma sempat membaca satu bagian, baca ini.
 | RTS | **siap** | seluruh salah ketik sudah diperbaiki sekolah dan diikuti seed |
 | Agama | **siap** | dua ejaan dipilih dari bentuk mayoritas di dokumen, dicocokkan lagi saat contoh terisi diterima. Lihat bagian 9.1 spesifikasinya |
 | Ummi | **siap** | |
-| Bahasa Inggris | **siap dibangun, seed menunggu** | beberapa teks tetap sedang diperbaiki sekolah. Seed masih memuat teks asli dan akan diperbarui setelah berkas revisinya diterima. Struktur dan skema tidak akan berubah |
+| Bahasa Inggris | **V1 diterima untuk pilot** | gunakan teks/definisi seed saat ini apa adanya. Perbaikan copy ditunda ke versi rubrik berikutnya dan tidak mengubah dokumen yang sudah terbit |
 | PPI | **siap** | alur Hasil Capaian setelah rapor terbit **bukan untuk pilot**, lihat bagian 6 spesifikasinya |
 | RAS | **belum dispesifikasi** | menggantikan RTS di akhir semester. Jangan menanam asumsi bahwa RTS selalu ada di tiap sesi |
 | Data Murid | di luar paket ini | |
+
+Keputusan implementasi 25 September 2026: untuk Rapor Ummi, cetakan tetap menampilkan sedikitnya dua baris tes dan mengisi sel kosong dengan `—`. Aturan ini mengikuti `SPEK_RUBRIK_UMMI.md` dan mengesampingkan catatan cetak lama dalam metadata `rubrik_ummi_seed.json`; seed V1 tidak diubah.
 
 ---
 

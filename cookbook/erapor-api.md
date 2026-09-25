@@ -4,6 +4,13 @@ Endpoint ini berbeda dari `/portal-guru/rapor/{id}` legacy. `{id}` adalah ID `er
 
 Aktivasi eksplisit melalui `.env`: `ERAPOR_API_ENABLED=true`. Default false. Flag ini membuka cabang dashboard/sesi Portal Guru yang baru dan API di bawah; jangan aktifkan sebagai rilis produksi sebelum backup, migrasi/seed terverifikasi, penugasan approver, editor nilai, dan uji browser siap. Ketika belum aktif, API JSON mengembalikan 503 `ERAPOR_NOT_ENABLED`, halaman sesi dan approval baru tidak tersedia (route approval HTML mengembalikan 404), dan dashboard/route legacy tetap bekerja.
 
+## Keputusan cakupan dan pembekuan dokumen (25 September 2026)
+
+- BING memakai teks dan definisi pada seed V1 apa adanya untuk pilot. Perubahan copy di masa mendatang harus menjadi versi rubrik baru, bukan mutasi seed atau PDF lama.
+- Narasi Agama memakai `AGAMA_NARASI_V1`. Versinya dicatat pada manifest; redaksi, enam isian, dan PDF ikut tercakup dalam hash sumber. Perubahan narasi hanya berlaku untuk publikasi baru.
+- Tabel tes Ummi selalu dicetak dengan minimal dua baris; sel tanpa nilai berisi `—` sebagai placeholder cetak, tidak sebagai data. Semua tes yang tercatat tetap ditampilkan.
+- RAS/Akhir Semester dan alur Hasil Capaian PPI setelah penerbitan ditahan dari cakupan pilot. Paket ABK tetap memuat dokumen PPI awal dengan Hasil Capaian kosong. Pengiriman ke orang tua juga belum aktif.
+
 ## Kontrak
 
 | Metode dan path | Izin Portal Guru / Daftar Murid | Body |

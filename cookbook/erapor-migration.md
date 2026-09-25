@@ -111,7 +111,7 @@ Pemeriksaan tanpa DB: `php database/validate-erapor-ummi-ppi.php`; unit: `php te
 
 `EraporBingSeed` khusus V1 memvalidasi cakupan semester, cetakan satu periode, bahasa Inggris, dua bagian wajib, tiga penandatangan, urutan skala dan identitas tanggal lahir (bukan usia). Transaksi, advisory lock, hash sumber/isi, retry no-op, dan penolakan overwrite mengikuti seeder sebelumnya. Teks tetap, kelompok dan metadata cetak disimpan di snapshot sumber. Ini bukan renderer atau guard penyimpanan nilai.
 
-Seed BING dan PDF revisi belum selaras: ejaan label Pronounciation, definisi skala serta kalimat REMARKS perlu dicocokkan sebelum aktivasi. Batch ini tidak mengoreksi sumber secara sepihak. Kode `speaking__pronounciation` tidak boleh ikut diganti saat label diperbaiki. Urutan Excellent > Outstanding > Good > Fair sudah tetap; tidak menghitung rata-rata ordinal.
+Keputusan cakupan 25 September 2026: pilot memakai seed BING V1 apa adanya meskipun teks sumber dan PDF revisi berbeda. Urutan Excellent > Outstanding > Good > Fair sudah tetap; tidak menghitung rata-rata ordinal. Jangan mengubah V1 atau kode `speaking__pronounciation`; koreksi copy di masa depan harus memakai versi rubrik baru dan hanya berlaku untuk publikasi baru.
 
 CLI read-only: `php database/validate-erapor-bing.php`. Validator `tests/erapor-bing-seed.php` lulus 19 skenario; harness restore MySQL lulus 328 pemeriksaan total. Seluruh data legacy/database lokal sumber tetap identik, database disposable telah dibersihkan, backup tetap tersedia. Regresi policy/audit/workflow lama dan validator rubrik terdahulu lulus. Belum ada migrasi database aplikasi/hosting atau perubahan UI/PDF.
 

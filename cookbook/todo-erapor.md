@@ -2,7 +2,7 @@
 
 Tanggal: 25 September 2026.
 
-Status: katalog/rubrik, alur pengisian guru, persetujuan, assignment, profil tanda tangan pemilik, serta persiapan artefak PDF privat sudah diimplementasikan secara opt-in. PDF baru didukung untuk paket Tengah Semester; tidak ada route unduh/pengiriman dan sesi tetap `MENUNGGU_TTD`. RAS, penyelarasan sumber dokumen, kesiapan migrasi produksi, pemeriksaan visual PDF/browser, serta pengiriman masih terbuka. Data murid menyimpan nomor telepon ayah/ibu tetapi tidak menyimpan email wali; pilihan kontak utama, consent, dan provider email/WhatsApp belum ditentukan/dikonfigurasi. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
+Status: katalog/rubrik, alur pengisian guru, persetujuan, assignment, profil tanda tangan pemilik, serta persiapan artefak PDF privat sudah diimplementasikan secara opt-in. PDF baru didukung untuk paket Tengah Semester; tidak ada route unduh/pengiriman dan sesi tetap `MENUNGGU_TTD`. Keputusan cakupan pilot: BING memakai seed saat ini apa adanya, narasi Agama diberi versi dan dibekukan pada artefak terbit, serta tabel tes Ummi mencetak minimum dua baris dengan placeholder `—`. RAS dan alur Hasil Capaian PPI pasca-terbit ditahan; kesiapan migrasi produksi, pemeriksaan visual PDF/browser, serta pengiriman masih terbuka. Data murid menyimpan nomor telepon ayah/ibu tetapi tidak menyimpan email wali; pilihan kontak utama, consent, dan provider email/WhatsApp belum ditentukan/dikonfigurasi. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
 
 ## Acuan dan batas pekerjaan
 
@@ -18,9 +18,11 @@ Status: katalog/rubrik, alur pengisian guru, persetujuan, assignment, profil tan
 - [x] Periksa jumlah seed: RTS 175 indikator/8 area/21 subarea bernama/2 grup; Agama 73 butir (37 Ganjil, 36 Genap)/99 nama; Ummi 27 materi/7 jilid/12 nilai; BING 5 nilai/4 komentar; PPI 5 aspek/30 isian wajib.
 - [x] Jalankan `uji_tinjauan_ppi.py` dan enam assertion tambahan pencarian periode dengan SQLite in-memory; tidak menyentuh database aplikasi. Ini bukan tes implementasi PHP.
 - [x] Tetapkan paket Regular = RTS atau RAS + Agama + Ummi + BING. Paket ABK = paket Regular + PPI. Identitas otomatis bukan tahap penilaian; RTS ABK tetap 175 indikator yang sama.
-- [ ] Catat keputusan penyelarasan versi sebelum seeding final/PDF: PDF BING sudah mengubah `Pronunciation` dan definisi skala, seed belum; Word Agama masih memuat beberapa ejaan lama; aturan Ummi tentang baris tes kosong berbeda antara seed dan spesifikasi.
-- [ ] Selaraskan kalimat Agama tentang perubahan narasi rapor lama dengan kewajiban pembekuan rubrik/rapor terbit. Jangan mengubah dokumen historis secara diam-diam.
-- [ ] Terima spesifikasi dan seed RAS. **Menahan implementasi lengkap paket akhir semester, bukan fondasi atau rubrik lain.** Jangan menggunakan RTS sebagai pengganti RAS atau menganggap paket tanpa RAS lengkap.
+- [x] Cakupan BING pilot memakai definisi dan teks dari seed saat ini tanpa koreksi. Jangan mengubah seed V1; revisi di kemudian hari harus memakai versi rubrik baru dan tidak mengubah artefak yang sudah terbit.
+- [x] Narasi Agama V1 dicatat pada manifest publikasi dan ikut hash snapshot/PDF. Perubahan redaksi hanya untuk publikasi mendatang; artefak lama tidak dirender ulang.
+- [x] Tes Ummi mencetak sekurang-kurangnya dua baris. Sel yang belum memiliki data menampilkan `—` hanya pada PDF; seluruh baris tes yang ada tetap dicetak. Aturan cetak ini mengesampingkan catatan tampilan lama pada metadata seed, tanpa mengubah seed V1.
+- [ ] Terima spesifikasi dan seed RAS sebelum membuka periode Akhir Semester. Sampai itu tersedia, jangan menggunakan RTS sebagai pengganti atau menganggap paket Akhir lengkap.
+- [ ] Alur Hasil Capaian PPI pasca-terbit ditahan sampai setelah pilot; PPI awal tetap termasuk dalam paket ABK dan dicetak dengan Hasil Capaian kosong.
 
 ## 1. Audit aplikasi dan rencana migrasi — mulai di sini
 
@@ -95,9 +97,9 @@ Gerbang: pemetaan data dan strategi pemulihan terbukti pada salinan database seb
 
 - [x] Renderer offline berversi untuk paket Tengah memakai definisi, nilai, identitas, dan snapshot penanda tangan dari sesi; tidak memakai asset jarak jauh. Preview interaktif/download belum dibuat.
 - [ ] RTS: A4 tegak, acuan delapan halaman, pagination mengalir; kop/identitas/header tabel berulang, legenda hanya halaman pertama, dua blok tanda tangan sesuai sesi masing-masing. Struktur dasar dirender; kecocokan pagination/visual belum diperiksa.
-- [ ] Agama: cetak seluruh 73 butir, tujuh kolom per periode, header bertingkat, dan enam catatan yang dirangkai untuk periode terbit. Implementasi ada; kecocokan teks sumber dan visual masih perlu tinjauan.
-- [ ] Ummi: dua kolom Tengah/Akhir pada bacaan; daftar tes kumulatif semester sampai periode terbit; catatan periode terbit; blok PRA mengikuti sakelar periode; tanpa Hafalan. Implementasi ada; aturan tes yang berbeda antara seed/spesifikasi perlu keputusan.
-- [ ] BING: satu periode per cetakan, lima nilai, empat komentar, remarks dan penandatangan sesuai versi teks yang diselaraskan. Struktur dirender; perbedaan versi teks belum diselesaikan.
+- [x] Agama: cetak seluruh 73 butir, tujuh kolom per periode, header bertingkat, enam catatan yang dirangkai, serta versi narasi yang dibekukan pada manifest publikasi. Tinjauan visual tetap terbuka.
+- [x] Ummi: dua kolom Tengah/Akhir pada bacaan; daftar tes kumulatif semester; catatan periode terbit; blok PRA mengikuti sakelar; tanpa Hafalan; tabel tes minimum dua baris dan placeholder `—`. Tinjauan visual tetap terbuka.
+- [x] BING: render satu periode, lima nilai, empat komentar, remarks, penandatangan dengan seed V1 apa adanya. Revisi copy ditunda ke versi baru; tinjauan visual tetap terbuka.
 - [ ] PPI: A4 dengan margin/lebar kolom dari seed, tabel berulang, teks mentah diubah menjadi butir hanya saat render. Usia dihitung pada tanggal pengesahan; Hasil Capaian kosong saat pilot. Renderer awal ada; PDF visual belum diperiksa.
 - [ ] Prefinal hanya pratinjau bertanda draft tanpa cap tanda tangan; unduhan final per dokumen/paket hanya setelah `SELESAI`. Cegah nilai periode mendatang bocor ke cetak ulang periode lama.
 - [x] Persetujuan Kepala Sekolah terakhir menyiapkan semua PDF paket Tengah dalam transaksi yang sama; satu kegagalan me-rollback approval/snapshot/tanggal/log. Artefak privat berisi manifest/hash, idempoten, dan belum mengubah sesi menjadi `SELESAI`.
@@ -177,7 +179,7 @@ Lanjutan batch berikutnya: struktur/seeder Ummi dan PPI, kemudian Agama/BING sam
 - [x] PPI: lima aspek, delapan kolom cetak; enam kolom sesi menghasilkan 30 isian wajib. Dua kolom Hasil Capaian tetap di luar sesi. Simpan label multiline, grup, lebar kolom, dan snapshot sumber untuk metadata cetak/identitas.
 - [x] Validator mandiri lulus 20 skenario. Integrasi MySQL kini lulus 291 pemeriksaan: rollback, lock, constraint, teks/metadata sumber, retry, drift, dan checksum legacy/sumber lokal tidak berubah. Regresi policy (65), RTS (11), audit dan workflow lama lulus.
 - [x] CLI read-only `database/validate-erapor-ummi-ppi.php`; rencana migrasi kini katalog → RTS → Ummi/PPI.
-- [ ] Migrasi/seed database aplikasi, penyimpanan nilai, kelengkapan sesi, UI/PDF dan tinjauan PPI belum diterapkan. Perbedaan ketentuan cetak baris tes Ummi kosong masih menunggu penyelarasan; tidak diputuskan oleh seeder ini.
+- [ ] Migrasi/seed database aplikasi, penyimpanan nilai, kelengkapan sesi, UI/PDF dan tinjauan PPI belum diterapkan. Catatan cetak lama pada metadata Ummi V1 dioverride oleh keputusan 25 September: cetak dua baris minimum dengan placeholder `—`, tanpa mengubah seed V1.
 
 Berikutnya: struktur/seeder Agama dan BING, dengan mempertahankan catatan perbedaan versi sumber. Setelah definisi siap, lanjut identitas dokumen/sesi dan penyimpanan penilaian transaksional. RAS tetap membutuhkan spesifikasi resmi.
 
@@ -188,7 +190,7 @@ Berikutnya: struktur/seeder Agama dan BING, dengan mempertahankan catatan perbed
 - [x] Validasi 5 indikator nilai, 4 komentar wajib, 4 skala berurutan Excellent > Outstanding > Good > Fair. Kehadiran tetap skala, bukan angka; Speaking Test Result hanya kepala kelompok.
 - [x] Uji validator 19 skenario; harness MySQL kini 328 pemeriksaan lulus (rollback impor, lock, retry, perubahan sumber, drift isi, status terkunci, FK/unique/check, teks persis sumber). Regresi policy, audit, RTS, Ummi/PPI dan workflow lama lulus.
 - [x] Rencana migrasi read-only ditambah BING setelah Ummi/PPI; tersedia CLI validasi tanpa DB `database/validate-erapor-bing.php`.
-- [ ] Aktivasi BING ke aplikasi/PDF tetap belum dilakukan. Selaraskan teks PDF revisi dan seed sebelum seeding final; jangan mengubah kode indikator yang dibekukan.
+- [ ] Aktivasi database aplikasi/PDF belum dilakukan. Keputusan cakupan terbaru menerima teks seed BING V1 apa adanya untuk pilot; jangan mengubah kode indikator atau seed V1.
 
 Berikutnya: struktur/seeder Agama (73 butir terikat semester, tujuh pilihan tahapan, 99 nama Asmaul Husna dalam 10 kelompok, enam catatan wajib). Setelah itu lanjut fondasi dokumen/sesi dan penyimpanan nilai. Batch BING belum mengubah UI atau database aplikasi.
 
@@ -407,19 +409,20 @@ Berikutnya: pipeline PDF immutable/publication transaction. Feature flag product
 - [x] Preview gambar dilayani dari route owner-only dengan no-store/nosniff/noindex; UI memakai komponen bersama dan token warna bank.
 - [x] Izin lihat/ubah masuk katalog RBAC; role Guru hanya boleh profil sendiri dan Portal Guru/Persetujuan yang memang diizinkan, bukan penugasan penyetuju.
 - [x] Tes UI, route/RBAC, akun, lint PHP, dan harness MySQL pada restore disposable lulus: 1175 pemeriksaan; checksum legacy tetap utuh.
-- [ ] Renderer/publikasi PDF final, penyelarasan ketidaksesuaian sumber dokumen, migrasi aplikasi, dan browser visual masih terbuka. Feature flag produksi tetap OFF.
+- [ ] Migrasi aplikasi dan tinjauan visual browser/PDF masih terbuka. Feature flag tetap OFF.
 
 Rencana saat itu: bangun renderer immutable dan finalisasi atomik. Diteruskan pada batch berikut, dengan RAS tetap menunggu spesifikasi resmi.
 
 ### Batch renderer dan persiapan artefak PDF privat (25 September 2026)
 
-- [x] Renderer v1 menghasilkan paket Tengah Regular/ABK berisi RTS, Agama, Ummi, BING, serta PPI khusus ABK; identitas dan nilai bersumber dari snapshot/query paket, warna cetak memakai token `config/colors.php`.
+- [x] Renderer v2 menghasilkan paket Tengah Regular/ABK berisi RTS, Agama, Ummi, BING, serta PPI khusus ABK; identitas dan nilai bersumber dari snapshot/query paket, warna cetak memakai token `config/colors.php`.
 - [x] Setelah approval Kepala Sekolah, renderer dan penyimpanan satu artefak privat berjalan di transaksi approval. PDF, ukuran, SHA-256, manifest sumber/rubrik/penanda tangan, tempat dan tanggal pengesahan diverifikasi; retry memakai artefak sama.
 - [x] Simulasi kegagalan insert PDF membuktikan approval final, snapshot tanda tangan, tanggal dan log ikut rollback. Status tetap `MENUNGGU_TTD`; tabel BLOB belum memiliki route publik atau kanal pengiriman.
-- [x] Empat tes struktur renderer memeriksa urutan semester Agama, satu header grup BING, dan escaping identitas. Tes ini bukan pengganti pemeriksaan PDF visual.
-- [x] Migrasi additive terbatas pada `erapor_sesi.tanggal_pengesahan` dan `erapor_publikasi_pdf`; runner menolak operasi DDL lain. Harness restore disposable lulus 1188 pemeriksaan dan checksum tabel legacy lokal tetap sama.
-- [ ] RAS tetap diblokir sampai spesifikasi/seed resmi tersedia. Penyelarasan variasi teks BING/Agama/Ummi masih perlu keputusan sumber.
+- [x] Tes renderer memeriksa urutan semester Agama, satu header grup BING, escaping identitas, minimum dua baris tes Ummi untuk 0/1 data, serta cetak seluruh data saat lebih dari dua tes. Tes ini bukan pengganti pemeriksaan PDF visual.
+- [x] Migrasi additive terbatas pada `erapor_sesi.tanggal_pengesahan` dan `erapor_publikasi_pdf`; runner menolak operasi DDL lain. Harness restore disposable lulus 1189 pemeriksaan dan checksum tabel legacy lokal tetap sama.
+- [x] Keputusan pilot: BING V1 memakai seed yang ada; narasi Agama V1 dicatat di manifest dan artefak lama tidak dirender ulang; baris tes Ummi yang kosong dicetak sebagai `—` tanpa mengubah data.
+- [ ] RAS dan periode Akhir tetap ditahan sampai spesifikasi/seed resmi tersedia. Hasil Capaian PPI pasca-terbit juga di luar pilot; PPI awal ABK tetap masuk paket.
 - [ ] Pemeriksaan tampilan halaman demi halaman PDF/browser belum tersedia di lingkungan ini. Email/WhatsApp belum diaktifkan; perlu kebijakan penerima dan konfigurasi provider sebelum implementasi/pengiriman.
 - [ ] Migrasi belum diterapkan ke database aplikasi/hosting; feature flag production tetap OFF.
 
-Berikutnya: tinjau hasil PDF secara visual dan selaraskan sumber dokumen; lanjutkan endpoint/retensi/pengiriman hanya setelah kebijakan dan konfigurasi tersedia.
+Berikutnya: tinjau PDF secara visual, selesaikan gerbang migrasi, dan pertahankan cakupan pilot yang disepakati. RAS, alur PPI pasca-terbit, dan pengiriman eksternal tetap ditahan.

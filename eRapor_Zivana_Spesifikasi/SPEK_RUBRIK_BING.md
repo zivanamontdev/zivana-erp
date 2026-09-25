@@ -11,6 +11,8 @@ Seluruh teks disalin **persis** dari berkas sumber, termasuk salah ketik. Daftar
 
 > **Urutan skala sudah ditetapkan `Excellent` di atas `Outstanding`**, dan yang perlu diperbaiki adalah definisinya, bukan urutannya. Baca bagian 4.2.
 
+> **Keputusan implementasi 25 September 2026:** pilot memakai teks dan definisi seed V1 apa adanya, termasuk copy REMARKS saat ini. Koreksi ditunda ke versi rubrik berikutnya; jangan mengubah seed V1 atau PDF yang sudah terbit.
+
 > **Berkas sumber masih memuat isian murid contoh bernama Naura** di Bagian B. Kalau berkas ini dipakai guru sebagai cetakan dasar, teks itu ikut ke mana-mana. Baca bagian 9.
 
 > **Dokumen ini paling kecil dari kelimanya.** 5 nilai dan 4 kotak teks per periode. Bandingkan RTS yang 175 nilai.

@@ -9,5 +9,5 @@ echo json_encode([
     'komentar'=>count($seed['komentar']),
     'skala'=>array_column($seed['skala'],'peringkat','kode'),
     'applied'=>false,
-    'warning'=>'Official seed preserved. Reconcile revised PDF text before application activation; no silent spelling/definition changes.',
+    'decision'=>'BING_V1 is accepted as-is for the pilot. Any future text correction requires a new rubric version; do not mutate V1 or published PDFs.',
 ],JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR).PHP_EOL;

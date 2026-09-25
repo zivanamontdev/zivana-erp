@@ -3,6 +3,8 @@
 /** Prepares one immutable signed PDF artifact inside the final approval transaction. */
 final class EraporPublication
 {
+    private const AGAMA_NARRATIVE_VERSION = 'AGAMA_NARASI_V1';
+
     public static function prepareWithin(PDO $db,int $sessionId,int $actorId,?DateTimeImmutable $clock=null): array
     {
         if ($db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql' || !$db->inTransaction() || min($sessionId,$actorId)<1) {
@@ -46,13 +48,18 @@ final class EraporPublication
         $rendered=EraporPackagePdfRenderer::renderArtifact($data); $pdf=$rendered['bytes'];
         $sourceJson=json_encode(self::manifestSource($data),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR);
         $sourceHash=hash('sha256',$sourceJson); $pdfHash=hash('sha256',$pdf);
+        $manifestDocuments=array_map(static function(array $d): array {
+            $entry=[
+                'id'=>(int)$d['id'],'rubrik_id'=>(int)$d['rubrik_id'],'kode'=>$d['kode'],'jenis'=>$d['jenis_dokumen'],
+                'versi'=>(int)$d['versi'],'seed_sha256'=>$d['seed_sha256'],
+            ];
+            if ($d['jenis_dokumen']==='AGAMA') $entry['narrative_template_version']=$d['narrative_version'];
+            return $entry;
+        },$data['documents']);
         $manifest=[
             'renderer'=>EraporPackagePdfRenderer::version(),'page_count'=>$rendered['pages'],'sesi_id'=>$sessionId,'murid_id'=>(int)$session['murid_id'],
             'periode_id'=>(int)$session['periode_id'],'tanggal_pengesahan'=>$now->format('Y-m-d'),
-            'school'=>$data['school']['snapshot'],'documents'=>array_map(static fn($d)=>[
-                'id'=>(int)$d['id'],'rubrik_id'=>(int)$d['rubrik_id'],'kode'=>$d['kode'],'jenis'=>$d['jenis_dokumen'],
-                'versi'=>(int)$d['versi'],'seed_sha256'=>$d['seed_sha256'],
-            ],$data['documents']),
+            'school'=>$data['school']['snapshot'],'documents'=>$manifestDocuments,
             'signers'=>self::signerManifest($data),'source_sha256'=>$sourceHash,'pdf_sha256'=>$pdfHash,
         ];
         $manifestJson=json_encode($manifest,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR);
@@ -141,6 +148,7 @@ final class EraporPublication
                 $doc['item_names']=[];
                 foreach (self::all($db,'SELECT n.item_id,n.nama FROM erapor_agama_item_nama n JOIN erapor_agama_item i ON i.id=n.item_id JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? ORDER BY n.urutan',[$doc['rubrik_id']]) as $name) $doc['item_names'][(int)$name['item_id']][]=$name['nama'];
                 $notes=[]; foreach ($defs['scopes'] ?? [] as $scope) $notes[]=$doc['form']['values']['catatan:'.$scope['id']] ?? '';
+                $doc['narrative_version']=self::AGAMA_NARRATIVE_VERSION;
                 $doc['narrative']=self::agamaNarrative($student['nama_lengkap'],$period['semester'],$notes);
             }
             if ($doc['jenis_dokumen']==='PPI') $doc['all_columns']=self::all($db,"SELECT * FROM erapor_ppi_kolom WHERE rubrik_id=? AND bagian='C' AND cetak=1 ORDER BY urutan",[$doc['rubrik_id']]);
@@ -229,7 +237,7 @@ final class EraporPublication
     {
         return ['renderer'=>EraporPackagePdfRenderer::version(),'session'=>$data['session']['id'],
             'period'=>$data['period'],'student'=>$data['student'],'school'=>$data['school']['snapshot'],
-            'documents'=>array_map(static fn($d)=>['id'=>$d['id'],'rubrik_id'=>$d['rubrik_id'],'kode'=>$d['kode'],'versi'=>$d['versi'],'seed_sha256'=>$d['seed_sha256'],'period_values'=>$d['period_values'],'form'=>$d['form'],'narrative'=>$d['narrative'] ?? null],$data['documents']),
+            'documents'=>array_map(static fn($d)=>['id'=>$d['id'],'rubrik_id'=>$d['rubrik_id'],'kode'=>$d['kode'],'versi'=>$d['versi'],'seed_sha256'=>$d['seed_sha256'],'period_values'=>$d['period_values'],'form'=>$d['form'],'narrative_template_version'=>$d['narrative_version'] ?? null,'narrative'=>$d['narrative'] ?? null],$data['documents']),
             'published_at'=>$data['published_at']];
     }
     private static function signerManifest(array $data): array

@@ -92,6 +92,9 @@ try {
         && hash_equals($pdfArtifact['sumber_sha256'],$pdfManifest['source_sha256'])
         && is_int($pdfManifest['page_count']) && $pdfManifest['page_count']>=5 && $pdfManifest['page_count']<=80,
         'ABK manifest freezes all five documents, signer evidence, and a bounded PDF page count');
+    $agamaManifest=array_values(array_filter($pdfManifest['documents'],static fn($d)=>($d['jenis'] ?? '')==='AGAMA'))[0] ?? null;
+    catalogCheck(($agamaManifest['narrative_template_version'] ?? null)==='AGAMA_NARASI_V1',
+        'Published Agama narrative records an immutable template version');
     catalogCheck($pdfManifest['school']['tempat_pengesahan']==='Makassar','Publication derives signing place from the configured school address');
     catalogCheck((int)$db->query("SELECT COUNT(*) FROM erapor_sesi_log WHERE sesi_id=$approveSid AND aksi='PDF_DISIAPKAN'")->fetchColumn()===1,'PDF preparation is audited once');
     catalogCheck((int)$db->query("SELECT COUNT(*) FROM erapor_sesi_log WHERE sesi_id=$approveSid AND aksi='SETUJUI'")->fetchColumn()===3,'One audit per approval');

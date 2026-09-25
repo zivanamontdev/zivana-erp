@@ -51,4 +51,38 @@ $check($ganjil!==false && $genap!==false && $ganjil<$genap,'Agama prints semeste
 $check(substr_count($agamaHtml,'CAPAIAN SEMESTER GANJIL')===1 && substr_count($agamaHtml,'CAPAIAN SEMESTER GENAP')===1,
     'Agama prints one section heading per semester');
 
+$ummi=new ReflectionMethod(EraporPackagePdfRenderer::class,'ummi');
+$ummiBase=[
+    'jenis_dokumen'=>'UMMI','nama'=>'Ummi','judul_cetak'=>'Rapor Ummi','signers'=>$signers,
+    'signature_current'=>$emptySignature,'period_values'=>[],'tests'=>[],'items'=>[],'show_pra_tk'=>false,
+    'form'=>['definitions'=>['scale'=>[],'volumes'=>[],'items'=>[]]],
+];
+$emptyUmmiHtml=$ummi->invoke(null,$package,$ummiBase);
+$emptyTestTable=substr($emptyUmmiHtml,strpos($emptyUmmiHtml,'<h2>TES KENAIKAN JILID</h2>'));
+$emptyTestTable=substr($emptyTestTable,0,strpos($emptyTestTable,'</table>')+8);
+preg_match('~<tbody>(.*?)</tbody>~s',$emptyTestTable,$emptyTestBody);
+$check(substr_count($emptyTestBody[1] ?? '', '<tr')===2 && substr_count($emptyTestBody[1] ?? '', 'test-placeholder-row')===2
+    && substr_count($emptyTestBody[1] ?? '', '>—</td>')===8,'Empty Ummi tests print two placeholder rows without becoming stored test values');
+
+$oneUmmi=$ummiBase;
+$oneUmmi['tests']=['TENGAH'=>[['urutan'=>1,'tanggal_tes'=>'2026-09-01','jilid'=>'I','nilai'=>'B']]];
+$oneUmmiHtml=$ummi->invoke(null,$package,$oneUmmi);
+$oneTestTable=substr($oneUmmiHtml,strpos($oneUmmiHtml,'<h2>TES KENAIKAN JILID</h2>'));
+$oneTestTable=substr($oneTestTable,0,strpos($oneTestTable,'</table>')+8);
+$check(substr_count($oneTestTable,'<tr class="test-placeholder-row">')===1
+    && str_contains($oneTestTable,'2026-09-01'),'One Ummi test prints one data row and pads to the two-row minimum');
+
+$manyUmmi=$ummiBase;
+$manyUmmi['tests']=['TENGAH'=>[
+    ['urutan'=>1,'tanggal_tes'=>'2026-09-01','jilid'=>'I','nilai'=>'B'],
+    ['urutan'=>2,'tanggal_tes'=>'2026-09-05','jilid'=>'I','nilai'=>'A'],
+    ['urutan'=>3,'tanggal_tes'=>'2026-09-09','jilid'=>'II','nilai'=>'A+'],
+]];
+$manyUmmiHtml=$ummi->invoke(null,$package,$manyUmmi);
+$manyTestTable=substr($manyUmmiHtml,strpos($manyUmmiHtml,'<h2>TES KENAIKAN JILID</h2>'));
+$manyTestTable=substr($manyTestTable,0,strpos($manyTestTable,'</table>')+8);
+$check(substr_count($manyTestTable,'<tr class="test-placeholder-row">')===0
+    && substr_count($manyTestTable,'2026-09-')===3
+    && str_contains($manyTestTable,'2026-09-09'),'Ummi prints every recorded test without truncating to the two-row baseline');
+
 echo "PASS: $assertions PDF renderer structure checks.\n";

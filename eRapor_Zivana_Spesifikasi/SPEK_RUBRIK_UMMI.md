@@ -251,7 +251,7 @@ rapor_ummi_tes
   INDEX (rapor_id, periode_id, urutan)
 ```
 
-Di cetakan, kalau barisnya kurang dari dua, tetap gambar dua baris supaya bentuknya sama seperti dokumen aslinya. Kalau lebih dari dua, gambar sebanyak yang ada.
+Di cetakan, kalau barisnya kurang dari dua, tetap gambar dua baris supaya bentuknya sama seperti dokumen aslinya. Sel kosong diberi placeholder singkat `—`; placeholder hanya untuk cetakan dan bukan data tes. Kalau lebih dari dua, gambar semua baris yang ada.
 
 Kolom nilai memakai **skala huruf yang sama dengan Bagian A**, yaitu dua belas tingkat dari `A+` sampai `D-`. Jadi komponen isiannya sama, dan `skala_huruf_id` menunjuk ke tabel `skala_huruf` yang sama.
 

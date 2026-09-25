@@ -3,7 +3,7 @@
 /** Deterministic, offline renderer for a frozen eRapor package snapshot. */
 final class EraporPackagePdfRenderer
 {
-    private const VERSION = 'erapor-print-v1';
+    private const VERSION = 'erapor-print-v2';
 
     public static function render(array $package): string
     {
@@ -142,12 +142,13 @@ final class EraporPackagePdfRenderer
         if ($note!==null) $html.='<h2>CATATAN GURU</h2><p class="narrative">'.self::text($note).'</p>';
         $tests=[];
         foreach (['TENGAH','AKHIR'] as $period) foreach ($d['tests'][$period] ?? [] as $test) $tests[]=$test;
-        if ($tests) {
-            usort($tests,static fn($a,$b)=>[$a['tanggal_tes'],$a['urutan']]<=>[$b['tanggal_tes'],$b['urutan']]);
-            $html.='<h2>TES KENAIKAN JILID</h2><table class="report-table"><thead><tr><th>No.</th><th>Tanggal</th><th>Jilid</th><th>Nilai</th></tr></thead><tbody>';
-            foreach ($tests as $test) $html.='<tr><td>'.e((string)$test['urutan']).'</td><td>'.e($test['tanggal_tes']).'</td><td>'.e($test['jilid']).'</td><td>'.e($scale[(string)$test['nilai']] ?? $test['nilai']).'</td></tr>';
-            $html.='</tbody></table>';
+        if ($tests) usort($tests,static fn($a,$b)=>[$a['tanggal_tes'],$a['urutan']]<=>[$b['tanggal_tes'],$b['urutan']]);
+        $html.='<h2>TES KENAIKAN JILID</h2><table class="report-table"><thead><tr><th>No.</th><th>Tanggal</th><th>Jilid</th><th>Nilai</th></tr></thead><tbody>';
+        foreach ($tests as $test) $html.='<tr><td>'.e((string)$test['urutan']).'</td><td>'.e($test['tanggal_tes']).'</td><td>'.e($test['jilid']).'</td><td>'.e($scale[(string)$test['nilai']] ?? $test['nilai']).'</td></tr>';
+        for ($row=count($tests);$row<2;$row++) {
+            $html.='<tr class="test-placeholder-row"><td>—</td><td>—</td><td>—</td><td>—</td></tr>';
         }
+        $html.='</tbody></table>';
         $html.=self::signatureBlock($p,$d,'Pengesahan Rapor Ummi',$d['signature_current'] ?? null);
         return $html;
     }

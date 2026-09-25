@@ -354,7 +354,7 @@ Berbeda dengan Rapor Ummi yang catatannya kosong melompong, di sini sudah ada ka
 
 Nama murid disisipkan otomatis di tiga tempat, dan label semester mengikuti semester rapornya.
 
-Simpan **enam potongan itu**, bukan hasil rangkaiannya. Kalau nanti kalimat pengantarnya diperbaiki, seluruh rapor lama ikut rapi tanpa perlu disunting satu per satu.
+Simpan **enam potongan itu**, bukan hasil rangkaiannya. Narasi yang dicetak menjadi bagian dari snapshot rapor saat pengesahan. Jika redaksi pengantar diperbaiki, naikkan versi template dan gunakan hanya untuk rapor yang disahkan sesudah perubahan; rapor yang sudah terbit tidak boleh berubah. Artefak PDF terbit dan manifest-nya menyimpan versi template yang dipakai.
 
 Label keenam textarea mengikuti urutan kalimatnya, yaitu Aqidah Tauhid, Fiqih Ibadah, Akhlaq, Al-Qur'an dan Hadits, Asmaul Husna, lalu Kisah Sahabat.
 
