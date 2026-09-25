@@ -25,13 +25,15 @@ class TeacherPortal
         $selected ??= $current ?? $past ?? $next;
         if ($current) $current['sisa_hari'] = (int)(new DateTimeImmutable($today))->diff(new DateTimeImmutable($current['tanggal_selesai']))->format('%a');
         if ($selected) {
-            $stmt = $db->prepare("SELECT m.id,m.nama_lengkap,r.id AS rapor_id,r.status AS rapor_status FROM rapor r
+            $stmt = $db->prepare("SELECT m.id,m.nama_lengkap,r.id AS rapor_id,r.status AS rapor_status,
+                    r.diarsipkan_at AS rapor_diarsipkan_at
+                FROM rapor r
                 JOIN murid m ON m.id=r.murid_id WHERE r.guru_id=? AND r.sesi_pembagian_id=?
                 AND (r.status<>'belum_diisi' OR EXISTS (SELECT 1 FROM kelas_guru_murid kg WHERE kg.murid_id=r.murid_id AND kg.guru_id=r.guru_id))
                 ORDER BY m.nama_lengkap");
             $stmt->execute([$teacherId,$selected['id']]);
         } else {
-            $stmt = $db->prepare('SELECT m.id,m.nama_lengkap,NULL AS rapor_id,NULL AS rapor_status FROM murid m WHERE EXISTS (SELECT 1 FROM kelas_guru_murid kg WHERE kg.murid_id=m.id AND kg.guru_id=?) ORDER BY m.nama_lengkap');
+            $stmt = $db->prepare('SELECT m.id,m.nama_lengkap,NULL AS rapor_id,NULL AS rapor_status,NULL AS rapor_diarsipkan_at FROM murid m WHERE EXISTS (SELECT 1 FROM kelas_guru_murid kg WHERE kg.murid_id=m.id AND kg.guru_id=?) ORDER BY m.nama_lengkap');
             $stmt->execute([$teacherId]);
         }
         $year = $selected ?: $db->query('SELECT tahun_awal,tahun_akhir FROM tahun_ajaran WHERE is_active=1 ORDER BY id DESC LIMIT 1')->fetch();

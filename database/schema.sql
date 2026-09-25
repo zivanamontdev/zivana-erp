@@ -434,6 +434,7 @@ CREATE TABLE IF NOT EXISTS rapor (
     template_id INT NOT NULL,
     guru_id INT NULL,
     status ENUM('belum_diisi', 'menunggu_persetujuan', 'disetujui') NOT NULL DEFAULT 'belum_diisi',
+    diarsipkan_at TIMESTAMP NULL DEFAULT NULL,
     disetujui_oleh INT NULL,
     disetujui_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

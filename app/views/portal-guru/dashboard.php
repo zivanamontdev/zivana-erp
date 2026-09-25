@@ -40,14 +40,18 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <?php foreach ($daftarMurid as $student): ?>
                     <?php
                     $draft = $student['rapor_status'] === 'belum_diisi';
+                    $archived = $draft && !empty($student['rapor_diarsipkan_at']);
                     $canOpen = !empty($student['rapor_id']) && uiCan('Portal Guru','Daftar Murid',$draft ? 'edit' : 'lihat');
                     $href = BASE_PATH . '/portal-guru/rapor/' . (int)$student['rapor_id'] . ($draft ? '' : '/pratinjau');
                     ?>
                     <tr><td>
                         <?php if ($canOpen): ?><a class="report-student-row" href="<?= e($href) ?>"><?php else: ?><div class="report-student-row"><?php endif; ?>
-                            <?= uiText($student['nama_lengkap'], 'body-sm', ['class'=>'report-student-name']) ?>
+                            <span class="report-student-identity">
+                                <?= uiText($student['nama_lengkap'], 'body-sm', ['class'=>'report-student-name']) ?>
+                                <?php if ($archived): ?><?= uiBadge('Diarsipkan', 'netral') ?><?php endif; ?>
+                            </span>
                             <?php if ($canOpen): ?>
-                                <?= uiText($draft ? 'Isi Rapor' : 'Lihat Rapor', 'body-sm', ['tone'=>$draft ? 'brand' : 'success']) ?>
+                                <?= uiText($archived ? 'Lanjutkan' : ($draft ? 'Isi Rapor' : 'Lihat Rapor'), 'body-sm', ['tone'=>$draft ? 'brand' : 'success']) ?>
                                 <span class="report-student-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span>
                             <?php else: ?>
                                 <?= uiText(empty($student['rapor_id']) ? 'Rapor belum tersedia' : 'Akses dibatasi', 'caption-md', ['tone'=>'muted']) ?>

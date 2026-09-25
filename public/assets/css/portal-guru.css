@@ -367,6 +367,7 @@ button.teacher-report-action:focus-visible,
 .focus-shell { min-height: 100svh; padding: var(--page-gutter-block) var(--page-gutter-inline); }
 .focus-column { width: 100%; max-width: calc(61.25 * var(--ui-unit)); min-width: 0; }
 .focus-column > *, .pengisian-item-row > * { min-width: 0; }
+.teacher-report-back { align-self: flex-start; margin-block: 0; }
 .dashboard-banner, .dashboard-murid-row, .dashboard-murid-row-actions { flex-wrap: wrap; }
 .pengisian-header-actions { flex-wrap: wrap; margin-left: auto; }
 .pengisian-rapor-progress { flex-wrap: wrap; }
@@ -382,6 +383,7 @@ button.teacher-report-action:focus-visible,
 /* ---------- Responsif — Pengisian Rapor WAJIB jalan baik di HP ---------- */
 @media (max-width: 40rem) {
   .focus-shell { padding: 0; }
+  .teacher-report-back { margin: var(--space-4) var(--space-5) 0; }
   .focus-column > form { padding-bottom: calc(var(--report-actions-height, 7rem) + 1.25rem); }
   .pengisian-header-card { border-radius: 0; width: 100%; box-sizing: border-box; }
   .focus-column > form > .pengisian-kategori,

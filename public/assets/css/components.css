@@ -698,7 +698,8 @@ body.modal-open {
 .report-period-table .data-table { min-width: 0; table-layout: fixed; }
 .report-period-table .data-table tbody td { padding: 0; height: auto; background: var(--color-login-preview-row); }
 .report-student-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); color: inherit; text-decoration: none; }
-.report-student-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.report-student-identity { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; flex-wrap: wrap; gap: var(--space-3); }
+.report-student-name { min-width: 0; overflow-wrap: anywhere; }
 .report-status-pending { color: var(--color-orange-600); }
 .report-student-chevron { display: inline-flex; flex: 0 0 auto; transform: rotate(-90deg); color: var(--color-login-preview-text); }
 .report-student-chevron svg { width: calc(1.25 * var(--ui-unit)); height: calc(1.25 * var(--ui-unit)); }

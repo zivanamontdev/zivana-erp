@@ -3,9 +3,10 @@
 /** Atomic draft save/submission, with ownership and template-bound validation. */
 class ReportEntry
 {
-    public static function save(int $reportId, int $teacherId, mixed $values, mixed $notes, bool $submit = false): void
+    public static function save(int $reportId, int $teacherId, mixed $values, mixed $notes, bool $submit = false, bool $archive = false): int
     {
         if (!is_array($values) || !is_array($notes)) throw new DomainException('Format nilai atau catatan tidak valid.');
+        if ($submit && $archive) throw new DomainException('Rapor tidak dapat diarsipkan dan dikirim sekaligus.');
         $db=Database::getInstance();
         $db->beginTransaction();
         try {
@@ -55,9 +56,13 @@ class ReportEntry
                     WHERE n.rapor_id=? AND n.semester=? AND a.template_id=?');
                 $query->execute([$reportId,$semester,$report['template_id']]);
                 if (!$items || (int)$query->fetchColumn()!==count($items)) throw new DomainException('Lengkapi semua nilai sebelum mengirim rapor. Jika template kosong, hubungi admin.');
-                $db->prepare("UPDATE rapor SET status='menunggu_persetujuan' WHERE id=? AND status='belum_diisi'")->execute([$reportId]);
+                $db->prepare("UPDATE rapor SET status='menunggu_persetujuan',diarsipkan_at=NULL WHERE id=? AND status='belum_diisi'")->execute([$reportId]);
+            } elseif ($archive) {
+                $db->prepare("UPDATE rapor SET diarsipkan_at=CURRENT_TIMESTAMP WHERE id=? AND status='belum_diisi'")->execute([$reportId]);
             }
+            $sessionId=(int)$report['sesi_pembagian_id'];
             $db->commit();
+            return $sessionId;
         } catch(Throwable $error) {
             $db->rollBack(); throw $error;
         }

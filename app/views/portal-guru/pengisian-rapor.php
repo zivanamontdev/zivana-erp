@@ -24,6 +24,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
 <?php unset($_SESSION['report_error']); endif; ?>
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 
+<a class="ui-button ui-button--outline teacher-report-back" href="<?= BASE_PATH ?>/portal-guru/dashboard?sesi_id=<?= (int)$rapor['sesi_pembagian_id'] ?>">
+    <span class="ui-button-label">Kembali ke Dashboard</span>
+</a>
+
 <form method="POST" action="<?= BASE_PATH ?>/portal-guru/rapor/<?= (int) $rapor['id'] ?>/simpan" data-report-entry>
     <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
 
@@ -32,7 +36,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <h1>Pengisian Rapor</h1>
             <div class="pengisian-header-actions">
 <?php if (uiCan('Portal Guru', 'Daftar Murid', 'edit')): ?>
-                <?= uiButton('Arsip Rapor', 'outline', ['type'=>'submit','marginVertical'=>0]) ?>
+                <?= uiButton('Arsip Rapor', 'outline', ['type'=>'submit','marginVertical'=>0,'attributes'=>['formaction'=>BASE_PATH . '/portal-guru/rapor/' . (int)$rapor['id'] . '/arsipkan']]) ?>
 <?php endif; ?>
 <?php if (uiCan('Portal Guru', 'Daftar Murid', 'kirim')): ?>
                 <?= uiButton('Selesaikan Rapor', 'primary', ['type'=>'submit','marginVertical'=>0,'disabled'=>$totalItem===0 || $terisiItem!==$totalItem,'attributes'=>['data-report-submit'=>true,'formaction'=>BASE_PATH . '/portal-guru/rapor/' . (int)$rapor['id'] . '/selesaikan']]) ?>

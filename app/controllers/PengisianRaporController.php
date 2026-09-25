@@ -51,6 +51,13 @@ class PengisianRaporController extends Controller
         $this->saveEntry($raporId, false);
     }
 
+    public function arsipkan(string $raporId): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Daftar Murid', 'edit');
+        $this->saveEntry($raporId, false, true);
+    }
+
     public function selesaikan(string $raporId): void
     {
         $this->middleware(AuthMiddleware::class);
@@ -58,13 +65,24 @@ class PengisianRaporController extends Controller
         $this->saveEntry($raporId, true);
     }
 
-    private function saveEntry(string $raporId, bool $submit): void
+    private function saveEntry(string $raporId, bool $submit, bool $archive = false): void
     {
         try {
-            ReportEntry::save((int)$raporId, (int)($_SESSION['karyawan_id'] ?? 0), $this->input('nilai', []), $this->input('catatan', []), $submit);
+            $sessionId = ReportEntry::save(
+                (int)$raporId,
+                (int)($_SESSION['karyawan_id'] ?? 0),
+                $this->input('nilai', []),
+                $this->input('catatan', []),
+                $submit,
+                $archive
+            );
         } catch (DomainException $e) {
             $_SESSION['report_error'] = $e->getMessage();
             $this->redirect('/portal-guru/rapor/' . (int)$raporId);
+            return;
+        }
+        if ($archive) {
+            $this->redirect('/portal-guru/dashboard?sesi_id=' . $sessionId);
             return;
         }
         $this->redirect('/portal-guru/rapor/' . (int)$raporId . ($submit ? '/pratinjau' : ''));
