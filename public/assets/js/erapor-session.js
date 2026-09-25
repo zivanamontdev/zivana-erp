@@ -9,6 +9,13 @@
     var token = root.dataset.csrfToken;
     var status = root.querySelector('[data-erapor-status]');
     var recovery = root.querySelector('[data-erapor-recovery]');
+    // Sisakan ruang setinggi action bar mobile (fixed) supaya isian terakhir tidak tertutup.
+    var actionBar = root.querySelector('.pengisian-header-actions');
+    if (actionBar && window.ResizeObserver) {
+      new window.ResizeObserver(function () {
+        root.style.setProperty('--report-actions-height', actionBar.getBoundingClientRect().height + 'px');
+      }).observe(actionBar);
+    }
     var pending = new Map();
     var timer = null;
     var saving = false;
@@ -292,6 +299,43 @@
       if (field.tagName === 'SELECT' || field.type === 'checkbox') noteChange(field);
     });
 
+    // Konfirmasi memakai modal aplikasi (#erapor-confirm-modal), bukan window.confirm() bawaan browser.
+    var confirmModal = root.querySelector('#erapor-confirm-modal');
+    // Pindahkan ke <body> agar overlay menutupi action bar fixed (root membentuk stacking context sendiri).
+    if (confirmModal) document.body.appendChild(confirmModal);
+    function askConfirm(title, message, acceptLabel) {
+      if (!confirmModal) return Promise.resolve(window.confirm(message));
+      var accept = confirmModal.querySelector('[data-erapor-confirm-accept]');
+      var cancel = confirmModal.querySelector('[data-erapor-confirm-cancel]');
+      var opener = document.activeElement;
+      confirmModal.querySelector('.modal-title').textContent = title;
+      confirmModal.querySelector('[data-erapor-confirm-message]').textContent = message;
+      accept.textContent = acceptLabel;
+      confirmModal.classList.add('is-open');
+      document.body.classList.add('modal-open');
+      cancel.focus();
+      return new Promise(function (resolve) {
+        function close(result) {
+          confirmModal.classList.remove('is-open');
+          document.body.classList.remove('modal-open');
+          confirmModal.removeEventListener('click', onClick);
+          document.removeEventListener('keydown', onKey);
+          if (opener && opener.focus) opener.focus();
+          resolve(result);
+        }
+        function onClick(event) {
+          event.stopPropagation();
+          if (event.target.closest('[data-erapor-confirm-accept]')) close(true);
+          else if (event.target === confirmModal || event.target.closest('[data-erapor-confirm-cancel]')) close(false);
+        }
+        function onKey(event) {
+          if (event.key === 'Escape') close(false);
+        }
+        confirmModal.addEventListener('click', onClick);
+        document.addEventListener('keydown', onKey);
+      });
+    }
+
     root.addEventListener('click', async function (event) {
       var addTest = event.target.closest('[data-erapor-add-test]');
       if (addTest) {
@@ -327,7 +371,8 @@
           updateConfirmState();
           return;
         }
-        if (!window.confirm('Hapus catatan tes ini dari Rapor Ummi?')) return;
+        if (!(await askConfirm('Hapus Catatan Tes?', 'Catatan tes ini akan dihapus dari Rapor Ummi.', 'Hapus'))) return;
+        if (blocked || saving) return;
         testRow.dataset.eraporDeleteTest = 'true';
         testRow.dataset.eraporIncomplete = 'false';
         var testStatus = testRow.querySelector('[data-ummi-test-status]');
@@ -373,7 +418,7 @@
       }
       var reload = event.target.closest('[data-erapor-reload]');
       if (reload) {
-        if (window.confirm('Muat ulang sesi? Perubahan yang belum tersimpan di halaman ini akan hilang.')) window.location.reload();
+        if (await askConfirm('Muat Ulang Sesi?', 'Perubahan yang belum tersimpan di halaman ini akan hilang.', 'Muat Ulang')) window.location.reload();
         return;
       }
       var confirmButton = event.target.closest('[data-erapor-confirm]');
@@ -386,9 +431,11 @@
       }
       var receiving = Boolean(receiveButton);
       var confirmation = receiving
-        ? 'Konfirmasi penerimaan akan mengunci seluruh isian rapor dan mengirimkannya ke antrean persetujuan. Setelah dilanjutkan, nilai tidak dapat diubah. Lanjutkan?'
-        : 'Konfirmasi ini menandai pengisian guru telah selesai. Anda masih dapat meninjau dan mengubah isian sebelum konfirmasi penerimaan. Lanjutkan?';
-      if (!window.confirm(confirmation)) return;
+        ? 'Konfirmasi penerimaan akan mengunci seluruh isian rapor dan mengirimkannya ke antrean persetujuan. Setelah dilanjutkan, nilai tidak dapat diubah.'
+        : 'Konfirmasi ini menandai pengisian guru telah selesai. Anda masih dapat meninjau dan mengubah isian sebelum konfirmasi penerimaan.';
+      if (!(await askConfirm(receiving ? 'Konfirmasi Penerimaan?' : 'Selesaikan Rapor?', confirmation,
+        receiving ? 'Konfirmasi Penerimaan' : 'Selesaikan Rapor'))) return;
+      if (pending.size || saving || blocked) return;
       setConfirmDisabled(true);
       setReceptionDisabled(true);
       try {

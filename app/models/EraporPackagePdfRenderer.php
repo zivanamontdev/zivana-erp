@@ -208,7 +208,11 @@ final class EraporPackagePdfRenderer
             .'<table class="report-table ppi-table ppi-program"><colgroup><col style="width:.8cm"><col style="width:2.4cm">';
         foreach ($columns as $column) $html.='<col style="width:'.e((string)$column['lebar_cetak_cm']).'cm">';
         $html.='</colgroup><thead>'.self::tableIdentity($p,$d,8).'<tr><th rowspan="2">No</th><th rowspan="2">Aspek Perkembangan</th><th colspan="2">Tujuan</th><th rowspan="2">Strategi</th><th rowspan="2">Media</th><th colspan="2">Hasil Capaian</th></tr><tr>';
-        foreach ($columns as $column) $html.='<th>'.nl2br(e($column['label_cetak']),false).'</th>';
+        // Baris kedua hanya sub-kolom Tujuan dan Hasil Capaian; Strategi/Media sudah rowspan=2 di baris pertama.
+        foreach ($columns as $column) {
+            if (!preg_match('/^(tujuan_|hasil_capaian_)/',(string)$column['kode'])) continue;
+            $html.='<th>'.nl2br(e($column['label_cetak']),false).'</th>';
+        }
         $html.='</tr></thead><tbody>';
         foreach ($f['aspects'] ?? [] as $i=>$aspect) {
             $html.='<tr><td>'.($i+1).'</td><td>'.e($aspect['nama']).'</td>';

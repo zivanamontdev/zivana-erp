@@ -23,7 +23,7 @@ require VIEW_PATH.'/layouts/shell-header.php';
         <?php foreach ($state['flows'] as $flow): ?>
             <?php ob_start(); ?>
             <div class="erapor-assignment-heading">
-                <?= uiText($flow['label'],'headline-sm',['tag'=>'h2','weight'=>'bold','tone'=>'heading']) ?>
+                <?= uiText($flow['label'],'body-md',['tag'=>'h2','weight'=>'bold','tone'=>'heading']) ?>
                 <?= uiBadge($flow['pending'].' rapor menunggu',$flow['pending']>0?'peringatan':'netral') ?>
             </div>
             <p class="text-caption-md erapor-assignment-scope">

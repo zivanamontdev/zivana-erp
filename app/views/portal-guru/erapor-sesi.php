@@ -134,7 +134,11 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     $scaleChoices[$grade] = $scale['label'];
                     $scaleImages[$grade] = skalaSimbolSrc($scale['simbol']);
                 }
+                $reference = $document['reference'] ?? null;
                 ?>
+                <?php if ($reference): ?>
+                    <p class="erapor-reference-note"><?= e($reference['label']) ?> ditampilkan di bawah setiap tujuan sebagai pembanding dan tidak dapat diubah.</p>
+                <?php endif; ?>
                 <?php foreach ($definitions['areas'] as $area): ?>
                     <details class="pengisian-kategori ui-disclosure erapor-area">
                         <summary class="pengisian-kategori-header ui-disclosure-trigger"><span><?= e(mb_convert_case($area['nama'], MB_CASE_TITLE, 'UTF-8')) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary>
@@ -154,7 +158,18 @@ require VIEW_PATH . '/layouts/focus-header.php';
                                                 <h3 class="erapor-subheading"><?= e($groups[$groupId]['nama']) ?></h3>
                                             <?php endif; $lastGroupId = $groupId; ?>
                                             <div class="pengisian-item-row">
-                                                <span><?= e($item['tujuan']) ?></span>
+                                                <span>
+                                                    <?= e($item['tujuan']) ?>
+                                                    <?php if ($reference): ?>
+                                                        <?php $refGrade = $reference['values']['nilai:' . $item['id']] ?? null; $refKey = $refGrade === null ? null : (string)$refGrade; ?>
+                                                        <small class="erapor-reference" data-erapor-reference><?= e($reference['label']) ?>:
+                                                            <?php if ($refKey !== null && isset($scaleChoices[$refKey])): ?>
+                                                                <?php if (($scaleImages[$refKey] ?? '') !== ''): ?><img src="<?= e($scaleImages[$refKey]) ?>" alt=""><?php endif; ?>
+                                                                <?= e($scaleChoices[$refKey]) ?>
+                                                            <?php else: ?>—<?php endif; ?>
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </span>
                                                 <?= $renderSelect($document, 'RTS', 'nilai:' . $item['id'], $item['tujuan'], $scaleChoices, $value === null ? null : (string)$value, $scaleImages) ?>
                                             </div>
                                         <?php endforeach; ?>
@@ -350,13 +365,20 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <?php endif; ?>
         </section>
     <?php endforeach; ?>
-</main>
 
-<script type="application/json" data-erapor-initial-state><?= json_encode([
-    'completion' => $form['completion'],
-    'capabilities' => $form['capabilities'],
-    'session' => $session,
-], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?></script>
+    <?php // Konfirmasi memakai modal aplikasi (sama dengan halaman persetujuan), bukan window.confirm() bawaan browser. ?>
+    <?= uiModal('erapor-confirm-modal', 'Konfirmasi', '<p class="ui-modal-description" data-erapor-confirm-message></p><div class="modal-body"><div class="modal-actions">'
+        . uiButton('Batal', 'outline', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-cancel'=>true]])
+        . uiButton('Lanjutkan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-accept'=>true]])
+        . '</div></div>') ?>
+
+    <?php // Harus di dalam [data-erapor-editor]: erapor-session.js mencarinya lewat root.querySelector(). ?>
+    <script type="application/json" data-erapor-initial-state><?= json_encode([
+        'completion' => $form['completion'],
+        'capabilities' => $form['capabilities'],
+        'session' => $session,
+    ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?></script>
+</main>
 
 <script src="<?= BASE_PATH ?>/assets/js/ui-select.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-select.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/erapor-session.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/erapor-session.js') ?>"></script>

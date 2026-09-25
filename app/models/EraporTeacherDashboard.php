@@ -161,10 +161,7 @@ final class EraporTeacherDashboard
 
     private static function condition(string $value): ?string
     {
-        $value = mb_strtolower(trim($value));
-        if (in_array($value,['regular','reguler'],true)) return 'Regular';
-        if (in_array($value,['abk','anak berkebutuhan khusus','berkebutuhan khusus','abk (anak berkebutuhan khusus)'],true)) return 'ABK';
-        return null;
+        return EraporPackagePlan::normalizeCondition($value);
     }
 
     private static function one(PDO $db,string $sql,array $args): array|false

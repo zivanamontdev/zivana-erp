@@ -10,6 +10,7 @@ Status: katalog/rubrik, alur pengisian guru, persetujuan, assignment, profil tan
 - Spesifikasi RTS, Agama, Ummi, Bahasa Inggris, dan PPI: struktur serta aturan khusus setiap dokumen. Gunakan lima JSON seed sebagai sumber data, bukan transkripsi tabel Markdown.
 - PDF, DOCX, dan XLSX dalam folder spesifikasi: acuan dokumen asli. Perbedaan versi harus dicatat dan diselaraskan, bukan diperbaiki sepihak.
 - [Design system](design-system.md): komponen UI aplikasi tetap digunakan. Setiap warna harus dicari di `config/colors.php`; tambahkan token jika belum tersedia, jangan menulis hex langsung di halaman/komponen.
+- [Panduan uji visual eRapor](erapor-visual-testing.md): langkah browser, viewport, batas cakupan, dan hasil UI yang diharapkan.
 - Jangan mengubah data produksi, menghapus nilai lama, atau menjalankan migrasi destruktif tanpa persetujuan. Tidak membuat CRUD editor kurikulum, reminder, delegasi persetujuan, atau fitur salin otomatis yang tidak diminta.
 
 ## 0. Pemahaman dan keputusan

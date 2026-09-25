@@ -40,6 +40,11 @@ foreach (['semester'=>null,'tipe'=>'Unknown','awal_periode'=>'2026-02-30','akhir
     $row=$base; $row[$key]=$value; planReject(fn()=>$build('Regular',$row));
 }
 planReject(fn()=>$build('Unknown',$base));
+// Form Tambah Murid menyimpan 'Reguler'/'Berkebutuhan Khusus'; factory menormalisasi sebelum build().
+foreach (['Reguler'=>'Regular',' regular '=>'Regular','Berkebutuhan Khusus'=>'ABK','ABK (Anak Berkebutuhan Khusus)'=>'ABK','ABK'=>'ABK'] as $raw=>$expected) {
+    planCheck(EraporPackagePlan::normalizeCondition($raw)===$expected);
+}
+planCheck(EraporPackagePlan::normalizeCondition('Unknown')===null && EraporPackagePlan::normalizeCondition('')===null);
 $bad=$catalog; $bad[0]['status']='arsip'; planReject(fn()=>$build('Regular',$base,$bad));
 $bad=$catalog; $bad[0]['cakupan']='SEMESTER'; planReject(fn()=>$build('Regular',$base,$bad));
 $bad=$catalog; $bad[]=$bad[0]; planReject(fn()=>$build('Regular',$base,$bad));

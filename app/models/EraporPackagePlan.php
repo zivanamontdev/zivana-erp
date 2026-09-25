@@ -5,6 +5,15 @@
  */
 final class EraporPackagePlan
 {
+    /** Form murid menyimpan 'Reguler'/'Berkebutuhan Khusus'; seed/impor lama memakai 'Regular'/'ABK'. */
+    public static function normalizeCondition(string $value): ?string
+    {
+        $value=mb_strtolower(trim($value));
+        if (in_array($value,['regular','reguler'],true)) return 'Regular';
+        if (in_array($value,['abk','anak berkebutuhan khusus','berkebutuhan khusus','abk (anak berkebutuhan khusus)'],true)) return 'ABK';
+        return null;
+    }
+
     public static function build(int $studentId,string $condition,array $legacyPeriod,array $catalog,array $composition): array
     {
         if ($studentId<1 || !in_array($condition,['Regular','ABK'],true)) throw new DomainException('Identitas/kondisi murid tidak valid.');

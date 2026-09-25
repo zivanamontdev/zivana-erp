@@ -101,6 +101,9 @@ $dom = new DOMDocument();
 $xpath = new DOMXPath($dom);
 
 eraporUiCheck(str_contains($html, 'data-erapor-editor') && str_contains($html, 'erapor-session.js'), 'Session editor boot contract');
+$initialState = $xpath->query('//*[@data-erapor-editor]//script[@data-erapor-initial-state]');
+eraporUiCheck($initialState->length === 1 && json_decode($initialState->item(0)->textContent, true) !== null,
+    'Initial state JSON lives inside the editor root (erapor-session.js scopes its lookup to that root)');
 eraporUiCheck(str_contains($html, 'Murid Uji') && str_contains($html, 'Ranting Akasia'), 'Student/class identity stays in header');
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="RTS"]')->length === 1, 'RTS grade select rendered');
 eraporUiCheck(str_contains($xpath->query('//select[@data-erapor-entry="RTS"]')->item(0)->getAttribute('class'), 'font-base'), 'Unspecified form font defaults to Plus Jakarta Sans');
@@ -164,4 +167,19 @@ eraporUiCheck(str_contains($script, "'/konfirmasi-penerimaan'")
     && str_contains($script, 'data-erapor-confirm-reception')
     && str_contains($script, 'tidak dapat diubah'),
     'Client routes reception separately and warns about the irreversible lock');
+// SPEK_RUBRIK_RTS 6: sesi Tengah Genap menampilkan nilai TS Ganjil hanya-baca di baris yang sama.
+eraporUiCheck($xpath->query('//*[@data-erapor-reference]')->length === 0, 'No TS Ganjil reference outside Tengah Genap');
+$form['documents'][0]['reference'] = ['label' => 'TS Ganjil', 'values' => ['nilai:3' => 3]];
+ob_start();
+eval('?>' . $source);
+$refHtml = ob_get_clean();
+$refDom = new DOMDocument();
+@$refDom->loadHTML($refHtml);
+$refXpath = new DOMXPath($refDom);
+$reference = $refXpath->query('//*[contains(@class,"pengisian-item-row")]//*[@data-erapor-reference]');
+eraporUiCheck($reference->length === 1 && str_contains($reference->item(0)->textContent, 'Berkembang sesuai harapan')
+    && $refXpath->query('//*[@data-erapor-reference]//img')->length === 1, 'TS Ganjil value shown with symbol beside the Genap select');
+eraporUiCheck($refXpath->query('//*[@data-erapor-reference]//select|//*[@data-erapor-reference][@data-erapor-key]')->length === 0, 'TS Ganjil reference is not an editable/autosaved field');
+unset($form['documents'][0]['reference']);
+
 echo "PASS: E-Rapor session editor markup covers RTS, Agama, BING, PPI, Ummi, and server-gated submission.\n";

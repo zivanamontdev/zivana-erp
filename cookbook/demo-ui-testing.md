@@ -1,5 +1,7 @@
 # Data dummy untuk uji UI
 
+Untuk uji browser visual **eRapor baru**, ikuti [panduan uji visual eRapor](erapor-visual-testing.md). Akun dan rapor legacy di bawah ini tidak otomatis berarti sesi eRapor baru sudah dibuat.
+
 Data sudah diterapkan pada database lokal. Semua entitas contoh diberi penanda `[DEMO]` atau email `@demo.zivana.test`. Data sekolah, akun asli, hak akses role, tahun aktif, template resmi, dan nilai asli tidak diganti. Seeder memeriksa checksum seluruh baris yang sudah ada sebelum commit.
 
 ## Akun

@@ -42,7 +42,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
 
 <?php foreach ($review['documents'] as $document): ?>
     <?php ob_start(); ?>
-    <h2 class="erapor-approval-document-title"><?= uiText($document['nama'], 'headline-sm', ['tag' => 'span']) ?></h2>
+    <h2 class="erapor-approval-document-title"><?= uiText($document['nama'], 'body-md', ['tag' => 'span', 'weight' => 'bold']) ?></h2>
     <div class="data-table-wrapper">
         <table class="data-table erapor-approval-values">
             <thead><tr><th>Aspek Penilaian</th><th>Isian Guru</th></tr></thead>

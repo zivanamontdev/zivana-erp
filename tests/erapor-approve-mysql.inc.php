@@ -96,6 +96,17 @@ try {
     catalogCheck(($agamaManifest['narrative_template_version'] ?? null)==='AGAMA_NARASI_V1',
         'Published Agama narrative records an immutable template version');
     catalogCheck($pdfManifest['school']['tempat_pengesahan']==='Makassar','Publication derives signing place from the configured school address');
+    // periode_penilaian menyimpan 'ganjil'/'Tengah Semester'; renderer membaca key ternormalisasi (TS_GANJIL, TENGAH_GANJIL, ...).
+    $capture=new ReflectionMethod(EraporPublication::class,'capture'); $capture->setAccessible(true);
+    $capSession=$db->query('SELECT * FROM erapor_sesi WHERE id='.$approveSid)->fetch(PDO::FETCH_ASSOC);
+    $capApprovals=$db->query('SELECT * FROM erapor_sesi_penyetuju WHERE sesi_id='.$approveSid.' ORDER BY urutan,id')->fetchAll(PDO::FETCH_ASSOC);
+    $captured=array_column($capture->invoke(null,$db,$capSession,$capApprovals,new DateTimeImmutable())['documents'],null,'jenis_dokumen');
+    $capSemester=$capSession['semester'];
+    catalogCheck(!empty($captured['RTS']['period_values']['TS_'.$capSemester]) && isset($captured['RTS']['signature_periods'][$capSemester])
+        && !empty($captured['AGAMA']['period_values']['TENGAH_'.$capSemester]) && !empty($captured['UMMI']['period_values']['TENGAH'])
+        && !empty($captured['BING']['period_values']['CURRENT'])
+        && str_contains($captured['AGAMA']['narrative'],'semester '.strtolower($capSemester)),
+        'Publication captures filled values under the keys the PDF renderer reads (not blank grade cells)');
     catalogCheck((int)$db->query("SELECT COUNT(*) FROM erapor_sesi_log WHERE sesi_id=$approveSid AND aksi='PDF_DISIAPKAN'")->fetchColumn()===1,'PDF preparation is audited once');
     catalogCheck((int)$db->query("SELECT COUNT(*) FROM erapor_sesi_log WHERE sesi_id=$approveSid AND aksi='SETUJUI'")->fetchColumn()===3,'One audit per approval');
     $manifestTampered=$pdfManifest; $manifestTampered['source_sha256']=str_repeat('0',64);

@@ -88,6 +88,8 @@ final class EraporPublication
             FROM murid m LEFT JOIN kelas k ON k.id=m.kelas_id WHERE m.id=?',[$session['murid_id']]);
         $school=self::one($db,'SELECT * FROM sekolah ORDER BY id LIMIT 1',[]);
         if (!$period || !$student || !$school) throw new DomainException('Data periode, murid, atau sekolah tidak tersedia.');
+        // Snapshot sesi sudah ternormalisasi (Regular/ABK); teks mentah murid bisa 'Reguler'/'Berkebutuhan Khusus'.
+        $student['status_kondisi']=$session['kondisi'];
         $cal=EraporCalendar::normalize($period);
         if ($cal['jenis']!=='TENGAH' || $cal['semester']!==$session['semester'] || $cal['tahun_ajaran_id']!==(int)$session['tahun_ajaran_id']) throw new DomainException('Periode sesi berubah atau bukan periode Tengah.');
         $address=(string)$school['alamat'];
@@ -100,10 +102,13 @@ final class EraporPublication
             'alamat'=>$address,'tempat_pengesahan'=>$place,'npsn'=>$school['npsn']];
         $student['usia']=self::age($student['tanggal_lahir'],$now);
         $student['nama_kelas']=trim(($student['level_kelas'] ?? '').' '.($student['nama_kelas'] ?? ''));
-        $sourceSession=$db->prepare("SELECT s.*,p.semester AS period_semester,p.tipe AS period_type,p.nama AS period_name
+        $sourceSession=$db->prepare("SELECT s.*,s.semester AS period_semester,s.jenis AS period_type,p.nama AS period_name
             FROM erapor_sesi_dokumen sd JOIN erapor_sesi s ON s.id=sd.sesi_id
             JOIN periode_penilaian p ON p.id=s.periode_id
-            WHERE sd.dokumen_id=? AND (s.status='SELESAI' OR s.id=?) ORDER BY s.tahun_ajaran_id,s.semester,p.tipe");
+            WHERE sd.dokumen_id=? AND (s.status='SELESAI' OR s.id=?
+                -- Pilot: sesi yang sudah disetujui penuh tetap MENUNGGU_TTD, tetapi artefaknya sudah terbit.
+                OR EXISTS(SELECT 1 FROM erapor_publikasi_pdf a WHERE a.sesi_id=s.id))
+            ORDER BY s.tahun_ajaran_id,s.semester,p.tipe");
         $docs=self::all($db,'SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,r.judul_cetak,r.versi,r.status
             FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id
             JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan',[$session['id']]);
@@ -121,7 +126,7 @@ final class EraporPublication
                     'RTS'=>'TS_'.$relatedSession['period_semester'],
                     'AGAMA'=>$relatedSession['period_type'].'_'.$relatedSession['period_semester'],
                     'UMMI'=>$relatedSession['period_type'],
-                    default=>$relatedSession['id']===$session['id']?'CURRENT':null,
+                    default=>(int)$relatedSession['id']===(int)$session['id']?'CURRENT':null,
                 };
                 if ($key!==null && ($doc['jenis_dokumen']!=='RTS' || $relatedSession['period_type']==='TENGAH')) {
                     $periodValues[$key]=$relatedForm['values'];
@@ -149,7 +154,7 @@ final class EraporPublication
                 foreach (self::all($db,'SELECT n.item_id,n.nama FROM erapor_agama_item_nama n JOIN erapor_agama_item i ON i.id=n.item_id JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? ORDER BY n.urutan',[$doc['rubrik_id']]) as $name) $doc['item_names'][(int)$name['item_id']][]=$name['nama'];
                 $notes=[]; foreach ($defs['scopes'] ?? [] as $scope) $notes[]=$doc['form']['values']['catatan:'.$scope['id']] ?? '';
                 $doc['narrative_version']=self::AGAMA_NARRATIVE_VERSION;
-                $doc['narrative']=self::agamaNarrative($student['nama_lengkap'],$period['semester'],$notes);
+                $doc['narrative']=self::agamaNarrative($student['nama_lengkap'],$session['semester'],$notes);
             }
             if ($doc['jenis_dokumen']==='PPI') $doc['all_columns']=self::all($db,"SELECT * FROM erapor_ppi_kolom WHERE rubrik_id=? AND bagian='C' AND cetak=1 ORDER BY urutan",[$doc['rubrik_id']]);
             // RTS stores the immutable source hash in seed history; newer rubrics also keep JSON.

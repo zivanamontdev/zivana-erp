@@ -34,7 +34,10 @@ final class EraporTeacherForm
             $locked=!in_array($session['status'],['BELUM_DIISI','TELAH_DIISI'],true);
             $reason=$locked?'STATUS_TERKUNCI':($today>$period['akhir_periode']?'TENGGAT_BERAKHIR':null);
             $docs=self::rows($db,'SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,sd.urutan FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan',[$sessionId]);
-            foreach ($docs as &$doc) $doc['form']=self::documentForm($db,$session,$doc);
+            foreach ($docs as &$doc) {
+                $doc['form']=self::documentForm($db,$session,$doc);
+                $doc['reference']=self::rtsReference($db,$session,$doc);
+            }
             unset($doc);
             $result=['session'=>['id'=>$sessionId,'status'=>$session['status'],'kondisi'=>$session['kondisi']],
                 'student'=>$student,'period'=>$period,'documents'=>$docs,'completion'=>$completion,
@@ -93,6 +96,20 @@ final class EraporTeacherForm
         }
         return ['definitions'=>$defs,'values'=>$values];
     }
+    /** SPEK_RUBRIK_RTS 6: saat mengisi TS Genap, nilai TS Ganjil pada dokumen RTS yang sama tampil hanya-baca.
+     * Baris itu milik sesi Tengah Ganjil; tidak pernah disalin ke sesi Genap. */
+    private static function rtsReference(PDO $db,array $s,array $d): ?array
+    {
+        if ($d['jenis_dokumen']!=='RTS' || $s['semester']!=='GENAP' || $s['jenis']!=='TENGAH') return null;
+        $ganjil=self::rows($db,"SELECT s.id FROM erapor_sesi s JOIN erapor_sesi_dokumen sd ON sd.sesi_id=s.id
+            WHERE sd.dokumen_id=? AND s.murid_id=? AND s.tahun_ajaran_id=? AND s.semester='GANJIL' AND s.jenis='TENGAH' AND s.id<>?",
+            [$d['id'],$s['murid_id'],$s['tahun_ajaran_id'],$s['id']])[0] ?? null;
+        if (!$ganjil) return null;
+        $values=[];
+        foreach (self::rows($db,'SELECT n.indikator_id,sc.nilai FROM erapor_rts_nilai n JOIN erapor_skala_nilai sc ON sc.id=n.skala_id AND sc.rubrik_id=? WHERE n.sesi_id=? AND n.dokumen_id=?',[$d['rubrik_id'],$ganjil['id'],$d['id']]) as $v) $values['nilai:'.$v['indikator_id']]=(int)$v['nilai'];
+        return ['label'=>'TS Ganjil','values'=>$values];
+    }
+
     private static function rows(PDO $db,string $sql,array $args): array
     {
         $q=$db->prepare($sql); $q->execute($args); return $q->fetchAll(PDO::FETCH_ASSOC);

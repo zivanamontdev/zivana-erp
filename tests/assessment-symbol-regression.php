@@ -9,6 +9,10 @@ foreach($files as $code=>$file){
     if(!str_contains(renderSkalaSimbol($code),'<img ')) throw new RuntimeException('Shared image renderer missing');
 }
 if(skalaSimbolSrc('unknown')!=='' || renderSkalaSimbol('unknown')!=='') throw new RuntimeException('Unknown rating should not invent a symbol');
+// erapor_skala_nilai.simbol menyimpan glyph, bukan kode legacy; editor & PDF eRapor harus tetap dapat SVG yang sama.
+foreach(['/'=>'slash','∠'=>'triangle-sm','△'=>'triangle-lg','▲'=>'triangle-full'] as $glyph=>$code){
+    if(skalaSimbolSrc($glyph)==='' || skalaSimbolSrc($glyph)!==skalaSimbolSrc($code)) throw new RuntimeException('eRapor glyph not mapped: '.$glyph);
+}
 $html=uiSelect('nilai[1]','Nilai',[''=>'Pilih',1=>'Baru dikenalkan',2=>'Mulai Berkembang'],['value'=>2,'optionImages'=>[1=>skalaSimbolSrc('slash'),2=>skalaSimbolSrc('triangle-sm')]]);
 $dom=new DOMDocument();@$dom->loadHTML($html);$xpath=new DOMXPath($dom);
 if($xpath->query('//option[@data-option-image]')->length!==2 || $xpath->query('//option[@selected and @value="2"]')->length!==1) throw new RuntimeException('Image select must preserve submitted selection');

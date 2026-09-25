@@ -117,7 +117,9 @@ function colorCssVariables(): string
  */
 function initials(string $name): string
 {
-    $words = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY);
+    // Abaikan penanda dalam kurung siku (mis. "[DEMO]") dan ambil hanya kata berhuruf.
+    preg_match_all('/\p{L}[\p{L}\p{M}]*/u', preg_replace('/\[[^\]]*\]/u', ' ', $name), $matches);
+    $words = $matches[0];
     $letters = array_map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)), array_slice($words, 0, 2));
 
     return implode('', $letters) ?: '?';
@@ -249,7 +251,8 @@ function validateCsrfToken(string $token): bool
  * legenda dan sel nilai dokumen rapor. Lihat
  * cookbook/design-system.md bagian 3.5.
  *
- * @param string $kode 'slash'|'triangle-sm'|'triangle-lg'|'triangle-full'
+ * @param string $kode 'slash'|'triangle-sm'|'triangle-lg'|'triangle-full', atau glyph
+ *                     yang disimpan rubrik eRapor (erapor_skala_nilai.simbol): / ∠ △ ▲
  */
 function skalaSimbolSrc(string $kode): string
 {
@@ -260,6 +263,8 @@ function skalaSimbolSrc(string $kode): string
         'triangle-lg' => 'penilaian-3-sisi.svg',
         'triangle-full' => 'penilaian-full.svg',
     ];
+    $aliases = ['/' => 'slash', '∠' => 'triangle-sm', '△' => 'triangle-lg', '▲' => 'triangle-full'];
+    $kode = $aliases[trim($kode)] ?? $kode;
     if (!isset($files[$kode])) return '';
     // Embed the same source for browser and offline PDF; no duplicate public asset.
     return $sources[$kode] ??= 'data:image/svg+xml;base64,' . base64_encode(file_get_contents(ROOT_PATH . '/assets/' . $files[$kode]));

@@ -19,6 +19,7 @@ final class EraporSessionFactory
             $db->beginTransaction();
             $student=self::one($db,'SELECT id,kelas_id,status_kondisi FROM murid WHERE id=? FOR UPDATE',[$studentId]);
             if (!$student) throw new DomainException('Murid tidak tersedia.');
+            $student['status_kondisi']=EraporPackagePlan::normalizeCondition((string)$student['status_kondisi']) ?? '';
             $assignment=self::one($db,"SELECT a.kelas_id,u.id AS user_id FROM kelas_guru_murid a
                 JOIN karyawan k ON k.id=a.guru_id JOIN jabatan j ON j.id=k.jabatan_id
                 JOIN users u ON u.karyawan_id=k.id
