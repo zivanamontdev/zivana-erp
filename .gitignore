@@ -1,5 +1,9 @@
 .env
 database/backups/
+# Local database exports/backups placed at repository root.
+/*.sql
+/*.sql.gz
+/*.dump
 node_modules/
 .DS_Store
 Thumbs.db

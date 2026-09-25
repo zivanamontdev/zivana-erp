@@ -41,7 +41,7 @@ Hasil tanpa anomali **tidak berarti data siap dikonversi**. Template dummy yang 
 - [ ] Dry-run pemetaan mengeluarkan pengecualian tanpa PII, lalu persetujuan atas mapping ambigu sebelum backfill data nyata.
 - [ ] Uji fitur baru di fixture; cutover terkontrol setelah lengkap, dengan jendela penghentian tulis. Jangan dual-write dua model status tanpa strategi konsistensi.
 - [ ] Pemulihan tidak menghapus nilai baru yang sudah diinput: backup pasca-cutover dan rencana rekonsiliasi wajib, bukan hanya kembali ke commit lama.
-- [ ] Hosting tanpa SSH: siapkan SQL migrasi terurut untuk phpMyAdmin beserta pemeriksaan sebelum/sesudah; jangan membuat runner SQL publik. Deployment ini memerlukan izin terpisah.
+- [ ] Hosting tanpa SSH: gunakan runner CLI-only melalui cPanel Cron sesuai `cookbook/erapor-cpanel-cron.md`; jangan membuat runner SQL publik. Jalankan `--check` dan tinjau output sebelum `--apply-production-schema-only`.
 
 ## Bukti batch awal
 
@@ -79,7 +79,7 @@ Perintah pertama hanya menampilkan empat tabel dan checksum migrasi. Perintah ke
 
 DDL `20260924_erapor_catalog.sql` **belum diterapkan ke database aplikasi**. Runner menulis ledger `erapor_migrations` dengan checksum stabil LF/CRLF dan status `applying/complete`, serta memakai MySQL advisory lock. Pengulangan `complete` tidak mengulang DDL; checksum berubah, tabel hilang, collision tak tercatat, atau status parsial menyebabkan penolakan. Ia hanya mendukung file DDL CREATE TABLE sederhana yang direview, bukan parser SQL umum.
 
-Jika gagal setelah sebagian DDL, jangan menghapus ledger atau menandai complete secara manual agar lolos. Hentikan penerapan, periksa tabel terhadap DDL dan backup, lalu susun pemulihan eksplisit. Batch ini tidak menyediakan auto-repair skema drift atau rollback DDL. Panduan penerapan phpMyAdmin beserta ledger yang konsisten masih perlu diselesaikan sebelum deploy tanpa SSH.
+Jika gagal setelah sebagian DDL, jangan menghapus ledger atau menandai complete secara manual agar lolos. Hentikan penerapan, periksa tabel terhadap DDL dan backup, lalu susun pemulihan eksplisit. Batch ini tidak menyediakan auto-repair skema drift atau rollback DDL. Untuk hosting tanpa SSH, gunakan runner dan prosedur Cron yang dijelaskan dalam `cookbook/erapor-cpanel-cron.md`; jangan impor berkas migrasi satu per satu melalui phpMyAdmin.
 
 Hasil uji: 17 pemeriksaan MySQL lulus (restore, checksum legacy, idempotensi, lock bersamaan, FK/unique/check, checksum migrasi berubah, parsial, tabel hilang, collision); 65 assertion policy dan tes audit/workflow lama lulus. Belum menguji UI atau versi MySQL hosting.
 
