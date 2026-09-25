@@ -16,3 +16,9 @@
   .erapor-assignment-flow { padding: var(--space-3); }
   .erapor-assignment-actions .ui-button { width: 100%; }
 }
+
+/* Sistem -> Migrasi eRapor */
+.erapor-migration-result { display: grid; gap: var(--space-3); }
+.erapor-migration-result-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.erapor-migration-result-head h2 { margin: 0; }
+.erapor-migration-log { margin: 0; max-height: 28rem; overflow: auto; white-space: pre-wrap; word-break: break-word; border: 1px solid var(--color-neutral-75); border-radius: var(--radius-md); background: var(--color-neutral-50); padding: var(--space-3); color: var(--color-neutral-800); font: 400 var(--font-size-caption-md)/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }

@@ -95,6 +95,9 @@ $router->get('/erapor/profil-penandatangan', [EraporSignerProfileController::cla
 $router->post('/erapor/profil-penandatangan', [EraporSignerProfileController::class, 'update']);
 $router->post('/erapor/profil-penandatangan/cabut', [EraporSignerProfileController::class, 'revoke']);
 $router->get('/erapor/profil-penandatangan/tanda-tangan', [EraporSignerProfileController::class, 'signature']);
+// Migrasi skema pilot via browser (hosting tanpa SSH). 404 kecuali ERAPOR_MIGRATION_TOKEN diisi di .env.
+$router->get('/sistem/migrasi-erapor', [EraporMigrationController::class, 'index']);
+$router->post('/sistem/migrasi-erapor', [EraporMigrationController::class, 'run']);
 
 // --- Portal Guru ---
 // New session IDs are NOT legacy rapor IDs. Disabled by default in config.

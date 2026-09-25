@@ -75,6 +75,8 @@ define('APP_DEBUG', filter_var(envValue($env, 'APP_DEBUG', 'false'), FILTER_VALI
 $eraporApiEnabled = getenv('ERAPOR_API_ENABLED');
 if ($eraporApiEnabled === false) $eraporApiEnabled = envValue($env, 'ERAPOR_API_ENABLED', 'false');
 define('ERAPOR_API_ENABLED', filter_var($eraporApiEnabled, FILTER_VALIDATE_BOOLEAN));
+// Kosong = halaman /sistem/migrasi-erapor 404. Isi (min. 32 karakter) hanya saat migrasi, lalu hapus lagi.
+define('ERAPOR_MIGRATION_TOKEN', trim((string) envValue($env, 'ERAPOR_MIGRATION_TOKEN', '')));
 define('SESSION_LIFETIME', (int) envValue($env, 'SESSION_LIFETIME', 120));
 
 // --- Upload ---
