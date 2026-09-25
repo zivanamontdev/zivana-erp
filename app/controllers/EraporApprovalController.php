@@ -65,13 +65,19 @@ final class EraporApprovalController extends Controller
             $_SESSION['erapor_approval_notice'] = [
                 'type' => 'success',
                 'message' => $result['all_approved']
-                    ? 'Seluruh persetujuan tercatat. Rapor menunggu proses publikasi dan belum diterbitkan.'
+                    ? 'Seluruh persetujuan tercatat dan paket PDF privat telah disiapkan. Rapor masih menunggu pengiriman, jadi belum berstatus Selesai.'
                     : 'Persetujuan Anda berhasil dicatat.',
             ];
         } catch (DomainException $exception) {
             $_SESSION['erapor_approval_notice'] = [
                 'type' => 'error',
                 'message' => 'Persetujuan tidak dapat diproses. Periksa urutan, penugasan, dan status rapor.',
+            ];
+        } catch (Throwable $exception) {
+            error_log('eRapor approval/publication preparation failed: '.$exception->getMessage());
+            $_SESSION['erapor_approval_notice'] = [
+                'type' => 'error',
+                'message' => 'Persetujuan dan persiapan PDF gagal. Tidak ada perubahan yang disimpan; coba kembali atau hubungi administrator.',
             ];
         }
 

@@ -1,6 +1,6 @@
 <?php
 
-/** Reviewed additive CREATE TABLE migrations only; never used by an HTTP route.
+/** Reviewed additive eRapor DDL only; never used by an HTTP route.
  * MySQL DDL auto-commits. Partial applications fail closed for manual inspection.
  */
 final class EraporMigrationRunner
@@ -15,11 +15,16 @@ final class EraporMigrationRunner
         foreach (explode(';', $clean) as $statement) {
             $statement = trim($statement);
             if ($statement === '') continue;
-            if (!preg_match('/^CREATE TABLE (erapor_[a-z_]+)\s*\(/', $statement, $match)) {
-                throw new RuntimeException('Only additive erapor CREATE TABLE statements are allowed.');
+            if (preg_match('/^CREATE TABLE (erapor_[a-z_]+)\s*\(/', $statement, $match)) {
+                $key=$match[1];
+            } elseif (preg_match('/^ALTER TABLE erapor_sesi ADD COLUMN tanggal_pengesahan DATE NULL$/i', $statement)) {
+                // Explicitly allow this one reviewed additive session field; reject arbitrary ALTER clauses.
+                $key='erapor_sesi.tanggal_pengesahan';
+            } else {
+                throw new RuntimeException('Only additive eRapor tables and columns are allowed.');
             }
-            if (isset($steps[$match[1]])) throw new RuntimeException('Duplicate migration table.');
-            $steps[$match[1]] = $statement;
+            if (isset($steps[$key])) throw new RuntimeException('Duplicate migration target.');
+            $steps[$key] = $statement;
         }
         if (!$steps) throw new RuntimeException('Empty migration.');
         return ['id' => pathinfo($file, PATHINFO_FILENAME), 'sha256' => hash('sha256', $sql), 'steps' => $steps];
@@ -45,13 +50,23 @@ final class EraporMigrationRunner
             if ($previous) {
                 if (!hash_equals($previous['sha256'], $plan['sha256'])) throw new RuntimeException('Migration checksum changed; create a new migration.');
                 if ($previous['status'] !== 'complete') throw new RuntimeException('Partial migration requires manual inspection.');
-                foreach ($plan['steps'] as $table => $_) {
-                    if (!self::tableExists($db, $table)) throw new RuntimeException('Completed migration table is missing.');
+                foreach ($plan['steps'] as $target => $_) {
+                    if (str_contains($target,'.')) {
+                        [$table,$column]=explode('.',$target,2);
+                        if (!self::columnExists($db,$table,$column)) throw new RuntimeException('Completed migration column is missing.');
+                    } elseif (!self::tableExists($db, $target)) {
+                        throw new RuntimeException('Completed migration table is missing.');
+                    }
                 }
                 return 'already_applied';
             }
-            foreach ($plan['steps'] as $table => $_) {
-                if (self::tableExists($db, $table)) throw new RuntimeException('Untracked table collision: ' . $table);
+            foreach ($plan['steps'] as $target => $_) {
+                if (str_contains($target,'.')) {
+                    [$table,$column]=explode('.',$target,2);
+                    if (self::columnExists($db,$table,$column)) throw new RuntimeException('Untracked column collision: '.$target);
+                } elseif (self::tableExists($db, $target)) {
+                    throw new RuntimeException('Untracked table collision: ' . $target);
+                }
             }
             $db->prepare("INSERT INTO erapor_migrations(id,sha256,status) VALUES(?,?,'applying')")
                 ->execute([$plan['id'], $plan['sha256']]);
@@ -69,5 +84,12 @@ final class EraporMigrationRunner
         $stmt = $db->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name=?');
         $stmt->execute([$table]);
         return (int)$stmt->fetchColumn() > 0;
+    }
+
+    private static function columnExists(PDO $db,string $table,string $column): bool
+    {
+        $stmt=$db->prepare('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=? AND column_name=?');
+        $stmt->execute([$table,$column]);
+        return (int)$stmt->fetchColumn()>0;
     }
 }

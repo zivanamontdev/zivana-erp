@@ -7,6 +7,8 @@ $args = getopt('', ['run', 'backup:']);
 if (!isset($args['run'], $args['backup'])) { echo "Usage: --run --backup=filename.sql (database/backups only)\n"; exit(1); }
 define('ROOT_PATH', dirname(__DIR__)); define('CONFIG_PATH', ROOT_PATH . '/config');
 require CONFIG_PATH . '/config.php';
+require ROOT_PATH . '/vendor/autoload.php';
+require ROOT_PATH . '/app/helpers/functions.php';
 require ROOT_PATH . '/app/models/EraporMigrationRunner.php';
 require ROOT_PATH . '/app/models/EraporRtsSeed.php';
 if (session_status() === PHP_SESSION_ACTIVE) session_write_close();

@@ -1,8 +1,8 @@
 # TODO Implementasi eRapor Zivana
 
-Tanggal: 24 September 2026.
+Tanggal: 25 September 2026.
 
-Status: katalog/rubrik, alur pengisian guru, persetujuan, assignment, dan profil tanda tangan pemilik sudah diimplementasikan secara opt-in. Renderer/publikasi PDF final, penyelarasan sumber dokumen, kesiapan migrasi produksi, serta uji visual browser masih belum selesai. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
+Status: katalog/rubrik, alur pengisian guru, persetujuan, assignment, profil tanda tangan pemilik, serta persiapan artefak PDF privat sudah diimplementasikan secara opt-in. PDF baru didukung untuk paket Tengah Semester; tidak ada route unduh/pengiriman dan sesi tetap `MENUNGGU_TTD`. RAS, penyelarasan sumber dokumen, kesiapan migrasi produksi, pemeriksaan visual PDF/browser, serta pengiriman masih terbuka. Data murid menyimpan nomor telepon ayah/ibu tetapi tidak menyimpan email wali; pilihan kontak utama, consent, dan provider email/WhatsApp belum ditentukan/dikonfigurasi. Dokumen ini menjadi roadmap aktif untuk modul rapor, menggantikan asumsi rapor lama di [todo.md](todo.md). Checkbox selesai harus disertai bukti; pekerjaan versi lama tidak otomatis lulus spesifikasi baru.
 
 ## Acuan dan batas pekerjaan
 
@@ -93,15 +93,16 @@ Gerbang: pemetaan data dan strategi pemulihan terbukti pada salinan database seb
 
 ## 7. Pratinjau, PDF, dan penerbitan
 
-- [ ] Rancang renderer per dokumen sejak skema, implementasikan setelah penyimpanan dan alur stabil. Pratinjau dan PDF memakai sumber data yang sama; jangan hardcode identitas, tanggal, kota, atau nilai.
-- [ ] RTS: A4 tegak, acuan delapan halaman, pagination mengalir; kop/identitas/header tabel berulang, legenda hanya halaman pertama, dua blok tanda tangan sesuai sesi masing-masing.
-- [ ] Agama: cetak seluruh 73 butir dengan nilai semester sebelumnya, tujuh kolom per periode, header bertingkat, dan enam catatan yang dirangkai untuk periode terbit.
-- [ ] Ummi: dua kolom Tengah/Akhir pada bacaan; daftar tes kumulatif semester sampai periode terbit; catatan periode terbit; blok PRA mengikuti sakelar periode; tanpa Hafalan.
-- [ ] BING: satu periode per cetakan, lima nilai, empat komentar, remarks dan penandatangan sesuai versi teks yang diselaraskan.
-- [ ] PPI: A4 dengan margin/lebar kolom dari seed, tabel berulang, teks mentah diubah menjadi butir hanya saat render. Usia dihitung pada tanggal pengesahan, bukan tanggal cetak ulang. Hasil Capaian kosong saat pilot.
+- [x] Renderer offline berversi untuk paket Tengah memakai definisi, nilai, identitas, dan snapshot penanda tangan dari sesi; tidak memakai asset jarak jauh. Preview interaktif/download belum dibuat.
+- [ ] RTS: A4 tegak, acuan delapan halaman, pagination mengalir; kop/identitas/header tabel berulang, legenda hanya halaman pertama, dua blok tanda tangan sesuai sesi masing-masing. Struktur dasar dirender; kecocokan pagination/visual belum diperiksa.
+- [ ] Agama: cetak seluruh 73 butir, tujuh kolom per periode, header bertingkat, dan enam catatan yang dirangkai untuk periode terbit. Implementasi ada; kecocokan teks sumber dan visual masih perlu tinjauan.
+- [ ] Ummi: dua kolom Tengah/Akhir pada bacaan; daftar tes kumulatif semester sampai periode terbit; catatan periode terbit; blok PRA mengikuti sakelar periode; tanpa Hafalan. Implementasi ada; aturan tes yang berbeda antara seed/spesifikasi perlu keputusan.
+- [ ] BING: satu periode per cetakan, lima nilai, empat komentar, remarks dan penandatangan sesuai versi teks yang diselaraskan. Struktur dirender; perbedaan versi teks belum diselesaikan.
+- [ ] PPI: A4 dengan margin/lebar kolom dari seed, tabel berulang, teks mentah diubah menjadi butir hanya saat render. Usia dihitung pada tanggal pengesahan; Hasil Capaian kosong saat pilot. Renderer awal ada; PDF visual belum diperiksa.
 - [ ] Prefinal hanya pratinjau bertanda draft tanpa cap tanda tangan; unduhan final per dokumen/paket hanya setelah `SELESAI`. Cegah nilai periode mendatang bocor ke cetak ulang periode lama.
-- [ ] Terbitkan paket secara atomik: kegagalan salah satu PDF tidak memfinalkan sebagian paket. Simpan artefak final, snapshot, tempat, dan tanggal pengesahan konsisten; retry tidak menggandakan persetujuan/penerbitan.
-- [ ] Siapkan pengiriman PDF melalui email dan WhatsApp sesuai spesifikasi; tentukan integrasi dan konfigurasi yang tersedia, catat kegagalan/retry tanpa membuka kembali nilai. Jangan mengklaim kanal aktif sebelum diuji; pengujian tidak mengirim ke orang tua nyata.
+- [x] Persetujuan Kepala Sekolah terakhir menyiapkan semua PDF paket Tengah dalam transaksi yang sama; satu kegagalan me-rollback approval/snapshot/tanggal/log. Artefak privat berisi manifest/hash, idempoten, dan belum mengubah sesi menjadi `SELESAI`.
+- [ ] Lengkapi lifecycle publikasi: verifikasi visual, route/otorisasi download dan cetak ulang historis setelah kebijakan status/penerbitan disepakati. RAS belum dapat dirender tanpa spesifikasi resmi.
+- [ ] Siapkan pengiriman PDF melalui email dan WhatsApp sesuai spesifikasi; saat ini hanya tersedia nomor telepon ayah/ibu, belum ada email wali, aturan pemilihan kontak/consent, atau provider/credential. Tetapkan sumber kontak serta provider dan konfigurasi; catat kegagalan/retry tanpa membuka kembali nilai. Jangan mengirim ke orang tua nyata saat pengujian.
 - [ ] Periksa visual PDF, simbol SVG, font, pemenggalan tabel, watermark, ukuran berkas, cetak ulang historis, dan kompatibilitas shared hosting.
 
 ## 8. Gerbang pengujian dan rilis
@@ -113,6 +114,7 @@ Gerbang: pemetaan data dan strategi pemulihan terbukti pada salinan database seb
 - [ ] Uji tenggat/perpanjangan, nilai Ganjil tetap ketika Genap diisi, pergantian guru/kepala sekolah, rubrik berversi, dan cetak ulang tanpa perubahan historis.
 - [ ] Uji request bersamaan: autosave vs lock, dua konfirmasi, dua persetujuan, serta kegagalan PDF di tengah paket. Pastikan rollback, idempotensi, dan penolakan tidak mengubah data.
 - [ ] Uji matriks izin setiap menu/aksi melalui UI dan HTTP langsung, termasuk akses lintas guru/murid/dokumen dan pembatasan approver.
+- [x] Integrasi disposable menguji final approval ABK sampai artefak lima dokumen tersimpan, hash/manifest diverifikasi, retry idempoten, dan rollback saat insert PDF gagal. Ini bukan uji E2E penuh Regular/akhir semester atau visual.
 - [ ] Jalankan regresi modul Sekolah, Karyawan, Jabatan, Guru, Murid, Kelas, Periode, login, dan RBAC. Periksa navigasi/sidebar serta design system tetap konsisten.
 - [ ] Bedakan bukti lint/unit, integrasi database, HTTP, browser visual, dan PDF visual. Checkbox hanya ditutup untuk pengujian yang benar-benar dijalankan.
 - [ ] Uji restore+migrasi pada salinan data, backup produksi, rencana pemulihan, konfigurasi hosting, dan smoke test setelah deploy dengan izin pengguna.
@@ -407,4 +409,17 @@ Berikutnya: pipeline PDF immutable/publication transaction. Feature flag product
 - [x] Tes UI, route/RBAC, akun, lint PHP, dan harness MySQL pada restore disposable lulus: 1175 pemeriksaan; checksum legacy tetap utuh.
 - [ ] Renderer/publikasi PDF final, penyelarasan ketidaksesuaian sumber dokumen, migrasi aplikasi, dan browser visual masih terbuka. Feature flag produksi tetap OFF.
 
-Berikutnya: bangun renderer immutable berbasis snapshot serta finalisasi atomik semua PDF paket; jangan menyamarkan RAS yang sumber resminya belum tersedia.
+Rencana saat itu: bangun renderer immutable dan finalisasi atomik. Diteruskan pada batch berikut, dengan RAS tetap menunggu spesifikasi resmi.
+
+### Batch renderer dan persiapan artefak PDF privat (25 September 2026)
+
+- [x] Renderer v1 menghasilkan paket Tengah Regular/ABK berisi RTS, Agama, Ummi, BING, serta PPI khusus ABK; identitas dan nilai bersumber dari snapshot/query paket, warna cetak memakai token `config/colors.php`.
+- [x] Setelah approval Kepala Sekolah, renderer dan penyimpanan satu artefak privat berjalan di transaksi approval. PDF, ukuran, SHA-256, manifest sumber/rubrik/penanda tangan, tempat dan tanggal pengesahan diverifikasi; retry memakai artefak sama.
+- [x] Simulasi kegagalan insert PDF membuktikan approval final, snapshot tanda tangan, tanggal dan log ikut rollback. Status tetap `MENUNGGU_TTD`; tabel BLOB belum memiliki route publik atau kanal pengiriman.
+- [x] Empat tes struktur renderer memeriksa urutan semester Agama, satu header grup BING, dan escaping identitas. Tes ini bukan pengganti pemeriksaan PDF visual.
+- [x] Migrasi additive terbatas pada `erapor_sesi.tanggal_pengesahan` dan `erapor_publikasi_pdf`; runner menolak operasi DDL lain. Harness restore disposable lulus 1188 pemeriksaan dan checksum tabel legacy lokal tetap sama.
+- [ ] RAS tetap diblokir sampai spesifikasi/seed resmi tersedia. Penyelarasan variasi teks BING/Agama/Ummi masih perlu keputusan sumber.
+- [ ] Pemeriksaan tampilan halaman demi halaman PDF/browser belum tersedia di lingkungan ini. Email/WhatsApp belum diaktifkan; perlu kebijakan penerima dan konfigurasi provider sebelum implementasi/pengiriman.
+- [ ] Migrasi belum diterapkan ke database aplikasi/hosting; feature flag production tetap OFF.
+
+Berikutnya: tinjau hasil PDF secara visual dan selaraskan sumber dokumen; lanjutkan endpoint/retensi/pengiriman hanya setelah kebijakan dan konfigurasi tersedia.

@@ -1,7 +1,7 @@
 <?php
 
-/** Internal approval action. Future route must supply authenticated actor + RBAC/CSRF.
- * This never publishes PDFs or changes the session to SELESAI.
+/** Internal approval action. Route supplies authenticated actor + RBAC/CSRF.
+ * Final approval prepares (but does not deliver) the immutable package PDF.
  */
 final class EraporApprove
 {
@@ -35,8 +35,10 @@ final class EraporApprove
                 if (!$existing || (int)$existing['user_id']!==$actorId) throw new DomainException('Persetujuan telah diberikan oleh akun lain atau jejak tidak lengkap.');
                 $event=self::one($db,"SELECT id FROM erapor_sesi_log WHERE id=? AND sesi_id=? AND aktor_id=? AND aksi='SETUJUI'",[$existing['log_id'],$sessionId,$actorId]);
                 if (!$event) throw new DomainException('Jejak persetujuan tidak lengkap.');
+                $all=self::allApproved($rows);
+                $publication=$all?EraporPublication::prepareWithin($db,$sessionId,$actorId):null;
                 $db->commit();
-                return ['result'=>'already_approved','status'=>'MENUNGGU_TTD','all_approved'=>self::allApproved($rows)];
+                return ['result'=>'already_approved','status'=>'MENUNGGU_TTD','all_approved'=>$all,'publication'=>$publication];
             }
             if ($existing) throw new DomainException('Snapshot persetujuan memiliki status yang salah.');
             $order=array_map(fn($r)=>['id'=>(int)$r['id'],'urutan'=>(int)$r['urutan'],'status'=>$r['status']],$rows);
@@ -56,8 +58,10 @@ final class EraporApprove
             $db->prepare("UPDATE erapor_sesi_penyetuju SET status='DISETUJUI' WHERE id=?")->execute([$approvalId]);
             foreach ($rows as &$row) if ((int)$row['id']===$approvalId) $row['status']='DISETUJUI';
             unset($row);
+            $all=self::allApproved($rows);
+            $publication=$all?EraporPublication::prepareWithin($db,$sessionId,$actorId):null;
             $db->commit();
-            return ['result'=>'approved','status'=>'MENUNGGU_TTD','all_approved'=>self::allApproved($rows)];
+            return ['result'=>'approved','status'=>'MENUNGGU_TTD','all_approved'=>$all,'publication'=>$publication];
         } catch (Throwable $e) {
             if ($db->inTransaction()) $db->rollBack(); throw $e;
         } finally { $q=$db->prepare('SELECT RELEASE_LOCK(?)'); $q->execute([$lock]); }
