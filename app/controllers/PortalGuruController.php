@@ -17,6 +17,13 @@ class PortalGuruController extends Controller
                 $this->view('portal-guru.erapor-dashboard', $data + [
                     'pageTitle'=>'Dashboard','breadcrumb'=>null,'activeNavItem'=>'portal-dashboard',
                 ]);
+            } catch (DomainException $e) {
+                // Superadmin/Admin/Kepala punya izin menu Portal Guru tetapi bukan guru pengampu: tampilkan dashboard kosong, bukan 500.
+                $this->view('portal-guru.erapor-dashboard', [
+                    'periodOptions'=>[],'selectedPeriod'=>null,'students'=>[],'agendaCurrent'=>null,'agendaNext'=>null,
+                    'portalNotice'=>'Dashboard ini menampilkan murid yang diampu akun guru. Akun Anda tidak terdaftar sebagai Guru Kelas atau Guru Shadow aktif. Pantau seluruh rapor lewat menu Rapor Murid atau Persetujuan eRapor.',
+                    'pageTitle'=>'Dashboard','breadcrumb'=>null,'activeNavItem'=>'portal-dashboard',
+                ]);
             } catch (Throwable $e) {
                 error_log('Erapor teacher dashboard failure: '.get_class($e));
                 http_response_code(503);

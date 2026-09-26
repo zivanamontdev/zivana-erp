@@ -19,6 +19,11 @@ require VIEW_PATH.'/layouts/shell-header.php';
     <?php unset($_SESSION['report_error']); ?>
 <?php endif; ?>
 
+<?php if (!empty($portalNotice)): ?>
+    <p role="status" class="erapor-session-notice"><?= e($portalNotice) ?></p>
+    <?php require VIEW_PATH.'/layouts/shell-footer.php'; return; ?>
+<?php endif; ?>
+
 <div class="dashboard-banner">
     <?= uiText('Halo! '.($_SESSION['display_name'] ?? ''),'body-sm',['weight'=>'bold','tone'=>'inverse']) ?>
     <?= uiText(date('d/m/Y, H:i'),'body-sm',['tone'=>'inverse']) ?>

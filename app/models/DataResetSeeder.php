@@ -42,7 +42,8 @@ final class DataResetSeeder
         $blockers = [];
         if ($unknown) $blockers[] = 'Tabel belum terklasifikasi (tidak akan dihapus/dipertahankan tanpa ditinjau): ' . implode(', ', $unknown);
         if ($missing) $blockers[] = 'Tabel yang diharapkan tidak ada: ' . implode(', ', $missing);
-        if (!in_array($actorId, array_column($kept, 'id'), true)) $blockers[] = 'Akun yang menjalankan reset bukan Superadmin non-demo tanpa data pegawai, sehingga ikut terhapus. Login dengan akun Superadmin utama.';
+        // Driver MariaDB/PDO di hosting mengembalikan ID sebagai string; bandingkan sebagai angka.
+        if (!in_array($actorId, array_map('intval', array_column($kept, 'id')), true)) $blockers[] = 'Akun yang menjalankan reset bukan Superadmin non-demo tanpa data pegawai, sehingga ikut terhapus. Login dengan akun Superadmin utama.';
         $order = $blockers ? [] : self::deleteOrder($db, $tables);
         $counts = [];
         foreach (array_intersect(self::CLEAR_TABLES, $tables) as $table) {
