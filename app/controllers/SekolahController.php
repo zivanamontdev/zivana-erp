@@ -10,7 +10,7 @@ class SekolahController extends Controller
         $this->middleware(AuthMiddleware::class);
         $this->middleware(RoleMiddleware::class, 'Sekolah', 'Data Sekolah', 'lihat');
 
-        $sekolah = (new Sekolah())->find(self::SEKOLAH_ID);
+        $sekolah = $this->current();
         $media = $sekolah ? (new SekolahMedia())->where('sekolah_id', $sekolah['id']) : [];
         $tahunAjaranAktif = (new TahunAjaran())->whereFirst('is_active', 1);
 
@@ -61,16 +61,25 @@ class SekolahController extends Controller
         }
 
         $sekolahModel = new Sekolah();
-        $existing = $sekolahModel->find(self::SEKOLAH_ID);
-        $sekolahId = $existing ? self::SEKOLAH_ID : $sekolahModel->create($data);
+        $existing = $this->current();
+        $sekolahId = $existing ? (int) $existing['id'] : (int) $sekolahModel->create($data);
 
         if ($existing) {
-            $sekolahModel->update(self::SEKOLAH_ID, $data);
+            $sekolahModel->update($sekolahId, $data);
         }
 
         $this->syncMedia($sekolahId);
 
         $this->redirect('/sekolah');
+    }
+
+    /** Baris sekolah tunggal: id 1, atau baris pertama bila id berbeda (mis. setelah reset data), agar Simpan tidak membuat duplikat. */
+    private function current(): ?array
+    {
+        $sekolah = (new Sekolah())->find(self::SEKOLAH_ID);
+        if ($sekolah) return $sekolah;
+        $first = Database::getInstance()->query('SELECT * FROM sekolah ORDER BY id LIMIT 1')->fetch();
+        return $first ?: null;
     }
 
     public function updateTahunAjaran(): void
