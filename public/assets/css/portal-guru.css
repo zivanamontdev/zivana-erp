@@ -542,3 +542,12 @@ button.teacher-report-action:focus-visible,
   .erapor-page-intro-top { flex-direction:column; gap:var(--space-1); }
   .erapor-pager { padding:1rem; }
 }
+
+/* Judul area/subarea bisa dilipat; tampilan header tetap sama, hanya ditambah chevron. */
+.erapor-section { display:grid; gap:var(--space-3); margin:0; }
+.erapor-section > summary.erapor-page-heading { margin:var(--space-2) 0 0; }
+.erapor-section-body { display:grid; gap:var(--space-3); }
+.erapor-section-body > .erapor-subheading { margin:var(--space-1) 0 0 var(--space-2); }
+.erapor-section > .ui-disclosure-trigger:focus-visible { outline:2px solid var(--color-red-400); outline-offset:2px; }
+.erapor-section.has-invalid > summary { box-shadow:0 0 0 2px var(--color-red-600); }
+.erapor-section:not([open]) > summary.erapor-page-heading { margin-top:0; }

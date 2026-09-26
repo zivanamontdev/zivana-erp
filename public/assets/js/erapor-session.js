@@ -317,9 +317,16 @@
       }
     }
 
+    function openSections(element) {
+      for (var node = element.parentElement; node && node !== root; node = node.parentElement) {
+        if (node.tagName === 'DETAILS') node.open = true;
+      }
+    }
+
     function goTo(element) {
       var page = element.closest('[data-erapor-page]');
       if (page) showPage(pages.indexOf(page), false);
+      openSections(element);
       element.scrollIntoView({block: 'center', behavior: 'smooth'});
       var target = element.querySelector('input:not([type="hidden"]):not(:disabled), textarea:not(:disabled), .ui-select-trigger, select:not(:disabled)');
       if (target && target.focus) target.focus({preventScroll: true});
@@ -340,6 +347,10 @@
     }
 
     function updateStepFlags() {
+      // Judul yang dilipat ikut ditandai agar isian merah di dalamnya tetap terlihat.
+      root.querySelectorAll('details.erapor-section').forEach(function (section) {
+        section.classList.toggle('has-invalid', Boolean(section.querySelector('[data-erapor-question].is-invalid')));
+      });
       pages.forEach(function (page, i) {
         if (steps[i]) steps[i].classList.toggle('has-invalid', Boolean(page.querySelector('[data-erapor-question].is-invalid')));
       });

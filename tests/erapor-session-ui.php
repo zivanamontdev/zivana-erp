@@ -131,7 +131,8 @@ eraporUiCheck($xpath->query('//input[@data-erapor-entry="UMMI" and @data-erapor-
 eraporUiCheck(!str_contains($html, 'Hafalan'), 'Ummi editor does not add the excluded memorization section');
 // Tombol tetap aktif: klik saat belum lengkap menandai kartu wajib yang kosong; server tetap memutuskan.
 eraporUiCheck($xpath->query('//button[@data-erapor-confirm and not(@disabled)]')->length === 2, 'Submit (header + last page) stays clickable to reveal missing answers');
-eraporUiCheck($xpath->query('//details[@open]')->length === 0, 'Ummi volumes start collapsed');
+eraporUiCheck($xpath->query('//details[@data-ummi-volume and @open]')->length === 0, 'Ummi volumes start collapsed');
+eraporUiCheck($xpath->query('//section[@data-erapor-type="RTS"]//details[contains(@class,"erapor-section") and @open]//details[contains(@class,"erapor-section") and @open]//*[@data-erapor-entry="RTS"]')->length === 1, 'RTS area and subarea are collapsible, open by default');
 
 $form['documents'][2]['form']['definitions']['initialization_required'] = true;
 $form['documents'][2]['form']['values'] = ['mulai_pra_tk'=>null,'catatan'=>null];

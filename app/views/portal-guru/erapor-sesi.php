@@ -184,10 +184,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <?php endif; ?>
             </header>
                 <?php foreach ($definitions['areas'] as $area): ?>
-                    <h3 class="pengisian-kategori-header erapor-page-heading"><?= e(mb_convert_case($area['nama'], MB_CASE_TITLE, 'UTF-8')) ?></h3>
+                    <details class="ui-disclosure erapor-section" open><summary class="pengisian-kategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(mb_convert_case($area['nama'], MB_CASE_TITLE, 'UTF-8')) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
                     <?php foreach ($subareasByArea[(int)$area['id']] ?? [] as $subarea): ?>
                         <?php $subItems = array_values(array_filter($definitions['items'], fn($item)=>(int)$item['sub_area_id']===(int)$subarea['id'])); ?>
-                        <?php if (!$subarea['implisit']): ?><h4 class="pengisian-subkategori-header erapor-page-heading"><?= e(($subarea['huruf'] ? $subarea['huruf'] . '. ' : '') . $subarea['nama']) ?></h4><?php endif; ?>
+                        <?php if (!$subarea['implisit']): ?><details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(($subarea['huruf'] ? $subarea['huruf'] . '. ' : '') . $subarea['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
                         <?php $lastGroupId = null; ?>
                         <?php foreach ($subItems as $item): ?>
                             <?php
@@ -211,7 +211,9 @@ require VIEW_PATH . '/layouts/focus-header.php';
                                 <p class="erapor-question-error" data-erapor-question-error hidden>Pilih salah satu capaian.</p>
                             </div>
                         <?php endforeach; ?>
+                        <?php if (!$subarea['implisit']): ?></div></details><?php endif; ?>
                     <?php endforeach; ?>
+                    </div></details>
                 <?php endforeach; ?>
 
             <?php elseif ($type === 'BING'): ?>
@@ -224,7 +226,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <p class="erapor-page-help">Pilih capaian untuk setiap indikator, lalu lengkapi catatan kemampuan di akhir halaman.</p>
             </header>
                 <?php foreach ($groupedIndicators as $groupName => $items): ?>
-                    <?php if ($groupName !== ''): ?><h3 class="pengisian-subkategori-header erapor-page-heading"><?= e($groupName) ?></h3><?php endif; ?>
+                    <?php if ($groupName !== ''): ?><details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e($groupName) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
                     <?php foreach ($items as $item): ?>
                         <div class="erapor-question erapor-question--select" data-erapor-question>
                             <span class="erapor-question-text"><?= e($item['penanda_cetak'] ? $item['penanda_cetak'] . ' ' : '') . e($item['label_cetak']) ?></span>
@@ -232,14 +234,16 @@ require VIEW_PATH . '/layouts/focus-header.php';
                             <p class="erapor-question-error" data-erapor-question-error hidden>Pilih salah satu capaian.</p>
                         </div>
                     <?php endforeach; ?>
+                    <?php if ($groupName !== ''): ?></div></details><?php endif; ?>
                 <?php endforeach; ?>
-                <h3 class="pengisian-subkategori-header erapor-page-heading">Catatan kemampuan</h3>
+                <details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span>Catatan kemampuan</span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
                 <?php foreach ($definitions['comments'] as $comment): ?>
                     <div class="erapor-question" data-erapor-question>
                         <?= $renderText($document, 'BING', 'komentar:' . $comment['id'], $comment['label_cetak'], $values['komentar:' . $comment['id']] ?? null, false, (bool)$comment['wajib']) ?>
                         <p class="erapor-question-error" data-erapor-question-error hidden>Catatan ini wajib diisi.</p>
                     </div>
                 <?php endforeach; ?>
+                </div></details>
 
             <?php elseif ($type === 'PPI'): ?>
                 <?php
@@ -278,10 +282,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
                         foreach ($scopeSubscopes as $subscope) if ((int)$item['sub_id'] === (int)$subscope['id']) $scopeItems[] = $item;
                     }
                     ?>
-                    <h3 class="pengisian-kategori-header erapor-page-heading"><?= e($scope['nomor_romawi'] . '. ' . $scope['nama']) ?></h3>
+                    <details class="ui-disclosure erapor-section" open><summary class="pengisian-kategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e($scope['nomor_romawi'] . '. ' . $scope['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
                     <?php foreach ($scopeSubscopes as $subscope): ?>
                         <?php $items = array_values(array_filter($scopeItems, fn($item)=>(int)$item['sub_id']===(int)$subscope['id'])); ?>
-                        <?php if (!$subscope['implisit']): ?><h4 class="pengisian-subkategori-header erapor-page-heading"><?= e(($subscope['huruf'] ? $subscope['huruf'] . '. ' : '') . $subscope['nama']) ?></h4><?php endif; ?>
+                        <?php if (!$subscope['implisit']): ?><details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(($subscope['huruf'] ? $subscope['huruf'] . '. ' : '') . $subscope['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
                         <?php foreach ($items as $item): ?>
                             <?php
                             $itemNames = array_values(array_filter($definitions['names'], fn($name)=>(int)$name['item_id']===(int)$item['id']));
@@ -293,6 +297,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                                 <p class="erapor-question-error" data-erapor-question-error hidden>Pilih salah satu tahapan.</p>
                             </div>
                         <?php endforeach; ?>
+                        <?php if (!$subscope['implisit']): ?></div></details><?php endif; ?>
                     <?php endforeach; ?>
                     <?php if (!empty($scope['catatan_wajib'])): ?>
                         <div class="erapor-question" data-erapor-question>
@@ -300,6 +305,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                             <p class="erapor-question-error" data-erapor-question-error hidden>Catatan ini wajib diisi.</p>
                         </div>
                     <?php endif; ?>
+                    </div></details>
                 <?php endforeach; ?>
 
             <?php elseif ($type === 'UMMI'): ?>
