@@ -31,9 +31,11 @@ final class DataResetSeeder
     ];
 
     public const EMAIL_DOMAIN = 'sekolahzivanamontessori.sch.id';
+    /** Awal tahun ajaran aktif seed; dipakai sebagai tanggal masuk murid dari Excel yang tidak mencantumkannya. */
+    public const SCHOOL_YEAR_START = '2026-07-01';
 
     /** Read-only: apa yang akan dihapus, dipertahankan, dan dibuat. */
-    public static function plan(PDO $db, int $actorId): array
+    public static function plan(PDO $db, int $actorId, ?array $pilot = null): array
     {
         $tables = self::tables($db);
         $unknown = array_values(array_diff($tables, self::KEEP_TABLES, self::CLEAR_TABLES));
@@ -52,7 +54,7 @@ final class DataResetSeeder
                 : (int) $db->query('SELECT COUNT(*) FROM `' . $table . '`')->fetchColumn();
         }
         arsort($counts);
-        $seed = self::seedData();
+        $seed = self::seedData($pilot);
         return [
             'blockers' => $blockers,
             'delete_counts' => $counts,
@@ -65,17 +67,19 @@ final class DataResetSeeder
                 'murid_abk' => count(array_filter($seed['students'], fn($s) => $s['kondisi'] === 'Berkebutuhan Khusus')),
             ],
             'staff' => array_map(fn($s) => $s['nama'] . ' — ' . $s['jabatan'] . ' — ' . $s['email'], $seed['staff']),
+            'pilot' => $pilot !== null,
+            'classes' => array_map(fn($c) => $c['level'] . ' ' . $c['nama'], array_values($seed['classes'])),
         ];
     }
 
     /** Jalankan dalam satu transaksi; penugasan penyetuju dibuat sesudahnya lewat EraporApprovalAssignment (beraudit). */
-    public static function run(PDO $db, int $actorId, string $password, callable $log): array
+    public static function run(PDO $db, int $actorId, string $password, callable $log, ?array $pilot = null): array
     {
         if (!employeePasswordIsValid($password)) throw new DomainException('Password awal minimal 8 karakter dengan huruf kapital, angka, dan simbol.');
-        $plan = self::plan($db, $actorId);
+        $plan = self::plan($db, $actorId, $pilot);
         if ($plan['blockers']) throw new DomainException(implode(' ', $plan['blockers']));
         $keptIds = array_map('intval', array_column(self::keptUsers($db), 'id'));
-        $seed = self::seedData();
+        $seed = self::seedData($pilot);
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $lock = substr('erapor_migration_' . hash('sha256', (string) $db->query('SELECT DATABASE()')->fetchColumn()), 0, 64);
         $q = $db->prepare('SELECT GET_LOCK(?,10)'); $q->execute([$lock]);
@@ -113,7 +117,8 @@ final class DataResetSeeder
             $warnings[] = 'Penugasan penyetuju belum dibuat (' . $e->getMessage() . '). Atur manual di menu Penugasan Penyetuju.';
         }
         // Dua rapor contoh terisi penuh (Regular + ABK) lewat layanan simpan yang sama dengan editor guru.
-        foreach (self::EXAMPLES as $example) {
+        // Tidak untuk data murid asli dari Excel: nilai rekaan tidak boleh melekat pada anak sungguhan.
+        foreach ($pilot === null ? self::EXAMPLES : [] as $example) {
             try {
                 $filled = self::fillExample($db, $ids['students'][$example['murid']], $ids['periods'][$example['periode']], $ids['users'][$example['guru']]);
                 $log('Rapor contoh ' . $example['murid'] . ': ' . $filled['filled'] . '/' . $filled['required'] . ' isian wajib terisi (status BELUM DIISI, siap diselesaikan guru).');
@@ -303,8 +308,12 @@ final class DataResetSeeder
         return $order;
     }
 
-    /** Data fiktif yang realistis. Nomor telepon memakai pola 0811-0000-xxxx agar tidak menjangkau nomor orang sungguhan. */
-    public static function seedData(): array
+    /**
+     * Data fiktif yang realistis. Nomor telepon memakai pola 0811-0000-xxxx agar tidak menjangkau nomor orang sungguhan.
+     * Dengan $pilot (PilotDataImport::fromXlsx): guru dan murid diganti data file; Kepala Sekolah, Admin, dan kelas seed tetap,
+     * kelas dari file yang belum ada ditambahkan.
+     */
+    public static function seedData(?array $pilot = null): array
     {
         $d = '@' . self::EMAIL_DOMAIN;
         $staff = [
@@ -362,6 +371,20 @@ final class DataResetSeeder
                 $periods[] = ['tahun' => $tahun, 'nama' => 'Rapor ' . $tipe . ' ' . ucfirst($semester) . ' ' . $label, 'semester' => $semester,
                     'tipe' => $tipe, 'kategori' => 'Rapor Murid', 'awal_periode' => $awal, 'akhir_periode' => $akhir];
             }
+        }
+        if ($pilot !== null) {
+            $staff = ['kepala' => $staff['kepala'], 'admin' => $staff['admin']];
+            $teacherKeys = [];
+            foreach (array_values($pilot['teachers']) as $i => $teacher) {
+                $teacherKeys[$teacher['nama']] = 'guru_' . ($i + 1);
+                $staff['guru_' . ($i + 1)] = $teacher;
+            }
+            $classKeys = [];
+            foreach ($classes as $key => $class) $classKeys[$class['level'] . ' ' . $class['nama']] = $key;
+            foreach ($pilot['classes'] as $classKey => $class) {
+                if (!isset($classKeys[$classKey])) { $classes[$classKey] = $class; $classKeys[$classKey] = $classKey; }
+            }
+            $students = array_map(fn($s) => ['kelas' => $classKeys[$s['kelas']], 'guru' => $teacherKeys[$s['guru']]] + $s, $pilot['students']);
         }
         return [
             'school' => ['nama_legal' => 'Yayasan Zivana Insan Mandiri', 'nama_komersial' => 'TK Zivana Montessori Makassar', 'bentuk_pendidikan' => 'TK',

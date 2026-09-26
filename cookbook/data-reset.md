@@ -22,9 +22,20 @@ Semua akun lain, karyawan, data sekolah + media, tahun ajaran, periode, kelas, m
 - Penugasan penyetuju: Kepala Sekolah pada ketiga tahap (koordinator dapat diganti di menu Penugasan Penyetuju).
 - Dua rapor contoh terisi penuh di Tengah Semester Ganjil 2026/2027 lewat layanan simpan editor guru: Fathan Al Ghifari (Regular) dan Zahra Aulia Kirana (ABK, termasuk PPI). Status BELUM DIISI sehingga guru tinggal meninjau lalu Selesaikan Rapor.
 
+## Data guru & murid asli dari Excel
+
+Isian **File Data Guru & Murid (.xlsx)** di halaman reset (opsional) membaca format "Data Piloting E-Rapor" (No, Nama Anak, NISN, Kelas, Nama Guru, Keterangan, Jenis Kelamin, Tempat, Tanggal Lahir, Agama, Anak Ke-, Jumlah Bersaudara, …) lewat `PilotDataImport`:
+
+- Guru dan murid fiktif diganti isi file; Kepala Sekolah, Admin, dan kelas seed tetap. Kelas di file yang belum ada (mis. "Ranting Cemara") ditambahkan.
+- Guru dibuat sebagai Guru Kelas dengan email `nama.depan@sekolahzivanamontessori.sch.id` dari nama tanpa gelar.
+- Kolom yang tidak ada di file (NIK, no. akta, telepon, pendidikan orang tua) diisi `-`; tanggal masuk = awal tahun ajaran. Lengkapi lewat Manajemen Murid.
+- Rapor contoh berisi nilai **tidak** dibuat untuk data asli.
+- File hanya dibaca saat itu dan tidak disimpan. Data pribadi murid tidak boleh di-commit; `/*.xlsx` di root sudah di-`.gitignore`.
+- Pilih file lagi saat menekan **Jalankan** (browser tidak menyimpan pilihan file setelah Pratinjau).
+
 ## Lokal: bangun ulang dari nol
 
-`php database/bootstrap.php --fresh --superadmin-email=EMAIL --superadmin-password=PASS --seed-password=PASS` menghapus semua tabel database lokal di `.env`, lalu: `schema.sql` → migrasi + seed rubrik eRapor → jabatan, aksi izin `PermissionCatalog::EXTRA`, RBAC dasar (`DataBaseline`) dan Superadmin → seed di atas. Hanya berjalan untuk `DB_HOST` lokal.
+`php database/bootstrap.php --fresh --superadmin-email=EMAIL --superadmin-password=PASS --seed-password=PASS [--data=pilot.xlsx]` menghapus semua tabel database lokal di `.env`, lalu: `schema.sql` → migrasi + seed rubrik eRapor → jabatan, aksi izin `PermissionCatalog::EXTRA`, RBAC dasar (`DataBaseline`) dan Superadmin → seed di atas. Hanya berjalan untuk `DB_HOST` lokal.
 
 ## Langkah
 

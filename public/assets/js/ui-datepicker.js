@@ -14,7 +14,12 @@
       previous.trigger.setAttribute('aria-expanded', 'false');
       if (focus) previous.trigger.focus();
     }
-    document.querySelectorAll('[data-datepicker]').forEach(function (wrapper, index) {
+    var sequence = 0;
+    // Juga menangani baris yang ditambahkan setelah halaman dimuat (mis. Tambah Tes Ummi), seperti ui-select.js.
+    function setup(wrapper) {
+      if (wrapper.dataset.datepickerReady) return;
+      wrapper.dataset.datepickerReady = 'true';
+      var index = sequence++;
       var input = wrapper.querySelector('input');
       var trigger = wrapper.querySelector('[data-datepicker-toggle]');
       var popup = document.createElement('div');
@@ -141,7 +146,10 @@
       popup.addEventListener('focusout', function () {
         window.setTimeout(function () { if (active && active.popup === popup && !wrapper.contains(document.activeElement)) close(false); }, 0);
       });
-    });
+    }
+    function initAll() { document.querySelectorAll('[data-datepicker]').forEach(setup); }
+    initAll();
+    new MutationObserver(initAll).observe(document.body, {childList: true, subtree: true});
     document.addEventListener('click', function (event) {
       // A month change replaces the clicked button. Use the original event
       // path, not contains(target), which sees that old button as detached.

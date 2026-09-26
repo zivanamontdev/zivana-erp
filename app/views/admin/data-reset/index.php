@@ -33,8 +33,11 @@ require VIEW_PATH . '/layouts/shell-header.php';
     <pre class="erapor-migration-log"><?php
         $s = $plan['seed'];
         echo 'Tahun ajaran ', $s['tahun_ajaran'], ' (2025/2026, 2026/2027 aktif) · Periode ', $s['periode'], ' · Kelas ', $s['kelas'], "\n";
-        echo 'Murid ', $s['murid'], ' (', $s['murid_regular'], ' Regular, ', $s['murid_abk'], " ABK; termasuk status tanpa keterangan, berhenti, tamat)\n";
-        echo 'Rapor contoh terisi penuh (belum dikonfirmasi): ', e(implode(', ', array_column(DataResetSeeder::EXAMPLES, 'murid'))), "\n\n";
+        echo 'Murid ', $s['murid'], ' (', $s['murid_regular'], ' Regular, ', $s['murid_abk'], ' ABK', empty($plan['pilot']) ? '; termasuk status tanpa keterangan, berhenti, tamat' : '', ")\n";
+        if (empty($plan['pilot'])) echo 'Rapor contoh terisi penuh (belum dikonfirmasi): ', e(implode(', ', array_column(DataResetSeeder::EXAMPLES, 'murid'))), "\n";
+        echo "\n";
+        if (!empty($plan['pilot'])) echo "Guru dan murid dari file Excel yang diunggah (tanpa rapor contoh).\n";
+        echo 'Kelas: ', e(implode(', ', $plan['classes'] ?? [])), "\n\n";
         foreach ($plan['staff'] as $staff) echo e($staff), "\n";
     ?></pre>
 </div>
@@ -42,12 +45,17 @@ require VIEW_PATH . '/layouts/shell-header.php';
 <?php endif; ?>
 
 <?php ob_start(); ?>
-<form method="POST" action="<?= BASE_PATH ?>/sistem/reset-data" class="erapor-signer-form" autocomplete="off" data-reset-form>
+<form method="POST" action="<?= BASE_PATH ?>/sistem/reset-data" class="erapor-signer-form" autocomplete="off" enctype="multipart/form-data" data-reset-form>
     <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
     <?= uiField('token', 'Token Reset', [
         'type' => 'password', 'variant' => 'form', 'placeholder' => 'Salin dari DATA_RESET_TOKEN di .env',
         'inputAttributes' => ['required' => 'required', 'autocomplete' => 'off', 'spellcheck' => 'false'],
     ]) ?>
+    <?= uiField('data_file', 'File Data Guru & Murid (.xlsx, opsional)', [
+        'type' => 'file', 'variant' => 'form',
+        'inputAttributes' => ['accept' => '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+    ]) ?>
+    <p class="text-caption-md">Format "Data Piloting E-Rapor": No, Nama Anak, NISN, Kelas, Nama Guru, Keterangan, Jenis Kelamin, Tempat, Tanggal Lahir, Agama, Anak Ke-, Jumlah Bersaudara, …. Tanpa file dipakai data fiktif. Pilih file lagi saat menekan Jalankan.</p>
     <?= uiField('password', 'Password Awal Akun Seed', [
         'type' => 'password', 'variant' => 'form', 'placeholder' => 'Min. 8 karakter, huruf kapital, angka, simbol',
         'inputAttributes' => ['autocomplete' => 'new-password'],

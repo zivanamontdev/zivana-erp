@@ -334,9 +334,9 @@ require VIEW_PATH . '/layouts/focus-header.php';
                             <?php foreach ($existingTests as $key => $test): ?>
                                 <?php $testToken = substr($key, 4); $savedTest = json_encode($test, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>
                                 <div class="erapor-ummi-test-row" data-erapor-entry="UMMI_TEST" data-erapor-document-id="<?= (int)$document['id'] ?>" data-erapor-key="<?= e($key) ?>" data-saved-value="<?= e($savedTest) ?>">
-                                    <?= uiField('erapor_ummi_test_order_' . $testToken, 'Urutan', ['type'=>'number','value'=>(string)$test['urutan'],'inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
-                                    <?= uiField('erapor_ummi_test_date_' . $testToken, 'Tanggal tes', ['type'=>'date','value'=>$test['tanggal_tes'],'inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
-                                    <?= uiField('erapor_ummi_test_volume_' . $testToken, 'Jilid yang diteskan', ['value'=>$test['jilid'],'placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
+                                    <?= uiField('erapor_ummi_test_order_' . $testToken, 'Urutan', ['variant'=>'form','font'=>'base','type'=>'number','value'=>(string)$test['urutan'],'inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
+                                    <?= uiField('erapor_ummi_test_date_' . $testToken, 'Tanggal tes', ['variant'=>'form','font'=>'base','icon'=>'icon_calendar','iconCalendar'=>true,'type'=>'date','value'=>$test['tanggal_tes'],'inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
+                                    <?= uiField('erapor_ummi_test_volume_' . $testToken, 'Jilid yang diteskan', ['variant'=>'form','font'=>'base','value'=>$test['jilid'],'placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
                                     <?= uiSelect('erapor_ummi_test_grade_' . $testToken, 'Nilai tes', [''=>'Pilih nilai'] + $ummiChoices, ['font'=>'base','value'=>$test['nilai'],'attributes'=>['data-ummi-test-field'=>'nilai']]) ?>
                                     <span class="erapor-ummi-test-status" data-ummi-test-status aria-live="polite"></span>
                                     <?php if ($canEdit): ?><?= uiButton('Hapus', 'outline-danger', ['marginVertical'=>0,'attributes'=>['data-erapor-remove-test'=>true]]) ?><?php endif; ?>
@@ -348,9 +348,9 @@ require VIEW_PATH . '/layouts/focus-header.php';
 
                     <template data-ummi-test-template data-ummi-document-id="<?= (int)$document['id'] ?>">
                         <div class="erapor-ummi-test-row" data-erapor-entry="UMMI_TEST" data-erapor-document-id="<?= (int)$document['id'] ?>" data-erapor-key="" data-saved-value="" data-erapor-incomplete="true">
-                            <?= uiField('erapor_ummi_test_order___TOKEN__', 'Urutan', ['type'=>'number','placeholder'=>'1','inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
-                            <?= uiField('erapor_ummi_test_date___TOKEN__', 'Tanggal tes', ['type'=>'date','inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
-                            <?= uiField('erapor_ummi_test_volume___TOKEN__', 'Jilid yang diteskan', ['placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
+                            <?= uiField('erapor_ummi_test_order___TOKEN__', 'Urutan', ['variant'=>'form','font'=>'base','type'=>'number','placeholder'=>'1','inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
+                            <?= uiField('erapor_ummi_test_date___TOKEN__', 'Tanggal tes', ['variant'=>'form','font'=>'base','icon'=>'icon_calendar','iconCalendar'=>true,'type'=>'date','inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
+                            <?= uiField('erapor_ummi_test_volume___TOKEN__', 'Jilid yang diteskan', ['variant'=>'form','font'=>'base','placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
                             <?= uiSelect('erapor_ummi_test_grade___TOKEN__', 'Nilai tes', [''=>'Pilih nilai'] + $ummiChoices, ['font'=>'base','id'=>'erapor_ummi_test_grade___TOKEN__','attributes'=>['data-ummi-test-field'=>'nilai']]) ?>
                             <span class="erapor-ummi-test-status" data-ummi-test-status aria-live="polite">Lengkapi semua kolom untuk menyimpan.</span>
                             <?= uiButton('Hapus', 'outline-danger', ['marginVertical'=>0,'attributes'=>['data-erapor-remove-test'=>true]]) ?>
@@ -382,5 +382,6 @@ require VIEW_PATH . '/layouts/focus-header.php';
 </main>
 
 <script src="<?= BASE_PATH ?>/assets/js/ui-select.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-select.js') ?>"></script>
+<script src="<?= BASE_PATH ?>/assets/js/ui-datepicker.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-datepicker.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/erapor-session.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/erapor-session.js') ?>"></script>
 <?php require VIEW_PATH . '/layouts/focus-footer.php'; ?>

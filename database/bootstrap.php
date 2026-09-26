@@ -3,14 +3,14 @@
  * Bangun ulang ekosistem LOKAL dari nol dalam satu perintah:
  *   schema.sql -> migrasi + seed rubrik eRapor (spesifikasi) -> jabatan, RBAC dasar, Superadmin -> seed uji coba (DataResetSeeder).
  *
- *   php database/bootstrap.php --fresh --superadmin-email=EMAIL --superadmin-password=PASS --seed-password=PASS
+ *   php database/bootstrap.php --fresh --superadmin-email=EMAIL --superadmin-password=PASS --seed-password=PASS [--data=pilot.xlsx]
  *
  * --fresh MENGHAPUS SEMUA TABEL di database .env. Hanya untuk database lokal (host localhost/127.0.0.1).
  * Production memakai /sistem/migrasi-erapor lalu /sistem/reset-data (cookbook/data-reset.md).
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 
-$opts = getopt('', ['fresh', 'superadmin-email:', 'superadmin-password:', 'seed-password:']);
+$opts = getopt('', ['fresh', 'superadmin-email:', 'superadmin-password:', 'seed-password:', 'data:']);
 if (!isset($opts['fresh'], $opts['superadmin-email'], $opts['superadmin-password'], $opts['seed-password'])) {
     fwrite(STDERR, "Usage: php database/bootstrap.php --fresh --superadmin-email=EMAIL --superadmin-password=PASS --seed-password=PASS\n");
     exit(64);
@@ -62,7 +62,10 @@ try {
     $superId = (int) $db->query('SELECT id FROM users WHERE email=' . $db->quote($opts['superadmin-email']))->fetchColumn();
     $say('Superadmin: ' . $opts['superadmin-email']);
 
-    $run = DataResetSeeder::run($db, $superId, $opts['seed-password'], static fn(string $m) => $say($m));
+    // --data=path.xlsx: guru & murid dari file "Data Piloting" (tidak disimpan di repository).
+    $pilot = isset($opts['data']) ? PilotDataImport::fromXlsx($opts['data'], DataResetSeeder::EMAIL_DOMAIN, DataResetSeeder::SCHOOL_YEAR_START) : null;
+    if ($pilot) $say('Data pilot: ' . count($pilot['teachers']) . ' guru, ' . count($pilot['students']) . ' murid, ' . count($pilot['classes']) . ' kelas.');
+    $run = DataResetSeeder::run($db, $superId, $opts['seed-password'], static fn(string $m) => $say($m), $pilot);
     $say($run['warnings'] ? 'Selesai dengan ' . count($run['warnings']) . ' peringatan.' : 'Selesai tanpa peringatan.');
     exit($run['warnings'] ? 2 : 0);
 } catch (Throwable $e) {

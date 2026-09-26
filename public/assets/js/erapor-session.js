@@ -168,7 +168,9 @@
       updateConfirmState();
     }
 
-    async function request(url, body) {
+    // Token CSRF sekali pakai per sesi login: tab lain atau jeda >1 jam membuat token halaman ini basi.
+    // Respons 419 selalu membawa token baru, jadi setiap permintaan dicoba ulang sekali sebelum dianggap gagal.
+    async function request(url, body, retried) {
       var headers = {'Accept': 'application/json'};
       var options = {method: 'GET', credentials: 'same-origin', cache: 'no-store', headers: headers};
       if (body !== undefined) {
@@ -181,6 +183,9 @@
       var json = await response.json();
       if (typeof json.csrf_token === 'string') token = json.csrf_token;
       root.dataset.csrfToken = token;
+      if (response.status === 419 && body !== undefined && !retried && typeof json.csrf_token === 'string') {
+        return request(url, body, true);
+      }
       if (!response.ok || json.ok !== true) {
         var error = new Error((json.error && json.error.message) || 'Permintaan tidak berhasil.');
         error.status = response.status;
@@ -357,7 +362,7 @@
         updateConfirmState();
         var orderInput = row.querySelector('[data-ummi-test-field="urutan"]');
         if (orderInput) orderInput.focus();
-        setStatus('Baris tes ditambahkan. Lengkapi seluruh kolom untuk menyimpannya.', 'pending');
+        setStatus('Baris tes ditambahkan. Lengkapi seluruh kolom, atau hapus baris ini, sebelum Selesaikan Rapor.', 'pending');
         return;
       }
 
@@ -369,6 +374,7 @@
           pending.delete(testRow);
           testRow.remove();
           updateConfirmState();
+          if (!pending.size && !saving) setStatus(hasIncompleteTestRows() ? 'Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum Selesaikan Rapor.' : 'Baris tes kosong dihapus. Semua perubahan tersimpan.', hasIncompleteTestRows() ? 'pending' : 'success');
           return;
         }
         if (!(await askConfirm('Hapus Catatan Tes?', 'Catatan tes ini akan dihapus dari Rapor Ummi.', 'Hapus'))) return;

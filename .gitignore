@@ -14,3 +14,6 @@ public/uploads/*
 # Local headless-browser UI test artifacts (not application data).
 tests/edge-report-profile/
 tests/report-preview-check.png
+
+# Data pribadi murid/guru untuk import pilot (jangan di-commit)
+/*.xlsx

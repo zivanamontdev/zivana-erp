@@ -209,9 +209,13 @@ button.teacher-report-action:focus-visible,
 .erapor-ummi-tests-heading { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); }
 .erapor-ummi-tests-heading h3, .erapor-ummi-teacher-note h3 { margin:0; color:var(--color-neutral-800); font-size:var(--font-size-body-sm); font-weight:var(--font-weight-bold); }
 .erapor-ummi-tests-heading > div { display:grid; gap:var(--space-1); }
+.erapor-ummi-tests-heading > .ui-button { flex-shrink:0; white-space:nowrap; }
 .erapor-ummi-test-list { display:grid; gap:var(--space-3); }
 .erapor-ummi-test-row { display:grid; grid-template-columns:minmax(5rem,.55fr) minmax(10rem,1fr) minmax(9rem,1fr) minmax(8rem,.75fr) auto; align-items:end; gap:var(--space-3); border:1px solid var(--color-neutral-75); border-radius:var(--radius-md); background:var(--color-neutral-white); padding:var(--space-3); }
 .erapor-ummi-test-row .ui-field, .erapor-ummi-test-row .ui-select { width:100%; min-width:0; }
+/* Semua isian baris tes setinggi dropdown; tombol Hapus sejajar isian di baris pertama. */
+.erapor-ummi-test-row .field-input, .erapor-ummi-test-row .ui-select-trigger { box-sizing:border-box; height:3.125rem; min-height:3.125rem; }
+@media (min-width: 56.01rem) { .erapor-ummi-test-row > .ui-button { grid-row:1; grid-column:-2; align-self:end; height:3.125rem; } }
 .erapor-ummi-test-status { grid-column:1 / -2; color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
 .erapor-ummi-test-row[data-erapor-incomplete="true"] { border-color:var(--color-orange-300); }
 .erapor-ummi-test-row[data-erapor-delete-test="true"] { opacity:.65; }

@@ -31,9 +31,15 @@ class DataResetController extends Controller
             return;
         }
         $db = Database::getInstance();
+        try {
+            $pilot = $this->uploadedPilot();
+        } catch (Throwable $e) {
+            $this->render(['mode' => $mode, 'ok' => false, 'lines' => ['File data tidak dapat dibaca: ' . $e->getMessage() . ' Tidak ada perubahan yang dilakukan.']], null);
+            return;
+        }
         if ($mode === 'preview') {
             try {
-                $plan = DataResetSeeder::plan($db, $actorId);
+                $plan = DataResetSeeder::plan($db, $actorId, $pilot);
                 $this->render(['mode' => $mode, 'ok' => !$plan['blockers'], 'lines' => $plan['blockers'] ?: ['Pratinjau selesai. Tidak ada perubahan yang dilakukan.']], $plan);
             } catch (Throwable $e) {
                 $this->render(['mode' => $mode, 'ok' => false, 'lines' => ['Pratinjau gagal: ' . $e->getMessage()]], null);
@@ -56,7 +62,7 @@ class DataResetController extends Controller
         $ok = false;
         try {
             error_log('Data reset: started by user ' . $actorId);
-            DataResetSeeder::run($db, $actorId, $password, static function (string $line) use (&$lines): void { $lines[] = $line; });
+            DataResetSeeder::run($db, $actorId, $password, static function (string $line) use (&$lines): void { $lines[] = $line; }, $pilot);
             error_log('Data reset: finished by user ' . $actorId);
             $lines[] = 'Selesai. Hapus DATA_RESET_TOKEN dari .env agar halaman ini kembali tidak tersedia.';
             $ok = true;
@@ -65,6 +71,17 @@ class DataResetController extends Controller
             $lines[] = 'Dibatalkan, seluruh perubahan di-rollback: ' . $e->getMessage();
         }
         $this->render(['mode' => $mode, 'ok' => $ok, 'lines' => $lines], null);
+    }
+
+    /** File "Data Piloting" (.xlsx) opsional; tanpa file dipakai data fiktif. Isi file tidak disimpan di server. */
+    private function uploadedPilot(): ?array
+    {
+        $file = $_FILES['data_file'] ?? null;
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return null;
+        if ($file['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) throw new DomainException('Unggahan gagal.');
+        if ($file['size'] > 5 * 1024 * 1024) throw new DomainException('Ukuran file maksimal 5 MB.');
+        if (strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION)) !== 'xlsx') throw new DomainException('Gunakan file Excel .xlsx.');
+        return PilotDataImport::fromXlsx($file['tmp_name'], DataResetSeeder::EMAIL_DOMAIN, DataResetSeeder::SCHOOL_YEAR_START);
     }
 
     private function guard(): void
