@@ -9,8 +9,8 @@
     var token = root.dataset.csrfToken;
     var status = root.querySelector('[data-erapor-status]');
     var recovery = root.querySelector('[data-erapor-recovery]');
-    // Sisakan ruang setinggi action bar mobile (fixed) supaya isian terakhir tidak tertutup.
-    var actionBar = root.querySelector('.pengisian-header-actions');
+    // Sisakan ruang setinggi bar navigasi mobile (fixed) supaya isian terakhir tidak tertutup.
+    var actionBar = root.querySelector('[data-erapor-pager]');
     if (actionBar && window.ResizeObserver) {
       new window.ResizeObserver(function () {
         root.style.setProperty('--report-actions-height', actionBar.getBoundingClientRect().height + 'px');
@@ -21,6 +21,7 @@
     var saving = false;
     var blocked = false;
     var serverStatus = null;
+    var lastCompletion = null;
     var pages = Array.from(root.querySelectorAll('[data-erapor-page]'));
     var steps = Array.from(root.querySelectorAll('[data-erapor-step]'));
     var currentPage = 0;
@@ -46,11 +47,41 @@
       });
     }
 
-    // Tombol tetap aktif walau isian belum lengkap; kelengkapan diperiksa saat diklik (lihat validateRequired).
+    // Rapor wajib yang belum lengkap menurut server (rapor opsional seperti Ummi punya required 0).
+    function incompleteDocuments() {
+      return ((lastCompletion && lastCompletion.documents) || []).filter(function (item) {
+        return Number(item.required || 0) > 0 && Number(item.filled || 0) < Number(item.required);
+      });
+    }
+
     function updateConfirmState() {
       var busy = pending.size > 0 || saving || hasIncompleteTestRows();
-      setConfirmDisabled(serverStatus !== 'BELUM_DIISI' || busy);
-      setReceptionDisabled(serverStatus !== 'TELAH_DIISI' || busy);
+      var incomplete = incompleteDocuments();
+      setConfirmDisabled(serverStatus !== 'BELUM_DIISI' || busy || incomplete.length > 0);
+      setReceptionDisabled(serverStatus !== 'TELAH_DIISI' || busy || incomplete.length > 0);
+      updatePagerHint(incomplete);
+    }
+
+    // Di halaman terakhir, jelaskan mengapa Selesaikan Rapor belum aktif dan tawarkan penanda isian kosong.
+    function updatePagerHint(incomplete) {
+      var hint = root.querySelector('[data-erapor-pager-hint]');
+      if (!hint) return;
+      var submit = root.querySelector('[data-erapor-pager-submit]');
+      var show = Boolean(submit) && currentPage === pages.length - 1 && incomplete.length > 0;
+      hint.hidden = !show;
+      if (!show) return;
+      var names = incomplete.map(function (item) {
+        var page = root.querySelector('[data-erapor-page][data-erapor-type="' + CSS.escape(item.jenis) + '"]');
+        var heading = page && page.querySelector('h2');
+        return (heading ? heading.textContent.trim() : item.jenis) + ' (' + item.filled + '/' + item.required + ')';
+      });
+      hint.textContent = 'Lengkapi dulu: ' + names.join(', ') + '. ';
+      var showButton = document.createElement('button');
+      showButton.type = 'button';
+      showButton.className = 'erapor-pager-hint-link';
+      showButton.dataset.eraporShowMissing = 'true';
+      showButton.textContent = 'Tunjukkan yang belum diisi';
+      hint.appendChild(showButton);
     }
 
     function setReceptionDisabled(disabled) {
@@ -171,6 +202,7 @@
           statusLine.textContent += ' · Status ' + data.session.status.replaceAll('_', ' ');
         }
       }
+      if (data.completion) lastCompletion = data.completion;
       var currentStatus = data.session && data.session.status;
       serverStatus = root.dataset.canSubmit === 'true' ? currentStatus : null;
       updateConfirmState();
@@ -302,9 +334,19 @@
       if (pager) {
         var last = index === pages.length - 1;
         pager.querySelector('[data-erapor-pager-label]').textContent = 'Bagian ' + (index + 1) + ' dari ' + pages.length;
-        pager.querySelector('[data-erapor-prev]').hidden = index === 0;
-        pager.querySelector('[data-erapor-next]').hidden = last;
-        pager.querySelectorAll('[data-erapor-pager-submit]').forEach(function (button) { button.hidden = !last; });
+        var prev = pager.querySelector('[data-erapor-prev]');
+        prev.disabled = index === 0;
+        prev.classList.toggle('ui-button--disabled', index === 0);
+        prev.classList.toggle('ui-button--outline', index !== 0);
+        var submits = pager.querySelectorAll('[data-erapor-pager-submit]');
+        var next = pager.querySelector('[data-erapor-next]');
+        // Di halaman terakhir Selanjutnya berganti menjadi Selesaikan Rapor (bila status mengizinkan).
+        next.hidden = last && submits.length > 0;
+        next.disabled = last;
+        next.classList.toggle('ui-button--disabled', last);
+        next.classList.toggle('ui-button--primary', !last);
+        submits.forEach(function (button) { button.hidden = !last; });
+        updatePagerHint(incompleteDocuments());
       }
       try { window.history.replaceState(null, '', '#bagian-' + (index + 1)); } catch (error) { /* abaikan */ }
       if (steps[index] && steps[index].parentElement) {
@@ -463,6 +505,13 @@
       if (step) { showPage(Number(step.dataset.eraporStep), true); return; }
       if (event.target.closest('[data-erapor-prev]')) { showPage(currentPage - 1, true); return; }
       if (event.target.closest('[data-erapor-next]')) { showPage(currentPage + 1, true); return; }
+      var openUrl = event.target.closest('[data-erapor-open-url]');
+      if (openUrl) { window.open(openUrl.dataset.eraporOpenUrl, '_blank', 'noopener'); return; }
+      if (event.target.closest('[data-erapor-show-missing]')) {
+        if (!validateRequired()) return;
+        markServerMissing(lastCompletion);
+        return;
+      }
 
       var addTest = event.target.closest('[data-erapor-add-test]');
       if (addTest) {

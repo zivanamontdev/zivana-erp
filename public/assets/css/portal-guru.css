@@ -544,10 +544,33 @@ button.teacher-report-action:focus-visible,
 }
 
 /* Judul area/subarea bisa dilipat; tampilan header tetap sama, hanya ditambah chevron. */
-.erapor-section { display:grid; gap:var(--space-3); margin:0; }
+.erapor-section { display:grid; gap:var(--space-3); margin-block:0; }
 .erapor-section > summary.erapor-page-heading { margin:var(--space-2) 0 0; }
 .erapor-section-body { display:grid; gap:var(--space-3); }
 .erapor-section-body > .erapor-subheading { margin:var(--space-1) 0 0 var(--space-2); }
 .erapor-section > .ui-disclosure-trigger:focus-visible { outline:2px solid var(--color-red-400); outline-offset:2px; }
 .erapor-section.has-invalid > summary { box-shadow:0 0 0 2px var(--color-red-600); }
 .erapor-section:not([open]) > summary.erapor-page-heading { margin-top:0; }
+
+/* ---------- eRapor: header ringkas + bar navigasi bawah ---------- */
+.erapor-session .pengisian-header-top { flex-wrap:nowrap; margin-bottom:var(--space-4); }
+.erapor-session .pengisian-title { display:grid; gap:var(--space-1); min-width:0; }
+.erapor-session .pengisian-student-name { margin:0; }
+.pengisian-header-icons { display:none; flex:0 0 auto; align-items:center; gap:var(--space-2); }
+.pengisian-header-icons .ui-button-icon svg { width:1.25rem; height:1.25rem; }
+.erapor-pager-hint { flex:1 1 100%; order:-1; margin:0; color:var(--color-red-600); font-size:var(--font-size-caption-md); }
+.erapor-pager-hint[hidden] { display:none; }
+.erapor-pager-hint-link { margin:0; padding:0; border:0; background:none; color:inherit; font:inherit; font-weight:var(--font-weight-bold); text-decoration:underline; cursor:pointer; }
+@media (max-width: 40rem) {
+  .erapor-session .pengisian-header-top { align-items:center; }
+  .erapor-session .pengisian-header-icons { display:flex; }
+  /* Aksi header desktop diganti ikon (atas) dan bar Sebelumnya/Selanjutnya (bawah). */
+  .erapor-session .pengisian-header-actions { display:none; }
+  .erapor-session .erapor-pager {
+    position:fixed; inset-inline:0; bottom:0; z-index:100; margin:0; border-radius:0;
+    border-top:1px solid var(--color-neutral-100); background:var(--color-page-background);
+    padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px)); gap:var(--space-2) var(--space-3);
+  }
+  .erapor-session .erapor-pager > .ui-button { flex:1 1 0; min-width:0; }
+  .erapor-session .erapor-pager-label { display:none; }
+}

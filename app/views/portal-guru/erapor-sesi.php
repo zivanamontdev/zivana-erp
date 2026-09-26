@@ -90,21 +90,30 @@ require VIEW_PATH . '/layouts/focus-header.php';
       data-csrf-token="<?= e(getCsrfToken()) ?>"
       data-can-submit="<?= $canSend ? 'true' : 'false' ?>">
     <section class="pengisian-header-card">
+        <?php
+        $pdfUrl = BASE_PATH . '/erapor/sesi/' . (int)$session['id'] . '/pdf';
+        $pdfLabel = !empty($hasOfficialPdf) ? 'Lihat PDF Resmi' : 'Pratinjau PDF';
+        ?>
         <div class="pengisian-header-top">
-            <div>
+            <div class="pengisian-title">
                 <h1>Pengisian Rapor</h1>
                 <p class="pengisian-student-name"><?= e($student['nama_lengkap']) ?></p>
             </div>
+            <?php // Mobile: aksi header diringkas jadi tombol ikon; navigasi & Selesaikan ada di bar bawah (pager). ?>
+            <div class="pengisian-header-icons">
+                <?= uiButton($pdfLabel, 'outline', ['icon'=>'icon_file_text', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>$pdfLabel, 'data-erapor-open-url'=>$pdfUrl]]) ?>
+                <?= uiButton('Kembali ke Dashboard', 'outline', ['icon'=>'icon_layout_dashboard', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Kembali ke Dashboard', 'onclick'=>'window.location.href=\''.BASE_PATH.'/portal-guru/dashboard\'']]) ?>
+            </div>
             <div class="pengisian-header-actions">
                 <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
-                    <?php // Tetap aktif walau belum lengkap: klik menandai isian wajib yang kosong dan membuka bagiannya. ?>
+                    <?php // Aktif setelah semua rapor wajib lengkap (diatur erapor-session.js dari data server). ?>
                     <?= uiButton('Selesaikan Rapor', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm'=>true]]) ?>
                 <?php elseif ($canSend && $session['status'] === 'TELAH_DIISI'): ?>
                     <?= uiButton('Konfirmasi Penerimaan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-reception'=>true]]) ?>
                 <?php elseif (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
                     <span class="teacher-report-action teacher-report-action--pending"><?= $session['status'] === 'SELESAI' ? 'Rapor telah disetujui' : 'Menunggu proses persetujuan' ?></span>
                 <?php endif; ?>
-                <a class="ui-button ui-button--outline" href="<?= BASE_PATH ?>/erapor/sesi/<?= (int)$session['id'] ?>/pdf" target="_blank" rel="noopener" data-erapor-pdf><?= !empty($hasOfficialPdf) ? 'Lihat PDF Resmi' : 'Pratinjau PDF' ?></a>
+                <a class="ui-button ui-button--outline" href="<?= e($pdfUrl) ?>" target="_blank" rel="noopener" data-erapor-pdf><?= e($pdfLabel) ?></a>
                 <?= uiButton('Kembali ke Dashboard', 'outline', ['marginVertical'=>0, 'attributes'=>['onclick'=>'window.location.href=\''.BASE_PATH.'/portal-guru/dashboard\'']]) ?>
             </div>
         </div>
@@ -413,9 +422,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
     <?php endforeach; ?>
 
     <nav class="erapor-pager" aria-label="Navigasi bagian rapor" data-erapor-pager>
+        <p class="erapor-pager-hint" data-erapor-pager-hint hidden></p>
         <?= uiButton('Sebelumnya', 'outline', ['marginVertical'=>0, 'attributes'=>['data-erapor-prev'=>true]]) ?>
         <span class="erapor-pager-label" data-erapor-pager-label>Bagian 1 dari <?= $pageTotal ?></span>
-        <?= uiButton('Berikutnya', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-next'=>true]]) ?>
+        <?= uiButton('Selanjutnya', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-next'=>true]]) ?>
         <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
             <?= uiButton('Selesaikan Rapor', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm'=>true, 'data-erapor-pager-submit'=>true]]) ?>
         <?php elseif ($canSend && $session['status'] === 'TELAH_DIISI'): ?>
