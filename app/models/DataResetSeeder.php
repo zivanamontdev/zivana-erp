@@ -217,7 +217,8 @@ final class DataResetSeeder
             $q->execute(array_values($row));
             return (int) $db->lastInsertId();
         };
-        $ins('sekolah', $seed['school']);
+        // SekolahController membaca baris tunggal ber-id 1 (SEKOLAH_ID); setelah DELETE auto-increment tidak kembali ke 1.
+        $ins('sekolah', ['id' => 1] + $seed['school']);
         $log('Data sekolah dibuat.');
 
         foreach ($seed['years'] as $key => $year) $ids['years'][$key] = $ins('tahun_ajaran', $year);
