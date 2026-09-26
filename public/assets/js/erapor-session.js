@@ -20,8 +20,10 @@
     var timer = null;
     var saving = false;
     var blocked = false;
-    var serverCanConfirm = false;
-    var serverCanReceive = false;
+    var serverStatus = null;
+    var pages = Array.from(root.querySelectorAll('[data-erapor-page]'));
+    var steps = Array.from(root.querySelectorAll('[data-erapor-step]'));
+    var currentPage = 0;
 
     function testRowValue(row) {
       var read = function (key) {
@@ -44,10 +46,11 @@
       });
     }
 
+    // Tombol tetap aktif walau isian belum lengkap; kelengkapan diperiksa saat diklik (lihat validateRequired).
     function updateConfirmState() {
       var busy = pending.size > 0 || saving || hasIncompleteTestRows();
-      setConfirmDisabled(!serverCanConfirm || busy);
-      setReceptionDisabled(!serverCanReceive || busy);
+      setConfirmDisabled(serverStatus !== 'BELUM_DIISI' || busy);
+      setReceptionDisabled(serverStatus !== 'TELAH_DIISI' || busy);
     }
 
     function setReceptionDisabled(disabled) {
@@ -68,6 +71,10 @@
     }
 
     function valueOf(field) {
+      if (field.dataset.eraporRadio === 'true') {
+        var checked = field.querySelector('input[type="radio"]:checked');
+        return checked ? Number(checked.value) : null;
+      }
       if (field.dataset.eraporEntry === 'UMMI_TEST') {
         if (field.dataset.eraporDeleteTest === 'true') return null;
         return testRowValue(field);
@@ -111,6 +118,7 @@
 
     function noteChange(field) {
       if (blocked || field.disabled) return;
+      refreshQuestion(field);
       pending.set(field, true);
       setConfirmDisabled(true);
       setReceptionDisabled(true);
@@ -138,12 +146,15 @@
       completion.documents.forEach(function (item) {
         totalRequired += Number(item.required || 0);
         totalFilled += Number(item.filled || 0);
-        var card = root.querySelector('[data-erapor-type="' + CSS.escape(item.jenis) + '"]');
+        var optional = Number(item.required || 0) === 0;
+        var stepLabel = root.querySelector('[data-erapor-step-progress="' + CSS.escape(item.jenis) + '"]');
+        if (stepLabel) stepLabel.textContent = optional ? 'Opsional' : item.filled + ' / ' + item.required;
+        var card = root.querySelector('[data-erapor-page][data-erapor-type="' + CSS.escape(item.jenis) + '"]');
         if (!card) return;
         card.dataset.eraporRequired = item.required;
         card.dataset.eraporFilled = item.filled;
         var label = card.querySelector('[data-erapor-document-progress]');
-        if (label) label.textContent = item.filled + ' / ' + item.required + ' terisi';
+        if (label) label.textContent = optional ? 'Opsional' : item.filled + ' / ' + item.required + ' terisi';
       });
       var count = root.querySelector('[data-erapor-overall-count]');
       var bar = root.querySelector('[data-erapor-overall-bar]');
@@ -161,10 +172,7 @@
         }
       }
       var currentStatus = data.session && data.session.status;
-      serverCanConfirm = root.dataset.canSubmit === 'true' && currentStatus === 'BELUM_DIISI'
-        && data.capabilities && data.capabilities.can_confirm_filled === true;
-      serverCanReceive = root.dataset.canSubmit === 'true' && currentStatus === 'TELAH_DIISI'
-        && data.capabilities && data.capabilities.can_confirm_reception === true;
+      serverStatus = root.dataset.canSubmit === 'true' ? currentStatus : null;
       updateConfirmState();
     }
 
@@ -281,11 +289,109 @@
       return Array.from(bytes).map(function (byte) { return byte.toString(16).padStart(2, '0'); }).join('');
     }
 
+    // ---- Halaman per jenis rapor (seperti Google Form) ----
+    var pager = root.querySelector('[data-erapor-pager]');
+    function showPage(index, scrollToTop) {
+      if (!pages.length || index < 0 || index >= pages.length) return;
+      currentPage = index;
+      pages.forEach(function (page, i) { page.hidden = i !== index; });
+      steps.forEach(function (step, i) {
+        if (i === index) step.setAttribute('aria-current', 'step');
+        else step.removeAttribute('aria-current');
+      });
+      if (pager) {
+        var last = index === pages.length - 1;
+        pager.querySelector('[data-erapor-pager-label]').textContent = 'Bagian ' + (index + 1) + ' dari ' + pages.length;
+        pager.querySelector('[data-erapor-prev]').hidden = index === 0;
+        pager.querySelector('[data-erapor-next]').hidden = last;
+        pager.querySelectorAll('[data-erapor-pager-submit]').forEach(function (button) { button.hidden = !last; });
+      }
+      try { window.history.replaceState(null, '', '#bagian-' + (index + 1)); } catch (error) { /* abaikan */ }
+      if (steps[index] && steps[index].parentElement) {
+        var nav = steps[index].parentElement;
+        nav.scrollLeft = Math.max(0, steps[index].offsetLeft - (nav.clientWidth - steps[index].offsetWidth) / 2);
+      }
+      if (scrollToTop) {
+        var anchor = root.querySelector('[data-erapor-steps]') || pages[index];
+        window.scrollTo({top: Math.max(0, anchor.getBoundingClientRect().top + window.scrollY - 16), behavior: 'smooth'});
+      }
+    }
+
+    function goTo(element) {
+      var page = element.closest('[data-erapor-page]');
+      if (page) showPage(pages.indexOf(page), false);
+      element.scrollIntoView({block: 'center', behavior: 'smooth'});
+      var target = element.querySelector('input:not([type="hidden"]):not(:disabled), textarea:not(:disabled), .ui-select-trigger, select:not(:disabled)');
+      if (target && target.focus) target.focus({preventScroll: true});
+    }
+
+    // ---- Penanda isian wajib yang belum diisi ----
+    function requiredEntries(scope) {
+      return Array.from(scope.querySelectorAll('[data-erapor-entry][aria-required="true"]')).filter(function (field) {
+        var page = field.closest('[data-erapor-page]');
+        return !page || page.dataset.eraporOptional !== 'true';
+      });
+    }
+
+    function setQuestionInvalid(card, invalid) {
+      card.classList.toggle('is-invalid', invalid);
+      var message = card.querySelector('[data-erapor-question-error]');
+      if (message) message.hidden = !invalid;
+    }
+
+    function updateStepFlags() {
+      pages.forEach(function (page, i) {
+        if (steps[i]) steps[i].classList.toggle('has-invalid', Boolean(page.querySelector('[data-erapor-question].is-invalid')));
+      });
+    }
+
+    function refreshQuestion(field) {
+      var card = field.closest('[data-erapor-question]');
+      if (!card || !card.classList.contains('is-invalid')) return;
+      if (requiredEntries(card).every(function (entry) { return valueOf(entry) !== null; })) {
+        setQuestionInvalid(card, false);
+        updateStepFlags();
+      }
+    }
+
+    function markMissing(fields) {
+      root.querySelectorAll('[data-erapor-question].is-invalid').forEach(function (card) { setQuestionInvalid(card, false); });
+      var first = null;
+      fields.forEach(function (field) {
+        var card = field.closest('[data-erapor-question]') || field;
+        if (card.hasAttribute('data-erapor-question')) setQuestionInvalid(card, true);
+        if (!first) first = card;
+      });
+      updateStepFlags();
+      if (first) goTo(first);
+      return fields.length;
+    }
+
+    // Pemeriksaan di browser hanya untuk menunjukkan lokasi; server tetap penentu kelengkapan.
+    function validateRequired() {
+      var missing = requiredEntries(root).filter(function (field) { return valueOf(field) === null; });
+      if (!markMissing(missing)) return true;
+      setStatus(missing.length + ' isian wajib belum diisi. Lengkapi isian bertanda merah sebelum melanjutkan.', 'error');
+      return false;
+    }
+
+    function markServerMissing(completion) {
+      var fields = [];
+      ((completion && completion.documents) || []).forEach(function (item) {
+        var page = root.querySelector('[data-erapor-page][data-erapor-type="' + CSS.escape(item.jenis) + '"]');
+        (item.missing || []).forEach(function (entry) {
+          var field = page && page.querySelector('[data-erapor-key="' + CSS.escape(entry.key) + '"]');
+          if (field) fields.push(field);
+        });
+      });
+      markMissing(fields);
+    }
+
     root.addEventListener('input', function (event) {
       var testRow = event.target.closest('[data-erapor-entry="UMMI_TEST"]');
       if (testRow) { handleTestRowChange(testRow); return; }
       var field = event.target.closest('[data-erapor-entry]');
-      if (field && field.tagName !== 'SELECT' && field.type !== 'checkbox') noteChange(field);
+      if (field && field.tagName !== 'SELECT' && field.type !== 'checkbox' && field.dataset.eraporRadio !== 'true') noteChange(field);
     });
 
     root.addEventListener('change', function (event) {
@@ -301,7 +407,7 @@
         var ummiCard = field.closest('[data-erapor-document]');
         if (ummiCard) updateUmmiReadingCount(ummiCard);
       }
-      if (field.tagName === 'SELECT' || field.type === 'checkbox') noteChange(field);
+      if (field.tagName === 'SELECT' || field.type === 'checkbox' || field.dataset.eraporRadio === 'true') noteChange(field);
     });
 
     // Konfirmasi memakai modal aplikasi (#erapor-confirm-modal), bukan window.confirm() bawaan browser.
@@ -342,6 +448,11 @@
     }
 
     root.addEventListener('click', async function (event) {
+      var step = event.target.closest('[data-erapor-step]');
+      if (step) { showPage(Number(step.dataset.eraporStep), true); return; }
+      if (event.target.closest('[data-erapor-prev]')) { showPage(currentPage - 1, true); return; }
+      if (event.target.closest('[data-erapor-next]')) { showPage(currentPage + 1, true); return; }
+
       var addTest = event.target.closest('[data-erapor-add-test]');
       if (addTest) {
         if (blocked || saving) return;
@@ -433,8 +544,13 @@
         || (receiveButton && receiveButton.disabled) || pending.size || saving || blocked) return;
       if (hasIncompleteTestRows()) {
         setStatus('Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum melanjutkan.', 'error');
+        var incompleteRow = Array.from(root.querySelectorAll('[data-erapor-entry="UMMI_TEST"]')).find(function (row) {
+          return row.dataset.eraporIncomplete === 'true' && row.dataset.eraporDeleteTest !== 'true';
+        });
+        if (incompleteRow) goTo(incompleteRow);
         return;
       }
+      if (!validateRequired()) return;
       var receiving = Boolean(receiveButton);
       var confirmation = receiving
         ? 'Konfirmasi penerimaan akan mengunci seluruh isian rapor dan mengirimkannya ke antrean persetujuan. Setelah dilanjutkan, nilai tidak dapat diubah.'
@@ -451,14 +567,15 @@
           return;
         }
         applyState(result);
-        setStatus('Masih ada isian wajib yang belum lengkap. Periksa kembali progress tiap dokumen.', 'error');
+        markServerMissing(result.completion);
+        setStatus('Masih ada isian wajib yang belum lengkap. Lengkapi isian bertanda merah.', 'error');
       } catch (error) {
         if (error.status === 401) { window.location.assign(root.dataset.loginUrl); return; }
         blocked = error.status === 403 || error.status === 409 || error.status === 419 || error.status === 422;
         if (blocked) recovery.hidden = false;
         setStatus(error.message || 'Konfirmasi belum dapat dilakukan.', 'error');
-        setConfirmDisabled(blocked || !serverCanConfirm);
-        setReceptionDisabled(blocked || !serverCanReceive);
+        setConfirmDisabled(blocked || serverStatus !== 'BELUM_DIISI');
+        setReceptionDisabled(blocked || serverStatus !== 'TELAH_DIISI');
       }
     });
 
@@ -466,6 +583,8 @@
       var initial = JSON.parse(root.querySelector('[data-erapor-initial-state]').textContent);
       applyState(initial);
       root.querySelectorAll('[data-erapor-document]').forEach(function (card) { updateUmmiReadingCount(card); });
+      var hashPage = /^#bagian-(\d+)$/.exec(window.location.hash);
+      showPage(hashPage ? Math.min(pages.length, Number(hashPage[1])) - 1 : 0, false);
     } catch (error) {
       setStatus('Ringkasan sesi tidak dapat dibaca. Muat ulang halaman sebelum mengubah nilai.', 'error');
       blocked = true;

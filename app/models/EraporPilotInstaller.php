@@ -21,6 +21,7 @@ final class EraporPilotInstaller
         '20260925_erapor_approval_assignment_audit.sql',
         '20260925_erapor_signer_profile_audit.sql',
         '20260925_erapor_publication_artifact.sql',
+        '20260926_erapor_rts_belum_dikenalkan.sql',
     ];
 
     private const SEEDS = [

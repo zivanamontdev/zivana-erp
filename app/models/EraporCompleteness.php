@@ -28,11 +28,13 @@ final class EraporCompleteness
             $args=[$session['id'],$doc['id'],$rid];
             $rows=[];
             if ($type==='RTS') {
-                $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.tujuan AS label,sc.nilai AS value
+                // "Belum Dikenalkan" (0) adalah jawaban yang sah, bukan isian kosong.
+                $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.tujuan AS label,COALESCE(sc.nilai,IF(b.indikator_id IS NULL,NULL,0)) AS value
                     FROM erapor_rubrik_indikator i JOIN erapor_rubrik_sub_area s ON s.id=i.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id
                     LEFT JOIN erapor_rts_nilai n ON n.indikator_id=i.id AND n.sesi_id=? AND n.dokumen_id=?
                     LEFT JOIN erapor_skala_nilai sc ON sc.id=n.skala_id AND sc.rubrik_id=a.rubrik_id
-                    WHERE a.rubrik_id=? AND i.aktif=1 ORDER BY i.id",$args);
+                    LEFT JOIN erapor_rts_belum_dikenalkan b ON b.indikator_id=i.id AND b.sesi_id=? AND b.dokumen_id=?
+                    WHERE a.rubrik_id=? AND i.aktif=1 ORDER BY i.id",[$session['id'],$doc['id'],$session['id'],$doc['id'],$rid]);
             } elseif ($type==='BING') {
                 $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.label_cetak AS label,sc.kode AS value
                     FROM erapor_bing_indikator i LEFT JOIN erapor_bing_nilai n ON n.indikator_id=i.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=i.rubrik_id
@@ -47,8 +49,8 @@ final class EraporCompleteness
                     LEFT JOIN erapor_ppi_isian n ON n.aspek_id=a.id AND n.kolom_id=c.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=a.rubrik_id
                     WHERE a.rubrik_id=? AND a.aktif=1 AND c.wajib=1 AND c.diisi_di_sesi=1 ORDER BY a.urutan,c.bagian,c.urutan",$args);
             } elseif ($type==='UMMI') {
-                $note=self::rows($db,'SELECT isi FROM erapor_ummi_catatan WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args);
-                $rows=[['field'=>'catatan','label'=>'Catatan Guru','value'=>$note[0]['isi'] ?? null]];
+                // Rapor Ummi opsional: seluruh isian (termasuk Catatan Guru) tidak menghalangi Selesaikan Rapor.
+                $rows=[];
             } elseif ($type==='AGAMA') {
                 $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.teks AS label,p.kolom_cetak AS value
                     FROM erapor_agama_item i JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id
@@ -60,7 +62,7 @@ final class EraporCompleteness
                     FROM erapor_agama_lingkup l LEFT JOIN erapor_agama_catatan n ON n.lingkup_id=l.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=l.rubrik_id
                     WHERE l.rubrik_id=? AND l.catatan_wajib=1 ORDER BY l.urutan",$args));
             } else throw new DomainException('Rubrik belum didukung: '.$type);
-            if (!$rows) throw new DomainException('Definisi wajib kosong: '.$type);
+            if (!$rows && $type!=='UMMI') throw new DomainException('Definisi wajib kosong: '.$type);
             $missing=[];
             foreach ($rows as $row) if ($row['value']===null || EraporSessionPolicy::isBlank((string)$row['value'])) $missing[]=['key'=>$row['field'],'label'=>$row['label']];
             $done=$missing===[]; $complete=$complete && $done;

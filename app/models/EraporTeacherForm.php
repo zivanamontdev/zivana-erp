@@ -66,7 +66,9 @@ final class EraporTeacherForm
                 $defs['subareas']=self::rows($db,'SELECT s.* FROM erapor_rubrik_sub_area s JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE a.rubrik_id=? ORDER BY a.urutan,s.urutan',[$rid]);
                 $defs['groups']=self::rows($db,'SELECT g.* FROM erapor_rubrik_grup g JOIN erapor_rubrik_sub_area s ON s.id=g.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE a.rubrik_id=? ORDER BY a.urutan,s.urutan,g.urutan',[$rid]);
                 $defs['items']=self::rows($db,'SELECT i.* FROM erapor_rubrik_indikator i JOIN erapor_rubrik_sub_area s ON s.id=i.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE a.rubrik_id=? AND i.aktif=1 ORDER BY a.urutan,s.urutan,i.urutan',[$rid]);
-                foreach (self::rows($db,'SELECT n.indikator_id,sc.nilai FROM erapor_rts_nilai n JOIN erapor_skala_nilai sc ON sc.id=n.skala_id AND sc.rubrik_id=? WHERE n.sesi_id=? AND n.dokumen_id=?',[$rid,$s['id'],$d['id']]) as $v) $values['nilai:'.$v['indikator_id']]=(int)$v['nilai'];
+                // Pilihan tambahan di luar skala rubrik V1; nilai 0 disimpan di erapor_rts_belum_dikenalkan.
+                array_unshift($defs['scale'],self::RTS_NOT_YET);
+                $values=self::rtsValues($db,(int)$rid,(int)$s['id'],(int)$d['id']);
                 break;
             case 'BING':
                 foreach (self::rows($db,'SELECT indikator_id,pilihan_kode FROM erapor_bing_nilai WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args) as $v) $values['nilai:'.$v['indikator_id']]=$v['pilihan_kode'];
@@ -105,9 +107,18 @@ final class EraporTeacherForm
             WHERE sd.dokumen_id=? AND s.murid_id=? AND s.tahun_ajaran_id=? AND s.semester='GANJIL' AND s.jenis='TENGAH' AND s.id<>?",
             [$d['id'],$s['murid_id'],$s['tahun_ajaran_id'],$s['id']])[0] ?? null;
         if (!$ganjil) return null;
+        return ['label'=>'TS Ganjil','values'=>self::rtsValues($db,(int)$d['rubrik_id'],(int)$ganjil['id'],(int)$d['id'])];
+    }
+
+    /** Pilihan RTS "-" untuk tujuan yang belum dikenalkan kepada murid (nilai 0). */
+    public const RTS_NOT_YET=['id'=>null,'nilai'=>0,'kode'=>'BLM','label'=>'Belum Dikenalkan','simbol'=>'-','urutan'=>0];
+
+    private static function rtsValues(PDO $db,int $rubricId,int $sessionId,int $documentId): array
+    {
         $values=[];
-        foreach (self::rows($db,'SELECT n.indikator_id,sc.nilai FROM erapor_rts_nilai n JOIN erapor_skala_nilai sc ON sc.id=n.skala_id AND sc.rubrik_id=? WHERE n.sesi_id=? AND n.dokumen_id=?',[$d['rubrik_id'],$ganjil['id'],$d['id']]) as $v) $values['nilai:'.$v['indikator_id']]=(int)$v['nilai'];
-        return ['label'=>'TS Ganjil','values'=>$values];
+        foreach (self::rows($db,'SELECT n.indikator_id,sc.nilai FROM erapor_rts_nilai n JOIN erapor_skala_nilai sc ON sc.id=n.skala_id AND sc.rubrik_id=? WHERE n.sesi_id=? AND n.dokumen_id=?',[$rubricId,$sessionId,$documentId]) as $v) $values['nilai:'.$v['indikator_id']]=(int)$v['nilai'];
+        foreach (self::rows($db,'SELECT indikator_id FROM erapor_rts_belum_dikenalkan WHERE sesi_id=? AND dokumen_id=?',[$sessionId,$documentId]) as $v) $values['nilai:'.$v['indikator_id']]=0;
+        return $values;
     }
 
     private static function rows(PDO $db,string $sql,array $args): array

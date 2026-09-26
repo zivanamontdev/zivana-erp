@@ -21,7 +21,7 @@ $form = [
     'completion' => ['complete'=>false,'documents'=>[
         ['jenis'=>'RTS','required'=>1,'filled'=>0,'complete'=>false],
         ['jenis'=>'AGAMA','required'=>2,'filled'=>0,'complete'=>false],
-        ['jenis'=>'UMMI','required'=>1,'filled'=>0,'complete'=>false],
+        ['jenis'=>'UMMI','required'=>0,'filled'=>0,'complete'=>true],
         ['jenis'=>'BING','required'=>2,'filled'=>0,'complete'=>false],
         ['jenis'=>'PPI','required'=>1,'filled'=>0,'complete'=>false],
     ]],
@@ -33,6 +33,7 @@ $form = [
                 'groups'=>[],
                 'items'=>[['id'=>3,'sub_area_id'=>2,'grup_id'=>null,'tujuan'=>'Menutup mulut saat batuk']],
                 'scale'=>[
+                    ['nilai'=>0,'label'=>'Belum Dikenalkan','simbol'=>'-'],
                     ['nilai'=>1,'label'=>'Baru dikenalkan','simbol'=>'slash'],
                     ['nilai'=>2,'label'=>'Mulai berkembang','simbol'=>'triangle-sm'],
                     ['nilai'=>3,'label'=>'Berkembang sesuai harapan','simbol'=>'triangle-lg'],
@@ -105,13 +106,20 @@ $initialState = $xpath->query('//*[@data-erapor-editor]//script[@data-erapor-ini
 eraporUiCheck($initialState->length === 1 && json_decode($initialState->item(0)->textContent, true) !== null,
     'Initial state JSON lives inside the editor root (erapor-session.js scopes its lookup to that root)');
 eraporUiCheck(str_contains($html, 'Murid Uji') && str_contains($html, 'Ranting Akasia'), 'Student/class identity stays in header');
-eraporUiCheck($xpath->query('//select[@data-erapor-entry="RTS"]')->length === 1, 'RTS grade select rendered');
-eraporUiCheck(str_contains($xpath->query('//select[@data-erapor-entry="RTS"]')->item(0)->getAttribute('class'), 'font-base'), 'Unspecified form font defaults to Plus Jakarta Sans');
-eraporUiCheck($xpath->query('//select[@data-erapor-entry="RTS"]//option[@data-option-image]')->length === 4, 'RTS uses all four shared assessment SVGs');
+$rtsGroup = $xpath->query('//div[@role="radiogroup" and @data-erapor-entry="RTS" and @data-erapor-radio="true" and @data-erapor-indicator-id="3"]');
+eraporUiCheck($rtsGroup->length === 1, 'RTS answer is one radio group per tujuan');
+eraporUiCheck($xpath->query('.//input[@type="radio"]', $rtsGroup->item(0))->length === 5
+    && $xpath->query('.//input[@type="radio" and @value="0"]', $rtsGroup->item(0))->length === 1, 'RTS offers five options including "-" Belum Dikenalkan');
+eraporUiCheck($xpath->query('.//img', $rtsGroup->item(0))->length === 4, 'RTS radios show the four shared assessment SVGs plus the dash');
+eraporUiCheck($xpath->query('//ul[contains(@class,"erapor-scale-legend")]/li')->length === 5, 'RTS page header explains every symbol');
+eraporUiCheck($xpath->query('//section[@data-erapor-page]')->length === 5 && $xpath->query('//section[@data-erapor-page and @hidden]')->length === 4, 'One page per report type; only the first is shown');
+eraporUiCheck($xpath->query('//*[@data-erapor-question]//*[@data-erapor-entry="RTS"]')->length === 1, 'Each assessment question has its own card');
+eraporUiCheck($xpath->query('//nav[@data-erapor-pager]//button[@data-erapor-next]')->length === 1 && $xpath->query('//nav[@data-erapor-pager]//button[@data-erapor-prev]')->length === 1, 'Pager offers previous/next navigation');
+eraporUiCheck($xpath->query('//section[@data-erapor-type="UMMI" and @data-erapor-optional="true"]')->length === 1, 'Ummi page is optional');
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="AGAMA"]')->length === 1, 'Agama choice mapped from rubric definitions');
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="BING"]')->length === 1 && $xpath->query('//textarea[@data-erapor-entry="BING"]')->length === 1, 'BING grade and comment controls rendered');
 eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="PPI" and not(@disabled)]')->length === 1, 'PPI session field is editable through shared textarea component');
-eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="UMMI" and @data-erapor-key="catatan"]')->length === 1, 'Ummi required period note uses shared textarea component');
+eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="UMMI" and @data-erapor-key="catatan" and @aria-required="false"]')->length === 1, 'Ummi period note is optional and uses shared textarea component');
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="UMMI" and @data-erapor-key="bacaan:14"]')->length === 1, 'Ummi reading grade uses shared select component');
 eraporUiCheck($xpath->query('//input[@data-erapor-pra-toggle and @type="checkbox"]')->length === 1 && $xpath->query('//details[@data-ummi-pra-tk="true" and @hidden]')->length === 1, 'Ummi PRA TK toggle hides its volume without removing its fields');
 eraporUiCheck($xpath->query('//div[@data-erapor-entry="UMMI_TEST" and @data-erapor-key="tes:0123456789abcdef0123456789abcdef"]')->length === 1, 'Ummi dynamic test row renders server-saved values');
@@ -121,8 +129,9 @@ eraporUiCheck($xpath->query('//input[@data-ummi-test-field="jilid" and @value="I
 eraporUiCheck($xpath->query('//button[@data-erapor-add-test="103"]')->length === 1 && $xpath->query('//template[@data-ummi-test-template]')->length === 1, 'Ummi supports dynamic test creation through shared controls');
 eraporUiCheck($xpath->query('//input[@data-erapor-entry="UMMI" and @data-erapor-key="mulai_pra_tk"]')->length === 1 && str_contains($source, 'data-erapor-ummi-init'), 'Ummi editor includes explicit, user-triggered initialization behavior');
 eraporUiCheck(!str_contains($html, 'Hafalan'), 'Ummi editor does not add the excluded memorization section');
-eraporUiCheck($xpath->query('//button[@data-erapor-confirm and @disabled]')->length === 1, 'Submission starts disabled until server confirms completeness');
-eraporUiCheck($xpath->query('//details[@open]')->length === 0, 'Assessment areas start collapsed');
+// Tombol tetap aktif: klik saat belum lengkap menandai kartu wajib yang kosong; server tetap memutuskan.
+eraporUiCheck($xpath->query('//button[@data-erapor-confirm and not(@disabled)]')->length === 2, 'Submit (header + last page) stays clickable to reveal missing answers');
+eraporUiCheck($xpath->query('//details[@open]')->length === 0, 'Ummi volumes start collapsed');
 
 $form['documents'][2]['form']['definitions']['initialization_required'] = true;
 $form['documents'][2]['form']['values'] = ['mulai_pra_tk'=>null,'catatan'=>null];
@@ -145,7 +154,7 @@ $receptionHtml = ob_get_clean();
 $receptionDom = new DOMDocument();
 @$receptionDom->loadHTML($receptionHtml);
 $receptionXPath = new DOMXPath($receptionDom);
-eraporUiCheck($receptionXPath->query('//button[@data-erapor-confirm-reception and not(@disabled)]')->length === 1
+eraporUiCheck($receptionXPath->query('//button[@data-erapor-confirm-reception and not(@disabled)]')->length === 2
     && $receptionXPath->query('//button[@data-erapor-confirm]')->length === 0,
     'After completion, teacher receives the separate server-gated permanent reception action');
 
@@ -176,9 +185,9 @@ $refHtml = ob_get_clean();
 $refDom = new DOMDocument();
 @$refDom->loadHTML($refHtml);
 $refXpath = new DOMXPath($refDom);
-$reference = $refXpath->query('//*[contains(@class,"pengisian-item-row")]//*[@data-erapor-reference]');
+$reference = $refXpath->query('//*[@data-erapor-question]//*[@data-erapor-reference]');
 eraporUiCheck($reference->length === 1 && str_contains($reference->item(0)->textContent, 'Berkembang sesuai harapan')
-    && $refXpath->query('//*[@data-erapor-reference]//img')->length === 1, 'TS Ganjil value shown with symbol beside the Genap select');
+    && $refXpath->query('//*[@data-erapor-reference]//img')->length === 1, 'TS Ganjil value shown with symbol beside the Genap options');
 eraporUiCheck($refXpath->query('//*[@data-erapor-reference]//select|//*[@data-erapor-reference][@data-erapor-key]')->length === 0, 'TS Ganjil reference is not an editable/autosaved field');
 unset($form['documents'][0]['reference']);
 

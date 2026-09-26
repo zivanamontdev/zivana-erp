@@ -25,7 +25,7 @@ final class DataResetSeeder
         'sesi_pembagian_rapor', 'rapor', 'rapor_nilai', 'rapor_catatan_guru',
         'erapor_dokumen', 'erapor_sesi', 'erapor_sesi_dokumen', 'erapor_sesi_log', 'erapor_sesi_penerimaan', 'erapor_sesi_penyetuju',
         'erapor_sesi_penyetuju_dokumen', 'erapor_persetujuan_snapshot', 'erapor_publikasi_pdf', 'erapor_isian_log', 'erapor_periode_perpanjangan',
-        'erapor_rts_nilai', 'erapor_agama_nilai', 'erapor_agama_catatan', 'erapor_bing_nilai', 'erapor_bing_isian', 'erapor_ppi_isian',
+        'erapor_rts_nilai', 'erapor_rts_belum_dikenalkan', 'erapor_agama_nilai', 'erapor_agama_catatan', 'erapor_bing_nilai', 'erapor_bing_isian', 'erapor_ppi_isian',
         'erapor_ummi_bacaan', 'erapor_ummi_catatan', 'erapor_ummi_periode', 'erapor_ummi_tes',
         'erapor_penyetuju_user', 'erapor_penugasan_penyetuju_audit', 'erapor_profil_penandatangan', 'erapor_profil_penandatangan_audit',
     ];

@@ -2,7 +2,8 @@
 
 /** Internal RTS autosave service; not an HTTP endpoint.
  * actorId and optional clock must come from trusted server context, never request fields.
- * Each change has indikator_id, nilai (1..4/null), expected (previous 1..4/null).
+ * Each change has indikator_id, nilai (0..4/null), expected (previous 0..4/null).
+ * 0 = "Belum Dikenalkan" (tanda -), disimpan di erapor_rts_belum_dikenalkan; 1..4 = skala rubrik di erapor_rts_nilai.
  * Expected-value checking prevents stale autosaves silently overwriting newer values.
  */
 final class EraporRtsEntry
@@ -14,7 +15,7 @@ final class EraporRtsEntry
         $seen=[];
         foreach ($changes as $c) {
             if (!is_array($c) || !is_int($c['indikator_id'] ?? null) || $c['indikator_id']<1 || isset($seen[$c['indikator_id']])) throw new DomainException('Indikator duplikat/tidak valid.');
-            foreach (['nilai','expected'] as $key) if (!array_key_exists($key,$c) || !in_array($c[$key],[null,1,2,3,4],true)) throw new DomainException('Nilai/skala tidak valid.');
+            foreach (['nilai','expected'] as $key) if (!array_key_exists($key,$c) || !in_array($c[$key],[null,0,1,2,3,4],true)) throw new DomainException('Nilai/skala tidak valid.');
             $seen[$c['indikator_id']]=true;
         }
         $today=($clock ?? new DateTimeImmutable('now',new DateTimeZone('Asia/Makassar')))->setTimezone(new DateTimeZone('Asia/Makassar'))->format('Y-m-d');
@@ -47,20 +48,24 @@ final class EraporRtsEntry
             foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $row) $scale[(int)$row['nilai']]=(int)$row['id'];
             $updated=0;
             foreach ($changes as $c) {
-                if (!isset($allowed[$c['indikator_id']]) || ($c['nilai']!==null && !isset($scale[$c['nilai']]))) throw new DomainException('Indikator/skala bukan milik rubrik aktif.');
+                if (!isset($allowed[$c['indikator_id']]) || ($c['nilai']!==null && $c['nilai']!==0 && !isset($scale[$c['nilai']]))) throw new DomainException('Indikator/skala bukan milik rubrik aktif.');
                 $old=self::one($db,'SELECT n.skala_id,s.nilai FROM erapor_rts_nilai n JOIN erapor_skala_nilai s ON s.id=n.skala_id WHERE n.sesi_id=? AND n.dokumen_id=? AND n.indikator_id=? FOR UPDATE',[$sessionId,$documentId,$c['indikator_id']]);
-                $oldValue=$old?(int)$old['nilai']:null;
+                $notYet=self::one($db,'SELECT 1 FROM erapor_rts_belum_dikenalkan WHERE sesi_id=? AND dokumen_id=? AND indikator_id=? FOR UPDATE',[$sessionId,$documentId,$c['indikator_id']]);
+                $oldValue=$old?(int)$old['nilai']:($notYet?0:null);
                 if ($oldValue!==$c['expected']) {
                     if ($oldValue===$c['nilai']) continue; // Idempotent retry of the same requested value.
                     throw new DomainException('Nilai telah berubah; muat ulang sebelum menyimpan.');
                 }
                 if ($oldValue===$c['nilai']) continue;
                 $args=[$sessionId,$documentId,$c['indikator_id']];
-                if ($c['nilai']===null) {
-                    $db->prepare('DELETE FROM erapor_rts_nilai WHERE sesi_id=? AND dokumen_id=? AND indikator_id=?')->execute($args);
-                } elseif ($old) {
+                // Satu indikator hanya punya satu jawaban: hapus bentuk lama sebelum menulis bentuk baru.
+                if ($notYet) $db->prepare('DELETE FROM erapor_rts_belum_dikenalkan WHERE sesi_id=? AND dokumen_id=? AND indikator_id=?')->execute($args);
+                if ($old && ($c['nilai']===null || $c['nilai']===0)) $db->prepare('DELETE FROM erapor_rts_nilai WHERE sesi_id=? AND dokumen_id=? AND indikator_id=?')->execute($args);
+                if ($c['nilai']===0) {
+                    $db->prepare('INSERT INTO erapor_rts_belum_dikenalkan(sesi_id,dokumen_id,indikator_id,diisi_oleh) VALUES(?,?,?,?)')->execute([...$args,$actorId]);
+                } elseif ($c['nilai']!==null && $old) {
                     $db->prepare('UPDATE erapor_rts_nilai SET skala_id=?,diisi_oleh=?,diisi_pada=CURRENT_TIMESTAMP WHERE sesi_id=? AND dokumen_id=? AND indikator_id=?')->execute([$scale[$c['nilai']],$actorId,...$args]);
-                } else {
+                } elseif ($c['nilai']!==null) {
                     $db->prepare('INSERT INTO erapor_rts_nilai(sesi_id,dokumen_id,indikator_id,skala_id,diisi_oleh) VALUES(?,?,?,?,?)')->execute([...$args,$scale[$c['nilai']],$actorId]);
                 }
                 $db->prepare("INSERT INTO erapor_isian_log(sesi_id,dokumen_id,jenis,kunci,nilai_lama,nilai_baru,aktor_id,status_sesi) VALUES(?,?,'RTS',?,?,?,?,?)")
@@ -70,6 +75,8 @@ final class EraporRtsEntry
             }
             $q=$db->prepare('SELECT COUNT(*) FROM erapor_rts_nilai n JOIN erapor_rubrik_indikator i ON i.id=n.indikator_id JOIN erapor_rubrik_sub_area s ON s.id=i.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE n.sesi_id=? AND n.dokumen_id=? AND i.aktif=1 AND a.rubrik_id=?');
             $q->execute([$sessionId,$documentId,$doc['rubrik_id']]); $filled=(int)$q->fetchColumn();
+            $q=$db->prepare('SELECT COUNT(*) FROM erapor_rts_belum_dikenalkan n JOIN erapor_rubrik_indikator i ON i.id=n.indikator_id JOIN erapor_rubrik_sub_area s ON s.id=i.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE n.sesi_id=? AND n.dokumen_id=? AND i.aktif=1 AND a.rubrik_id=?');
+            $q->execute([$sessionId,$documentId,$doc['rubrik_id']]); $filled+=(int)$q->fetchColumn();
             $db->commit();
             return ['changed'=>$updated,'filled'=>$filled,'required'=>count($allowed),'complete'=>count($allowed)>0 && $filled===count($allowed)];
         } catch (Throwable $e) {

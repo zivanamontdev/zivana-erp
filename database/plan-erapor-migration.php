@@ -3,7 +3,7 @@
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/../app/models/EraporMigrationRunner.php';
 $plans=[];
-foreach (['20260924_erapor_catalog.sql','20260924_erapor_rts.sql','20260924_erapor_ummi_ppi.sql','20260924_erapor_bing.sql','20260924_erapor_agama.sql','20260924_erapor_sessions.sql','20260924_erapor_rts_values.sql','20260924_erapor_bing_ppi_values.sql','20260924_erapor_agama_values.sql','20260924_erapor_ummi_values.sql','20260924_erapor_approval_flow.sql','20260924_erapor_reception.sql','20260924_erapor_approval_actions.sql','20260924_erapor_extensions.sql','20260925_erapor_approval_assignment_audit.sql','20260925_erapor_signer_profile_audit.sql','20260925_erapor_publication_artifact.sql'] as $file) {
+foreach (['20260924_erapor_catalog.sql','20260924_erapor_rts.sql','20260924_erapor_ummi_ppi.sql','20260924_erapor_bing.sql','20260924_erapor_agama.sql','20260924_erapor_sessions.sql','20260924_erapor_rts_values.sql','20260924_erapor_bing_ppi_values.sql','20260924_erapor_agama_values.sql','20260924_erapor_ummi_values.sql','20260924_erapor_approval_flow.sql','20260924_erapor_reception.sql','20260924_erapor_approval_actions.sql','20260924_erapor_extensions.sql','20260925_erapor_approval_assignment_audit.sql','20260925_erapor_signer_profile_audit.sql','20260925_erapor_publication_artifact.sql','20260926_erapor_rts_belum_dikenalkan.sql'] as $file) {
     $plan=EraporMigrationRunner::plan(__DIR__.'/migrations/'.$file);
     $plans[]=['migration'=>$plan['id'],'sha256'=>$plan['sha256'],'operations'=>array_keys($plan['steps'])];
 }
