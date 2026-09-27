@@ -150,6 +150,7 @@
     function noteChange(field) {
       if (blocked || field.disabled) return;
       refreshQuestion(field);
+      updateSectionCounts();
       pending.set(field, true);
       setConfirmDisabled(true);
       setReceptionDisabled(true);
@@ -353,6 +354,7 @@
         var nav = steps[index].parentElement;
         nav.scrollLeft = Math.max(0, steps[index].offsetLeft - (nav.clientWidth - steps[index].offsetWidth) / 2);
       }
+      if (filterMode !== 'all') applyFilter();
       if (scrollToTop) {
         var anchor = root.querySelector('[data-erapor-steps]') || pages[index];
         window.scrollTo({top: Math.max(0, anchor.getBoundingClientRect().top + window.scrollY - 16), behavior: 'smooth'});
@@ -372,6 +374,66 @@
       element.scrollIntoView({block: 'center', behavior: 'smooth'});
       var target = element.querySelector('input:not([type="hidden"]):not(:disabled), textarea:not(:disabled), .ui-select-trigger, select:not(:disabled)');
       if (target && target.focus) target.focus({preventScroll: true});
+    }
+
+    // ---- Hitungan terisi/total per bagian (judul merah) dan sub bagian (judul oranye) ----
+    function sectionEntries(scope) {
+      return Array.from(scope.querySelectorAll('[data-erapor-entry][aria-required="true"]'));
+    }
+
+    function updateSectionCounts() {
+      root.querySelectorAll('details.erapor-section').forEach(function (section) {
+        var summary = section.querySelector(':scope > summary');
+        if (!summary) return;
+        var badge = summary.querySelector('[data-erapor-section-count]');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'erapor-section-count';
+          badge.setAttribute('data-erapor-section-count', '');
+          summary.insertBefore(badge, summary.querySelector('.ui-disclosure-chevron'));
+        }
+        var entries = sectionEntries(section);
+        var filled = entries.filter(function (entry) { return valueOf(entry) !== null; }).length;
+        badge.textContent = filled + '/' + entries.length;
+        badge.hidden = entries.length === 0;
+        badge.classList.toggle('is-complete', entries.length > 0 && filled === entries.length);
+      });
+    }
+
+    // ---- Filter "Semua" / "Belum Diisi" ----
+    // Diterapkan saat filter diklik atau pindah halaman (bukan setiap klik jawaban) agar kartu tidak melompat saat diisi.
+    var filterMode = 'all';
+    function applyFilter() {
+      var only = filterMode === 'empty';
+      root.querySelectorAll('[data-erapor-filter]').forEach(function (button) {
+        var on = button.dataset.eraporFilter === filterMode;
+        button.classList.toggle('ui-button--tabular-active', on);
+        button.classList.toggle('ui-button--tabular-inactive', !on);
+        button.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      pages.forEach(function (page) {
+        page.classList.toggle('is-filtering', only);
+        var visible = 0;
+        page.querySelectorAll('[data-erapor-question]').forEach(function (card) {
+          var entries = sectionEntries(card);
+          var hide = only && entries.every(function (entry) { return valueOf(entry) !== null; });
+          card.classList.toggle('is-filtered', hide);
+          if (!hide) visible++;
+        });
+        page.querySelectorAll('details.erapor-section').forEach(function (section) {
+          section.classList.toggle('is-filtered', only && !section.querySelector('[data-erapor-question]:not(.is-filtered)'));
+          if (only && !section.classList.contains('is-filtered')) section.open = true;
+        });
+        var empty = page.querySelector('[data-erapor-filter-empty]');
+        if (!empty) {
+          empty = document.createElement('p');
+          empty.className = 'erapor-filter-empty';
+          empty.setAttribute('data-erapor-filter-empty', '');
+          empty.textContent = 'Tidak ada isian yang belum diisi di bagian ini.';
+          page.appendChild(empty);
+        }
+        empty.hidden = !(only && visible === 0);
+      });
     }
 
     // ---- Penanda isian wajib yang belum diisi ----
@@ -505,6 +567,19 @@
       if (step) { showPage(Number(step.dataset.eraporStep), true); return; }
       if (event.target.closest('[data-erapor-prev]')) { showPage(currentPage - 1, true); return; }
       if (event.target.closest('[data-erapor-next]')) { showPage(currentPage + 1, true); return; }
+      var filterButton = event.target.closest('[data-erapor-filter]');
+      if (filterButton) { filterMode = filterButton.dataset.eraporFilter; applyFilter(); return; }
+      var bingStart = event.target.closest('[data-erapor-bing-start]');
+      if (bingStart) {
+        var bingPage = bingStart.closest('[data-erapor-page]');
+        var bingFields = bingPage && bingPage.querySelector('[data-erapor-bing-fields]');
+        if (bingFields) bingFields.hidden = false;
+        var intro = bingStart.closest('[data-erapor-bing-intro]');
+        if (intro) intro.remove();
+        updateSectionCounts();
+        if (bingFields) { var first = bingFields.querySelector('.ui-select-trigger, select, textarea'); if (first) first.focus(); }
+        return;
+      }
       var openUrl = event.target.closest('[data-erapor-open-url]');
       if (openUrl) { window.open(openUrl.dataset.eraporOpenUrl, '_blank', 'noopener'); return; }
       if (event.target.closest('[data-erapor-show-missing]')) {
@@ -643,6 +718,7 @@
       var initial = JSON.parse(root.querySelector('[data-erapor-initial-state]').textContent);
       applyState(initial);
       root.querySelectorAll('[data-erapor-document]').forEach(function (card) { updateUmmiReadingCount(card); });
+      updateSectionCounts();
       var hashPage = /^#bagian-(\d+)$/.exec(window.location.hash);
       showPage(hashPage ? Math.min(pages.length, Number(hashPage[1])) - 1 : 0, false);
     } catch (error) {

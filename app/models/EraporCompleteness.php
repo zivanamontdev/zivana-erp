@@ -36,13 +36,8 @@ final class EraporCompleteness
                     LEFT JOIN erapor_rts_belum_dikenalkan b ON b.indikator_id=i.id AND b.sesi_id=? AND b.dokumen_id=?
                     WHERE a.rubrik_id=? AND i.aktif=1 ORDER BY i.id",[$session['id'],$doc['id'],$session['id'],$doc['id'],$rid]);
             } elseif ($type==='BING') {
-                $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.label_cetak AS label,sc.kode AS value
-                    FROM erapor_bing_indikator i LEFT JOIN erapor_bing_nilai n ON n.indikator_id=i.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=i.rubrik_id
-                    LEFT JOIN erapor_bing_skala sc ON sc.rubrik_id=i.rubrik_id AND sc.kode=n.pilihan_kode
-                    WHERE i.rubrik_id=? AND i.wajib=1 ORDER BY i.urutan",$args);
-                $rows=array_merge($rows,self::rows($db,"SELECT CONCAT('komentar:',i.id) AS field,i.label_cetak AS label,n.isi AS value
-                    FROM erapor_bing_komentar i LEFT JOIN erapor_bing_isian n ON n.komentar_id=i.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=i.rubrik_id
-                    WHERE i.rubrik_id=? AND i.wajib=1 ORDER BY i.urutan",$args));
+                // Rapor Bahasa Inggris opsional (sama seperti Ummi): tidak menghalangi Selesaikan Rapor.
+                $rows=[];
             } elseif ($type==='PPI') {
                 $rows=self::rows($db,"SELECT CONCAT(a.id,':',c.id) AS field,CONCAT(a.nama,' - ',c.label_cetak) AS label,n.isi AS value
                     FROM erapor_ppi_aspek a JOIN erapor_ppi_kolom c ON c.rubrik_id=a.rubrik_id
@@ -58,11 +53,12 @@ final class EraporCompleteness
                     LEFT JOIN erapor_agama_pilihan p ON p.rubrik_id=l.rubrik_id AND p.tahapan_id=n.tahapan_id AND p.tahapan_kode=n.tahapan_kode
                         AND p.subtingkat_id <=> n.subtingkat_id AND p.subtingkat_kode <=> n.subtingkat_kode
                     WHERE l.rubrik_id=? AND i.semester=? AND i.aktif=1 ORDER BY i.id",[...$args,$session['semester']]);
-                $rows=array_merge($rows,self::rows($db,"SELECT CONCAT('catatan:',l.id) AS field,l.nama AS label,n.isi AS value
+                // Satu narasi "Laporan Perkembangan Agama" disimpan pada catatan lingkup wajib pertama.
+                $rows=array_merge($rows,self::rows($db,"SELECT CONCAT('catatan:',l.id) AS field,'Laporan Perkembangan Agama' AS label,n.isi AS value
                     FROM erapor_agama_lingkup l LEFT JOIN erapor_agama_catatan n ON n.lingkup_id=l.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=l.rubrik_id
-                    WHERE l.rubrik_id=? AND l.catatan_wajib=1 ORDER BY l.urutan",$args));
+                    WHERE l.rubrik_id=? AND l.catatan_wajib=1 ORDER BY l.urutan LIMIT 1",$args));
             } else throw new DomainException('Rubrik belum didukung: '.$type);
-            if (!$rows && $type!=='UMMI') throw new DomainException('Definisi wajib kosong: '.$type);
+            if (!$rows && !in_array($type,['UMMI','BING'],true)) throw new DomainException('Definisi wajib kosong: '.$type);
             $missing=[];
             foreach ($rows as $row) if ($row['value']===null || EraporSessionPolicy::isBlank((string)$row['value'])) $missing[]=['key'=>$row['field'],'label'=>$row['label']];
             $done=$missing===[]; $complete=$complete && $done;

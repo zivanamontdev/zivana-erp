@@ -3,7 +3,7 @@
 /** Deterministic, offline renderer for a frozen eRapor package snapshot. */
 final class EraporPackagePdfRenderer
 {
-    private const VERSION = 'erapor-print-v4';
+    private const VERSION = 'erapor-print-v5';
 
     public static function render(array $package): string
     {
@@ -24,6 +24,8 @@ final class EraporPackagePdfRenderer
 
         $body='';
         foreach ($package['documents'] as $document) {
+            // Ummi dan Bahasa Inggris opsional: tidak dicetak bila tidak ada isian sama sekali (template tetap dicetak).
+            if (empty($package['template']) && in_array($document['jenis_dokumen'],['UMMI','BING'],true) && !self::hasEntries($document)) continue;
             $body.='<section class="report report-'.strtolower(e($document['jenis_dokumen'])).'">';
             $body.=match ($document['jenis_dokumen']) {
                 'RTS'=>self::rts($package,$document),
@@ -124,9 +126,14 @@ final class EraporPackagePdfRenderer
             }
             $html.='</tr>';
         }
+        // Narasi masuk tabel sebagai sub bagian: kolom judul + narasi yang menggabungkan 14 kolom penilaian.
+        $narrative=(string)($d['narrative'] ?? '');
+        if ($narrative==='' && !empty($p['template'])) $narrative='{Laporan Perkembangan Agama}';
+        $html.='<tr class="sub-row"><th colspan="15">Laporan Perkembangan Agama</th></tr>'
+            .'<tr class="agama-narrative"><td><strong>Laporan Perkembangan Agama</strong></td><td colspan="14" class="narrative">'.self::text($narrative).'</td></tr>';
         $html.='</tbody></table><h2>Pengertian Tahapan</h2><table class="report-table"><tbody>';
         foreach ($f['stages'] ?? [] as $stage) $html.='<tr><th>'.e($stage['label']).'</th><td>'.self::text($stage['definisi']).'</td></tr>';
-        $html.='</tbody></table><h2>Bagian VII — Laporan Perkembangan Agama</h2><p class="narrative">'.e($d['narrative'] ?? '').'</p>';
+        $html.='</tbody></table>';
         $html.=self::signatureBlock($p,$d,'Pengesahan Rapor Agama',$d['signature_current'] ?? null);
         return $html;
     }
@@ -306,6 +313,17 @@ final class EraporPackagePdfRenderer
         return '<img src="'.$uri.'" alt="✓">';
     }
 
+    /** Apakah dokumen opsional punya isian apa pun (nilai, catatan, atau tes) pada periode mana pun. */
+    private static function hasEntries(array $d): bool
+    {
+        $sets=array_merge([$d['form']['values'] ?? []],array_values($d['period_values'] ?? []));
+        foreach ($sets as $values) foreach ((array)$values as $key=>$value) {
+            if (!preg_match('/^(nilai|komentar|bacaan|tes|catatan)(:|$)/',(string)$key)) continue;
+            if (is_array($value) ? $value!==[] : ($value!==null && trim((string)$value)!=='')) return true;
+        }
+        return false;
+    }
+
     private static function symbol(?string $code): string
     {
         if ($code==='-') return '<span class="skala-dash">&#8212;</span>';
@@ -329,6 +347,6 @@ final class EraporPackagePdfRenderer
     {
         $ink=colorToken('neutral-900'); $muted=colorToken('neutral-500'); $line=colorToken('neutral-150');
         $surface=colorToken('neutral-50'); $section=colorToken('neutral-75'); $white=colorToken('neutral-white');
-        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:DejaVu Sans,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:12pt}.agama-grade img{width:9pt;height:9pt;vertical-align:middle}.sign-job{height:34pt;overflow:hidden}.sign-image{height:62pt;margin:2pt auto}.sign-image img{max-height:58pt;max-width:105pt;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}';
+        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:DejaVu Sans,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:14pt}.agama-grade img{width:11pt;height:11pt;vertical-align:middle}.agama-table .agama-narrative td{font-size:8pt;padding:5pt}.agama-table .agama-narrative td.narrative{text-align:justify;line-height:1.5}.sign-job{height:34pt;overflow:hidden}.sign-image{height:62pt;margin:2pt auto}.sign-image img{max-height:58pt;max-width:105pt;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}';
     }
 }

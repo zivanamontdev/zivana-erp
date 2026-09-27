@@ -153,6 +153,11 @@ require VIEW_PATH . '/layouts/focus-header.php';
             </button>
         <?php endforeach; ?>
     </nav>
+    <div class="erapor-filter" role="group" aria-label="Filter isian">
+        <span class="erapor-filter-label">Tampilkan:</span>
+        <?= uiButton('Semua', 'tabular-active', ['marginVertical'=>0, 'attributes'=>['data-erapor-filter'=>'all']]) ?>
+        <?= uiButton('Belum Diisi', 'tabular-inactive', ['marginVertical'=>0, 'attributes'=>['data-erapor-filter'=>'empty']]) ?>
+    </div>
 
     <?php foreach ($form['documents'] as $index => $document): ?>
         <?php
@@ -232,8 +237,25 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 $groupedIndicators = [];
                 foreach ($definitions['items'] as $item) $groupedIndicators[$item['grup'] ?: ''][] = $item;
                 ?>
-                <p class="erapor-page-help">Pilih capaian untuk setiap indikator, lalu lengkapi catatan kemampuan di akhir halaman.</p>
+                <?php
+                // Opsional seperti Ummi: form baru tampil setelah guru menekan "Mulai pengisian" atau bila sudah ada isian.
+                $bingStarted = false;
+                foreach ($values as $valueKey => $value) if (preg_match('/^(nilai|komentar):/', (string)$valueKey) && $value !== null && trim((string)$value) !== '') $bingStarted = true;
+                ?>
+                <p class="erapor-page-help">Rapor Bahasa Inggris bersifat <strong>opsional</strong> dan tidak dicetak bila tidak diisi. Bila diisi, pilih capaian untuk setiap indikator lalu lengkapi catatan kemampuan.</p>
             </header>
+                <?php if (!$bingStarted): ?>
+                    <div class="erapor-question erapor-ummi-init" data-erapor-bing-intro>
+                        <h3 class="erapor-question-title">Mulai pengisian Rapor Bahasa Inggris</h3>
+                        <?php if ($canEdit): ?>
+                            <p>Rapor ini opsional. Tekan tombol di bawah bila murid mengikuti kelas Bahasa Inggris pada periode ini.</p>
+                            <?= uiButton('Mulai pengisian Bahasa Inggris', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-bing-start'=>true]]) ?>
+                        <?php else: ?>
+                            <p>Rapor Bahasa Inggris tidak diisi pada periode ini.</p>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+                <div class="erapor-page-group" data-erapor-bing-fields<?= $bingStarted ? '' : ' hidden' ?>>
                 <?php foreach ($groupedIndicators as $groupName => $items): ?>
                     <?php if ($groupName !== ''): ?><details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e($groupName) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
                     <?php foreach ($items as $item): ?>
@@ -253,6 +275,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     </div>
                 <?php endforeach; ?>
                 </div></details>
+                </div>
 
             <?php elseif ($type === 'PPI'): ?>
                 <?php
@@ -281,7 +304,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 $agamaChoices = [];
                 foreach ($definitions['scale'] as $grade) $agamaChoices[$grade['kolom_cetak']] = $grade['label'];
                 ?>
-                <p class="erapor-page-help">Pilih tahapan capaian untuk setiap butir. Semua butir dan catatan lingkup wajib diisi.</p>
+                <p class="erapor-page-help">Pilih tahapan capaian untuk setiap butir, lalu tulis Laporan Perkembangan Agama di akhir halaman. Semuanya wajib diisi.</p>
             </header>
                 <?php foreach ($definitions['scopes'] as $scope): ?>
                     <?php
@@ -308,17 +331,35 @@ require VIEW_PATH . '/layouts/focus-header.php';
                         <?php endforeach; ?>
                         <?php if (!$subscope['implisit']): ?></div></details><?php endif; ?>
                     <?php endforeach; ?>
-                    <?php if (!empty($scope['catatan_wajib'])): ?>
-                        <div class="erapor-question" data-erapor-question>
-                            <?= $renderText($document, 'AGAMA', 'catatan:' . $scope['id'], 'Catatan ' . $scope['nama'], $values['catatan:' . $scope['id']] ?? null, false, (bool)$scope['catatan_wajib']) ?>
-                            <p class="erapor-question-error" data-erapor-question-error hidden>Catatan ini wajib diisi.</p>
-                        </div>
-                    <?php endif; ?>
                     </div></details>
                 <?php endforeach; ?>
+                <?php
+                // Satu narasi untuk seluruh lingkup; disimpan pada catatan lingkup wajib pertama (lihat EraporCompleteness).
+                $narrativeScope = null;
+                foreach ($definitions['scopes'] as $scope) if (!empty($scope['catatan_wajib'])) { $narrativeScope = $scope; break; }
+                ?>
+                <?php if ($narrativeScope): ?>
+                    <details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span>Laporan Perkembangan Agama</span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
+                        <div class="erapor-question" data-erapor-question>
+                            <?= $renderText($document, 'AGAMA', 'catatan:' . $narrativeScope['id'], 'Laporan Perkembangan Agama', $values['catatan:' . $narrativeScope['id']] ?? null, false, true) ?>
+                            <p class="erapor-question-error" data-erapor-question-error hidden>Laporan Perkembangan Agama wajib diisi.</p>
+                        </div>
+                    </div></details>
+                <?php endif; ?>
 
             <?php elseif ($type === 'UMMI'): ?>
-                <p class="erapor-page-help">Rapor Ummi bersifat <strong>opsional</strong>. Rapor tetap dapat diselesaikan walaupun bagian ini dikosongkan.</p>
+                <p class="erapor-page-help">Rapor Ummi bersifat <strong>opsional</strong> dan tidak dicetak bila tidak diisi. Rapor tetap dapat diselesaikan walaupun bagian ini dikosongkan.</p>
+                <?php $ummiScale = $definitions['scale'] ?? []; ?>
+                <?php if ($ummiScale): ?>
+                    <div class="erapor-grade-legend">
+                        <p class="erapor-page-help">Keterangan nilai bacaan dan tes: huruf <strong><?= e($ummiScale[0]['kode']) ?></strong> adalah capaian tertinggi, turun berurutan sampai <strong><?= e($ummiScale[count($ummiScale) - 1]['kode']) ?></strong> sebagai capaian terendah.</p>
+                        <ul class="erapor-scale-legend" aria-label="Urutan nilai Ummi">
+                            <?php foreach ($ummiScale as $i => $grade): ?>
+                                <li><strong><?= e($grade['kode']) ?></strong><?php if ($i === 0): ?><span>tertinggi</span><?php elseif ($i === count($ummiScale) - 1): ?><span>terendah</span><?php endif; ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
             </header>
                 <?php if (!empty($definitions['initialization_required'])): ?>
                     <div class="erapor-question erapor-ummi-init" role="status">

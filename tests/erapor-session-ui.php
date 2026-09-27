@@ -22,7 +22,7 @@ $form = [
         ['jenis'=>'RTS','required'=>1,'filled'=>0,'complete'=>false],
         ['jenis'=>'AGAMA','required'=>2,'filled'=>0,'complete'=>false],
         ['jenis'=>'UMMI','required'=>0,'filled'=>0,'complete'=>true],
-        ['jenis'=>'BING','required'=>2,'filled'=>0,'complete'=>false],
+        ['jenis'=>'BING','required'=>0,'filled'=>0,'complete'=>true],
         ['jenis'=>'PPI','required'=>1,'filled'=>0,'complete'=>false],
     ]],
     'documents' => [
@@ -111,7 +111,7 @@ eraporUiCheck($rtsGroup->length === 1, 'RTS answer is one radio group per tujuan
 eraporUiCheck($xpath->query('.//input[@type="radio"]', $rtsGroup->item(0))->length === 5
     && $xpath->query('.//input[@type="radio" and @value="0"]', $rtsGroup->item(0))->length === 1, 'RTS offers five options including "-" Belum Dikenalkan');
 eraporUiCheck($xpath->query('.//img', $rtsGroup->item(0))->length === 4, 'RTS radios show the four shared assessment SVGs plus the dash');
-eraporUiCheck($xpath->query('//ul[contains(@class,"erapor-scale-legend")]/li')->length === 5, 'RTS page header explains every symbol');
+eraporUiCheck($xpath->query('//section[@data-erapor-type="RTS"]//ul[contains(@class,"erapor-scale-legend")]/li')->length === 5, 'RTS page header explains every symbol');
 eraporUiCheck($xpath->query('//section[@data-erapor-page]')->length === 5 && $xpath->query('//section[@data-erapor-page and @hidden]')->length === 4, 'One page per report type; only the first is shown');
 eraporUiCheck($xpath->query('//*[@data-erapor-question]//*[@data-erapor-entry="RTS"]')->length === 1, 'Each assessment question has its own card');
 eraporUiCheck($xpath->query('//nav[@data-erapor-pager]//button[@data-erapor-next]')->length === 1 && $xpath->query('//nav[@data-erapor-pager]//button[@data-erapor-prev]')->length === 1, 'Pager offers previous/next navigation');
@@ -192,4 +192,8 @@ eraporUiCheck($reference->length === 1 && str_contains($reference->item(0)->text
 eraporUiCheck($refXpath->query('//*[@data-erapor-reference]//select|//*[@data-erapor-reference][@data-erapor-key]')->length === 0, 'TS Ganjil reference is not an editable/autosaved field');
 unset($form['documents'][0]['reference']);
 
+eraporUiCheck($xpath->query('//*[@data-erapor-filter="all"]')->length === 1 && $xpath->query('//*[@data-erapor-filter="empty"]')->length === 1, 'Filter Semua / Belum Diisi rendered');
+eraporUiCheck($xpath->query('//section[@data-erapor-type="BING" and @data-erapor-optional="true"]//*[@data-erapor-bing-fields and @hidden]')->length === 1
+    && $xpath->query('//button[@data-erapor-bing-start]')->length === 1, 'Empty optional BING waits for explicit start');
+eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="AGAMA" and starts-with(@data-erapor-key,"catatan:")]')->length === 1, 'Agama has one Laporan Perkembangan Agama textarea');
 echo "PASS: E-Rapor session editor markup covers RTS, Agama, BING, PPI, Ummi, and server-gated submission.\n";

@@ -56,7 +56,7 @@ final class EraporTeacherForm
             'RTS'=>['areas'=>['erapor_rubrik_area','urutan'],'scale'=>['erapor_skala_nilai','urutan']],
             'BING'=>['items'=>['erapor_bing_indikator','urutan'],'comments'=>['erapor_bing_komentar','urutan'],'scale'=>['erapor_bing_skala','urutan_tampil']],
             'PPI'=>['aspects'=>['erapor_ppi_aspek','urutan'],'columns'=>['erapor_ppi_kolom','bagian,urutan']],
-            'UMMI'=>['volumes'=>['erapor_ummi_jilid','urutan'],'scale'=>['erapor_skala_huruf','peringkat']],
+            'UMMI'=>['volumes'=>['erapor_ummi_jilid','urutan'],'scale'=>['erapor_skala_huruf','peringkat DESC']],
             'AGAMA'=>['scopes'=>['erapor_agama_lingkup','urutan'],'scale'=>['erapor_agama_pilihan','urutan'],'stages'=>['erapor_agama_tahapan','urutan']],
             default=>throw new DomainException('Rubrik belum didukung.'),
         };

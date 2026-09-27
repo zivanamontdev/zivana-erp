@@ -3,7 +3,7 @@
 /** Prepares one immutable signed PDF artifact inside the final approval transaction. */
 final class EraporPublication
 {
-    private const AGAMA_NARRATIVE_VERSION = 'AGAMA_NARASI_V1';
+    private const AGAMA_NARRATIVE_VERSION = 'AGAMA_NARASI_V2';
 
     public static function prepareWithin(PDO $db,int $sessionId,int $actorId,?DateTimeImmutable $clock=null): array
     {
@@ -169,9 +169,12 @@ final class EraporPublication
             }
             $doc['item_names']=[];
             foreach (self::all($db,'SELECT n.item_id,n.nama FROM erapor_agama_item_nama n JOIN erapor_agama_item i ON i.id=n.item_id JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? ORDER BY n.urutan',[$doc['rubrik_id']]) as $name) $doc['item_names'][(int)$name['item_id']][]=$name['nama'];
-            $notes=[]; foreach ($defs['scopes'] ?? [] as $scope) $notes[]=$doc['form']['values']['catatan:'.$scope['id']] ?? '';
+            // V2: guru menulis satu narasi utuh "Laporan Perkembangan Agama" (catatan lingkup wajib pertama).
+            // Kosong tetap boleh di pratinjau draf; paket terbit hanya dibuat setelah kelengkapan dipastikan.
+            $narrative='';
+            foreach ($defs['scopes'] ?? [] as $scope) if (!empty($scope['catatan_wajib'])) { $narrative=(string)($doc['form']['values']['catatan:'.$scope['id']] ?? ''); break; }
             $doc['narrative_version']=self::AGAMA_NARRATIVE_VERSION;
-            $doc['narrative']=self::agamaNarrative($studentName,$semester,$notes);
+            $doc['narrative']=trim($narrative);
         }
         if ($doc['jenis_dokumen']==='PPI') $doc['all_columns']=self::all($db,"SELECT * FROM erapor_ppi_kolom WHERE rubrik_id=? AND bagian='C' AND cetak=1 ORDER BY urutan",[$doc['rubrik_id']]);
         // RTS stores the immutable source hash in seed history; newer rubrics also keep JSON.
@@ -274,14 +277,6 @@ final class EraporPublication
         return ['nama'=>$row['nama'] ?? '', 'nuptk'=>$row['nuptk'] ?? null,
             'ttd_data_uri'=>$png!==null?'data:image/png;base64,'.base64_encode($png):null,
             'ttd_sha256'=>$hash,'consent_at'=>$row['consent_at'] ?? null];
-    }
-
-    private static function agamaNarrative(string $name,string $semester,array $notes): string
-    {
-        if (count($notes)!==6) throw new DomainException('Enam catatan Agama wajib tersedia untuk narasi cetak.');
-        foreach ($notes as $note) if (!is_string($note) || EraporSessionPolicy::isBlank($note)) throw new DomainException('Narasi Agama belum lengkap.');
-        $semesterText=$semester==='GANJIL'?'ganjil':'genap';
-        return 'Pencapaian perkembangan Ananda '.$name.' di semester '.$semesterText.' ini secara umum berkembang sesuai harapan. Kini Ananda '.$name.' telah menunjukkan kemajuan, seperti aqidah tauhid yaitu '.$notes[0].'. Fiqih ibadah yaitu '.$notes[1].'. Akhlaq yaitu '.$notes[2].'. Al-Qur\'an dan hadits yaitu '.$notes[3].'. Asmaul husna yaitu '.$notes[4].' dan kisah sahabat yaitu '.$notes[5].'. Secara keseluruhan, Ananda mulai memahami nilai-nilai Islam yang terkandung di dalamnya dan berusaha menerapkannya dalam kegiatan sehari-hari. Dengan dukungan dari guru dan orang tua, Ananda diharapkan semakin tumbuh menjadi anak yang mengenal dan mencintai Allah, mencintai Rasulullah, serta terbiasa menjalankan ajaran Islam dengan penuh kesadaran dan kegembiraan. Semangat, Ananda '.$name.'!';
     }
 
     private static function age(string $birthDate,DateTimeImmutable $on): string

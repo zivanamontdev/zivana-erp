@@ -574,3 +574,23 @@ button.teacher-report-action:focus-visible,
   .erapor-session .erapor-pager > .ui-button { flex:1 1 0; min-width:0; }
   .erapor-session .erapor-pager-label { display:none; }
 }
+
+/* ---------- eRapor: hitungan per bagian, filter "Belum Diisi", grup opsional ---------- */
+.erapor-section > summary .erapor-section-count { margin-left:auto; margin-right:var(--space-3); flex:0 0 auto; border-radius:999px; background:rgba(255,255,255,.35); padding:.125rem .625rem; font-size:var(--font-size-caption-md); font-weight:var(--font-weight-bold); white-space:nowrap; }
+.erapor-section > summary .erapor-section-count[hidden] { display:none; }
+.erapor-section > summary .erapor-section-count.is-complete { background:var(--color-neutral-white); color:var(--color-green-700); }
+.erapor-filter { display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-2); }
+.erapor-filter-label { color:var(--color-neutral-600); font-size:var(--font-size-body-sm); }
+.erapor-filter > .ui-button { margin-block:0; }
+.erapor-page-group { display:grid; gap:var(--space-3); }
+.erapor-page-group[hidden] { display:none; }
+.is-filtered { display:none !important; }
+.erapor-page.is-filtering > :not(.erapor-page-intro):not(.erapor-section):not([data-erapor-question]):not(.erapor-page-group):not(.erapor-filter-empty) { display:none; }
+.erapor-page.is-filtering .erapor-subheading { display:none; }
+.erapor-filter-empty { margin:0; border-radius:1rem; background:var(--color-neutral-white); padding:1rem 1.5rem; color:var(--color-neutral-600); font-size:var(--font-size-body-sm); }
+.erapor-filter-empty[hidden] { display:none; }
+.erapor-grade-legend { display:grid; gap:var(--space-2); }
+.erapor-grade-legend .erapor-scale-legend li span { color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
+@media (max-width: 40rem) {
+  .erapor-filter { margin-inline:1rem; }
+}
