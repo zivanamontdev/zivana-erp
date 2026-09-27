@@ -576,7 +576,7 @@ button.teacher-report-action:focus-visible,
 }
 
 /* ---------- eRapor: hitungan per bagian, filter "Belum Diisi", grup opsional ---------- */
-.erapor-section > summary .erapor-section-count { margin-left:auto; margin-right:var(--space-3); flex:0 0 auto; border-radius:999px; background:rgba(255,255,255,.35); padding:.125rem .625rem; font-size:var(--font-size-caption-md); font-weight:var(--font-weight-bold); white-space:nowrap; }
+.erapor-section > summary .erapor-section-count { margin-left:auto; margin-right:var(--space-3); flex:0 0 auto; border-radius:999px; background:var(--color-neutral-white); color:var(--color-neutral-800); padding:.125rem .625rem; font-size:var(--font-size-caption-md); font-weight:var(--font-weight-bold); white-space:nowrap; }
 .erapor-section > summary .erapor-section-count[hidden] { display:none; }
 .erapor-section > summary .erapor-section-count.is-complete { background:var(--color-neutral-white); color:var(--color-green-700); }
 .erapor-filter { display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-2); }
@@ -594,3 +594,4 @@ button.teacher-report-action:focus-visible,
 @media (max-width: 40rem) {
   .erapor-filter { margin-inline:1rem; }
 }
+.erapor-section > summary > span:first-child { flex:1 1 auto; }
