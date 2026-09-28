@@ -3,27 +3,28 @@
 /** Scoped, read-only projection for an explicitly assigned eRapor approver. */
 final class EraporApprovalReview
 {
-    public static function read(PDO $db,int $sessionId,int $approvalId,int $actorId): array
+    public static function read(PDO $db,int $sessionId,int $approvalId,int $actorId,bool $monitor=false): array
     {
         if ($db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql' || $db->inTransaction()) throw new RuntimeException('Dedicated MySQL connection required.');
         if (min($sessionId,$approvalId,$actorId)<1) throw new DomainException('Identitas tinjauan tidak valid.');
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
         $db->exec('SET TRANSACTION READ ONLY'); $db->beginTransaction();
         try {
-            $result=self::within($db,$sessionId,$approvalId,$actorId,true);
+            $result=self::within($db,$sessionId,$approvalId,$actorId,true,$monitor);
             $db->commit(); return $result;
         } catch (Throwable $e) { if ($db->inTransaction()) $db->rollBack(); throw $e; }
     }
 
     /** Caller owns a repeatable-read, read-only transaction. */
-    public static function within(PDO $db,int $sessionId,int $approvalId,int $actorId,bool $includeValues): array
+    public static function within(PDO $db,int $sessionId,int $approvalId,int $actorId,bool $includeValues,bool $monitor=false): array
     {
         if (!$db->inTransaction()) throw new RuntimeException('Approval projection requires a transaction.');
         $session=self::one($db,'SELECT * FROM erapor_sesi WHERE id=?',[$sessionId]);
         $target=self::one($db,'SELECT a.id,a.sesi_id,a.penyetuju_id,a.kode,a.label,a.urutan,a.cakupan,a.status
             FROM erapor_sesi_penyetuju a WHERE a.id=? AND a.sesi_id=?',[$approvalId,$sessionId]);
         if (!$session || !$target || $session['status']!=='MENUNGGU_TTD') throw new DomainException('Tinjauan persetujuan tidak tersedia.');
-        $actor=EraporApprovalAccess::actor($db,$target,$session,$actorId);
+        // Mode pantau (Superadmin) boleh melihat, tidak pernah menyetujui.
+        $actor=$monitor?['nama'=>'Superadmin','jabatan'=>'Superadmin']:EraporApprovalAccess::actor($db,$target,$session,$actorId);
         if (!$actor) throw new DomainException('Akun tidak berwenang atas tinjauan ini.');
 
         EraporSessionFactory::assertPackage($db,$session);
@@ -64,7 +65,7 @@ final class EraporApprovalReview
             'student'=>$student,'period'=>$period,'approval'=>$targetRow,'approvals'=>$approvals,
             'documents'=>$documents,'completion'=>$completion,
             'waiting_for'=>$waiting,
-            'can_approve'=>$targetRow['status']==='MENUNGGU' && $waiting===[],
+            'can_approve'=>!$monitor && $targetRow['status']==='MENUNGGU' && $waiting===[],
             'all_approved'=>count(array_filter($approvals,fn($r)=>$r['status']!=='DISETUJUI'))===0,
         ];
     }

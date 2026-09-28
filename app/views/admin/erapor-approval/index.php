@@ -9,7 +9,9 @@ require VIEW_PATH . '/layouts/shell-header.php';
 <p class="erapor-approval-notice" role="status"><?= uiText($notice['message'], 'body-sm', ['tone' => $notice['type'] === 'success' ? 'success' : 'status-inactive']) ?></p>
 <?php endif; ?>
 
-<p class="text-body-sm erapor-approval-intro">Tinjau hanya rapor yang ditugaskan kepada akun Anda. Persetujuan mengikuti urutan dan cakupan dokumen yang tersimpan pada sesi rapor.</p>
+<p class="text-body-sm erapor-approval-intro"><?= !empty($monitor)
+    ? 'Mode pantau: seluruh rapor yang menunggu persetujuan. Hanya dapat dilihat; persetujuan dilakukan oleh penyetuju yang ditugaskan.'
+    : 'Tinjau hanya rapor yang ditugaskan kepada akun Anda. Persetujuan mengikuti urutan dan cakupan dokumen yang tersimpan pada sesi rapor.' ?></p>
 
 <div class="data-table-wrapper erapor-approval-table">
     <table class="data-table">
@@ -36,7 +38,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <td>
                     <?php if ($task['integrity_error']): ?>
                         <?= uiBadge('Perlu diperiksa', 'destruktif') ?>
-                    <?php elseif ($task['can_approve']): ?>
+                    <?php elseif ($task['can_approve'] || (!empty($monitor) && empty($task['waiting_for']))): ?>
                         <?= uiBadge('Siap ditinjau', 'peringatan') ?>
                     <?php else: ?>
                         <?= uiBadge('Menunggu tahap sebelumnya', 'netral') ?>

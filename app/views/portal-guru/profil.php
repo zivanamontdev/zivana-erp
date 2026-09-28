@@ -11,7 +11,24 @@ $csrf = e(getCsrfToken());
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/portal-guru.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/portal-guru.css') ?>">
 
 <?php if ($profile === null): ?>
-    <?= uiCard(uiText('Profil hanya tersedia untuk akun pegawai.', 'body-sm'), 'callout', ['tag' => 'section', 'class' => 'profile-card']) ?>
+<div class="profile-layout">
+    <?php ob_start(); ?>
+    <div class="profile-avatar-wrap"><div class="profile-avatar profile-avatar--initials" aria-hidden="true"><?= e(initials($account['nama'])) ?></div></div>
+    <div class="profile-identity">
+        <?= uiText($account['nama'], 'body-lg', ['tag' => 'h2', 'weight' => 'bold', 'tone' => 'heading', 'align' => 'center']) ?>
+        <?= uiText($account['role'], 'body-sm', ['tone' => 'muted', 'align' => 'center']) ?>
+    </div>
+    <div class="profile-badges"><?= $account['is_active'] ? uiBadge('Aktif', 'positif') : uiBadge('Nonaktif', 'netral') ?><?= uiBadge('Akun sistem', 'netral') ?></div>
+    <?php echo uiCard(ob_get_clean(), 'outlined', ['tag' => 'aside', 'class' => 'profile-card profile-summary profile-area-summary']); ?>
+    <?php ob_start(); ?>
+    <?= uiText('Informasi Akun', 'body-md', ['tag' => 'h2', 'weight' => 'bold', 'tone' => 'heading']) ?>
+    <div class="field-row profile-fields">
+        <?= uiDataCard('Email', $account['email']) ?>
+        <?= uiDataCard('Peran', $account['role']) ?>
+    </div>
+    <?= uiText('Akun ini tidak terhubung ke data pegawai, jadi tidak memiliki NUPTK, tanda tangan, atau penugasan.', 'caption-md', ['tone' => 'muted']) ?>
+    <?php echo uiCard(ob_get_clean(), 'outlined', ['tag' => 'section', 'class' => 'profile-card profile-area-info']); ?>
+</div>
 <?php else: ?>
 <?php
 $roles = $profile['tahap_persetujuan'];

@@ -84,7 +84,7 @@ $navGroups = [
         'entries' => [
             ['type' => 'item', 'key' => 'portal-dashboard', 'label' => 'Dashboard', 'href' => '/portal-guru/dashboard', 'icon' => 'icon_layout_dashboard', 'perm' => ['Portal Guru', 'Dashboard']],
             ['type' => 'item', 'key' => 'portal-daftar-murid', 'label' => 'Daftar Murid', 'href' => '/portal-guru/murid', 'icon' => 'icon_backpack', 'perm' => ['Portal Guru', 'Daftar Murid']],
-            ['type' => 'item', 'key' => 'portal-profil', 'label' => 'Profil', 'href' => '/portal-guru/profil', 'icon' => 'icon_user_round', 'perm' => ['Portal Guru', 'Dashboard'], 'employeeOnly' => true],
+            ['type' => 'item', 'key' => 'portal-profil', 'label' => 'Profil', 'href' => '/portal-guru/profil', 'icon' => 'icon_user_round', 'perm' => ['Portal Guru', 'Dashboard']],
         ],
     ],
     [
@@ -99,8 +99,7 @@ $navGroups = [
 // Filter entry/child yang tidak bisa diakses role saat ini (aksi 'lihat').
 // Ini murni UX — proteksi sungguhan tetap RoleMiddleware server-side.
 $roleChecker = new RoleMiddleware();
-$canAccessNav = fn(array $item) => (!isset($item['perm']) || $roleChecker->check($item['perm'][0], $item['perm'][1], 'lihat'))
-    && (empty($item['employeeOnly']) || !empty($_SESSION['karyawan_id'])); // Profil hanya untuk akun yang terhubung ke data pegawai
+$canAccessNav = fn(array $item) => !isset($item['perm']) || $roleChecker->check($item['perm'][0], $item['perm'][1], 'lihat');
 
 foreach ($navGroups as $gi => $group) {
     foreach ($group['entries'] as $ei => $entry) {
@@ -220,7 +219,7 @@ try {
                         <?= icon('icon_chevron') ?>
                     </button>
                     <div class="action-menu-dropdown">
-                        <?php if (!empty($_SESSION['karyawan_id']) && $roleChecker->check('Portal Guru', 'Dashboard')): ?><a href="<?= BASE_PATH ?>/portal-guru/profil">Profil</a><?php endif; ?>
+                        <?php if ($roleChecker->check('Portal Guru', 'Dashboard')): ?><a href="<?= BASE_PATH ?>/portal-guru/profil">Profil</a><?php endif; ?>
                         <a href="<?= BASE_PATH ?>/logout">Keluar</a>
                     </div>
                 </div>

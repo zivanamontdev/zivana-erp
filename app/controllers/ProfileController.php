@@ -14,6 +14,8 @@ final class ProfileController extends Controller
         $this->view('portal-guru.profil', [
             'pageTitle' => 'Profil', 'breadcrumb' => null, 'activeNavItem' => 'portal-profil',
             'profile' => $profile,
+            // Akun tanpa data pegawai (mis. Superadmin): tampilkan info akun baca-saja.
+            'account' => $profile === null ? $this->account($db) : null,
             'canViewSignature' => $profile !== null && $signer->check('eRapor', 'Profil Penandatangan', 'lihat'),
             'canEditSignature' => $profile !== null && $signer->check('eRapor', 'Profil Penandatangan', 'edit'),
         ]);
@@ -41,6 +43,13 @@ final class ProfileController extends Controller
             $this->notice('error', 'Profil tidak tersimpan. Coba lagi.');
         }
         $this->redirect('/portal-guru/profil');
+    }
+
+    private function account(PDO $db): array
+    {
+        $q = $db->prepare('SELECT u.email,r.nama AS role,u.is_active FROM users u JOIN roles r ON r.id=u.role_id WHERE u.id=?');
+        $q->execute([(int) $_SESSION['user_id']]);
+        return ($q->fetch(PDO::FETCH_ASSOC) ?: ['email' => '-', 'role' => '-', 'is_active' => 1]) + ['nama' => (string) ($_SESSION['display_name'] ?? 'Akun')];
     }
 
     private function guard(bool $write = false): void

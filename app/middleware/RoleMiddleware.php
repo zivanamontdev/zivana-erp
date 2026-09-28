@@ -28,7 +28,8 @@ class RoleMiddleware
             // Selama ERAPOR_API_ENABLED mati semua halaman eRapor 404; menu tidak boleh menawarkannya.
             if (!defined('ERAPOR_API_ENABLED') || !ERAPOR_API_ENABLED) return false;
             if ($subSection === 'Persetujuan') {
-                if (!EraporApprovalAccess::assigned((int)$_SESSION['user_id'])) return false;
+                // Superadmin selalu dapat memantau antrean (baca-saja); akun lain hanya bila ditugaskan/wali kelas.
+                if (($_SESSION['role_name'] ?? '') !== 'Superadmin' && !EraporApprovalAccess::assigned((int)$_SESSION['user_id'])) return false;
             } elseif ($subSection === 'Penugasan Penyetuju') {
                 if (AccountAccess::isTeacher()) return false;
             } elseif ($subSection === 'Profil Penandatangan') {

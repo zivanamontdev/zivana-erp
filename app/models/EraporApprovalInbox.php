@@ -3,29 +3,31 @@
 /** Pending approvals are visible only through current explicit user assignments. */
 final class EraporApprovalInbox
 {
-    public static function read(PDO $db,int $actorId): array
+    public static function read(PDO $db,int $actorId,bool $monitor=false): array
     {
         if ($db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql' || $db->inTransaction()) throw new RuntimeException('Dedicated MySQL connection required.');
         if ($actorId<1) throw new DomainException('Identitas penyetuju tidak valid.');
         $db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
         $db->exec('SET TRANSACTION READ ONLY'); $db->beginTransaction();
         try {
-            $actor=self::one($db,"SELECT u.id FROM users u JOIN karyawan k ON k.id=u.karyawan_id JOIN jabatan j ON j.id=k.jabatan_id
-                WHERE u.id=? AND u.is_active=1 AND k.is_active=1 AND j.is_active=1",[$actorId]);
-            if (!$actor) throw new DomainException('Akun penyetuju tidak aktif.');
+            if (!$monitor) {
+                $actor=self::one($db,"SELECT u.id FROM users u JOIN karyawan k ON k.id=u.karyawan_id JOIN jabatan j ON j.id=k.jabatan_id
+                    WHERE u.id=? AND u.is_active=1 AND k.is_active=1 AND j.is_active=1",[$actorId]);
+                if (!$actor) throw new DomainException('Akun penyetuju tidak aktif.');
+            }
             $candidates=self::all($db,"SELECT a.id AS approval_id,a.sesi_id,a.kode,a.label,a.urutan,m.nama_lengkap,p.nama AS periode_nama,
                     CONCAT(t.tahun_awal,'/',t.tahun_akhir) AS tahun_label
                 FROM erapor_sesi_penyetuju a
                 JOIN erapor_sesi s ON s.id=a.sesi_id JOIN murid m ON m.id=s.murid_id
                 JOIN periode_penilaian p ON p.id=s.periode_id JOIN tahun_ajaran t ON t.id=p.tahun_ajaran_id
-                WHERE a.status='MENUNGGU' AND s.status='MENUNGGU_TTD' AND (
+                WHERE a.status='MENUNGGU' AND s.status='MENUNGGU_TTD' AND (? OR
                     (a.kode<>'WALI_KELAS' AND EXISTS (SELECT 1 FROM erapor_penyetuju_user au WHERE au.penyetuju_id=a.penyetuju_id AND au.user_id=? AND au.aktif=1))
                     OR (a.kode='WALI_KELAS' AND EXISTS (SELECT 1 FROM erapor_wali_kelas w WHERE w.kelas_id=s.kelas_id AND w.user_id=?)))
-                ORDER BY p.awal_periode DESC,m.nama_lengkap,a.urutan,a.id",[$actorId,$actorId]);
+                ORDER BY p.awal_periode DESC,m.nama_lengkap,a.urutan,a.id",[$monitor?1:0,$actorId,$actorId]);
             $tasks=[];
             foreach ($candidates as $candidate) {
                 try {
-                    $review=EraporApprovalReview::within($db,(int)$candidate['sesi_id'],(int)$candidate['approval_id'],$actorId,false);
+                    $review=EraporApprovalReview::within($db,(int)$candidate['sesi_id'],(int)$candidate['approval_id'],$actorId,false,$monitor);
                     $tasks[]=['approval_id'=>(int)$candidate['approval_id'],'session_id'=>(int)$candidate['sesi_id'],
                         'label'=>$review['approval']['label'],'code'=>$review['approval']['kode'],
                         'student'=>$review['student']['nama_lengkap'],'period'=>$review['period']['nama'].' · '.$review['period']['tahun_label'],

@@ -21,6 +21,12 @@ final class EraporApprovalAccess
         }
     }
 
+    /** Mode pantau: Superadmin tanpa penugasan melihat seluruh antrean dan tinjauan secara baca-saja. */
+    public static function monitor(int $userId): bool
+    {
+        return ($_SESSION['role_name'] ?? '') === 'Superadmin' && !self::assigned($userId);
+    }
+
     /**
      * Pemegang sah satu baris tahap persetujuan: WALI_KELAS = wali kelas kelas sesi (erapor_wali_kelas);
      * tahap lain = penugasan eksplisit aktif. Kepala Sekolah wajib berjabatan Kepala Sekolah.

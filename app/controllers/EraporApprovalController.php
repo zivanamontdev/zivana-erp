@@ -10,12 +10,14 @@ final class EraporApprovalController extends Controller
         $this->middleware(RoleMiddleware::class, 'eRapor', 'Persetujuan', 'lihat');
 
         $actorId = (int) $_SESSION['user_id'];
-        $inbox = EraporApprovalInbox::read(Database::getInstance(), $actorId);
+        $monitor = EraporApprovalAccess::monitor($actorId);
+        $inbox = EraporApprovalInbox::read(Database::getInstance(), $actorId, $monitor);
         $this->view('admin.erapor-approval.index', [
             'pageTitle' => 'Antrean Persetujuan',
             'breadcrumb' => breadcrumb(['Persetujuan eRapor', '/erapor/persetujuan'], 'Antrean'),
             'activeNavItem' => 'erapor-approval',
             'tasks' => $inbox['tasks'],
+            'monitor' => $monitor,
             'notice' => $this->takeNotice(),
         ]);
     }
@@ -31,7 +33,8 @@ final class EraporApprovalController extends Controller
         }
 
         try {
-            $review = EraporApprovalReview::read(Database::getInstance(), (int) $sessionId, (int) $approvalId, (int) $_SESSION['user_id']);
+            $monitor = EraporApprovalAccess::monitor((int) $_SESSION['user_id']);
+            $review = EraporApprovalReview::read(Database::getInstance(), (int) $sessionId, (int) $approvalId, (int) $_SESSION['user_id'], $monitor);
         } catch (DomainException $exception) {
             // Assigned-user and document-scope failures must not disclose whether another task exists.
             $this->notFound();
