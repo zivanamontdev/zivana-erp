@@ -38,6 +38,19 @@ class PortalGuruController extends Controller
         ]);
     }
 
+    /** Profil baca-saja akun pegawai yang login: data pegawai, peran eRapor, dan tanda tangan miliknya sendiri. */
+    public function profil(): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Dashboard', 'lihat');
+        $profile = empty($_SESSION['karyawan_id']) ? null : TeacherProfile::read(Database::getInstance(), (int) $_SESSION['user_id']);
+        $this->view('portal-guru.profil', [
+            'pageTitle' => 'Profil', 'breadcrumb' => null, 'activeNavItem' => 'portal-profil',
+            'profile' => $profile,
+            'canManageSignature' => $profile !== null && (new RoleMiddleware())->check('eRapor', 'Profil Penandatangan', 'lihat'),
+        ]);
+    }
+
     /** Explicit POST only: opening/reloading the dashboard is always read-only. */
     public function prepareEraporSession(): void
     {

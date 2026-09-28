@@ -508,7 +508,8 @@ Murid
 └── Rapor Murid
 Portal Guru
 ├── Dashboard
-└── Daftar Murid
+├── Daftar Murid
+└── Profil
 Sistem
 └── RBAC
 ```
@@ -1631,6 +1632,7 @@ Baris memuat nama murid di kiri, status teks dan chevron 20px di kanan dengan ga
 - Pengisian tetap memakai layout fokus tanpa sidebar. Nilai memakai `uiSelect`, catatan memakai `uiField` textarea, aksi memakai `uiButton`. `uiSelect` menerima `attributes` untuk atribut native seperti data hook; komponen tidak menyimpan state nilai terpisah dari select native.
 - Tombol Kirim/Selesaikan nonaktif jika template kosong atau nilai belum lengkap. Progres mengikuti perubahan dropdown; simpan draft tetap diperbolehkan. Aksi desktop berada di kartu header, aksi mobile di bawah. Peringatan keluar melindungi perubahan yang belum disimpan.
 - Pratinjau guru memakai komponen kertas horizontal yang sama dengan admin, refresh dan PDF sesuai izin, tanpa Setujui. Jumlah halaman mengikuti konten nyata; jangan menduplikasi nilai atau halaman agar terlihat empat halaman.
+- Profil (`/portal-guru/profil`) baca-saja untuk akun yang terhubung ke data pegawai: dua `uiCard` outlined (Data Pegawai, Tanda Tangan) dengan judul `uiText` body-md bold + `uiBadge` status di kanan, isi `uiDataCard` dalam `.field-row`. Pratinjau tanda tangan memakai route privat Profil Penandatangan; perubahan tanda tangan lewat tombol header outline "Kelola Tanda Tangan". Menu disembunyikan untuk akun tanpa data pegawai (mis. Superadmin).
 
 ### Persetujuan eRapor
 

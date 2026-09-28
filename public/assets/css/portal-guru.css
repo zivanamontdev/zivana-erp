@@ -606,3 +606,14 @@ button.teacher-report-action:focus-visible,
 .erapor-approval-step.is-done .erapor-approval-dot { background:var(--color-green-600); color:var(--color-neutral-white); }
 .erapor-approval-step.is-current .erapor-approval-dot { background:var(--color-red-600); color:var(--color-neutral-white); }
 .erapor-approval-step.is-current small { color:var(--color-red-600); }
+
+/* ---------- Portal Guru > Profil ---------- */
+.teacher-profile-card { display:grid; gap:var(--space-4); margin-block:0; padding:var(--space-4); }
+.teacher-profile-heading { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); }
+.teacher-profile-heading h2 { margin:0; }
+.teacher-profile-grid { margin:0; }
+.teacher-profile-signature { display:grid; gap:var(--space-2); justify-items:start; margin:0; }
+.teacher-profile-signature img { display:block; max-width:100%; max-height:10rem; object-fit:contain; padding:var(--space-3); border:1px solid var(--color-neutral-75); border-radius:var(--radius-md); background:var(--color-neutral-white); }
+@media (max-width: 40rem) {
+  .teacher-profile-card { padding:var(--space-3); }
+}

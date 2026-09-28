@@ -115,6 +115,7 @@ $router->post('/api/erapor/sesi/{id}/konfirmasi-penerimaan', [EraporTeacherApiCo
 $router->post('/portal-guru/sesi/siapkan', [PortalGuruController::class, 'prepareEraporSession']);
 $router->get('/portal-guru/sesi/{id}', [PortalGuruController::class, 'showEraporSession']);
 $router->get('/portal-guru/dashboard', [PortalGuruController::class, 'dashboard']);
+$router->get('/portal-guru/profil', [PortalGuruController::class, 'profil']);
 $router->get('/portal-guru/murid', [PortalGuruController::class, 'daftarMurid']);
 $router->get('/portal-guru/murid/{id}', [PortalGuruController::class, 'showMurid']);
 $router->get('/portal-guru/rapor/{id}/pdf', [PengisianRaporController::class, 'downloadPdf']);
