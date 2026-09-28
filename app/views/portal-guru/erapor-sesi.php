@@ -16,6 +16,8 @@ $readonlyMessages = [
 ];
 
 $renderSelect = static function (array $document, string $type, string $key, string $label, array $choices, mixed $value, array $images = [], bool $required = true, array $extraAttributes = []) use ($canEdit): string {
+    // Nilai huruf Ummi (maks. 2 karakter) memakai pilihan kecil dengan placeholder "-".
+    $placeholder = $type === 'UMMI' ? '-' : 'Pilih jawaban Anda';
     $attributes = [
         'data-erapor-entry' => $type,
         'data-erapor-document-id' => (int)$document['id'],
@@ -26,7 +28,7 @@ $renderSelect = static function (array $document, string $type, string $key, str
     if ($type === 'RTS') $attributes['data-erapor-indicator-id'] = substr($key, strlen('nilai:'));
     $attributes = array_merge($attributes, $extraAttributes);
     return uiSelect('erapor_' . (int)$document['id'] . '_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $key), $label,
-        ['' => 'Pilih jawaban Anda'] + $choices, [
+        ['' => $placeholder] + $choices, [
             'id' => 'erapor-field-' . (int)$document['id'] . '-' . substr(hash('sha256', $key), 0, 12),
             'value' => $value === null ? '' : (string)$value,
             'font' => 'base',
@@ -62,12 +64,13 @@ $renderScale = static function (array $document, array $item, array $scales, ?in
     }
     return $html . '</div>';
 };
-$renderText = static function (array $document, string $type, string $key, string $label, ?string $value, bool $disabled = false, bool $required = true) use ($canEdit): string {
+$renderText = static function (array $document, string $type, string $key, string $label, ?string $value, bool $disabled = false, bool $required = true, bool $hideLabel = false) use ($canEdit): string {
     return uiField('erapor_' . (int)$document['id'] . '_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $key), $label, [
         'type' => 'textarea', 'variant' => 'form',
         'id' => 'erapor-field-' . (int)$document['id'] . '-' . substr(hash('sha256', $key), 0, 12),
         'value' => $value ?? '', 'placeholder' => 'Tulis ' . mb_strtolower($label, 'UTF-8'),
         'disabled' => $disabled || !$canEdit,
+        'hideLabel' => $hideLabel,
         'inputAttributes' => [
             'rows' => 3,
             'data-erapor-entry' => $type,
@@ -89,67 +92,51 @@ require VIEW_PATH . '/layouts/focus-header.php';
       data-login-url="<?= e(BASE_PATH . '/login') ?>"
       data-csrf-token="<?= e(getCsrfToken()) ?>"
       data-can-submit="<?= $canSend ? 'true' : 'false' ?>">
+    <?php // Tombol kembali: di luar kartu judul pada desktop, di dalam kartu pada mobile. ?>
+    <a class="ui-button ui-button--outline ui-button--icon-only pengisian-back pengisian-back--outside" href="<?= BASE_PATH ?>/portal-guru/dashboard" aria-label="Kembali ke Dashboard" title="Kembali ke Dashboard"><span class="ui-button-icon" aria-hidden="true"><?= icon('icon_chevron') ?></span></a>
     <section class="pengisian-header-card">
         <?php
         $pdfUrl = BASE_PATH . '/erapor/sesi/' . (int)$session['id'] . '/pdf';
         $pdfLabel = !empty($hasOfficialPdf) ? 'Lihat PDF Resmi' : 'Pratinjau PDF';
         ?>
+        <a class="ui-button ui-button--outline ui-button--icon-only pengisian-back pengisian-back--inside" href="<?= BASE_PATH ?>/portal-guru/dashboard" aria-label="Kembali ke Dashboard" title="Kembali ke Dashboard"><span class="ui-button-icon" aria-hidden="true"><?= icon('icon_chevron') ?></span></a>
         <div class="pengisian-header-top">
             <div class="pengisian-title">
                 <h1>Pengisian Rapor</h1>
                 <p class="pengisian-student-name"><?= e($student['nama_lengkap']) ?></p>
+                <?php if (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
+                    <?php $allApproved = !empty($form['approvals']) && !array_filter($form['approvals'], fn($a) => $a['status'] !== 'DISETUJUI'); ?>
+                    <p class="pengisian-approval-status"><?= $session['status'] === 'SELESAI' || $allApproved ? uiBadge('Rapor telah disetujui', 'positif') : uiBadge('Menunggu proses persetujuan', 'peringatan') ?></p>
+                <?php endif; ?>
             </div>
             <?php // Mobile: aksi header diringkas jadi tombol ikon; navigasi & Selesaikan ada di bar bawah (pager). ?>
             <div class="pengisian-header-icons">
                 <?= uiButton($pdfLabel, 'outline', ['icon'=>'icon_file_text', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>$pdfLabel, 'data-erapor-open-url'=>$pdfUrl]]) ?>
-                <?= uiButton('Kembali ke Dashboard', 'outline', ['icon'=>'icon_layout_dashboard', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Kembali ke Dashboard', 'onclick'=>'window.location.href=\''.BASE_PATH.'/portal-guru/dashboard\'']]) ?>
+                <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
             </div>
             <div class="pengisian-header-actions">
+                <a class="ui-button ui-button--outline" href="<?= e($pdfUrl) ?>" target="_blank" rel="noopener" data-erapor-pdf><?= e($pdfLabel) ?></a>
+                <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
                 <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
                     <?php // Aktif setelah semua rapor wajib lengkap (diatur erapor-session.js dari data server). ?>
                     <?= uiButton('Selesaikan Rapor', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm'=>true]]) ?>
                 <?php elseif ($canSend && $session['status'] === 'TELAH_DIISI'): ?>
                     <?= uiButton('Konfirmasi Penerimaan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-reception'=>true]]) ?>
-                <?php elseif (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
-                    <?php $allApproved = !empty($form['approvals']) && !array_filter($form['approvals'], fn($a) => $a['status'] !== 'DISETUJUI'); ?>
-                    <span class="teacher-report-action teacher-report-action--pending"><?= $session['status'] === 'SELESAI' || $allApproved ? 'Rapor telah disetujui' : 'Menunggu proses persetujuan' ?></span>
                 <?php endif; ?>
-                <a class="ui-button ui-button--outline" href="<?= e($pdfUrl) ?>" target="_blank" rel="noopener" data-erapor-pdf><?= e($pdfLabel) ?></a>
-                <?= uiButton('Kembali ke Dashboard', 'outline', ['marginVertical'=>0, 'attributes'=>['onclick'=>'window.location.href=\''.BASE_PATH.'/portal-guru/dashboard\'']]) ?>
             </div>
         </div>
         <p class="pengisian-rapor-warning">
-            <?= e($period['nama']) ?> · Tahun Ajaran <?= e($period['tahun_label']) ?> ·
-            Semester <?= e(ucfirst(strtolower($period['semester']))) ?>
+            <?= e($period['nama']) ?>
             <?php if ($kelasLabel !== ''): ?> · <?= e($kelasLabel) ?><?php endif; ?>
             · Status <?= e(str_replace('_', ' ', $session['status'])) ?>
         </p>
-        <?php if (!empty($form['approvals'])): ?>
-            <?php
-            $pendingRank = null;
-            foreach ($form['approvals'] as $approval) if ($approval['status'] !== 'DISETUJUI') { $pendingRank = $pendingRank === null ? (int)$approval['urutan'] : min($pendingRank, (int)$approval['urutan']); }
-            ?>
-            <ol class="erapor-approval-track" aria-label="Posisi rapor dalam alur persetujuan">
-                <?php foreach ($form['approvals'] as $approval): ?>
-                    <?php $state = $approval['status'] === 'DISETUJUI' ? 'done' : ((int)$approval['urutan'] === $pendingRank ? 'current' : 'next'); ?>
-                    <li class="erapor-approval-step is-<?= $state ?>">
-                        <span class="erapor-approval-dot" aria-hidden="true"><?= $state === 'done' ? '&#10003;' : (int)$approval['urutan'] ?></span>
-                        <span>
-                            <strong><?= e($approval['label']) ?></strong>
-                            <small><?= $state === 'done' ? e('Disetujui ' . ($approval['nama'] ?? '') . ($approval['disetujui_pada'] ? ' · ' . date('d/m/Y', strtotime($approval['disetujui_pada'])) : '')) : ($state === 'current' ? 'Sedang ditinjau' : 'Menunggu tahap sebelumnya') ?></small>
-                        </span>
-                    </li>
-                <?php endforeach; ?>
-            </ol>
-        <?php endif; ?>
         <?php if (!$canEdit): ?>
             <p class="erapor-session-notice" role="status">
                 <?= e($readonlyMessages[$form['capabilities']['read_only_reason'] ?? ''] ?? 'Sesi ini hanya dapat dilihat.') ?>
             </p>
         <?php endif; ?>
         <div class="pengisian-rapor-progress" aria-label="Progress isian rapor">
-            <span class="pengisian-rapor-progress-label">Progress:</span>
-            <span class="pengisian-rapor-progress-bar"><span class="pengisian-rapor-progress-bar-fill" data-erapor-overall-bar style="width:<?= $required ? min(100, round($filled / $required * 100)) : 0 ?>%"></span></span>
+            <?= uiProgress($filled, $required, ['label'=>'Progress isian rapor', 'fillAttributes'=>['data-erapor-overall-bar'=>true]]) ?>
             <span data-erapor-overall-count><?= (int)$filled ?> dari <?= (int)$required ?></span>
         </div>
         <p class="erapor-save-status" data-erapor-status role="status" aria-live="polite">Semua perubahan tersimpan.</p>
@@ -160,23 +147,23 @@ require VIEW_PATH . '/layouts/focus-header.php';
     </section>
 
     <?php $pageTotal = count($form['documents']); ?>
+    <div class="erapor-filter" role="group" aria-label="Filter isian">
+        <span class="erapor-filter-label">Tampilkan:</span>
+        <?= uiButton('Semua', 'tabular-active', ['marginVertical'=>0, 'attributes'=>['data-erapor-filter'=>'all']]) ?>
+        <?= uiButton('Belum Diisi', 'tabular-inactive', ['marginVertical'=>0, 'attributes'=>['data-erapor-filter'=>'empty']]) ?>
+    </div>
     <nav class="erapor-steps" aria-label="Bagian rapor" data-erapor-steps>
         <?php foreach ($form['documents'] as $index => $document): ?>
             <?php $stepProgress = $completionByType[$document['jenis_dokumen']] ?? ['filled'=>0, 'required'=>0]; ?>
             <button type="button" class="erapor-step" data-erapor-step="<?= $index ?>"<?= $index === 0 ? ' aria-current="step"' : '' ?>>
                 <span class="erapor-step-index" aria-hidden="true"><?= $index + 1 ?></span>
                 <span class="erapor-step-text">
-                    <span class="erapor-step-name"><?= e($document['nama']) ?></span>
+                    <span class="erapor-step-name"><?= e(['RTS' => 'RTS', 'RAS' => 'RAS', 'AGAMA' => 'Rapor PAI', 'UMMI' => 'Rapor Ummi', 'BING' => 'Rapor BING', 'PPI' => 'Rapor PPI'][$document['jenis_dokumen']] ?? $document['nama']) ?></span>
                     <small data-erapor-step-progress="<?= e($document['jenis_dokumen']) ?>"><?= (int)$stepProgress['required'] ? (int)$stepProgress['filled'] . ' / ' . (int)$stepProgress['required'] : 'Opsional' ?></small>
                 </span>
             </button>
         <?php endforeach; ?>
     </nav>
-    <div class="erapor-filter" role="group" aria-label="Filter isian">
-        <span class="erapor-filter-label">Tampilkan:</span>
-        <?= uiButton('Semua', 'tabular-active', ['marginVertical'=>0, 'attributes'=>['data-erapor-filter'=>'all']]) ?>
-        <?= uiButton('Belum Diisi', 'tabular-inactive', ['marginVertical'=>0, 'attributes'=>['data-erapor-filter'=>'empty']]) ?>
-    </div>
 
     <?php foreach ($form['documents'] as $index => $document): ?>
         <?php
@@ -217,10 +204,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <?php endif; ?>
             </header>
                 <?php foreach ($definitions['areas'] as $area): ?>
-                    <details class="ui-disclosure erapor-section" open><summary class="pengisian-kategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(mb_convert_case($area['nama'], MB_CASE_TITLE, 'UTF-8')) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
+                    <details class="ui-disclosure erapor-section"><summary class="pengisian-kategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(mb_convert_case($area['nama'], MB_CASE_TITLE, 'UTF-8')) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
                     <?php foreach ($subareasByArea[(int)$area['id']] ?? [] as $subarea): ?>
                         <?php $subItems = array_values(array_filter($definitions['items'], fn($item)=>(int)$item['sub_area_id']===(int)$subarea['id'])); ?>
-                        <?php if (!$subarea['implisit']): ?><details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(($subarea['huruf'] ? $subarea['huruf'] . '. ' : '') . $subarea['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
+                        <?php if (!$subarea['implisit']): ?><details class="ui-disclosure erapor-section"><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(($subarea['huruf'] ? $subarea['huruf'] . '. ' : '') . $subarea['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
                         <?php $lastGroupId = null; ?>
                         <?php foreach ($subItems as $item): ?>
                             <?php
@@ -276,7 +263,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <?php endif; ?>
                 <div class="erapor-page-group" data-erapor-bing-fields<?= $bingStarted ? '' : ' hidden' ?>>
                 <?php foreach ($groupedIndicators as $groupName => $items): ?>
-                    <?php if ($groupName !== ''): ?><details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e($groupName) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
+                    <?php if ($groupName !== ''): ?><details class="ui-disclosure erapor-section"><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e($groupName) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
                     <?php foreach ($items as $item): ?>
                         <div class="erapor-question erapor-question--select" data-erapor-question>
                             <span class="erapor-question-text"><?= e($item['penanda_cetak'] ? $item['penanda_cetak'] . ' ' : '') . e($item['label_cetak']) ?></span>
@@ -286,7 +273,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     <?php endforeach; ?>
                     <?php if ($groupName !== ''): ?></div></details><?php endif; ?>
                 <?php endforeach; ?>
-                <details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span>Catatan kemampuan</span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
+                <details class="ui-disclosure erapor-section"><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span>Catatan kemampuan</span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
                 <?php foreach ($definitions['comments'] as $comment): ?>
                     <div class="erapor-question" data-erapor-question>
                         <?= $renderText($document, 'BING', 'komentar:' . $comment['id'], $comment['label_cetak'], $values['komentar:' . $comment['id']] ?? null, false, (bool)$comment['wajib']) ?>
@@ -333,10 +320,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
                         foreach ($scopeSubscopes as $subscope) if ((int)$item['sub_id'] === (int)$subscope['id']) $scopeItems[] = $item;
                     }
                     ?>
-                    <details class="ui-disclosure erapor-section" open><summary class="pengisian-kategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e($scope['nomor_romawi'] . '. ' . $scope['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
+                    <details class="ui-disclosure erapor-section"><summary class="pengisian-kategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e($scope['nomor_romawi'] . '. ' . $scope['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
                     <?php foreach ($scopeSubscopes as $subscope): ?>
                         <?php $items = array_values(array_filter($scopeItems, fn($item)=>(int)$item['sub_id']===(int)$subscope['id'])); ?>
-                        <?php if (!$subscope['implisit']): ?><details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(($subscope['huruf'] ? $subscope['huruf'] . '. ' : '') . $subscope['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
+                        <?php if (!$subscope['implisit']): ?><details class="ui-disclosure erapor-section"><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span><?= e(($subscope['huruf'] ? $subscope['huruf'] . '. ' : '') . $subscope['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body"><?php endif; ?>
                         <?php foreach ($items as $item): ?>
                             <?php
                             $itemNames = array_values(array_filter($definitions['names'], fn($name)=>(int)$name['item_id']===(int)$item['id']));
@@ -358,7 +345,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 foreach ($definitions['scopes'] as $scope) if (!empty($scope['catatan_wajib'])) { $narrativeScope = $scope; break; }
                 ?>
                 <?php if ($narrativeScope): ?>
-                    <details class="ui-disclosure erapor-section" open><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span>Laporan Perkembangan Agama</span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
+                    <details class="ui-disclosure erapor-section"><summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span>Laporan Perkembangan Agama</span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
                         <div class="erapor-question" data-erapor-question>
                             <?= $renderText($document, 'AGAMA', 'catatan:' . $narrativeScope['id'], 'Laporan Perkembangan Agama', $values['catatan:' . $narrativeScope['id']] ?? null, false, true) ?>
                             <p class="erapor-question-error" data-erapor-question-error hidden>Laporan Perkembangan Agama wajib diisi.</p>
@@ -398,6 +385,24 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     foreach ($definitions['items'] as $item) $itemsByVolume[(int)$item['jilid_id']][] = $item;
                     $existingTests = [];
                     foreach ($values as $valueKey => $value) if (str_starts_with($valueKey, 'tes:') && is_array($value)) $existingTests[$valueKey] = $value;
+                    uasort($existingTests, static fn(array $x, array $y): int => (int)$x['urutan'] <=> (int)$y['urutan']);
+                    // Pilihan jilid tes diambil dari judul jilid rubrik; nilai lama di luar daftar tetap dipertahankan.
+                    $volumeChoices = [];
+                    foreach ($definitions['volumes'] as $volume) $volumeChoices['Jilid ' . $volume['nama']] = 'Jilid ' . $volume['nama'];
+                    // Satu baris tes: No. otomatis (teks tebal; urutan tersimpan di input tersembunyi), tanggal, jilid, nilai, hapus.
+                    $renderTestRow = static function (string $token, array $test, array $rowAttributes, bool $editable = false) use ($document, $ummiChoices, $volumeChoices, $canEdit): string {
+                        $volume = (string)($test['jilid'] ?? '');
+                        $choices = ['' => 'Pilih jilid'] + $volumeChoices + ($volume !== '' && !isset($volumeChoices[$volume]) ? [$volume => $volume] : []);
+                        return '<div class="erapor-ummi-test-row" data-erapor-entry="UMMI_TEST" data-erapor-document-id="' . (int)$document['id'] . '"' . uiAttrs($rowAttributes) . '>'
+                            . '<div class="erapor-ummi-test-no"><span class="field-label font-base">No.</span><strong data-ummi-test-no>' . e((string)($test['no'] ?? '')) . '</strong>'
+                            . '<input type="hidden" name="erapor_ummi_test_order_' . e($token) . '" value="' . e((string)($test['urutan'] ?? '')) . '" data-ummi-test-field="urutan"></div>'
+                            . uiField('erapor_ummi_test_date_' . $token, 'Tanggal tes', ['variant'=>'form','font'=>'base','icon'=>'icon_calendar','iconCalendar'=>true,'type'=>'date','value'=>(string)($test['tanggal_tes'] ?? ''),'inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']])
+                            . uiSelect('erapor_ummi_test_volume_' . $token, 'Jilid yang diteskan', $choices, ['font'=>'base','id'=>'erapor_ummi_test_volume_' . $token,'value'=>$volume,'attributes'=>['data-ummi-test-field'=>'jilid']])
+                            . uiSelect('erapor_ummi_test_grade_' . $token, 'Nilai tes', ['' => 'Pilih nilai'] + $ummiChoices, ['font'=>'base','id'=>'erapor_ummi_test_grade_' . $token,'value'=>(string)($test['nilai'] ?? ''),'attributes'=>['data-ummi-test-field'=>'nilai']])
+                            . '<span class="erapor-ummi-test-status" data-ummi-test-status aria-live="polite"></span>'
+                            . ($canEdit || $editable ? uiButton('Hapus tes', 'outline-danger', ['icon'=>'icon_trash','iconOnly'=>true,'marginVertical'=>0,'attributes'=>['title'=>'Hapus tes','data-erapor-remove-test'=>true]]) : '')
+                            . '</div>';
+                    };
                     $filledReadings = 0;
                     foreach ($definitions['items'] as $item) if (!empty($values['bacaan:' . $item['id']])) $filledReadings++;
                     $praId = null;
@@ -418,61 +423,48 @@ require VIEW_PATH . '/layouts/focus-header.php';
                         <p class="erapor-ummi-reading-count" data-ummi-reading-count data-filled="<?= (int)$filledReadings ?>" data-total="<?= count($definitions['items']) ?>">Terisi <?= (int)$filledReadings ?> dari <?= count($definitions['items']) ?> materi</p>
                     </section>
 
-                    <section class="erapor-ummi-volumes" aria-label="Bacaan jilid">
-                        <?php foreach ($definitions['volumes'] as $volume): ?>
-                            <?php $isPra = !empty($volume['hanya_pra_tk']); ?>
-                            <?php if ($isPra && $praId === null) continue; ?>
-                            <details class="erapor-ummi-volume ui-disclosure" data-ummi-volume="<?= (int)$volume['id'] ?>" data-ummi-pra-tk="<?= $isPra ? 'true' : 'false' ?>"<?= $isPra && !$values['mulai_pra_tk'] ? ' hidden' : '' ?>>
-                                <summary class="pengisian-subkategori-header ui-disclosure-trigger"><span>Jilid <?= e($volume['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary>
-                                <div class="erapor-ummi-volume-items">
-                                    <?php foreach ($itemsByVolume[(int)$volume['id']] ?? [] as $item): ?>
+                    <?php // Seragam dengan RTS: judul jilid (oranye, bisa dilipat) lalu satu kartu per materi: teks di kiri, pilihan nilai kecil di kanan. ?>
+                    <?php foreach ($definitions['volumes'] as $volume): ?>
+                        <?php $isPra = !empty($volume['hanya_pra_tk']); ?>
+                        <?php if ($isPra && $praId === null) continue; ?>
+                        <details class="ui-disclosure erapor-section erapor-ummi-volume" data-ummi-volume="<?= (int)$volume['id'] ?>" data-ummi-pra-tk="<?= $isPra ? 'true' : 'false' ?>"<?= $isPra && !$values['mulai_pra_tk'] ? ' hidden' : '' ?>>
+                            <summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger"><span>Jilid <?= e($volume['nama']) ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary>
+                            <div class="erapor-section-body">
+                                <?php foreach ($itemsByVolume[(int)$volume['id']] ?? [] as $item): ?>
+                                    <div class="erapor-question erapor-question--grade" data-erapor-question>
+                                        <span class="erapor-question-text"><?= e($item['teks']) ?></span>
                                         <?= $renderSelect($document, 'UMMI', 'bacaan:' . $item['id'], $item['teks'], $ummiChoices, $values['bacaan:' . $item['id']] ?? null, [], false, ['data-ummi-reading'=>'true']) ?>
-                                    <?php endforeach; ?>
-                                </div>
-                            </details>
-                        <?php endforeach; ?>
-                    </section>
-
-                    <section class="erapor-question erapor-field-group erapor-ummi-tests" data-ummi-tests>
-                        <div class="erapor-ummi-tests-heading">
-                            <div>
-                                <h3>Nilai Tes Kenaikan Jilid</h3>
-                                <p>Tes bersifat opsional. Tambahkan baris hanya jika ada tes yang perlu dicatat.</p>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                            <?php if ($canEdit): ?>
-                                <?= uiButton('Tambah Tes', 'outline', ['marginVertical'=>0, 'attributes'=>['data-erapor-add-test'=>(int)$document['id']]]) ?>
-                            <?php endif; ?>
-                        </div>
+                        </details>
+                    <?php endforeach; ?>
+
+                    <?php // Setara jilid: judul oranye lebih gelap, satu kartu per tes, tombol Tambah Tes di kartu paling bawah. ?>
+                    <details class="ui-disclosure erapor-section erapor-ummi-tests" data-ummi-tests>
+                        <summary class="pengisian-subkategori-header erapor-page-heading ui-disclosure-trigger erapor-ummi-tests-heading"><span class="erapor-ummi-tests-title">Nilai Tes Kenaikan Jilid <?= uiTooltip('Tes bersifat opsional. Tambahkan baris hanya jika ada tes yang perlu dicatat.') ?></span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary>
+                        <div class="erapor-section-body">
                         <div class="erapor-ummi-test-list" data-ummi-test-list>
-                            <?php foreach ($existingTests as $key => $test): ?>
-                                <?php $testToken = substr($key, 4); $savedTest = json_encode($test, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>
-                                <div class="erapor-ummi-test-row" data-erapor-entry="UMMI_TEST" data-erapor-document-id="<?= (int)$document['id'] ?>" data-erapor-key="<?= e($key) ?>" data-saved-value="<?= e($savedTest) ?>">
-                                    <?= uiField('erapor_ummi_test_order_' . $testToken, 'Urutan', ['variant'=>'form','font'=>'base','type'=>'number','value'=>(string)$test['urutan'],'inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
-                                    <?= uiField('erapor_ummi_test_date_' . $testToken, 'Tanggal tes', ['variant'=>'form','font'=>'base','icon'=>'icon_calendar','iconCalendar'=>true,'type'=>'date','value'=>$test['tanggal_tes'],'inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
-                                    <?= uiField('erapor_ummi_test_volume_' . $testToken, 'Jilid yang diteskan', ['variant'=>'form','font'=>'base','value'=>$test['jilid'],'placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
-                                    <?= uiSelect('erapor_ummi_test_grade_' . $testToken, 'Nilai tes', [''=>'Pilih nilai'] + $ummiChoices, ['font'=>'base','value'=>$test['nilai'],'attributes'=>['data-ummi-test-field'=>'nilai']]) ?>
-                                    <span class="erapor-ummi-test-status" data-ummi-test-status aria-live="polite"></span>
-                                    <?php if ($canEdit): ?><?= uiButton('Hapus', 'outline-danger', ['marginVertical'=>0,'attributes'=>['data-erapor-remove-test'=>true]]) ?><?php endif; ?>
-                                </div>
+                            <?php $testNo = 0; foreach ($existingTests as $key => $test): ?>
+                                <?php $savedTest = json_encode($test, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>
+                                <?= $renderTestRow(substr($key, 4), $test + ['no' => ++$testNo], ['data-erapor-key' => $key, 'data-saved-value' => $savedTest]) ?>
                             <?php endforeach; ?>
                         </div>
-                        <?php if (!$existingTests && !$canEdit): ?><p>Tidak ada tes yang dicatat pada periode ini.</p><?php endif; ?>
-                    </section>
+                        <?php if ($canEdit): ?>
+                            <button type="button" class="erapor-ummi-test-add" data-erapor-add-test="<?= (int)$document['id'] ?>"><span aria-hidden="true"><?= icon('icon_plus') ?></span>Tambah Tes</button>
+                        <?php elseif (!$existingTests): ?>
+                            <p class="erapor-question erapor-ummi-test-empty">Tidak ada tes yang dicatat pada periode ini.</p>
+                        <?php endif; ?>
+                        </div>
+                    </details>
 
                     <template data-ummi-test-template data-ummi-document-id="<?= (int)$document['id'] ?>">
-                        <div class="erapor-ummi-test-row" data-erapor-entry="UMMI_TEST" data-erapor-document-id="<?= (int)$document['id'] ?>" data-erapor-key="" data-saved-value="" data-erapor-incomplete="true">
-                            <?= uiField('erapor_ummi_test_order___TOKEN__', 'Urutan', ['variant'=>'form','font'=>'base','type'=>'number','placeholder'=>'1','inputAttributes'=>['min'=>1,'max'=>2147483647,'step'=>1,'data-ummi-test-field'=>'urutan']]) ?>
-                            <?= uiField('erapor_ummi_test_date___TOKEN__', 'Tanggal tes', ['variant'=>'form','font'=>'base','icon'=>'icon_calendar','iconCalendar'=>true,'type'=>'date','inputAttributes'=>['min'=>'1000-01-01','data-ummi-test-field'=>'tanggal_tes']]) ?>
-                            <?= uiField('erapor_ummi_test_volume___TOKEN__', 'Jilid yang diteskan', ['variant'=>'form','font'=>'base','placeholder'=>'Contoh: Jilid I','inputAttributes'=>['maxlength'=>150,'data-ummi-test-field'=>'jilid']]) ?>
-                            <?= uiSelect('erapor_ummi_test_grade___TOKEN__', 'Nilai tes', [''=>'Pilih nilai'] + $ummiChoices, ['font'=>'base','id'=>'erapor_ummi_test_grade___TOKEN__','attributes'=>['data-ummi-test-field'=>'nilai']]) ?>
-                            <span class="erapor-ummi-test-status" data-ummi-test-status aria-live="polite">Lengkapi semua kolom untuk menyimpan.</span>
-                            <?= uiButton('Hapus', 'outline-danger', ['marginVertical'=>0,'attributes'=>['data-erapor-remove-test'=>true]]) ?>
-                        </div>
+                        <?= $renderTestRow('__TOKEN__', [], ['data-erapor-key' => '', 'data-saved-value' => '', 'data-erapor-incomplete' => 'true'], true) ?>
                     </template>
 
-                    <section class="erapor-question erapor-field-group erapor-ummi-teacher-note">
+                    <section class="erapor-question erapor-field-group erapor-ummi-teacher-note" data-erapor-question>
                         <h3>Catatan Guru</h3>
-                        <?= $renderText($document, 'UMMI', 'catatan', 'Catatan Guru', $values['catatan'] ?? null, false, false) ?>
+                        <?= $renderText($document, 'UMMI', 'catatan', 'Catatan Guru', $values['catatan'] ?? null, false, false, true) ?>
                     </section>
                 <?php endif; ?>
             <?php else: ?>
@@ -494,10 +486,11 @@ require VIEW_PATH . '/layouts/focus-header.php';
     </nav>
 
     <?php // Konfirmasi memakai modal aplikasi (sama dengan halaman persetujuan), bukan window.confirm() bawaan browser. ?>
-    <?= uiModal('erapor-confirm-modal', 'Konfirmasi', '<p class="ui-modal-description" data-erapor-confirm-message></p><div class="modal-body"><div class="modal-actions">'
+    <?php // Varian konfirmasi standar aplikasi (judul, deskripsi, tombol) dengan jarak antarbagian dari ui-modal--delete. ?>
+    <?= uiModal('erapor-confirm-modal', 'Konfirmasi', '<p class="ui-modal-description" data-erapor-confirm-message></p><div class="modal-actions">'
         . uiButton('Batal', 'outline', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-cancel'=>true]])
         . uiButton('Lanjutkan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-accept'=>true]])
-        . '</div></div>') ?>
+        . '</div>', ['variant'=>'delete']) ?>
 
     <?php // Harus di dalam [data-erapor-editor]: erapor-session.js mencarinya lewat root.querySelector(). ?>
     <script type="application/json" data-erapor-initial-state><?= json_encode([
@@ -506,6 +499,30 @@ require VIEW_PATH . '/layouts/focus-header.php';
         'session' => $session,
     ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?></script>
 </main>
+
+<?php if (!empty($form['approvals'])): ?>
+    <?php // Alur persetujuan (siapa sudah/belum menyetujui) di modal kecil, dibuka dari tombol ikon di header. ?>
+    <?php ob_start(); ?>
+            <?php
+            $pendingRank = null;
+            foreach ($form['approvals'] as $approval) if ($approval['status'] !== 'DISETUJUI') { $pendingRank = $pendingRank === null ? (int)$approval['urutan'] : min($pendingRank, (int)$approval['urutan']); }
+            ?>
+            <ol class="erapor-approval-track" aria-label="Posisi rapor dalam alur persetujuan">
+                <?php foreach ($form['approvals'] as $approval): ?>
+                    <?php $state = $approval['status'] === 'DISETUJUI' ? 'done' : ((int)$approval['urutan'] === $pendingRank ? 'current' : 'next'); ?>
+                    <li class="erapor-approval-step is-<?= $state ?>">
+                        <span class="erapor-approval-dot" aria-hidden="true"><?= $state === 'done' ? '&#10003;' : (int)$approval['urutan'] ?></span>
+                        <span>
+                            <strong><?= e($approval['label']) ?></strong>
+                            <small><?= $state === 'done' ? e('Disetujui ' . ($approval['nama'] ?? '') . ($approval['disetujui_pada'] ? ' · ' . date('d/m/Y', strtotime($approval['disetujui_pada'])) : '')) : ($state === 'current' ? 'Sedang ditinjau' : 'Menunggu tahap sebelumnya') ?></small>
+                        </span>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+    <div class="modal-actions"><?= uiButton('Tutup', 'outline', ['marginVertical'=>0, 'attributes'=>['data-modal-close'=>true]]) ?></div>
+    <?= uiModal('erapor-approval-modal', 'Alur Persetujuan', ob_get_clean(), ['variant'=>'delete']) ?>
+<?php endif; ?>
+<script src="<?= BASE_PATH ?>/assets/js/modal.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/modal.js') ?>"></script>
 
 <script src="<?= BASE_PATH ?>/assets/js/ui-select.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-select.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/ui-datepicker.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-datepicker.js') ?>"></script>

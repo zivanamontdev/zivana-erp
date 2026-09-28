@@ -41,6 +41,15 @@
       return {urutan: order, tanggal_tes: date, jilid: volume, nilai: grade};
     }
 
+    // No. baris tes = posisi baris (1, 2, 3, ...), diperbarui saat baris ditambah/dihapus.
+    function renumberTests(list) {
+      if (!list) return;
+      Array.from(list.querySelectorAll('[data-erapor-entry="UMMI_TEST"]')).forEach(function (row, index) {
+        var no = row.querySelector('[data-ummi-test-no]');
+        if (no) no.textContent = String(index + 1);
+      });
+    }
+
     function hasIncompleteTestRows() {
       return Array.from(root.querySelectorAll('[data-erapor-entry="UMMI_TEST"]')).some(function (row) {
         return row.dataset.eraporIncomplete === 'true' && row.dataset.eraporDeleteTest !== 'true';
@@ -90,6 +99,34 @@
         button.classList.toggle('ui-button--disabled', disabled);
         button.classList.toggle('ui-button--primary', !disabled);
       });
+    }
+
+    // Centang "mulai dari PRA TK" menampilkan Jilid PRA TK; hapus centang menyembunyikannya dan mengosongkan
+    // nilainya (server menghapus nilai PRA TK saat setelan disimpan), sehingga harus diisi ulang bila dicentang lagi.
+    async function handlePraToggle(field) {
+      var card = field.closest('[data-erapor-document]');
+      if (!card) return;
+      var volumes = Array.from(card.querySelectorAll('[data-ummi-pra-tk="true"]'));
+      var praSelects = [];
+      volumes.forEach(function (volume) { praSelects = praSelects.concat(Array.from(volume.querySelectorAll('select[data-ummi-reading]'))); });
+      if (!field.checked && praSelects.some(function (select) { return select.value !== ''; })) {
+        if (!(await askConfirm('Hapus Nilai PRA TK?', 'Nilai Jilid PRA TK yang sudah diisi akan dihapus. Centang lagi bila perlu mengisinya ulang.', 'Hapus'))) {
+          field.checked = true;
+          return;
+        }
+      }
+      volumes.forEach(function (volume) { volume.hidden = !field.checked; });
+      if (!field.checked) {
+        praSelects.forEach(function (select) {
+          pending.delete(select);
+          select.value = '';
+          select.dataset.savedValue = '';
+          select.removeAttribute('aria-invalid');
+          select.dispatchEvent(new CustomEvent('change', {bubbles: false}));
+        });
+        updateUmmiReadingCount(card);
+      }
+      noteChange(field);
     }
 
     function updateUmmiReadingCount(card) {
@@ -191,7 +228,10 @@
       var count = root.querySelector('[data-erapor-overall-count]');
       var bar = root.querySelector('[data-erapor-overall-bar]');
       if (count) count.textContent = totalFilled + ' dari ' + totalRequired;
-      if (bar) bar.style.width = (totalRequired ? Math.min(100, Math.round(totalFilled / totalRequired * 100)) : 0) + '%';
+      if (bar) {
+        bar.style.width = (totalRequired ? Math.min(100, Math.round(totalFilled / totalRequired * 100)) : 0) + '%';
+        if (bar.parentElement) bar.parentElement.setAttribute('aria-valuenow', Math.round(parseFloat(bar.style.width)));
+      }
     }
 
     function applyState(data) {
@@ -260,14 +300,16 @@
           var saved = changes[index].value;
           if (field.dataset.eraporEntry === 'UMMI_TEST') {
             if (saved === null && field.dataset.eraporDeleteTest === 'true') {
+              var parentList = field.parentElement;
               field.remove();
+              renumberTests(parentList);
               return;
             }
             field.dataset.savedValue = saved === null ? '' : JSON.stringify(saved);
             field.dataset.eraporIncomplete = 'false';
             field.dataset.eraporDeleteTest = 'false';
             var testStatus = field.querySelector('[data-ummi-test-status]');
-            if (testStatus) testStatus.textContent = 'Tersimpan.';
+            if (testStatus) testStatus.textContent = '';
           } else {
             field.dataset.savedValue = saved === null ? '' : String(saved);
           }
@@ -304,7 +346,7 @@
       if (!value) {
         row.dataset.eraporIncomplete = 'true';
         pending.delete(row);
-        if (statusLine) statusLine.textContent = 'Lengkapi urutan, tanggal, jilid, dan nilai untuk menyimpan.';
+        if (statusLine) statusLine.textContent = '';
         updateConfirmState();
         if (pending.size === 0 && timer) { window.clearTimeout(timer); timer = null; }
         setStatus('Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum menyelesaikan rapor.', 'pending');
@@ -377,8 +419,11 @@
     }
 
     // ---- Hitungan terisi/total per bagian (judul merah) dan sub bagian (judul oranye) ----
+    // Isian wajib; pada bagian tanpa isian wajib (rapor opsional seperti Ummi) semua isian dihitung.
     function sectionEntries(scope) {
-      return Array.from(scope.querySelectorAll('[data-erapor-entry][aria-required="true"]'));
+      var required = Array.from(scope.querySelectorAll('[data-erapor-entry][aria-required="true"]'));
+      if (required.length) return required;
+      return Array.from(scope.querySelectorAll('select[data-erapor-entry], textarea[data-erapor-entry], [data-erapor-radio]'));
     }
 
     function updateSectionCounts() {
@@ -514,10 +559,7 @@
       if (testRow) { handleTestRowChange(testRow); return; }
       var field = event.target.closest('[data-erapor-entry]');
       if (!field) return;
-      if (field.dataset.eraporPraToggle === 'true') {
-        var documentCard = field.closest('[data-erapor-document]');
-        if (documentCard) documentCard.querySelectorAll('[data-ummi-pra-tk="true"]').forEach(function (volume) { volume.hidden = !field.checked; });
-      }
+      if (field.dataset.eraporPraToggle === 'true') { handlePraToggle(field); return; }
       if (field.dataset.ummiReading === 'true') {
         var ummiCard = field.closest('[data-erapor-document]');
         if (ummiCard) updateUmmiReadingCount(ummiCard);
@@ -603,14 +645,24 @@
         holder.innerHTML = template.innerHTML.replaceAll('__TOKEN__', newTestToken());
         var row = holder.firstElementChild;
         if (!row) return;
-        row.dataset.eraporKey = 'tes:' + row.querySelector('[data-ummi-test-field="urutan"]').name.slice(-32);
-        list.appendChild(row);
-        updateConfirmState();
         var orderInput = row.querySelector('[data-ummi-test-field="urutan"]');
-        if (orderInput) orderInput.focus();
+        row.dataset.eraporKey = 'tes:' + orderInput.name.slice(-32);
+        // Urutan otomatis: satu di atas urutan terbesar yang sudah ada.
+        var maxOrder = Array.from(list.querySelectorAll('[data-ummi-test-field="urutan"]')).reduce(function (max, input) {
+          return Math.max(max, Number(input.value) || 0);
+        }, 0);
+        orderInput.value = String(maxOrder + 1);
+        list.appendChild(row);
+        renumberTests(list);
+        updateConfirmState();
+        var dateInput = row.querySelector('[data-ummi-test-field="tanggal_tes"]');
+        if (dateInput) dateInput.focus();
         setStatus('Baris tes ditambahkan. Lengkapi seluruh kolom, atau hapus baris ini, sebelum Selesaikan Rapor.', 'pending');
         return;
       }
+
+      var tooltip = event.target.closest('[data-ui-tooltip]');
+      if (tooltip && tooltip.closest('summary')) { event.preventDefault(); tooltip.focus(); return; }
 
       var removeTest = event.target.closest('[data-erapor-remove-test]');
       if (removeTest) {
@@ -618,7 +670,9 @@
         if (!testRow || blocked || saving) return;
         if (!testRow.dataset.savedValue) {
           pending.delete(testRow);
+          var testList = testRow.parentElement;
           testRow.remove();
+          renumberTests(testList);
           updateConfirmState();
           if (!pending.size && !saving) setStatus(hasIncompleteTestRows() ? 'Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum Selesaikan Rapor.' : 'Baris tes kosong dihapus. Semua perubahan tersimpan.', hasIncompleteTestRows() ? 'pending' : 'success');
           return;

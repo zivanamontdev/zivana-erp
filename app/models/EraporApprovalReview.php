@@ -22,7 +22,8 @@ final class EraporApprovalReview
         $session=self::one($db,'SELECT * FROM erapor_sesi WHERE id=?',[$sessionId]);
         $target=self::one($db,'SELECT a.id,a.sesi_id,a.penyetuju_id,a.kode,a.label,a.urutan,a.cakupan,a.status
             FROM erapor_sesi_penyetuju a WHERE a.id=? AND a.sesi_id=?',[$approvalId,$sessionId]);
-        if (!$session || !$target || $session['status']!=='MENUNGGU_TTD') throw new DomainException('Tinjauan persetujuan tidak tersedia.');
+        // SELESAI tetap bisa ditinjau (baca saja) sebagai riwayat penyetuju; persetujuan hanya untuk baris MENUNGGU.
+        if (!$session || !$target || !in_array($session['status'],['MENUNGGU_TTD','SELESAI'],true)) throw new DomainException('Tinjauan persetujuan tidak tersedia.');
         // Mode pantau (Superadmin) boleh melihat, tidak pernah menyetujui.
         $actor=$monitor?['nama'=>'Superadmin','jabatan'=>'Superadmin']:EraporApprovalAccess::actor($db,$target,$session,$actorId);
         if (!$actor) throw new DomainException('Akun tidak berwenang atas tinjauan ini.');
@@ -70,42 +71,64 @@ final class EraporApprovalReview
         ];
     }
 
+    /**
+     * Baris tinjauan per dokumen. 'group' = bagian yang dilipat (Area RTS, Lingkup Agama, Jilid Ummi, ...),
+     * 'sub' = subjudul di dalam bagian (Sub-area RTS, Sub-lingkup Agama); keduanya mengikuti halaman pengisian.
+     */
     private static function displayRows(array $document): array
     {
         $type=$document['jenis_dokumen']; $defs=$document['form']['definitions']; $values=$document['form']['values']; $rows=[];
         $scaleKey=match($type) {'RTS'=>'nilai','AGAMA'=>'kolom_cetak','BING'=>'kode','UMMI'=>'kode',default=>null};
         $scales=[];
         if ($scaleKey!==null) foreach ($defs['scale'] ?? [] as $scale) $scales[(string)$scale[$scaleKey]]=(string)$scale['label'];
-        $append=static function(string $label,mixed $value) use (&$rows): void {
+        $append=static function(string $label,mixed $value,string $group='',string $sub='') use (&$rows): void {
             $value=is_string($value) ? trim($value) : $value;
-            $rows[]=['label'=>$label,'value'=>($value===null || $value==='')?'Belum dinilai':(string)$value];
+            $rows[]=['label'=>$label,'value'=>($value===null || $value==='')?'Belum dinilai':(string)$value,'group'=>$group,'sub'=>$sub];
         };
         if ($type==='RTS') {
-            foreach ($defs['items'] as $item) { $value=$values['nilai:'.$item['id']] ?? null; $append((string)$item['tujuan'],$scales[(string)$value] ?? null); }
-        } elseif ($type==='AGAMA') {
+            $areas=[]; foreach ($defs['areas'] ?? [] as $area) $areas[(int)$area['id']]=mb_convert_case((string)$area['nama'],MB_CASE_TITLE,'UTF-8');
+            $subs=[]; foreach ($defs['subareas'] ?? [] as $sub) $subs[(int)$sub['id']]=$sub;
             foreach ($defs['items'] as $item) {
+                $sub=$subs[(int)$item['sub_area_id']] ?? null;
+                $subLabel=$sub && !(bool)$sub['implisit'] ? trim(($sub['huruf'] ? $sub['huruf'].'. ' : '').$sub['nama']) : '';
+                $value=$values['nilai:'.$item['id']] ?? null;
+                $append((string)$item['tujuan'],$scales[(string)$value] ?? null,$sub ? ($areas[(int)$sub['area_id']] ?? '') : '',$subLabel);
+            }
+        } elseif ($type==='AGAMA') {
+            $scopes=[]; foreach ($defs['scopes'] ?? [] as $scope) $scopes[(int)$scope['id']]=$scope['nomor_romawi'].'. '.$scope['nama'];
+            $subs=[]; foreach ($defs['subscopes'] ?? [] as $sub) $subs[(int)$sub['id']]=$sub;
+            foreach ($defs['items'] as $item) {
+                $sub=$subs[(int)$item['sub_id']] ?? null;
+                $subLabel=$sub && !(bool)$sub['implisit'] ? trim(($sub['huruf'] ? $sub['huruf'].'. ' : '').$sub['nama']) : '';
                 $label=($item['nomor'] ? $item['nomor'].'. ' : '').$item['teks'];
-                $value=$values['nilai:'.$item['id']] ?? null; $append((string)$label,$scales[(string)$value] ?? null);
+                $value=$values['nilai:'.$item['id']] ?? null;
+                $append((string)$label,$scales[(string)$value] ?? null,$sub ? ($scopes[(int)$sub['lingkup_id']] ?? '') : '',$subLabel);
             }
             // Satu narasi Laporan Perkembangan Agama (disimpan pada catatan lingkup wajib pertama).
-            foreach ($defs['scopes'] as $scope) if (!empty($scope['catatan_wajib'])) { $append('Laporan Perkembangan Agama',$values['catatan:'.$scope['id']] ?? null); break; }
+            foreach ($defs['scopes'] as $scope) if (!empty($scope['catatan_wajib'])) { $append('Laporan Perkembangan Agama',$values['catatan:'.$scope['id']] ?? null,'Laporan Perkembangan Agama'); break; }
         } elseif ($type==='BING') {
             foreach ($defs['items'] as $item) {
                 $label=($item['penanda_cetak'] ? $item['penanda_cetak'].' ' : '').$item['label_cetak'];
-                $value=$values['nilai:'.$item['id']] ?? null; $append((string)$label,$scales[(string)$value] ?? null);
+                $value=$values['nilai:'.$item['id']] ?? null;
+                $append((string)$label,$scales[(string)$value] ?? null,'Learning Achievement',trim((string)($item['grup'] ?? '')));
             }
-            foreach ($defs['comments'] as $comment) $append((string)$comment['label_cetak'],$values['komentar:'.$comment['id']] ?? null);
+            foreach ($defs['comments'] as $comment) $append((string)$comment['label_cetak'],$values['komentar:'.$comment['id']] ?? null,'Teacher Comments');
         } elseif ($type==='PPI') {
             foreach ($defs['aspects'] as $aspect) foreach ($defs['columns'] as $column) {
-                $append($aspect['nama'].' - '.$column['label_cetak'],$values[$aspect['id'].':'.$column['id']] ?? null);
+                $append((string)$column['label_cetak'],$values[$aspect['id'].':'.$column['id']] ?? null,(string)$aspect['nama']);
             }
         } elseif ($type==='UMMI') {
-            foreach ($defs['items'] as $item) { $value=$values['bacaan:'.$item['id']] ?? null; $append('Jilid '.$item['jilid_nama'].' · '.$item['teks'],$scales[(string)$value] ?? null); }
+            $withPra=!empty($values['mulai_pra_tk']);
+            foreach ($defs['items'] as $item) {
+                if (!empty($item['hanya_pra_tk']) && !$withPra) continue;
+                $value=$values['bacaan:'.$item['id']] ?? null;
+                $append((string)$item['teks'],$scales[(string)$value] ?? null,'Jilid '.$item['jilid_nama']);
+            }
             $tests=[];
             foreach ($values as $key=>$test) if (str_starts_with($key,'tes:') && is_array($test)) $tests[]=$test;
             usort($tests,static fn($a,$b)=>[(int)$a['urutan'],$a['tanggal_tes']]<=>[(int)$b['urutan'],$b['tanggal_tes']]);
-            foreach ($tests as $test) $append('Tes #'.$test['urutan'].' · '.$test['tanggal_tes'].' · Jilid '.$test['jilid'],$scales[(string)$test['nilai']] ?? $test['nilai']);
-            $append('Catatan Guru',$values['catatan'] ?? null);
+            foreach ($tests as $i=>$test) $append(($i+1).'. '.$test['tanggal_tes'].' · '.$test['jilid'],$scales[(string)$test['nilai']] ?? $test['nilai'],'Nilai Tes Kenaikan Jilid');
+            $append('Catatan Guru',$values['catatan'] ?? null,'Catatan Guru');
         }
         return $rows;
     }

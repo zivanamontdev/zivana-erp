@@ -621,14 +621,35 @@ body.modal-open {
 
 /* Scoped eRapor approval inbox and read-only review use the shared table/cards. */
 .erapor-approval-intro { margin: 0 0 var(--space-4); color: var(--color-neutral-600); }
+.erapor-approval-filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.erapor-approval-filters .ui-button { margin-block: 0; background: var(--color-neutral-white); text-decoration: none; }
 .erapor-approval-notice { margin: 0 0 var(--space-4); }
 .erapor-approval-table { margin-top: var(--space-4); }
 .erapor-approval-review-link { white-space: nowrap; text-decoration: none; }
 .erapor-approval-summary { margin: var(--space-4) 0; gap: var(--space-4); }
 .erapor-approval-state { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin: 0 0 var(--space-4); }
 .erapor-approval-document { margin: 0 0 var(--space-4); padding: var(--space-4); }
-.erapor-approval-document-title { margin: 0 0 var(--space-3); }
+.erapor-approval-document-title { margin: 0; }
+/* Tinjauan: rapor dan bagiannya (Area/Lingkup/Jilid) dapat dilipat; judul bagian oranye seperti halaman pengisian. */
+.erapor-approval-disclosure > summary { gap: var(--space-3); }
+.erapor-approval-disclosure > summary > :first-child { flex: 1; min-width: 0; }
+.erapor-approval-disclosure[open] > summary { margin-bottom: var(--space-3); }
+.erapor-approval-groups { display: grid; gap: var(--space-3); }
+.erapor-approval-group > summary { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--color-orange-300); color: var(--color-neutral-800); font-size: var(--font-size-body-sm); font-weight: var(--font-weight-bold); }
+.erapor-approval-group > summary > span:first-child { flex: 1; }
+.erapor-approval-group[open] > summary { margin-bottom: var(--space-3); }
+.erapor-approval-count { flex: 0 0 auto; border-radius: 999px; background: var(--color-neutral-white); padding: .125rem .625rem; color: var(--color-neutral-800); font-size: var(--font-size-caption-md); font-weight: var(--font-weight-bold); }
+.erapor-approval-disclosure > summary > .erapor-approval-count { background: var(--color-neutral-75); }
+.erapor-approval-subrow th { padding: var(--space-4); background: var(--color-orange-50); color: var(--color-neutral-800); font-size: var(--font-size-body-sm); text-align: left; }
+.erapor-approval-document, .erapor-approval-disclosure, .erapor-approval-group { min-width: 0; }
+.erapor-approval-groups { grid-template-columns: minmax(0, 1fr); }
+.erapor-approval-empty { color: var(--color-neutral-400); }
 .erapor-approval-values { min-width: calc(38 * var(--ui-unit)); }
+@media (max-width: 40rem) {
+  .data-table.erapor-approval-values { min-width: 0; width: 100%; table-layout: fixed; }
+  .erapor-approval-values th, .erapor-approval-values td { white-space: normal; overflow-wrap: anywhere; padding-inline: var(--space-3); }
+  .erapor-approval-values thead th:first-child { width: 58%; }
+}
 .erapor-approval-values tbody td:last-child { overflow-wrap: anywhere; }
 @media (max-width: 37.5rem) {
   .erapor-approval-summary { grid-template-columns: minmax(0, 1fr); }
@@ -1270,3 +1291,18 @@ body.modal-open {
 @keyframes ui-toast-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 @media (prefers-reduced-motion: reduce) { .ui-toast, .ui-toast-timer { animation: none; } .ui-toast.is-leaving { transition: none; } }
 @media (max-width: 40rem) { .ui-toast-region { top: var(--space-3); right: var(--space-4); left: var(--space-4); width: auto; } }
+
+/* Tooltip ikon: gelembung gelap di bawah ikon, muncul saat hover/focus. */
+.ui-tooltip { position: relative; display: inline-flex; align-items: center; vertical-align: middle; margin-left: var(--space-1); color: var(--color-neutral-600); cursor: help; }
+.ui-tooltip > svg { width: var(--icon-sm, 1rem); height: var(--icon-sm, 1rem); }
+.ui-tooltip:focus-visible { outline: 2px solid var(--color-neutral-800); outline-offset: 2px; border-radius: 50%; }
+.ui-tooltip-bubble { position: absolute; top: calc(100% + 6px); left: 50%; z-index: 20; width: max-content; max-width: min(16rem, 70vw); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-neutral-900); color: var(--color-neutral-white); font-size: var(--font-size-caption-lg); font-weight: var(--font-weight-regular, 400); line-height: 1.4; white-space: normal; transform: translateX(-50%); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease; }
+.ui-tooltip:hover .ui-tooltip-bubble, .ui-tooltip:focus .ui-tooltip-bubble, .ui-tooltip:focus-within .ui-tooltip-bubble { opacity: 1; visibility: visible; }
+
+/* Progress bar: jalur 8px membulat, isian merah membulat, thumb logo 24x24px (lingkar 30px) di ujung isian.
+   Isian minimal selebar thumb sehingga thumb tetap tampil di kiri saat 0% dan tidak keluar jalur saat 100%. */
+.ui-progress { position: relative; display: block; flex: 1; height: 8px; border-radius: 999px; background: var(--color-neutral-75); }
+.ui-progress-fill { position: relative; display: block; height: 100%; min-width: 30px; max-width: 100%; border-radius: 999px; background: var(--color-red-600); transition: width .3s ease; }
+.ui-progress-thumb { position: absolute; top: 50%; right: 0; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--color-red-400); border-radius: 50%; background: var(--color-neutral-white); box-shadow: 0 1px 3px rgba(4, 4, 4, 0.18); transform: translateY(-50%); transition: right .3s ease; }
+.ui-progress-thumb img { display: block; width: 24px; height: 24px; object-fit: contain; }
+@media (prefers-reduced-motion: reduce) { .ui-progress-fill { transition: none; } }

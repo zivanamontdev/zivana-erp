@@ -34,9 +34,9 @@ $check(substr_count($bingHtml,'Speaking Test Result')===1,'BING group heading ap
 $check(str_contains($bingHtml,'&lt;Nama Murid&gt;') && !str_contains($bingHtml,'<Nama Murid>'),'PDF identity text is escaped');
 
 $agama=new ReflectionMethod(EraporPackagePdfRenderer::class,'agama');
-$agamaHtml=$agama->invoke(null,$package,[
+$agamaDoc=[
     'jenis_dokumen'=>'AGAMA','nama'=>'Agama','judul_cetak'=>'Rapor Agama','signers'=>$signers,
-    'signature_current'=>$emptySignature,'period_values'=>[],
+    'signature_current'=>$emptySignature,'period_values'=>['TENGAH_GANJIL'=>['nilai:1'=>'TALQIN'],'TENGAH_GENAP'=>['nilai:2'=>'TADIB']],
     'form'=>['definitions'=>['scopes'=>[['id'=>1,'nomor_romawi'=>'I','nama'=>'AQIDAH']],
         'subscopes'=>[['id'=>1,'huruf'=>null,'nama'=>null,'implisit'=>1]],'stages'=>[]]],
     'all_items'=>[
@@ -44,12 +44,31 @@ $agamaHtml=$agama->invoke(null,$package,[
         ['id'=>2,'semester'=>'GENAP','lingkup_id'=>1,'sub_id'=>1,'nomor'=>1,'teks'=>'Capaian genap'],
     ],
     'item_names'=>[],'narrative'=>'Narasi murid',
-]);
+];
+$agamaHtml=$agama->invoke(null,$package,$agamaDoc);
 $ganjil=strpos($agamaHtml,'CAPAIAN SEMESTER GANJIL');
 $genap=strpos($agamaHtml,'CAPAIAN SEMESTER GENAP');
 $check($ganjil!==false && $genap!==false && $ganjil<$genap,'Agama prints semester sections in Ganjil then Genap order');
 $check(substr_count($agamaHtml,'CAPAIAN SEMESTER GANJIL')===1 && substr_count($agamaHtml,'CAPAIAN SEMESTER GENAP')===1,
     'Agama prints one section heading per semester');
+$check(!str_contains($agamaHtml,'AKHIR SEMESTER') && str_contains($agamaHtml,'agama-wide'),'Agama hides Akhir Semester columns and widens the table before RAS exists');
+$ganjilOnly=$agamaDoc; $ganjilOnly['period_values']=['TENGAH_GANJIL'=>['nilai:1'=>'TALQIN']];
+$ganjilOnlyHtml=$agama->invoke(null,$package,$ganjilOnly);
+$check(str_contains($ganjilOnlyHtml,'CAPAIAN SEMESTER GANJIL') && !str_contains($ganjilOnlyHtml,'CAPAIAN SEMESTER GENAP'),'Agama hides Capaian Semester Genap until genap is filled');
+$withRas=$agamaDoc; $withRas['period_values']['AKHIR_GANJIL']=['nilai:1'=>'TADIB'];
+$withRasHtml=$agama->invoke(null,$package,$withRas);
+$check(str_contains($withRasHtml,'AKHIR SEMESTER') && !str_contains($withRasHtml,'agama-wide'),'Agama prints Akhir Semester columns once RAS is filled');
+$check(str_contains($agamaHtml,'<p class="signature-title">Pengesahan Rapor Agama Islam</p>') && !str_contains($agamaHtml,'signature-identity'),'Signature block uses a centered title without the report header when it stays on the page');
+
+$rts=new ReflectionMethod(EraporPackagePdfRenderer::class,'rts');
+$rtsDoc=['jenis_dokumen'=>'RTS','nama'=>'RTS','judul_cetak'=>'RTS','signers'=>$signers,'period_values'=>[],
+    'form'=>['definitions'=>['scale'=>[],'areas'=>[],'subareas'=>[],'groups'=>[],'items'=>[]]],
+    'signature_periods'=>['GANJIL'=>$emptySignature]];
+$rtsHtml=$rts->invoke(null,$package,$rtsDoc);
+$check(substr_count($rtsHtml,'signature-block')===1 && str_contains($rtsHtml,'Pengesahan Tengah Semester Ganjil<'),'RTS prints only the Ganjil signature block before TS Genap exists');
+$rtsDoc['signature_periods']['GENAP']=$emptySignature;
+$rtsHtml=$rts->invoke(null,$package,$rtsDoc);
+$check(substr_count($rtsHtml,'signature-block')===1 && str_contains($rtsHtml,'Pengesahan Tengah Semester Ganjil dan Genap'),'RTS merges Ganjil and Genap into one signature block');
 
 $ummi=new ReflectionMethod(EraporPackagePdfRenderer::class,'ummi');
 $ummiBase=[

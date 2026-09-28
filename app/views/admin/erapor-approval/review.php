@@ -4,8 +4,9 @@ $approval = $review['approval'];
 $sessionId = (int) $review['session']['id'];
 $approvalId = (int) $approval['id'];
 $modalId = 'modal-setujui-erapor-' . $sessionId . '-' . $approvalId;
-$headerActions = '<a class="ui-button ui-button--outline" href="' . BASE_PATH . '/erapor/persetujuan">Kembali ke Antrean</a>';
-if (!empty($canPdf)) $headerActions .= ' <a class="ui-button ui-button--outline" href="' . BASE_PATH . '/erapor/sesi/' . (int) $sessionId . '/pdf" target="_blank" rel="noopener">Pratinjau PDF</a>';
+// Kembali ke antrean lewat breadcrumb.
+$headerActions = '';
+if (!empty($canPdf)) $headerActions .= '<a class="ui-button ui-button--outline" href="' . BASE_PATH . '/erapor/sesi/' . (int) $sessionId . '/pdf" target="_blank" rel="noopener">Pratinjau PDF</a>';
 if ($canApprove) {
     $headerActions .= ' ' . uiButton('Setujui', 'primary', ['marginVertical' => 0, 'attributes' => ['data-modal-open' => $modalId]]);
 }
@@ -41,22 +42,51 @@ require VIEW_PATH . '/layouts/shell-header.php';
     <?php endif; ?>
 </div>
 
+<?php
+// Satu tabel nilai; baris 'sub' menjadi subjudul (mis. "a. Perawatan Diri").
+$renderValues = static function (array $rows): string {
+    $html = '<div class="data-table-wrapper"><table class="data-table erapor-approval-values"><thead><tr><th>Aspek Penilaian</th><th>Isian Guru</th></tr></thead><tbody>';
+    $openSub = null;
+    foreach ($rows as $row) {
+        $sub = (string) ($row['sub'] ?? '');
+        if ($sub !== '' && $sub !== $openSub) $html .= '<tr class="erapor-approval-subrow"><th colspan="2">' . e($sub) . '</th></tr>';
+        $openSub = $sub;
+        $empty = $row['value'] === 'Belum dinilai';
+        $html .= '<tr><td>' . e($row['label']) . '</td><td' . ($empty ? ' class="erapor-approval-empty"' : '') . '>' . e($row['value']) . '</td></tr>';
+    }
+    if (!$rows) $html .= '<tr><td colspan="2" class="data-table-empty">Tidak ada butir penilaian pada dokumen ini.</td></tr>';
+    return $html . '</tbody></table></div>';
+};
+$filledCount = static fn(array $rows): string => count(array_filter($rows, static fn($row) => $row['value'] !== 'Belum dinilai')) . '/' . count($rows);
+$chevron = '<span class="ui-disclosure-chevron" aria-hidden="true">' . icon('icon_chevron') . '</span>';
+?>
+<?php // Tiap rapor dapat dilipat; di dalamnya bagian (Area/Lingkup/Jilid) juga dapat dilipat, seperti halaman pengisian. ?>
 <?php foreach ($review['documents'] as $document): ?>
-    <?php ob_start(); ?>
-    <h2 class="erapor-approval-document-title"><?= uiText($document['nama'], 'body-md', ['tag' => 'span', 'weight' => 'bold']) ?></h2>
-    <div class="data-table-wrapper">
-        <table class="data-table erapor-approval-values">
-            <thead><tr><th>Aspek Penilaian</th><th>Isian Guru</th></tr></thead>
-            <tbody>
-                <?php foreach ($document['display_rows'] as $row): ?>
-                <tr><td><?= e($row['label']) ?></td><td><?= e($row['value']) ?></td></tr>
-                <?php endforeach; ?>
-                <?php if (empty($document['display_rows'])): ?>
-                <tr><td colspan="2" class="data-table-empty">Tidak ada butir penilaian pada dokumen ini.</td></tr>
+    <?php
+    $groups = [];
+    foreach ($document['display_rows'] as $row) $groups[(string) ($row['group'] ?? '')][] = $row;
+    ob_start();
+    ?>
+    <details class="ui-disclosure erapor-approval-disclosure">
+        <summary class="ui-disclosure-trigger erapor-approval-document-title">
+            <?= uiText($document['nama'], 'body-md', ['tag' => 'span', 'weight' => 'bold']) ?>
+            <span class="erapor-approval-count"><?= e($filledCount($document['display_rows'])) ?></span>
+            <?= $chevron ?>
+        </summary>
+        <div class="erapor-approval-groups">
+            <?php foreach ($groups as $groupName => $rows): ?>
+                <?php if ($groupName === ''): ?>
+                    <?= $renderValues($rows) ?>
+                <?php else: ?>
+                    <details class="ui-disclosure erapor-approval-group">
+                        <summary class="ui-disclosure-trigger"><span><?= e($groupName) ?></span><span class="erapor-approval-count"><?= e($filledCount($rows)) ?></span><?= $chevron ?></summary>
+                        <?= $renderValues($rows) ?>
+                    </details>
                 <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
+            <?php endforeach; ?>
+            <?php if (!$groups): ?><?= $renderValues([]) ?><?php endif; ?>
+        </div>
+    </details>
     <?php echo uiCard(ob_get_clean(), 'outlined', ['tag' => 'section', 'class' => 'erapor-approval-document']); ?>
 <?php endforeach; ?>
 

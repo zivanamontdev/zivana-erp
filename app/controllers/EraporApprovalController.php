@@ -11,12 +11,14 @@ final class EraporApprovalController extends Controller
 
         $actorId = (int) $_SESSION['user_id'];
         $monitor = EraporApprovalAccess::monitor($actorId);
-        $inbox = EraporApprovalInbox::read(Database::getInstance(), $actorId, $monitor);
+        $done = (string) $this->input('status', '') === 'selesai';
+        $inbox = EraporApprovalInbox::read(Database::getInstance(), $actorId, $monitor, $done);
         $this->view('admin.erapor-approval.index', [
             'pageTitle' => 'Antrean Persetujuan',
             'breadcrumb' => breadcrumb(['Persetujuan eRapor', '/erapor/persetujuan'], 'Antrean'),
             'activeNavItem' => 'erapor-approval',
             'tasks' => $inbox['tasks'],
+            'done' => $done,
             'monitor' => $monitor,
             'notice' => $this->takeNotice(),
         ]);
@@ -50,7 +52,8 @@ final class EraporApprovalController extends Controller
             'review' => $review,
             'canApprove' => $canApprove,
             // PDF memuat seluruh paket: hanya penyetuju bercakupan SEMUA (Kepala Sekolah) atau Superadmin.
-            'canPdf' => EraporPdfAccess::canView(Database::getInstance(), (int) $sessionId, (int) $_SESSION['user_id']),
+            'canPdf' => EraporPdfAccess::canView(Database::getInstance(), (int) $sessionId, (int) $_SESSION['user_id'])
+                || EraporPdfAccess::scopedDocumentIds(Database::getInstance(), (int) $sessionId, (int) $_SESSION['user_id']) !== [],
             'notice' => $this->takeNotice(),
         ]);
     }

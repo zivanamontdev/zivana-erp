@@ -424,6 +424,30 @@ function uiInlineMeta(string $primary, ?string $secondary = null, array $options
 }
 
 /**
+ * Tooltip ikon (i): teks muncul saat disorot/difokus (tap di layar sentuh). Aman dipakai di dalam <summary>:
+ * klik ikon tidak ikut melipat/membuka disclosure (lihat ui-tooltip di components.css & erapor-session.js).
+ */
+function uiTooltip(string $text): string
+{
+    return '<span class="ui-tooltip" tabindex="0" role="button" aria-label="' . e($text) . '" data-ui-tooltip>'
+        . icon('icon_tooltip') . '<span class="ui-tooltip-bubble" role="tooltip">' . e($text) . '</span></span>';
+}
+
+/**
+ * Progress bar tema aplikasi: jalur membulat, isian merah, dan thumb logo di ujung isian.
+ * JS cukup mengubah style.width elemen isian (atribut 'fillAttributes', mis. data-erapor-overall-bar).
+ */
+function uiProgress(int|float $value, int|float $max, array $options = []): string
+{
+    $percent = $max > 0 ? max(0, min(100, round($value / $max * 100))) : 0;
+    $label = (string) ($options['label'] ?? 'Progress');
+    return '<span class="ui-progress" role="progressbar" aria-label="' . e($label) . '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' . $percent . '">'
+        . '<span class="ui-progress-fill" style="width:' . $percent . '%"' . uiAttrs($options['fillAttributes'] ?? []) . '>'
+        . '<span class="ui-progress-thumb" aria-hidden="true"><img src="' . BASE_PATH . '/assets/images/logo-icon.png" alt=""></span>'
+        . '</span></span>';
+}
+
+/**
  * Toast notifikasi. Variants: success, error, info. Dipakai untuk hasil aksi/event (simpan, hapus, gagal).
  * Server: flashToast() menyimpan pesan di sesi (bertahan satu redirect); uiToastRegion() merender antrean di layout.
  * Browser: window.uiToast(pesan, variant) dari ui-toast.js.

@@ -123,16 +123,21 @@ eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="UMMI" and @data-erap
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="UMMI" and @data-erapor-key="bacaan:14"]')->length === 1, 'Ummi reading grade uses shared select component');
 eraporUiCheck($xpath->query('//input[@data-erapor-pra-toggle and @type="checkbox"]')->length === 1 && $xpath->query('//details[@data-ummi-pra-tk="true" and @hidden]')->length === 1, 'Ummi PRA TK toggle hides its volume without removing its fields');
 eraporUiCheck($xpath->query('//div[@data-erapor-entry="UMMI_TEST" and @data-erapor-key="tes:0123456789abcdef0123456789abcdef"]')->length === 1, 'Ummi dynamic test row renders server-saved values');
-eraporUiCheck($xpath->query('//input[@data-ummi-test-field="jilid" and @value="I"]')->length === 1
+eraporUiCheck($xpath->query('//select[@data-ummi-test-field="jilid"]/option[@value="I" and @selected]')->length === 1
+    && $xpath->query('//select[@data-ummi-test-field="jilid"]/option[@value="Jilid PRA TK"]')->length >= 1
     && $xpath->query('//select[@data-ummi-test-field="nilai"]/option[@value="A" and @selected]')->length === 1,
-    'Ummi test fields preserve saved jilid and grade values');
+    'Ummi test jilid is a dropdown of volume titles and preserves saved jilid and grade values');
+eraporUiCheck($xpath->query('//input[@type="hidden" and @data-ummi-test-field="urutan" and @value="1"]')->length === 1
+    && $xpath->query('//*[@data-ummi-test-no and normalize-space()="1"]')->length === 1
+    && $xpath->query('//button[@data-erapor-remove-test and contains(@class,"ui-button--icon-only")]')->length >= 1,
+    'Ummi test number is automatic text and delete is an icon button');
 eraporUiCheck($xpath->query('//button[@data-erapor-add-test="103"]')->length === 1 && $xpath->query('//template[@data-ummi-test-template]')->length === 1, 'Ummi supports dynamic test creation through shared controls');
 eraporUiCheck($xpath->query('//input[@data-erapor-entry="UMMI" and @data-erapor-key="mulai_pra_tk"]')->length === 1 && str_contains($source, 'data-erapor-ummi-init'), 'Ummi editor includes explicit, user-triggered initialization behavior');
 eraporUiCheck(!str_contains($html, 'Hafalan'), 'Ummi editor does not add the excluded memorization section');
 // Tombol tetap aktif: klik saat belum lengkap menandai kartu wajib yang kosong; server tetap memutuskan.
 eraporUiCheck($xpath->query('//button[@data-erapor-confirm and not(@disabled)]')->length === 2, 'Submit (header + last page) stays clickable to reveal missing answers');
-eraporUiCheck($xpath->query('//details[@data-ummi-volume and @open]')->length === 0, 'Ummi volumes start collapsed');
-eraporUiCheck($xpath->query('//section[@data-erapor-type="RTS"]//details[contains(@class,"erapor-section") and @open]//details[contains(@class,"erapor-section") and @open]//*[@data-erapor-entry="RTS"]')->length === 1, 'RTS area and subarea are collapsible, open by default');
+eraporUiCheck($xpath->query('//details[contains(@class,"erapor-section") and @open]')->length === 0 && $xpath->query('//details[@data-ummi-volume]//*[@data-erapor-question]')->length > 0, 'Assessment sections start collapsed; Ummi has one card per material');
+eraporUiCheck($xpath->query('//section[@data-erapor-type="RTS"]//details[contains(@class,"erapor-section")]//details[contains(@class,"erapor-section")]//*[@data-erapor-entry="RTS"]')->length === 1, 'RTS area and subarea are collapsible, collapsed by default');
 
 $form['documents'][2]['form']['definitions']['initialization_required'] = true;
 $form['documents'][2]['form']['values'] = ['mulai_pra_tk'=>null,'catatan'=>null];

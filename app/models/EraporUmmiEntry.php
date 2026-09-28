@@ -95,6 +95,16 @@ final class EraporUmmiEntry
                     } else self::insert($db,$table,$keys+$values+['diisi_oleh'=>$actorId]);
                 }
                 self::audit($db,$sessionId,$documentId,$key,$oldValue,$value,$actorId,$session['status']); $updated++;
+                // Batal mulai dari PRA TK: nilai Jilid PRA TK dihapus agar harus diisi ulang bila dicentang lagi.
+                if ($kind==='mulai_pra_tk' && $value===false) {
+                    $q=$db->prepare('SELECT b.materi_id,b.nilai FROM erapor_ummi_bacaan b JOIN erapor_ummi_materi m ON m.id=b.materi_id
+                        JOIN erapor_ummi_jilid j ON j.id=m.jilid_id WHERE b.sesi_id=? AND b.dokumen_id=? AND j.hanya_pra_tk=1 FOR UPDATE');
+                    $q->execute([$sessionId,$documentId]);
+                    foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                        $db->prepare('DELETE FROM erapor_ummi_bacaan WHERE sesi_id=? AND dokumen_id=? AND materi_id=?')->execute([$sessionId,$documentId,(int)$row['materi_id']]);
+                        self::audit($db,$sessionId,$documentId,'bacaan:'.$row['materi_id'],$row['nilai'],null,$actorId,$session['status']);
+                    }
+                }
             }
             $note=self::one($db,'SELECT isi FROM erapor_ummi_catatan WHERE sesi_id=? AND dokumen_id=?',[$sessionId,$documentId]);
             $complete=$note && !EraporSessionPolicy::isBlank($note['isi']);

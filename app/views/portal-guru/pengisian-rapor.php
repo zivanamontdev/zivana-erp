@@ -52,9 +52,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
 
         <div class="pengisian-rapor-progress">
             <span class="pengisian-rapor-progress-label">Progress:</span>
-            <div class="pengisian-rapor-progress-bar">
-                <div class="pengisian-rapor-progress-bar-fill" data-report-progress style="width:<?= $totalItem > 0 ? round($terisiItem / $totalItem * 100) : 0 ?>%"></div>
-            </div>
+            <?= uiProgress($terisiItem, $totalItem, ['label'=>'Progress isian rapor', 'fillAttributes'=>['data-report-progress'=>true]]) ?>
             <span class="pengisian-rapor-progress-label" data-report-count><?= $terisiItem ?> dari <?= $totalItem ?></span>
         </div>
 

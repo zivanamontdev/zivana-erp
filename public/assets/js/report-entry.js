@@ -17,7 +17,10 @@
       var count = form.querySelector('[data-report-count]');
       var bar = form.querySelector('[data-report-progress]');
       if (count) count.textContent = filled + ' dari ' + fields.length;
-      if (bar) bar.style.width = (fields.length ? filled / fields.length * 100 : 0) + '%';
+      if (bar) {
+        bar.style.width = (fields.length ? filled / fields.length * 100 : 0) + '%';
+        if (bar.parentElement) bar.parentElement.setAttribute('aria-valuenow', Math.round(parseFloat(bar.style.width)));
+      }
       form.querySelectorAll('[data-report-submit]').forEach(function (button) {
         button.disabled = !fields.length || filled !== fields.length;
         button.classList.toggle('ui-button--disabled', button.disabled);

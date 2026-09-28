@@ -3,7 +3,7 @@
 /**
  * Siapa yang boleh membuka PDF paket eRapor satu sesi. PDF memuat seluruh dokumen, jadi hanya pihak yang
  * berwenang atas seluruh paket: guru pemilik sesi, penyetuju tahap cakupan SEMUA (Kepala Sekolah), dan Superadmin.
- * Koordinator bercakupan TERBATAS tetap meninjau lewat halaman persetujuan saja.
+ * Koordinator bercakupan TERBATAS hanya melihat pratinjau dokumen dalam cakupannya (lihat scopedDocumentIds).
  */
 final class EraporPdfAccess
 {
@@ -31,6 +31,23 @@ final class EraporPdfAccess
             WHERE s.id=? LIMIT 1");
         $q->execute([$userId, $sessionId]);
         return (bool) $q->fetchColumn();
+    }
+
+    /**
+     * Dokumen yang boleh dipratinjau koordinator bercakupan TERBATAS (mis. Koordinator Agama: Agama + Ummi).
+     * Array kosong bila pengguna bukan penyetuju terbatas aktif pada sesi ini.
+     * @return array<int,int>
+     */
+    public static function scopedDocumentIds(PDO $db, int $sessionId, int $userId): array
+    {
+        if (min($sessionId, $userId) < 1) return [];
+        $q = $db->prepare("SELECT DISTINCT d.dokumen_id FROM erapor_sesi_penyetuju sp
+            JOIN erapor_sesi_penyetuju_dokumen d ON d.sesi_penyetuju_id=sp.id AND d.sesi_id=sp.sesi_id
+            JOIN erapor_penyetuju_user a ON a.penyetuju_id=sp.penyetuju_id AND a.user_id=? AND a.aktif=1
+            JOIN users u ON u.id=a.user_id AND u.is_active=1
+            WHERE sp.sesi_id=? AND sp.cakupan='TERBATAS'");
+        $q->execute([$userId, $sessionId]);
+        return array_map('intval', $q->fetchAll(PDO::FETCH_COLUMN));
     }
 
     /** Artefak resmi (setelah seluruh persetujuan) bila ada, sudah diverifikasi hash-nya. */

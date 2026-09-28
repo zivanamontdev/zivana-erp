@@ -200,22 +200,19 @@ button.teacher-report-action:focus-visible,
   font-size:var(--font-size-caption-md);
 }
 .erapor-ummi-reading-count { margin:0; color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
-.erapor-ummi-volumes { display:grid; gap:var(--space-3); }
-.erapor-ummi-volume { border:1px solid var(--color-neutral-75); border-radius:var(--radius-md); background:var(--color-neutral-white); overflow:hidden; }
-.erapor-ummi-volume > summary { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); cursor:pointer; list-style:none; }
-.erapor-ummi-volume > summary::-webkit-details-marker { display:none; }
-.erapor-ummi-volume-items { display:grid; gap:var(--space-3); padding:var(--space-4); }
-.erapor-ummi-volume-items > .ui-select { width:100%; }
 .erapor-ummi-tests-heading { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); }
 .erapor-ummi-tests-heading h3, .erapor-ummi-teacher-note h3 { margin:0; color:var(--color-neutral-800); font-size:var(--font-size-body-sm); font-weight:var(--font-weight-bold); }
 .erapor-ummi-tests-heading > div { display:grid; gap:var(--space-1); }
 .erapor-ummi-tests-heading > .ui-button { flex-shrink:0; white-space:nowrap; }
 .erapor-ummi-test-list { display:grid; gap:var(--space-3); }
-.erapor-ummi-test-row { display:grid; grid-template-columns:minmax(5rem,.55fr) minmax(10rem,1fr) minmax(9rem,1fr) minmax(8rem,.75fr) auto; align-items:end; gap:var(--space-3); border:1px solid var(--color-neutral-75); border-radius:var(--radius-md); background:var(--color-neutral-white); padding:var(--space-3); }
+.erapor-ummi-test-row { display:grid; grid-template-columns:2.5rem minmax(10rem,1fr) minmax(9rem,1fr) minmax(8rem,.75fr) auto; align-items:end; gap:var(--space-3); border:1px solid transparent; border-radius:1rem; background:var(--color-neutral-white); padding:.75rem 1.5rem; }
 .erapor-ummi-test-row .ui-field, .erapor-ummi-test-row .ui-select { width:100%; min-width:0; }
 /* Semua isian baris tes setinggi dropdown; tombol Hapus sejajar isian di baris pertama. */
 .erapor-ummi-test-row .field-input, .erapor-ummi-test-row .ui-select-trigger { box-sizing:border-box; height:3.125rem; min-height:3.125rem; }
 @media (min-width: 56.01rem) { .erapor-ummi-test-row > .ui-button { grid-row:1; grid-column:-2; align-self:end; height:3.125rem; } }
+.erapor-ummi-test-no { display:grid; gap:var(--space-1); align-content:end; }
+.erapor-ummi-test-no strong { display:flex; align-items:center; height:3.125rem; color:var(--color-neutral-900); font-weight:var(--font-weight-bold); }
+.erapor-ummi-test-status:empty { display:none; }
 .erapor-ummi-test-status { grid-column:1 / -2; color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
 .erapor-ummi-test-row[data-erapor-incomplete="true"] { border-color:var(--color-orange-300); }
 .erapor-ummi-test-row[data-erapor-delete-test="true"] { opacity:.65; }
@@ -305,20 +302,6 @@ button.teacher-report-action:focus-visible,
   white-space: nowrap;
 }
 
-.pengisian-rapor-progress-bar {
-  flex: 1;
-  height: calc(0.25 * var(--ui-unit));
-  background: var(--color-neutral-75);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.pengisian-rapor-progress-bar-fill {
-  display: block; /* editor eRapor memakai <span>; tanpa ini width/height diabaikan */
-  height: 100%;
-  background: var(--color-blue-600);
-}
-
 .pengisian-disclosure-content {
   display: flex;
   flex-direction: column;
@@ -383,12 +366,20 @@ button.teacher-report-action:focus-visible,
 .dashboard-banner, .dashboard-murid-row, .dashboard-murid-row-actions { flex-wrap: wrap; }
 .pengisian-header-actions { flex-wrap: wrap; margin-left: auto; }
 .pengisian-rapor-progress { flex-wrap: wrap; }
-.pengisian-rapor-progress-bar { min-width: 4rem; }
+.pengisian-rapor-progress .ui-progress { min-width: 4rem; }
 @media (max-width: 56rem) {
   .pengisian-item-row { flex-direction: column; align-items: stretch; }
   .pengisian-item-row .field-input { max-width: none; }
   .erapor-document .pengisian-item-row > .ui-select { flex-basis: auto; max-width: none; }
-  .erapor-ummi-test-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  /* Mobile: baris atas "No. n" + tombol hapus, lalu tanggal, lalu jilid + nilai. */
+  .erapor-ummi-test-row { grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; grid-template-areas:"no no del" "date date date" "vol grade grade"; }
+  .erapor-ummi-test-row > .erapor-ummi-test-no { grid-area:no; display:flex; align-items:center; gap:var(--space-2); }
+  .erapor-ummi-test-row > .erapor-ummi-test-no strong { height:auto; }
+  .erapor-ummi-test-row > .erapor-ummi-test-no .field-label { margin:0; }
+  .erapor-ummi-test-row > :nth-child(2) { grid-area:date; }
+  .erapor-ummi-test-row > :nth-child(3) { grid-area:vol; }
+  .erapor-ummi-test-row > :nth-child(4) { grid-area:grade; }
+  .erapor-ummi-test-row > .ui-button { grid-area:del; align-self:center; }
   .erapor-ummi-test-status { grid-column:1 / -1; }
 }
 
@@ -545,6 +536,17 @@ button.teacher-report-action:focus-visible,
 
 /* Judul area/subarea bisa dilipat; tampilan header tetap sama, hanya ditambah chevron. */
 .erapor-section { display:grid; gap:var(--space-3); margin-block:0; }
+.erapor-section[hidden] { display:none; }
+/* Nilai Tes Kenaikan Jilid: selevel jilid, oranye lebih gelap. */
+.erapor-ummi-tests > summary.pengisian-subkategori-header { background:var(--color-orange-500); }
+.erapor-ummi-tests-title { display:inline-flex; align-items:center; gap:var(--space-1); overflow:visible !important; }
+.erapor-ummi-tests-title .ui-tooltip { color:var(--color-neutral-800); }
+/* Tambah Tes: seluruh kartu adalah tombol bergaris putus-putus. */
+.erapor-ummi-test-add { display:flex; align-items:center; justify-content:center; gap:var(--space-2); width:100%; margin:0; padding:12px; border:1px dashed var(--color-neutral-300); border-radius:1rem; background:var(--color-neutral-white); color:var(--color-neutral-800); font:inherit; font-size:var(--font-size-body-sm); cursor:pointer; transition:border-color .15s ease, color .15s ease; }
+.erapor-ummi-test-add svg { width:1rem; height:1rem; }
+.erapor-ummi-test-add:hover { border-color:var(--color-red-400); color:var(--color-red-600); }
+.erapor-ummi-test-add:focus-visible { outline:2px solid var(--color-red-400); outline-offset:2px; }
+.erapor-ummi-test-empty { margin:0; color:var(--color-neutral-600); font-size:var(--font-size-body-sm); }
 .erapor-section > summary.erapor-page-heading { margin:var(--space-2) 0 0; }
 .erapor-section-body { display:grid; gap:var(--space-3); }
 .erapor-section-body > .erapor-subheading { margin:var(--space-1) 0 0 var(--space-2); }
@@ -597,7 +599,8 @@ button.teacher-report-action:focus-visible,
 .erapor-section > summary > span:first-child { flex:1 1 auto; }
 
 /* ---------- eRapor: posisi rapor dalam alur persetujuan (guru pengisi) ---------- */
-.erapor-approval-track { display:flex; flex-wrap:wrap; gap:var(--space-2) var(--space-4); margin:var(--space-2) 0 var(--space-3); padding:0; list-style:none; }
+.erapor-approval-track { display:grid; gap:var(--space-3); margin:0; padding:0; list-style:none; }
+.pengisian-approval-status { margin:var(--space-2) 0 0; }
 .erapor-approval-step { display:flex; align-items:center; gap:var(--space-2); min-width:0; }
 .erapor-approval-step > span:last-child { display:grid; line-height:1.3; }
 .erapor-approval-step strong { font-size:var(--font-size-body-sm); color:var(--color-neutral-800); }
@@ -644,3 +647,19 @@ button.teacher-report-action:focus-visible,
 @media (max-width: 80rem) {
   .profile-fields { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---------- eRapor: tab bagian & filter berlatar putih, tombol kembali, kartu nilai Ummi ---------- */
+.erapor-step[aria-current="step"] { background: var(--color-neutral-white); }
+.erapor-filter .ui-button { background: var(--color-neutral-white); }
+.pengisian-back { display: inline-flex; margin: 0 0 var(--space-3); background: var(--color-neutral-white); }
+.pengisian-back--outside { justify-self: start; margin: 0; }
+.pengisian-back--inside { display: none; }
+.pengisian-back .ui-button-icon svg { transform: rotate(90deg); }
+/* Materi Ummi: teks di kiri, pilihan nilai (maks. 2 karakter) sempit di kanan, juga di mobile. */
+.erapor-question--grade { grid-template-columns: minmax(0, 1fr) 5.5rem; }
+.erapor-question--grade > .ui-select { width: 5.5rem; min-width: 0; max-width: 5.5rem; }
+@media (max-width: 40rem) {
+  .pengisian-back--outside { display: none; }
+  .pengisian-back--inside { display: inline-flex; margin-bottom: var(--space-4); }
+}
+.pengisian-rapor-progress { min-height: calc(30px + var(--space-2)); } /* ruang untuk thumb progress 30px */

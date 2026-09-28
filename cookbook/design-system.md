@@ -1060,6 +1060,8 @@ tidak mengulang markup dan class yang sama di setiap halaman.
 | Card | `uiCard(content, variant, options)` | surface, brand, preview, outlined, callout |
 | Inline metadata | `uiInlineMeta(primary, secondary, options)` | teks dengan separator dot |
 | Toast | `flashToast(pesan, variant)` (server, bertahan satu redirect) / `window.uiToast(pesan, variant)` (browser) | success, error, info |
+| Progress bar | `uiProgress(nilai, maks, [label, fillAttributes])`; JS cukup mengubah `style.width` elemen isian | jalur 8px membulat, isian merah, thumb logo 24x24px di ujung isian |
+| Tooltip | `uiTooltip(teks)` | ikon (i) + gelembung gelap saat hover/focus; aman di dalam `<summary>` |
 
 Contoh pemakaian:
 
