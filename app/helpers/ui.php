@@ -272,9 +272,18 @@ function uiField(string $name, string $label, array $options = []): string
         $control = '<textarea ' . uiAttrs($inputAttributes) . '>' . e($value) . '</textarea>';
     } else {
         $inputAttributes['type'] = $type;
-        if ($type !== 'file') $inputAttributes['value'] = $value;
-        else unset($inputAttributes['value']);
-        $control = '<input ' . uiAttrs($inputAttributes) . '>';
+        if ($type !== 'file') {
+            $inputAttributes['value'] = $value;
+            $control = '<input ' . uiAttrs($inputAttributes) . '>';
+        } else {
+            // Pemilih file bergaya komponen: input native transparan menutupi area (tetap bisa difokus/diklik),
+            // tombol outline + nama file terpilih (diperbarui ui-file.js). Tidak memakai tombol bawaan browser.
+            unset($inputAttributes['value']);
+            $inputAttributes['class'] = uiClassList(['ui-file-input', $font]);
+            $control = '<div class="ui-file field-input ' . $font . '" data-file-picker>' . '<input ' . uiAttrs($inputAttributes) . '>'
+                . '<span class="ui-button ui-button--outline ui-file-button" aria-hidden="true">' . e($options['buttonLabel'] ?? 'Pilih File') . '</span>'
+                . '<span class="ui-file-name" data-file-name data-empty="' . e($options['emptyText'] ?? 'Belum ada file dipilih') . '">' . e($options['emptyText'] ?? 'Belum ada file dipilih') . '</span></div>';
+        }
     }
 
     $iconName = (string) ($options['icon'] ?? '');
@@ -412,4 +421,42 @@ function uiInlineMeta(string $primary, ?string $secondary = null, array $options
     }
 
     return $html . '</div>';
+}
+
+/**
+ * Toast notifikasi. Variants: success, error, info. Dipakai untuk hasil aksi/event (simpan, hapus, gagal).
+ * Server: flashToast() menyimpan pesan di sesi (bertahan satu redirect); uiToastRegion() merender antrean di layout.
+ * Browser: window.uiToast(pesan, variant) dari ui-toast.js.
+ */
+function uiToast(string $message, string $variant = 'success'): string
+{
+    $variant = in_array($variant, ['success', 'error', 'info'], true) ? $variant : 'info';
+    [$title, $iconName] = ['success' => ['Berhasil', 'icon_check'], 'error' => ['Gagal', 'icon_alert'], 'info' => ['Info', 'icon_info']][$variant];
+    return '<div class="ui-toast ui-toast--' . $variant . '" role="' . ($variant === 'error' ? 'alert' : 'status') . '" data-toast>'
+        . '<span class="ui-toast-icon" aria-hidden="true">' . icon($iconName) . '</span>'
+        . '<span class="ui-toast-body"><strong class="ui-toast-title">' . e($title) . '</strong>'
+        . '<span class="ui-toast-message">' . e($message) . '</span></span>'
+        . '<button type="button" class="ui-toast-close" data-toast-close aria-label="Tutup notifikasi">' . icon('icon_close') . '</button>'
+        . '<span class="ui-toast-timer" aria-hidden="true"></span>'
+        . '</div>';
+}
+
+function flashToast(string $message, string $variant = 'success'): void
+{
+    $_SESSION['ui_toasts'][] = ['message' => $message, 'variant' => $variant];
+}
+
+/** Wadah toast (pojok kanan atas) berisi antrean dari sesi; selalu dirender agar JS dapat menambahkan toast. */
+function uiToastRegion(): string
+{
+    $toasts = $_SESSION['ui_toasts'] ?? [];
+    unset($_SESSION['ui_toasts']);
+    $html = '';
+    foreach (is_array($toasts) ? $toasts : [] as $toast) {
+        if (is_array($toast) && isset($toast['message'])) $html .= uiToast((string) $toast['message'], (string) ($toast['variant'] ?? 'info'));
+    }
+    return '<div class="ui-toast-region" data-toast-region aria-live="polite">' . $html . '</div>'
+        . '<template data-toast-template="success">' . uiToast('', 'success') . '</template>'
+        . '<template data-toast-template="error">' . uiToast('', 'error') . '</template>'
+        . '<template data-toast-template="info">' . uiToast('', 'info') . '</template>';
 }

@@ -1233,3 +1233,40 @@ body.modal-open {
 .ui-disclosure-chevron svg { width: 100%; height: 100%; }
 .ui-disclosure-chevron svg path { stroke: currentColor; }
 .ui-disclosure[open] > .ui-disclosure-trigger > .ui-disclosure-chevron { transform: rotate(180deg); }
+
+/* uiField type file: tombol outline komponen + nama file; input native transparan di atasnya. */
+.ui-file { position: relative; display: flex; align-items: center; gap: var(--space-3); height: auto; min-height: calc(2.8125 * var(--ui-unit) + 2px); padding: var(--space-1) var(--space-2); box-sizing: border-box; cursor: pointer; }
+.ui-file-input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.ui-file .ui-file-button { flex: 0 0 auto; margin: 0; pointer-events: none; }
+.ui-file-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-neutral-400); font-size: var(--font-size-body-sm); }
+.ui-file.has-file .ui-file-name { color: var(--color-neutral-900); }
+.ui-file:focus-within { border-color: var(--color-red-600); }
+
+/* Toast mengikuti tema: kartu putih ber-radius seperti kartu aplikasi, ikon bulat berwarna status,
+   judul tebal, dan garis waktu tipis berwarna status di bawah. Semua warna dari bank warna. */
+.ui-toast-region { position: fixed; top: calc(4.25 * var(--ui-unit)); right: var(--space-5); z-index: 1100; display: grid; gap: var(--space-3); width: min(24rem, calc(100vw - 2rem)); pointer-events: none; }
+.ui-toast { position: relative; display: flex; align-items: flex-start; gap: var(--space-3); overflow: hidden; padding: var(--space-3) var(--space-3) calc(var(--space-3) + 3px) var(--space-3); border: 1px solid var(--color-neutral-75); border-radius: var(--radius-lg); background: var(--color-neutral-white); box-shadow: 0 calc(0.25 * var(--ui-unit)) calc(0.75 * var(--ui-unit)) rgba(4, 4, 4, 0.12); color: var(--color-neutral-900); font-family: var(--font-family-base); pointer-events: auto; animation: ui-toast-in .22s ease-out; }
+.ui-toast--success { border-color: var(--color-green-100); }
+.ui-toast--error { border-color: var(--color-red-100); }
+.ui-toast-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: calc(1.75 * var(--ui-unit)); height: calc(1.75 * var(--ui-unit)); border-radius: 50%; background: var(--color-neutral-75); color: var(--color-neutral-600); }
+.ui-toast-icon svg { width: var(--icon-sm); height: var(--icon-sm); }
+.ui-toast--success .ui-toast-icon { background: var(--color-green-50); color: var(--color-green-600); }
+.ui-toast--error .ui-toast-icon { background: var(--color-red-50); color: var(--color-red-600); }
+.ui-toast-body { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.ui-toast-title { font-size: var(--font-size-body-sm); line-height: var(--line-height-body-sm); font-weight: var(--font-weight-bold); color: var(--color-neutral-900); }
+.ui-toast--success .ui-toast-title { color: var(--color-green-700); }
+.ui-toast--error .ui-toast-title { color: var(--color-red-600); }
+.ui-toast-message { font-size: var(--font-size-caption-lg); line-height: var(--line-height-caption-lg); color: var(--color-neutral-600); overflow-wrap: anywhere; }
+.ui-toast-close { display: inline-flex; flex: 0 0 auto; margin: 0; padding: 2px; border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-neutral-400); cursor: pointer; }
+.ui-toast-close svg { width: var(--icon-sm); height: var(--icon-sm); }
+.ui-toast-close:hover { color: var(--color-neutral-900); background: var(--color-neutral-50); }
+.ui-toast-close:focus-visible { outline: 2px solid var(--color-red-400); outline-offset: 1px; }
+.ui-toast-timer { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--color-neutral-150); transform-origin: left; animation: ui-toast-timer var(--toast-duration, 5000ms) linear forwards; }
+.ui-toast--success .ui-toast-timer { background: var(--color-green-600); }
+.ui-toast--error .ui-toast-timer { background: var(--color-red-600); }
+.ui-toast.is-paused .ui-toast-timer { animation-play-state: paused; }
+.ui-toast.is-leaving { opacity: 0; transform: translateX(8px); transition: opacity .2s ease, transform .2s ease; }
+@keyframes ui-toast-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+@keyframes ui-toast-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .ui-toast, .ui-toast-timer { animation: none; } .ui-toast.is-leaving { transition: none; } }
+@media (max-width: 40rem) { .ui-toast-region { top: var(--space-3); right: var(--space-4); left: var(--space-4); width: auto; } }

@@ -1059,6 +1059,7 @@ tidak mengulang markup dan class yang sama di setiap halaman.
 | Checkbox | `uiCheckbox(nama, label, checked, options)` | variant default/login; regular/bold, base/Geist, checked/unchecked/indeterminate |
 | Card | `uiCard(content, variant, options)` | surface, brand, preview, outlined, callout |
 | Inline metadata | `uiInlineMeta(primary, secondary, options)` | teks dengan separator dot |
+| Toast | `flashToast(pesan, variant)` (server, bertahan satu redirect) / `window.uiToast(pesan, variant)` (browser) | success, error, info |
 
 Contoh pemakaian:
 
@@ -1096,6 +1097,15 @@ untuk elemen yang secara eksplisit memintanya.
 ]) ?>
 <?= uiCard(uiText('Agenda Berikutnya', 'preview', ['weight' => 'bold']), 'outlined') ?>
 ```
+
+Toast (`uiToast`, dirender otomatis oleh `uiToastRegion()` di layout shell): hasil aksi dan kesalahan
+(simpan, hapus, gagal) ditampilkan sebagai toast, bukan paragraf notifikasi di halaman. Posisi kanan atas di bawah toolbar
+(HP: atas, selebar layar dengan gutter 16px). Kartu putih radius `radius-lg` dengan border status
+(`green-100` / `red-100` / `neutral-75`), ikon bulat 28px berlatar `green-50`/`red-50`/`neutral-75`
+(`icon_check`/`icon_alert`/`icon_info`), judul bold body-sm ("Berhasil" `green-700`, "Gagal" `red-600`, "Info"),
+pesan caption-lg `neutral-600`, tombol tutup `icon_close`, dan garis waktu 3px berwarna status di bawah.
+Tutup otomatis 5 detik (error 8 detik), garis waktu berhenti saat disorot/difokus; error memakai `role="alert"`. Form dengan `novalidate data-toast-validate`
+menampilkan kesalahan isian di browser sebagai toast, bukan balon bawaan browser; validasi server tetap wajib.
 
 Password toggle dari `uiField()` memakai `aria-controls` untuk memilih input.
 
@@ -1632,7 +1642,7 @@ Baris memuat nama murid di kiri, status teks dan chevron 20px di kanan dengan ga
 - Pengisian tetap memakai layout fokus tanpa sidebar. Nilai memakai `uiSelect`, catatan memakai `uiField` textarea, aksi memakai `uiButton`. `uiSelect` menerima `attributes` untuk atribut native seperti data hook; komponen tidak menyimpan state nilai terpisah dari select native.
 - Tombol Kirim/Selesaikan nonaktif jika template kosong atau nilai belum lengkap. Progres mengikuti perubahan dropdown; simpan draft tetap diperbolehkan. Aksi desktop berada di kartu header, aksi mobile di bawah. Peringatan keluar melindungi perubahan yang belum disimpan.
 - Pratinjau guru memakai komponen kertas horizontal yang sama dengan admin, refresh dan PDF sesuai izin, tanpa Setujui. Jumlah halaman mengikuti konten nyata; jangan menduplikasi nilai atau halaman agar terlihat empat halaman.
-- Profil (`/portal-guru/profil`) baca-saja untuk akun yang terhubung ke data pegawai: dua `uiCard` outlined (Data Pegawai, Tanda Tangan) dengan judul `uiText` body-md bold + `uiBadge` status di kanan, isi `uiDataCard` dalam `.field-row`. Pratinjau tanda tangan memakai route privat Profil Penandatangan; perubahan tanda tangan lewat tombol header outline "Kelola Tanda Tangan". Menu disembunyikan untuk akun tanpa data pegawai (mis. Superadmin).
+- Profil (`/portal-guru/profil`) untuk akun pegawai: grid dua kolom 1,5:3,5 dua baris (ringkasan sejajar-tinggi dengan Informasi Pribadi; ≤64rem satu kolom; isian ditumpuk ≤80rem). Tombol Simpan berada di header halaman (`form="form-profil"`). Kiri: `uiCard` ringkasan (avatar inisial bulat 120px, nama, jabatan, `uiBadge` status/peran; unggah foto profil belum tersedia) lalu `uiCard` Tanda Tangan (judul + badge, tombol ikon-saja `icon_edit`/`icon_plus` dan `icon_trash` membuka `uiModal`, kotak pratinjau privat). Kanan: Informasi Pribadi (`uiField` Nama + NUPTK, `uiDataCard` Email/Jabatan, Simpan primary) dan Penugasan (`uiDataCard`). Teks deskripsi dibuat singkat. Profil Penandatangan kini menjadi bagian halaman ini (menu terpisah disembunyikan). Input file memakai `uiField` type file: tombol outline "Pilih File" + nama file (`ui-file.js`), bukan tombol bawaan browser.
 
 ### Persetujuan eRapor
 

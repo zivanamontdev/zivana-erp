@@ -32,14 +32,14 @@ final class EraporSignerProfileController extends Controller
             $result=EraporSignerProfile::save(Database::getInstance(),(int)$_SESSION['user_id'],
                 $_POST['nuptk'] ?? null,$upload,($_POST['consent'] ?? '')==='1');
             $_SESSION['erapor_signer_notice']=['type'=>'success','message'=>$result['changed']
-                ? 'Profil penandatangan tersimpan.' : 'Tidak ada perubahan profil.'];
+                ? 'Tanda tangan tersimpan.' : 'Tidak ada perubahan.'];
         } catch (DomainException $e) {
             $_SESSION['erapor_signer_notice']=['type'=>'error','message'=>$e->getMessage()];
         } catch (Throwable $e) {
             error_log('eRapor signer profile update failed: '.$e->getMessage());
             $_SESSION['erapor_signer_notice']=['type'=>'error','message'=>'Profil tidak tersimpan. Muat ulang halaman dan coba kembali.'];
         }
-        $this->redirect('/erapor/profil-penandatangan');
+        $this->redirect($this->returnPath());
     }
 
     public function revoke(): void
@@ -50,12 +50,12 @@ final class EraporSignerProfileController extends Controller
         try {
             $result=EraporSignerProfile::revoke(Database::getInstance(),(int)$_SESSION['user_id']);
             $_SESSION['erapor_signer_notice']=['type'=>'success','message'=>$result['changed']
-                ? 'Persetujuan tanda tangan dicabut. Snapshot rapor yang telah dibuat tetap tersimpan.' : 'Belum ada tanda tangan tersimpan untuk dicabut.'];
+                ? 'Tanda tangan dihapus.' : 'Belum ada tanda tangan.'];
         } catch (Throwable $e) {
             error_log('eRapor signer consent revocation failed: '.$e->getMessage());
             $_SESSION['erapor_signer_notice']=['type'=>'error','message'=>'Persetujuan tanda tangan belum dapat dicabut. Coba kembali.'];
         }
-        $this->redirect('/erapor/profil-penandatangan');
+        $this->redirect($this->returnPath());
     }
 
     public function signature(): void
@@ -97,6 +97,11 @@ final class EraporSignerProfileController extends Controller
     {
         if (defined('ERAPOR_API_ENABLED') && ERAPOR_API_ENABLED) return true;
         $this->notFound(); return false;
+    }
+    /** Form tanda tangan juga tersedia di Portal Guru > Profil; kembali ke halaman asal form. */
+    private function returnPath(): string
+    {
+        return ($_POST['return_to'] ?? '')==='profil' ? '/portal-guru/profil' : '/erapor/profil-penandatangan';
     }
     private function deny(): void { http_response_code(403); require VIEW_PATH.'/errors/403.php'; }
     private function notFound(): void { http_response_code(404); require VIEW_PATH.'/errors/404.php'; }

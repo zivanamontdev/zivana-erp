@@ -1,6 +1,7 @@
         </main>
     </div>
 </div>
+<?= uiToastRegion() ?>
 
 <script src="<?= BASE_PATH ?>/assets/js/sidebar.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/sidebar.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/checkbox-tree.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/checkbox-tree.js') ?>"></script>
@@ -12,6 +13,8 @@
 <script src="<?= BASE_PATH ?>/assets/js/list-search.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/list-search.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/ui-select.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-select.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/ui-datepicker.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-datepicker.js') ?>"></script>
+<script src="<?= BASE_PATH ?>/assets/js/ui-file.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-file.js') ?>"></script>
+<script src="<?= BASE_PATH ?>/assets/js/ui-toast.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-toast.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/login.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/login.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/complete-form.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/complete-form.js') ?>"></script>
 </body>

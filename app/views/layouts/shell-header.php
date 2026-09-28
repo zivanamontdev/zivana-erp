@@ -85,7 +85,6 @@ $navGroups = [
             ['type' => 'item', 'key' => 'portal-dashboard', 'label' => 'Dashboard', 'href' => '/portal-guru/dashboard', 'icon' => 'icon_layout_dashboard', 'perm' => ['Portal Guru', 'Dashboard']],
             ['type' => 'item', 'key' => 'portal-daftar-murid', 'label' => 'Daftar Murid', 'href' => '/portal-guru/murid', 'icon' => 'icon_backpack', 'perm' => ['Portal Guru', 'Daftar Murid']],
             ['type' => 'item', 'key' => 'portal-profil', 'label' => 'Profil', 'href' => '/portal-guru/profil', 'icon' => 'icon_user_round', 'perm' => ['Portal Guru', 'Dashboard'], 'employeeOnly' => true],
-            ['type' => 'item', 'key' => 'erapor-signer-profile', 'label' => 'Profil Penandatangan', 'href' => '/erapor/profil-penandatangan', 'icon' => 'icon_user_round_cog', 'perm' => ['eRapor', 'Profil Penandatangan']],
         ],
     ],
     [
@@ -221,6 +220,7 @@ try {
                         <?= icon('icon_chevron') ?>
                     </button>
                     <div class="action-menu-dropdown">
+                        <?php if (!empty($_SESSION['karyawan_id']) && $roleChecker->check('Portal Guru', 'Dashboard')): ?><a href="<?= BASE_PATH ?>/portal-guru/profil">Profil</a><?php endif; ?>
                         <a href="<?= BASE_PATH ?>/logout">Keluar</a>
                     </div>
                 </div>
