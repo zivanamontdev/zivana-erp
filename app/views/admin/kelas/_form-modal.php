@@ -10,7 +10,12 @@ ob_start();
     <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
     <?php if (!empty($returnToDetail)): ?><input type="hidden" name="return_to" value="detail"><?php endif; ?>
     <?= uiSelect('level_kelas', 'Level Kelas *', ['' => 'Pilih level kelas'] + array_combine(Kelas::LEVELS, Kelas::LEVELS), ['id' => 'class-level-' . $suffix, 'value' => $classRecord['level_kelas'] ?? '', 'required' => true]) ?>
+    <?php $waliField = !empty($returnToDetail) && isset($waliChoices) && $waliChoices !== null; ?>
     <?= uiField('nama_kelas', 'Nama Kelas *', ['variant' => 'form', 'font' => 'geist', 'id' => 'class-name-' . $suffix, 'value' => $classRecord['nama_kelas'] ?? '', 'placeholder' => 'Isi nama kelas', 'required' => true]) ?>
+    <?php if ($waliField): ?>
+    <?= uiSelect('wali_kelas_user_id', 'Wali Kelas', ['' => 'Belum ditetapkan'] + $waliChoices, ['id' => 'class-wali-' . $suffix, 'value' => isset($waliKelas['user_id']) ? (string) $waliKelas['user_id'] : '']) ?>
+    <p class="text-caption-md">Wali kelas menyetujui dan menandatangani rapor murid kelas ini sebelum Kepala Sekolah.</p>
+    <?php endif; ?>
     <div class="modal-actions">
         <?= uiButton('Batal', 'outline', ['marginVertical' => 0, 'attributes' => ['data-modal-close' => true]]) ?>
         <?= uiButton($editing ? 'Simpan Perubahan' : 'Tambah Kelas', $variant, ['type' => 'submit', 'marginVertical' => 0, 'disabled' => true, 'attributes' => ['data-complete-submit' => true, 'data-enabled-variant' => $variant]]) ?>

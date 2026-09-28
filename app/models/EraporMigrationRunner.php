@@ -5,6 +5,8 @@
  */
 final class EraporMigrationRunner
 {
+    public const WALI_KELAS_CHECK="ALTER TABLE erapor_alur_penyetuju ADD CONSTRAINT erapor_alur_kode_v2 CHECK (kode IN ('KOORDINATOR_QURAN','KOORDINATOR_BING','WALI_KELAS','KEPALA_SEKOLAH'))";
+
     public static function plan(string $file): array
     {
         $sql = file_get_contents($file);
@@ -20,6 +22,9 @@ final class EraporMigrationRunner
             } elseif (preg_match('/^ALTER TABLE erapor_sesi ADD COLUMN tanggal_pengesahan DATE NULL$/i', $statement)) {
                 // Explicitly allow this one reviewed additive session field; reject arbitrary ALTER clauses.
                 $key='erapor_sesi.tanggal_pengesahan';
+            } elseif ($statement===self::WALI_KELAS_CHECK) {
+                // Reviewed: widen the approval-code CHECK for WALI_KELAS. Target "table#constraint".
+                $key='erapor_alur_penyetuju#erapor_alur_kode_v2';
             } else {
                 throw new RuntimeException('Only additive eRapor tables and columns are allowed.');
             }
@@ -51,6 +56,8 @@ final class EraporMigrationRunner
                 if (!hash_equals($previous['sha256'], $plan['sha256'])) throw new RuntimeException('Migration checksum changed; create a new migration.');
                 if ($previous['status'] !== 'complete') throw new RuntimeException('Partial migration requires manual inspection.');
                 foreach ($plan['steps'] as $target => $_) {
+                    if (!self::targetExists($db,$target) && str_contains($target,'#')) throw new RuntimeException('Completed migration constraint is missing.');
+                    if (str_contains($target,'#')) continue;
                     if (str_contains($target,'.')) {
                         [$table,$column]=explode('.',$target,2);
                         if (!self::columnExists($db,$table,$column)) throw new RuntimeException('Completed migration column is missing.');
@@ -61,6 +68,10 @@ final class EraporMigrationRunner
                 return 'already_applied';
             }
             foreach ($plan['steps'] as $target => $_) {
+                if (str_contains($target,'#')) {
+                    if (self::targetExists($db,$target)) throw new RuntimeException('Untracked constraint collision: '.$target);
+                    continue;
+                }
                 if (str_contains($target,'.')) {
                     [$table,$column]=explode('.',$target,2);
                     if (self::columnExists($db,$table,$column)) throw new RuntimeException('Untracked column collision: '.$target);
@@ -70,13 +81,45 @@ final class EraporMigrationRunner
             }
             $db->prepare("INSERT INTO erapor_migrations(id,sha256,status) VALUES(?,?,'applying')")
                 ->execute([$plan['id'], $plan['sha256']]);
-            foreach ($plan['steps'] as $statement) $db->exec($statement);
+            foreach ($plan['steps'] as $target => $statement) {
+                // CHECK lama tanpa nama (MySQL: *_chk_N, MariaDB: CONSTRAINT_N) dicari lewat isinya lalu dihapus.
+                if ($target==='erapor_alur_penyetuju#erapor_alur_kode_v2') foreach (self::legacyCodeChecks($db) as $name) {
+                    $db->exec('ALTER TABLE erapor_alur_penyetuju DROP CONSTRAINT `'.str_replace('`','',$name).'`');
+                }
+                $db->exec($statement);
+            }
             $db->prepare("UPDATE erapor_migrations SET status='complete',completed_at=CURRENT_TIMESTAMP WHERE id=?")
                 ->execute([$plan['id']]);
             return 'applied';
         } finally {
             $release = $db->prepare('SELECT RELEASE_LOCK(?)'); $release->execute([$lock]);
         }
+    }
+
+    /** Target "table", "table.column", atau "table#constraint". */
+    public static function targetExists(PDO $db,string $target): bool
+    {
+        if (str_contains($target,'#')) {
+            [$table,$name]=explode('#',$target,2);
+            $q=$db->prepare("SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_schema=DATABASE() AND table_name=? AND constraint_name=? AND constraint_type='CHECK'");
+            $q->execute([$table,$name]);
+            return (int)$q->fetchColumn()>0;
+        }
+        if (str_contains($target,'.')) { [$table,$column]=explode('.',$target,2); return self::columnExists($db,$table,$column); }
+        return self::tableExists($db,$target);
+    }
+
+    private static function legacyCodeChecks(PDO $db): array
+    {
+        $q=$db->query("SELECT t.constraint_name,c.check_clause FROM information_schema.table_constraints t
+            JOIN information_schema.check_constraints c ON c.constraint_schema=t.constraint_schema AND c.constraint_name=t.constraint_name
+            WHERE t.constraint_schema=DATABASE() AND t.table_name='erapor_alur_penyetuju' AND t.constraint_type='CHECK'");
+        $names=[];
+        foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $row=array_change_key_case($row,CASE_LOWER);
+            if (str_contains($row['check_clause'],'KOORDINATOR_QURAN') && !str_contains($row['check_clause'],'WALI_KELAS')) $names[]=$row['constraint_name'];
+        }
+        return $names;
     }
 
     private static function tableExists(PDO $db, string $table): bool

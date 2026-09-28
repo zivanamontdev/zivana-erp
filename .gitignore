@@ -17,3 +17,5 @@ tests/report-preview-check.png
 
 # Data pribadi murid/guru untuk import pilot (jangan di-commit)
 /*.xlsx
+/docs/*.xlsx
+/docs/*.png

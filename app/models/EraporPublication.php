@@ -219,7 +219,7 @@ final class EraporPublication
             $doc=['id'=>0]+$rubrics[$type];
             $doc['form']=EraporTeacherForm::documentForm($db,$session,$doc);
             // Narasi Agama dirangkai dari catatan per lingkup; template menampilkan penanda posisinya.
-            if ($type==='AGAMA') foreach ($doc['form']['definitions']['scopes'] ?? [] as $scope) $doc['form']['values']['catatan:'.$scope['id']]='{Catatan '.$scope['nama'].'}';
+            if ($type==='AGAMA') foreach ($doc['form']['definitions']['scopes'] ?? [] as $scope) if (!empty($scope['catatan_wajib'])) { $doc['form']['values']['catatan:'.$scope['id']]='{Laporan Perkembangan Agama}'; break; }
             $doc['period_values']=[]; $doc['signature_periods']=[];
             $doc['signature_current']=['signers'=>[],'tempat'=>'','tanggal'=>null];
             $documents[]=self::describeDocument($db,$doc,[],$student['nama_lengkap'],$semester);
@@ -256,12 +256,15 @@ final class EraporPublication
     private static function signatureBlock(PDO $db,array $session,array $currentApprovals,?DateTimeImmutable $currentDate,string $place): array
     {
         $signers=[]; $teacher=self::one($db,'SELECT guru_nama AS nama,guru_nuptk AS nuptk,guru_ttd_png AS ttd_png,guru_ttd_sha256 AS ttd_sha256,guru_ttd_disetujui_pada AS consent_at FROM erapor_sesi_penerimaan WHERE sesi_id=?',[$session['id']]);
-        if ($teacher) $signers['GURU_KELAS']=self::normalizeSigner($teacher);
+        // Guru pengisi (penerimaan) tetap menjadi "English Teacher" di Rapor Bahasa Inggris.
+        if ($teacher) $signers['GURU_KELAS']=$signers['GURU_PENGISI']=self::normalizeSigner($teacher);
+        // Paket dengan tahap Wali Kelas: kolom Guru Kelas ditandatangani wali kelas setelah ia menyetujui (kosong sebelumnya).
+        if (self::one($db,"SELECT 1 FROM erapor_sesi_penyetuju WHERE sesi_id=? AND kode='WALI_KELAS'",[$session['id']])) unset($signers['GURU_KELAS']);
         $approvals=self::all($db,'SELECT a.id,a.sesi_id,a.kode,s.nama,s.nuptk,s.ttd_png,s.ttd_sha256,s.ttd_disetujui_pada AS consent_at
             FROM erapor_sesi_penyetuju a JOIN erapor_persetujuan_snapshot s ON s.sesi_penyetuju_id=a.id AND s.sesi_id=a.sesi_id WHERE a.sesi_id=? AND a.status=\'DISETUJUI\'',[$session['id']]);
         foreach ($approvals as $row) {
             if ((int)($row['sesi_id'] ?? 0)!==(int)$session['id']) continue;
-            $role=match($row['kode'] ?? '') {'KEPALA_SEKOLAH'=>'KEPALA_SEKOLAH','KOORDINATOR_QURAN'=>'KOORDINATOR_QURAN','KOORDINATOR_BING'=>'KOORDINATOR_BING',default=>null};
+            $role=match($row['kode'] ?? '') {'KEPALA_SEKOLAH'=>'KEPALA_SEKOLAH','KOORDINATOR_QURAN'=>'KOORDINATOR_QURAN','KOORDINATOR_BING'=>'KOORDINATOR_BING','WALI_KELAS'=>'GURU_KELAS',default=>null};
             if ($role) $signers[$role]=self::normalizeSigner($row);
         }
         $date=$currentDate?self::indonesianDate($currentDate):(!empty($session['tanggal_pengesahan'])?self::indonesianDate(new DateTimeImmutable($session['tanggal_pengesahan'])):null);

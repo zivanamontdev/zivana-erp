@@ -22,10 +22,8 @@ final class EraporApprove
             foreach ($rows as $row) if ((int)$row['id']===$approvalId) $target=$row;
             if (!$target) throw new DomainException('Persetujuan bukan bagian sesi ini.');
             // Current explicit assignment can be revoked; flow configuration itself is snapshotted.
-            $actor=self::one($db,"SELECT k.nama,j.nama AS jabatan FROM erapor_penyetuju_user a
-                JOIN users u ON u.id=a.user_id JOIN karyawan k ON k.id=u.karyawan_id JOIN jabatan j ON j.id=k.jabatan_id
-                WHERE a.penyetuju_id=? AND a.user_id=? AND a.aktif=1 AND u.is_active=1 AND k.is_active=1 AND j.is_active=1 FOR UPDATE",[$target['penyetuju_id'],$actorId]);
-            if (!$actor || ($target['kode']==='KEPALA_SEKOLAH' && $actor['jabatan']!=='Kepala Sekolah')) throw new DomainException('Akun tidak berwenang sebagai penyetuju ini.');
+            $actor=EraporApprovalAccess::actor($db,$target,$session,$actorId,true);
+            if (!$actor) throw new DomainException('Akun tidak berwenang sebagai penyetuju ini.');
             $reception=self::one($db,'SELECT sesi_id FROM erapor_sesi_penerimaan WHERE sesi_id=?',[$sessionId]);
             $event=self::one($db,"SELECT id FROM erapor_sesi_log WHERE sesi_id=? AND aksi='KONFIRMASI_PENERIMAAN' LIMIT 1",[$sessionId]);
             if (!$reception || !$event) throw new DomainException('Jejak penerimaan tidak lengkap.');

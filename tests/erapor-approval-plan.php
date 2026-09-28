@@ -8,17 +8,25 @@ foreach (['RTS','AGAMA','UMMI','BING','PPI'] as $i=>$type) $documents[]=['id'=>$
 $flows=[
     ['id'=>1,'kode'=>'KOORDINATOR_QURAN','label'=>'Koordinator Quran','urutan'=>1,'cakupan'=>'TERBATAS','aktif'=>1],
     ['id'=>2,'kode'=>'KOORDINATOR_BING','label'=>'Koordinator BING','urutan'=>1,'cakupan'=>'TERBATAS','aktif'=>1],
-    ['id'=>3,'kode'=>'KEPALA_SEKOLAH','label'=>'Kepala Sekolah','urutan'=>2,'cakupan'=>'SEMUA','aktif'=>1],
+    ['id'=>3,'kode'=>'KEPALA_SEKOLAH','label'=>'Kepala Sekolah','urutan'=>3,'cakupan'=>'SEMUA','aktif'=>1],
+    ['id'=>4,'kode'=>'WALI_KELAS','label'=>'Wali Kelas','urutan'=>2,'cakupan'=>'SEMUA','aktif'=>1],
 ];
-$scopes=[['penyetuju_id'=>1,'rubrik_id'=>13],['penyetuju_id'=>2,'rubrik_id'=>14]];
+$scopes=[['penyetuju_id'=>1,'rubrik_id'=>12],['penyetuju_id'=>1,'rubrik_id'=>13],['penyetuju_id'=>2,'rubrik_id'=>14]];
 $plan=EraporApprovalPlan::build($documents,$flows,$scopes);
 $byCode=array_column($plan,null,'kode');
-approvalCheck(array_column($plan,'urutan')===[1,1,2]);
-approvalCheck($byCode['KOORDINATOR_QURAN']['dokumen_ids']===[3]);
+approvalCheck(array_column($plan,'urutan')===[1,1,2,3]);
+approvalCheck($byCode['WALI_KELAS']['dokumen_ids']===[1,2,3,4,5]);
+approvalCheck($byCode['KOORDINATOR_QURAN']['dokumen_ids']===[2,3]);
 approvalCheck($byCode['KOORDINATOR_BING']['dokumen_ids']===[4]);
 approvalCheck($byCode['KEPALA_SEKOLAH']['dokumen_ids']===[1,2,3,4,5]);
 $regular=EraporApprovalPlan::build(array_slice($documents,0,4),$flows,$scopes);
-approvalCheck(count($regular[2]['dokumen_ids'])===4);
+approvalCheck(count($regular[2]['dokumen_ids'])===4 && count($regular[3]['dokumen_ids'])===4);
+// Tanpa tahap Wali Kelas aktif, paket tidak boleh dibuat.
+approvalReject(fn()=>EraporApprovalPlan::build($documents,array_slice($flows,0,3),$scopes));
+// Snapshot lama (tanpa Wali Kelas, kepala urutan 2, Quran = Ummi) tetap tervalidasi.
+$legacyFlows=array_slice($flows,0,3); $legacyFlows[2]['urutan']=2;
+$legacy=EraporApprovalPlan::build($documents,$legacyFlows,[['penyetuju_id'=>1,'rubrik_id'=>13],['penyetuju_id'=>2,'rubrik_id'=>14]]);
+approvalCheck(array_column($legacy,'kode')===['KOORDINATOR_BING','KOORDINATOR_QURAN','KEPALA_SEKOLAH'] && array_column($legacy,null,'kode')['KOORDINATOR_QURAN']['dokumen_ids']===[3]);
 approvalReject(fn()=>EraporApprovalPlan::build([],$flows,$scopes));
 approvalReject(fn()=>EraporApprovalPlan::build($documents,[],$scopes));
 approvalReject(fn()=>EraporApprovalPlan::build($documents,$flows,[]));

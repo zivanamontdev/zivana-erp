@@ -9,34 +9,71 @@ final class PilotDataImport
 {
     /** Kolom wajib pada baris judul (huruf besar/kecil diabaikan). */
     private const HEADERS = [
-        'nama' => 'nama anak', 'nisn' => 'nisn', 'kelas' => 'kelas', 'guru' => 'nama guru', 'keterangan' => 'keterangan',
+        'nama' => 'nama anak', 'nisn' => 'nisn', 'kelas' => 'kelas', 'guru' => ['nama guru pic', 'nama guru'], 'keterangan' => 'keterangan',
         'jk' => 'jenis kelamin', 'tempat' => 'tempat', 'lahir' => 'tanggal lahir', 'agama' => 'agama', 'anak_ke' => 'anak ke-',
         'saudara' => 'jumlah bersaudara', 'ayah' => 'nama ayah', 'ibu' => 'nama ibu', 'alamat' => 'alamat',
         'kerja_ayah' => 'pekerjaan ayah', 'kerja_ibu' => 'pekerjaan ibu',
     ];
+    /** Kolom opsional format baru: wali kelas per kelas beserta NUPTK dan tautan TTD. */
+    private const OPTIONAL = ['wali' => 'nama wali kelas', 'wali_nuptk' => 'nuptk', 'wali_ttd' => 'ttd wali kelas'];
+    /** Blok pimpinan di atas tabel (label di kolom A, nama di kolom berikutnya, "NUPTK. …" di baris bawahnya). */
+    private const LEADERS = ['kepala' => 'nama kepala', 'koordinator_bing' => 'english coordinator', 'koordinator_quran' => 'koordinator agama'];
     private const LEVELS = ['Akar', 'Batang', 'Ranting', 'Daun'];
     private const MONTHS = ['januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4, 'mei' => 5, 'juni' => 6, 'juli' => 7,
         'agustus' => 8, 'september' => 9, 'oktober' => 10, 'november' => 11, 'desember' => 12];
 
-    /** @return array{teachers: array<string,array>, classes: array<string,array>, students: list<array>} */
+    /**
+     * @return array{teachers: array<string,array>, classes: array<string,array>, students: list<array>,
+     *   leaders: array<string,array>, wali: array<string,string>}
+     * teachers[nama] = nama, jabatan, email, nuptk (null), ttd_url (null); leaders[peran] = nama, nuptk, ttd_url.
+     */
     public static function fromXlsx(string $path, string $emailDomain, string $schoolYearStart): array
     {
-        $rows = self::readRows($path);
+        [$rows, $links] = self::readRows($path);
         $headerIndex = null; $map = [];
         foreach ($rows as $i => $row) {
             $normalized = array_map(fn($v) => mb_strtolower(trim((string) $v)), $row);
-            if (in_array('nama anak', $normalized, true) && in_array('nama guru', $normalized, true)) {
-                foreach (self::HEADERS as $key => $label) {
-                    $col = array_search($label, $normalized, true);
-                    if ($col === false) throw new DomainException('Kolom "' . $label . '" tidak ditemukan di file Excel.');
+            if (in_array('nama anak', $normalized, true) && (in_array('nama guru', $normalized, true) || in_array('nama guru pic', $normalized, true))) {
+                foreach (self::HEADERS as $key => $labels) {
+                    $col = false;
+                    foreach ((array) $labels as $label) if (($col = array_search($label, $normalized, true)) !== false) break;
+                    if ($col === false) throw new DomainException('Kolom "' . ((array) $labels)[0] . '" tidak ditemukan di file Excel.');
                     $map[$key] = $col;
+                }
+                foreach (self::OPTIONAL as $key => $label) {
+                    $col = array_search($label, $normalized, true);
+                    if ($col !== false) $map[$key] = $col;
                 }
                 $headerIndex = $i; break;
             }
         }
         if ($headerIndex === null) throw new DomainException('Baris judul (No, Nama Anak, NISN, Kelas, Nama Guru, …) tidak ditemukan di sheet pertama.');
 
-        $teachers = []; $classes = []; $students = []; $emails = [];
+        $teachers = []; $classes = []; $students = []; $emails = []; $wali = []; $leaders = [];
+        $addTeacher = static function (string $name, ?string $nuptk, ?string $ttd) use (&$teachers, &$emails, $emailDomain): void {
+            if (!isset($teachers[$name])) {
+                $email = self::emailFor($name, $emailDomain, $emails);
+                $emails[$email] = true;
+                $teachers[$name] = ['nama' => $name, 'jabatan' => 'Guru Kelas', 'email' => $email, 'nuptk' => null, 'ttd_url' => null];
+            }
+            if ($nuptk !== null) $teachers[$name]['nuptk'] = $nuptk;
+            if ($ttd !== null) $teachers[$name]['ttd_url'] = $ttd;
+        };
+        // Blok pimpinan di atas tabel: kepala sekolah dan koordinator (nama, NUPTK di baris bawahnya, TTD sebagai tautan).
+        foreach (array_slice($rows, 0, $headerIndex, true) as $i => $row) {
+            $label = mb_strtolower(trim((string) ($row[0] ?? '')));
+            foreach (self::LEADERS as $role => $prefix) {
+                if (!str_starts_with($label, $prefix)) continue;
+                $cells = array_values(array_filter(array_slice($row, 1), fn($v) => trim((string) $v) !== ''));
+                $name = trim((string) ($cells[0] ?? ''));
+                if ($name === '') continue;
+                $ttd = null;
+                foreach ($links[$i] ?? [] as $url) { $ttd = $url; break; }
+                $nuptk = null;
+                foreach ($rows[$i + 1] ?? [] as $value) if (preg_match('/^NUPTK\.?\s*(.*)$/i', trim((string) $value), $m)) $nuptk = self::nuptk($m[1]);
+                $leaders[$role] = ['nama' => $name, 'nuptk' => $nuptk, 'ttd_url' => $ttd];
+            }
+        }
         foreach (array_slice($rows, $headerIndex + 1) as $offset => $row) {
             $get = fn(string $key) => trim((string) ($row[$map[$key]] ?? ''));
             $name = $get('nama');
@@ -48,10 +85,12 @@ final class PilotDataImport
 
             $teacherName = $get('guru');
             if ($teacherName === '') throw new DomainException("Baris $line: Nama Guru kosong.");
-            if (!isset($teachers[$teacherName])) {
-                $email = self::emailFor($teacherName, $emailDomain, $emails);
-                $emails[$email] = true;
-                $teachers[$teacherName] = ['nama' => $teacherName, 'jabatan' => 'Guru Kelas', 'email' => $email];
+            $addTeacher($teacherName, null, null);
+            if (isset($map['wali']) && ($waliName = $get('wali')) !== '') {
+                $waliTtd = isset($map['wali_ttd']) ? ($links[$headerIndex + $offset + 1][$map['wali_ttd']] ?? null) : null;
+                $addTeacher($waliName, isset($map['wali_nuptk']) ? self::nuptk($get('wali_nuptk')) : null, $waliTtd);
+                if (isset($wali[$classKey]) && $wali[$classKey] !== $waliName) throw new DomainException("Baris $line: Kelas $classKey punya lebih dari satu wali kelas.");
+                $wali[$classKey] = $waliName;
             }
 
             $condition = mb_strtolower($get('keterangan'));
@@ -83,7 +122,20 @@ final class PilotDataImport
             ];
         }
         if (!$students) throw new DomainException('Tidak ada data murid di file Excel.');
-        return ['teachers' => $teachers, 'classes' => $classes, 'students' => $students];
+        // Koordinator juga akun guru (satu orang bisa sekaligus wali kelas); kepala sekolah akun tersendiri.
+        foreach (['koordinator_bing', 'koordinator_quran'] as $role) {
+            if (isset($leaders[$role])) $addTeacher($leaders[$role]['nama'], $leaders[$role]['nuptk'], $leaders[$role]['ttd_url']);
+        }
+        if (isset($leaders['kepala'])) $leaders['kepala']['email'] = self::emailFor($leaders['kepala']['nama'], $emailDomain, $emails);
+        return ['teachers' => $teachers, 'classes' => $classes, 'students' => $students, 'leaders' => $leaders, 'wali' => $wali];
+    }
+
+    /** "7058759660230163" -> string; "-" / kosong / bukan 16 digit -> null. */
+    private static function nuptk(string $value): ?string
+    {
+        $value = preg_replace('/\s+/', '', $value);
+        if (preg_match('/^\d+(\.\d+)?E\+?\d+$/i', $value)) $value = sprintf('%.0f', (float) $value);
+        return preg_match('/^\d{16}$/', $value) ? $value : null;
     }
 
     /** "Ranting Akasia" -> ['Ranting', 'Akasia']. */
@@ -130,7 +182,7 @@ final class PilotDataImport
         return preg_match('/^\d+$/', $value) ? (int) $value : null;
     }
 
-    /** Sheet pertama sebagai array baris; sel kosong = ''. */
+    /** Sheet pertama: [baris (sel kosong = ''), tautan [indeks baris][indeks kolom] => URL]. */
     private static function readRows(string $path): array
     {
         if (!class_exists(ZipArchive::class)) throw new RuntimeException('Ekstensi PHP zip tidak tersedia untuk membaca .xlsx.');
@@ -147,10 +199,17 @@ final class PilotDataImport
             }
         }
         $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $relsXml = $zip->getFromName('xl/worksheets/_rels/sheet1.xml.rels');
         $zip->close();
+        $targets = [];
+        if ($relsXml !== false) {
+            foreach (simplexml_load_string($relsXml)->Relationship as $rel) {
+                if (str_ends_with((string) $rel['Type'], '/hyperlink')) $targets[(string) $rel['Id']] = (string) $rel['Target'];
+            }
+        }
         if ($sheet === false) throw new DomainException('Sheet pertama tidak ditemukan di file Excel.');
         $xml = simplexml_load_string($sheet);
-        $rows = [];
+        $rows = []; $refs = [];
         foreach ($xml->sheetData->row as $row) {
             $cells = [];
             foreach ($row->c as $c) {
@@ -160,8 +219,15 @@ final class PilotDataImport
                 $value = $type === 's' ? ($strings[(int) $c->v] ?? '') : ($type === 'inlineStr' ? (string) $c->is->t : (string) $c->v);
                 $cells[$col - 1] = $value;
             }
-            if ($cells) { $max = max(array_keys($cells)); $rows[] = array_replace(array_fill(0, $max + 1, ''), $cells); }
+            if ($cells) { $max = max(array_keys($cells)); $refs[(int) $row['r']] = count($rows); $rows[] = array_replace(array_fill(0, $max + 1, ''), $cells); }
         }
-        return $rows;
+        $links = [];
+        foreach ($xml->hyperlinks->hyperlink ?? [] as $link) {
+            $id = (string) $link->attributes('http://schemas.openxmlformats.org/officeDocument/2006/relationships')['id'];
+            if (!isset($targets[$id]) || !preg_match('/^([A-Z]+)(\d+)$/', (string) $link['ref'], $m) || !isset($refs[(int) $m[2]])) continue;
+            $col = 0; foreach (str_split($m[1]) as $ch) $col = $col * 26 + (ord($ch) - 64);
+            $links[$refs[(int) $m[2]]][$col - 1] = $targets[$id];
+        }
+        return [$rows, $links];
     }
 }

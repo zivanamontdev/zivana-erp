@@ -47,6 +47,16 @@ class KelasController extends Controller
         if (in_array($levelKelas, Kelas::LEVELS, true) && $namaKelas !== '') {
             (new Kelas())->update((int) $id, ['level_kelas' => $levelKelas, 'nama_kelas' => $namaKelas]);
         }
+        // Wali kelas hanya dikirim dari form Detail Kelas (field ada = boleh dikosongkan).
+        $db = Database::getInstance();
+        if (array_key_exists('wali_kelas_user_id', $_POST) && WaliKelas::available($db)) {
+            $wali = (int) $this->input('wali_kelas_user_id', 0);
+            try {
+                WaliKelas::set($db, (int) $id, $wali > 0 ? $wali : null, (int) $_SESSION['user_id']);
+            } catch (DomainException $e) {
+                $_SESSION['assignment_error'] = $e->getMessage();
+            }
+        }
 
         $this->redirect($this->input('return_to') === 'detail' ? '/kelas/' . (int) $id : '/kelas');
     }
@@ -93,7 +103,11 @@ class KelasController extends Controller
             }
         }
 
+        $db = Database::getInstance();
+        $waliEnabled = WaliKelas::available($db);
         $this->view('admin.kelas.show', [
+            'waliKelas' => $waliEnabled ? WaliKelas::forKelas($db, (int) $id) : null,
+            'waliChoices' => $waliEnabled ? WaliKelas::candidates($db) : null,
             'pageTitle' => 'Detail Kelas',
             'breadcrumb' => breadcrumb('Manajemen Kelas', 'Detail Kelas'),
             'activeNavItem' => 'manajemen-kelas',

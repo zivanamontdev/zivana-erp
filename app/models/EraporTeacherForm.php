@@ -39,8 +39,11 @@ final class EraporTeacherForm
                 $doc['reference']=self::rtsReference($db,$session,$doc);
             }
             unset($doc);
+            // Posisi rapor dalam alur persetujuan (untuk guru pengisi): tahap, status, dan nama penyetuju yang sudah menyetujui.
+            $approvals=self::rows($db,'SELECT a.label,a.kode,a.urutan,a.status,s.nama,s.disetujui_pada FROM erapor_sesi_penyetuju a
+                LEFT JOIN erapor_persetujuan_snapshot s ON s.sesi_penyetuju_id=a.id AND s.sesi_id=a.sesi_id WHERE a.sesi_id=? ORDER BY a.urutan,a.id',[$sessionId]);
             $result=['session'=>['id'=>$sessionId,'status'=>$session['status'],'kondisi'=>$session['kondisi']],
-                'student'=>$student,'period'=>$period,'documents'=>$docs,'completion'=>$completion,
+                'student'=>$student,'period'=>$period,'documents'=>$docs,'completion'=>$completion,'approvals'=>$approvals,
                 'capabilities'=>['can_edit'=>$reason===null,'read_only_reason'=>$reason,
                     'can_confirm_filled'=>$session['status']==='BELUM_DIISI' && $completion['complete'],
                     'can_confirm_reception'=>$session['status']==='TELAH_DIISI' && $completion['complete']]];

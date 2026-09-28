@@ -19,6 +19,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
 <div class="field-row class-detail-summary">
     <?= uiDataCard('Level Kelas', $kelas['level_kelas']) ?>
     <?= uiDataCard('Nama Kelas', $kelas['nama_kelas']) ?>
+    <?php if ($waliChoices !== null): ?><?= uiDataCard('Wali Kelas', $waliKelas['nama'] ?? 'Belum ditetapkan') ?><?php endif; ?>
 </div>
 
 <?= uiText('Daftar Guru & Murid', 'body-sm', ['tag' => 'h2', 'weight' => 'bold', 'class' => 'class-detail-heading']) ?>

@@ -22,6 +22,7 @@ final class EraporPilotInstaller
         '20260925_erapor_signer_profile_audit.sql',
         '20260925_erapor_publication_artifact.sql',
         '20260926_erapor_rts_belum_dikenalkan.sql',
+        '20260928_erapor_wali_kelas.sql',
     ];
 
     private const SEEDS = [
@@ -81,7 +82,7 @@ final class EraporPilotInstaller
         $complete = count($ledger) === count(self::MIGRATIONS)
             && $rubricCount === 5
             && $seedHistoryCount === 5
-            && $approvalStageCount === 3;
+            && $approvalStageCount === 4;
 
         return [
             'server' => $server,
@@ -137,7 +138,8 @@ final class EraporPilotInstaller
             }
 
             self::applyApprovalSetup($db, $root . '/database/seeds/20260925_erapor_approval_setup.sql');
-            $emit('Approval setup seed: applied');
+            self::applyApprovalSetup($db, $root . '/database/seeds/20260928_erapor_wali_kelas_setup.sql');
+            $emit('Approval setup seed: applied (termasuk tahap Wali Kelas)');
 
             $final = self::preflight($db, $root);
             if (!$final['complete']) {
@@ -264,7 +266,10 @@ final class EraporPilotInstaller
         foreach ($plans as $plan) {
             $expectedMigrations[$plan['id']] = $plan['sha256'];
             foreach (array_keys($plan['steps']) as $target) {
-                if (str_contains($target, '.')) {
+                if (str_contains($target, '#')) {
+                    [$table] = explode('#', $target, 2);
+                    $expectedTables[$table] = true;
+                } elseif (str_contains($target, '.')) {
                     [$table] = explode('.', $target, 2);
                     $expectedTables[$table] = true;
                 } else {
@@ -302,17 +307,7 @@ final class EraporPilotInstaller
         foreach ($plans as $plan) {
             $isComplete = isset($ledger[$plan['id']]);
             foreach (array_keys($plan['steps']) as $target) {
-                if (str_contains($target, '.')) {
-                    [$table, $column] = explode('.', $target, 2);
-                    $query = $db->prepare('SELECT COUNT(*) FROM information_schema.columns
-                        WHERE table_schema=DATABASE() AND table_name=? AND column_name=?');
-                    $query->execute([$table, $column]);
-                } else {
-                    $query = $db->prepare('SELECT COUNT(*) FROM information_schema.tables
-                        WHERE table_schema=DATABASE() AND table_name=?');
-                    $query->execute([$target]);
-                }
-                $exists = (int)$query->fetchColumn() > 0;
+                $exists = EraporMigrationRunner::targetExists($db, $target);
                 if ($isComplete && !$exists) {
                     throw new RuntimeException('Completed migration target is missing: ' . $target);
                 }
@@ -347,7 +342,9 @@ final class EraporPilotInstaller
             throw new RuntimeException('Approval setup seed is empty.');
         }
         foreach ($statements as $statement) {
-            if (!preg_match('/^INSERT(?:\s+IGNORE)?\s+INTO\s+(?:permissions|erapor_alur_penyetuju|erapor_alur_dokumen)\b/i', $statement)) {
+            if (!preg_match('/^INSERT(?:\s+IGNORE)?\s+INTO\s+(?:permissions|erapor_alur_penyetuju|erapor_alur_dokumen)\b/i', $statement)
+                && !in_array($statement, ["UPDATE erapor_alur_penyetuju SET urutan=3 WHERE kode='KEPALA_SEKOLAH' AND urutan=2",
+                    "UPDATE erapor_alur_penyetuju SET label='Koordinator Agama' WHERE kode='KOORDINATOR_QURAN' AND label<>'Koordinator Agama'"], true)) {
                 throw new RuntimeException('Approval setup seed contains an unreviewed statement.');
             }
         }

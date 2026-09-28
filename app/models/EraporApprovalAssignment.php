@@ -6,7 +6,11 @@ final class EraporApprovalAssignment
     private const FLOW_RULES = [
         'KOORDINATOR_QURAN' => ['urutan'=>1, 'cakupan'=>'TERBATAS', 'rubric'=>'UMMI'],
         'KOORDINATOR_BING' => ['urutan'=>1, 'cakupan'=>'TERBATAS', 'rubric'=>'BING'],
-        'KEPALA_SEKOLAH' => ['urutan'=>2, 'cakupan'=>'SEMUA', 'rubric'=>null],
+        'KEPALA_SEKOLAH' => ['urutan'=>3, 'cakupan'=>'SEMUA', 'rubric'=>null],
+    ];
+    /** Tahap yang pemegangnya ditentukan per kelas (erapor_wali_kelas), bukan lewat penugasan di halaman ini. */
+    private const CLASS_FLOWS = [
+        'WALI_KELAS' => ['urutan'=>2, 'cakupan'=>'SEMUA', 'rubric'=>null],
     ];
 
     public static function read(PDO $db): array
@@ -24,6 +28,7 @@ final class EraporApprovalAssignment
             $result=[];
             foreach ($flows as $flow) {
                 $code=$flow['kode'];
+                if (isset(self::CLASS_FLOWS[$code])) continue;
                 $flowUsers=[];
                 foreach ($candidates as $candidate) {
                     $assigned=!empty($assignments[$code][(int)$candidate['id']]);
@@ -159,20 +164,21 @@ final class EraporApprovalAssignment
 
     private static function assertConfiguration(PDO $db,array $flows,bool $lock=false): void
     {
-        if (count($flows)!==count(self::FLOW_RULES)) throw new DomainException('Konfigurasi alur persetujuan belum lengkap.');
+        if (count($flows)!==count(self::FLOW_RULES)+count(self::CLASS_FLOWS)) throw new DomainException('Konfigurasi alur persetujuan belum lengkap.');
         $byCode=[];
         foreach ($flows as $flow) {
-            $code=(string)$flow['kode']; $rule=self::FLOW_RULES[$code] ?? null;
+            $code=(string)$flow['kode']; $rule=self::FLOW_RULES[$code] ?? self::CLASS_FLOWS[$code] ?? null;
             if (!$rule || isset($byCode[$code]) || !(bool)$flow['aktif'] || (int)$flow['urutan']!==$rule['urutan']
                 || $flow['cakupan']!==$rule['cakupan'] || trim((string)$flow['label'])==='') {
                 throw new DomainException('Konfigurasi alur persetujuan tidak sesuai spesifikasi.');
             }
             $byCode[$code]=$flow;
         }
-        $rubrics=$db->query('SELECT id,jenis_dokumen FROM erapor_rubrik WHERE jenis_dokumen IN (\'UMMI\',\'BING\') ORDER BY id'.($lock?' FOR UPDATE':''))->fetchAll(PDO::FETCH_ASSOC);
+        // Koordinator Agama (kode KOORDINATOR_QURAN) menyetujui Rapor Ummi dan Rapor Agama.
+        $rubrics=$db->query('SELECT id,jenis_dokumen FROM erapor_rubrik WHERE jenis_dokumen IN (\'UMMI\',\'AGAMA\',\'BING\') ORDER BY id'.($lock?' FOR UPDATE':''))->fetchAll(PDO::FETCH_ASSOC);
         $expected=[];
         foreach ($rubrics as $rubric) {
-            $code=$rubric['jenis_dokumen']==='UMMI'?'KOORDINATOR_QURAN':'KOORDINATOR_BING';
+            $code=$rubric['jenis_dokumen']==='BING'?'KOORDINATOR_BING':'KOORDINATOR_QURAN';
             $expected[(int)$byCode[$code]['id']][(int)$rubric['id']]=true;
         }
         if (empty($expected[(int)$byCode['KOORDINATOR_QURAN']['id']]) || empty($expected[(int)$byCode['KOORDINATOR_BING']['id']])) {

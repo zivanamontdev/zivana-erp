@@ -27,7 +27,7 @@ final class DataResetSeeder
         'erapor_sesi_penyetuju_dokumen', 'erapor_persetujuan_snapshot', 'erapor_publikasi_pdf', 'erapor_isian_log', 'erapor_periode_perpanjangan',
         'erapor_rts_nilai', 'erapor_rts_belum_dikenalkan', 'erapor_agama_nilai', 'erapor_agama_catatan', 'erapor_bing_nilai', 'erapor_bing_isian', 'erapor_ppi_isian',
         'erapor_ummi_bacaan', 'erapor_ummi_catatan', 'erapor_ummi_periode', 'erapor_ummi_tes',
-        'erapor_penyetuju_user', 'erapor_penugasan_penyetuju_audit', 'erapor_profil_penandatangan', 'erapor_profil_penandatangan_audit',
+        'erapor_penyetuju_user', 'erapor_wali_kelas', 'erapor_penugasan_penyetuju_audit', 'erapor_profil_penandatangan', 'erapor_profil_penandatangan_audit',
     ];
 
     public const EMAIL_DOMAIN = 'sekolahzivanamontessori.sch.id';
@@ -106,15 +106,26 @@ final class DataResetSeeder
         }
         $log('Transaksi reset + seed berhasil di-commit.');
 
-        // Penugasan: kepala sekolah untuk ketiga tahap; koordinator dapat diganti lewat menu Penugasan Penyetuju.
+        // Penugasan: tanpa file, kepala sekolah memegang ketiga tahap; dengan file, koordinator sesuai blok pimpinan.
+        // Tahap Wali Kelas tidak ditugaskan di sini: pemegangnya wali kelas masing-masing kelas.
         $warnings = [];
         try {
-            $kepala = $ids['users']['kepala'];
-            EraporApprovalAssignment::save($db, $actorId, ['KEPALA_SEKOLAH' => [$kepala], 'KOORDINATOR_BING' => [$kepala], 'KOORDINATOR_QURAN' => [$kepala]],
-                'Seed awal uji coba: kepala sekolah pada semua tahap');
-            $log('Penugasan penyetuju: Kepala Sekolah pada tahap Koordinator Bahasa Inggris, Koordinator Al-Qur\'an, dan Kepala Sekolah.');
+            $approvers = $seed['approvers'] ?: ['KEPALA_SEKOLAH' => 'kepala', 'KOORDINATOR_BING' => 'kepala', 'KOORDINATOR_QURAN' => 'kepala'];
+            EraporApprovalAssignment::save($db, $actorId, array_map(fn($key) => [$ids['users'][$key]], $approvers), 'Seed awal uji coba: penugasan penyetuju');
+            foreach ($approvers as $code => $key) $log('Penugasan penyetuju ' . $code . ': ' . $seed['staff'][$key]['nama'] . '.');
         } catch (Throwable $e) {
             $warnings[] = 'Penugasan penyetuju belum dibuat (' . $e->getMessage() . '). Atur manual di menu Penugasan Penyetuju.';
+        }
+        // NUPTK dan tanda tangan dari file (tautan Google Drive) disimpan ke profil penandatangan masing-masing akun.
+        foreach ($seed['signatures'] as $key => $signature) {
+            $name = $seed['staff'][$key]['nama'];
+            try {
+                $png = $signature['ttd_url'] ? SignatureDownload::fetch($signature['ttd_url']) : null;
+                EraporSignerProfile::save($db, $ids['users'][$key], $signature['nuptk'], $png, $png !== null);
+                $log('Profil penandatangan ' . $name . ': ' . ($png !== null ? 'tanda tangan' : 'tanpa tanda tangan') . ($signature['nuptk'] ? ', NUPTK' : '') . '.');
+            } catch (Throwable $e) {
+                $warnings[] = 'Tanda tangan ' . $name . ' belum tersimpan (' . $e->getMessage() . '). Unggah lewat menu Profil Penandatangan.';
+            }
         }
         // Dua rapor contoh terisi penuh (Regular + ABK) lewat layanan simpan yang sama dengan editor guru.
         // Tidak untuk data murid asli dari Excel: nilai rekaan tidak boleh melekat pada anak sungguhan.
@@ -230,6 +241,8 @@ final class DataResetSeeder
         $log('Tahun ajaran: 2025/2026 (tidak aktif), 2026/2027 (aktif).');
 
         DataBaseline::ensureJabatan($db);
+        $granted = DataBaseline::grantRbac($db); // hanya menambah izin dasar yang belum ada (mis. Persetujuan untuk Guru)
+        if ($granted) $log('Izin RBAC dasar ditambahkan: ' . $granted . '.');
         $positions = [];
         foreach ($db->query('SELECT id,nama,role_id,is_active FROM jabatan')->fetchAll(PDO::FETCH_ASSOC) as $p) $positions[$p['nama']] = $p;
         foreach ($seed['staff'] as $key => $staff) {
@@ -243,6 +256,10 @@ final class DataResetSeeder
 
         foreach ($seed['classes'] as $key => $class) $ids['classes'][$key] = $ins('kelas', ['tahun_ajaran_id' => $ids['years']['2026'], 'level_kelas' => $class['level'], 'nama_kelas' => $class['nama']]);
         $log('Kelas 2026/2027: ' . count($seed['classes']) . '.');
+        if ($seed['wali'] && in_array('erapor_wali_kelas', self::tables($db), true)) {
+            foreach ($seed['wali'] as $classKey => $staffKey) $ins('erapor_wali_kelas', ['kelas_id' => $ids['classes'][$classKey], 'user_id' => $ids['users'][$staffKey]]);
+            $log('Wali kelas: ' . count($seed['wali']) . ' kelas.');
+        }
 
         $abk = 0;
         foreach ($seed['students'] as $student) {
@@ -372,12 +389,27 @@ final class DataResetSeeder
                     'tipe' => $tipe, 'kategori' => 'Rapor Murid', 'awal_periode' => $awal, 'akhir_periode' => $akhir];
             }
         }
+        $wali = []; $approvers = []; $signatures = [];
         if ($pilot !== null) {
-            $staff = ['kepala' => $staff['kepala'], 'admin' => $staff['admin']];
+            // Kepala sekolah dari blok pimpinan file (bila ada); akun Admin tetap dari seed.
+            $leaders = $pilot['leaders'] ?? [];
+            $kepala = $staff['kepala'];
+            if (isset($leaders['kepala'])) {
+                $kepala = ['nama' => $leaders['kepala']['nama'], 'jabatan' => 'Kepala Sekolah',
+                    'email' => $leaders['kepala']['email']];
+                $signatures['kepala'] = ['nuptk' => $leaders['kepala']['nuptk'], 'ttd_url' => $leaders['kepala']['ttd_url']];
+            }
+            $staff = ['kepala' => $kepala, 'admin' => $staff['admin']];
             $teacherKeys = [];
             foreach (array_values($pilot['teachers']) as $i => $teacher) {
-                $teacherKeys[$teacher['nama']] = 'guru_' . ($i + 1);
-                $staff['guru_' . ($i + 1)] = $teacher;
+                $key = 'guru_' . ($i + 1);
+                $teacherKeys[$teacher['nama']] = $key;
+                $staff[$key] = ['nama' => $teacher['nama'], 'jabatan' => $teacher['jabatan'], 'email' => $teacher['email']];
+                if (!empty($teacher['nuptk']) || !empty($teacher['ttd_url'])) $signatures[$key] = ['nuptk' => $teacher['nuptk'] ?? null, 'ttd_url' => $teacher['ttd_url'] ?? null];
+            }
+            $approvers = ['KEPALA_SEKOLAH' => 'kepala'];
+            foreach (['KOORDINATOR_BING' => 'koordinator_bing', 'KOORDINATOR_QURAN' => 'koordinator_quran'] as $code => $role) {
+                $approvers[$code] = isset($leaders[$role]) ? $teacherKeys[$leaders[$role]['nama']] : 'kepala';
             }
             $classKeys = [];
             foreach ($classes as $key => $class) $classKeys[$class['level'] . ' ' . $class['nama']] = $key;
@@ -385,12 +417,15 @@ final class DataResetSeeder
                 if (!isset($classKeys[$classKey])) { $classes[$classKey] = $class; $classKeys[$classKey] = $classKey; }
             }
             $students = array_map(fn($s) => ['kelas' => $classKeys[$s['kelas']], 'guru' => $teacherKeys[$s['guru']]] + $s, $pilot['students']);
+            foreach ($pilot['wali'] ?? [] as $classKey => $teacherName) $wali[$classKeys[$classKey]] = $teacherKeys[$teacherName];
         }
         return [
             'school' => ['nama_legal' => 'Yayasan Zivana Insan Mandiri', 'nama_komersial' => 'TK Zivana Montessori Makassar', 'bentuk_pendidikan' => 'TK',
                 'npsn' => '70015857', 'alamat' => 'Kota Makassar, Sulawesi Selatan', 'no_telepon' => '081100000000', 'email' => 'info' . $d],
             'years' => ['2025' => ['tahun_awal' => 2025, 'tahun_akhir' => 2026, 'is_active' => 0], '2026' => ['tahun_awal' => 2026, 'tahun_akhir' => 2027, 'is_active' => 1]],
             'staff' => $staff, 'classes' => $classes, 'students' => $students, 'periods' => $periods,
+            // Pilot: wali kelas [kelas => staf], pemegang tahap [kode => staf], dan NUPTK/TTD [staf => …] dari file.
+            'wali' => $wali, 'approvers' => $approvers, 'signatures' => $signatures,
         ];
     }
 }

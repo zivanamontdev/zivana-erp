@@ -15,11 +15,13 @@ final class EraporApprovalInbox
             if (!$actor) throw new DomainException('Akun penyetuju tidak aktif.');
             $candidates=self::all($db,"SELECT a.id AS approval_id,a.sesi_id,a.kode,a.label,a.urutan,m.nama_lengkap,p.nama AS periode_nama,
                     CONCAT(t.tahun_awal,'/',t.tahun_akhir) AS tahun_label
-                FROM erapor_penyetuju_user au JOIN erapor_sesi_penyetuju a ON a.penyetuju_id=au.penyetuju_id
+                FROM erapor_sesi_penyetuju a
                 JOIN erapor_sesi s ON s.id=a.sesi_id JOIN murid m ON m.id=s.murid_id
                 JOIN periode_penilaian p ON p.id=s.periode_id JOIN tahun_ajaran t ON t.id=p.tahun_ajaran_id
-                WHERE au.user_id=? AND au.aktif=1 AND a.status='MENUNGGU' AND s.status='MENUNGGU_TTD'
-                ORDER BY p.awal_periode DESC,m.nama_lengkap,a.urutan,a.id",[$actorId]);
+                WHERE a.status='MENUNGGU' AND s.status='MENUNGGU_TTD' AND (
+                    (a.kode<>'WALI_KELAS' AND EXISTS (SELECT 1 FROM erapor_penyetuju_user au WHERE au.penyetuju_id=a.penyetuju_id AND au.user_id=? AND au.aktif=1))
+                    OR (a.kode='WALI_KELAS' AND EXISTS (SELECT 1 FROM erapor_wali_kelas w WHERE w.kelas_id=s.kelas_id AND w.user_id=?)))
+                ORDER BY p.awal_periode DESC,m.nama_lengkap,a.urutan,a.id",[$actorId,$actorId]);
             $tasks=[];
             foreach ($candidates as $candidate) {
                 try {

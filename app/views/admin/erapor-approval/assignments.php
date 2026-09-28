@@ -10,7 +10,8 @@ require VIEW_PATH.'/layouts/shell-header.php';
 <p class="erapor-approval-notice" role="status"><?= uiText($notice['message'],'body-sm',['tone'=>$notice['type']==='success'?'success':'status-inactive']) ?></p>
 <?php endif; ?>
 
-<p class="text-body-sm erapor-assignment-intro">Tetapkan secara eksplisit akun untuk tiap tahap. Akun harus aktif dan memiliki izin Persetujuan; tahap Kepala Sekolah hanya dapat ditugaskan kepada pegawai dengan jabatan Kepala Sekolah.</p>
+<p class="text-body-sm erapor-assignment-intro">Tetapkan secara eksplisit akun untuk tiap tahap. Akun harus aktif dan memiliki izin Persetujuan; tahap Kepala Sekolah hanya dapat ditugaskan kepada pegawai dengan jabatan Kepala Sekolah.
+Tahap 2 <strong>Wali Kelas</strong> tidak diatur di sini: pemegangnya wali kelas masing-masing kelas (Manajemen Kelas → Detail Kelas → Ubah Data Kelas).</p>
 
 <?php if ($configurationIssue): ?>
     <?= uiCard(uiText($configurationIssue,'body-sm',['tone'=>'status-inactive']), 'callout', ['tag'=>'section','class'=>'erapor-assignment-warning']) ?>
@@ -27,7 +28,7 @@ require VIEW_PATH.'/layouts/shell-header.php';
                 <?= uiBadge($flow['pending'].' rapor menunggu',$flow['pending']>0?'peringatan':'netral') ?>
             </div>
             <p class="text-caption-md erapor-assignment-scope">
-                <?= $flow['code']==='KEPALA_SEKOLAH'?'Tahap 2 · seluruh dokumen setelah kedua koordinator.':($flow['code']==='KOORDINATOR_QURAN'?'Tahap 1 · dokumen Ummi/Quran.':'Tahap 1 · dokumen Bahasa Inggris.') ?>
+                <?= $flow['code']==='KEPALA_SEKOLAH'?'Tahap 3 · seluruh dokumen setelah Wali Kelas.':($flow['code']==='KOORDINATOR_QURAN'?'Tahap 1 · Rapor Agama dan Rapor Ummi.':'Tahap 1 · Rapor Bahasa Inggris.') ?>
             </p>
             <div class="erapor-assignment-options">
                 <?php if (!$flow['users']): ?>

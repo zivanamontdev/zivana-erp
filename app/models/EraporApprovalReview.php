@@ -23,11 +23,8 @@ final class EraporApprovalReview
         $target=self::one($db,'SELECT a.id,a.sesi_id,a.penyetuju_id,a.kode,a.label,a.urutan,a.cakupan,a.status
             FROM erapor_sesi_penyetuju a WHERE a.id=? AND a.sesi_id=?',[$approvalId,$sessionId]);
         if (!$session || !$target || $session['status']!=='MENUNGGU_TTD') throw new DomainException('Tinjauan persetujuan tidak tersedia.');
-        $actor=self::one($db,"SELECT k.nama,j.nama AS jabatan FROM erapor_penyetuju_user a
-            JOIN users u ON u.id=a.user_id JOIN karyawan k ON k.id=u.karyawan_id JOIN jabatan j ON j.id=k.jabatan_id
-            WHERE a.penyetuju_id=? AND a.user_id=? AND a.aktif=1 AND u.is_active=1 AND k.is_active=1 AND j.is_active=1",
-            [$target['penyetuju_id'],$actorId]);
-        if (!$actor || ($target['kode']==='KEPALA_SEKOLAH' && $actor['jabatan']!=='Kepala Sekolah')) throw new DomainException('Akun tidak berwenang atas tinjauan ini.');
+        $actor=EraporApprovalAccess::actor($db,$target,$session,$actorId);
+        if (!$actor) throw new DomainException('Akun tidak berwenang atas tinjauan ini.');
 
         EraporSessionFactory::assertPackage($db,$session);
         $approvals=self::all($db,'SELECT * FROM erapor_sesi_penyetuju WHERE sesi_id=? ORDER BY urutan,id',[$sessionId]);
@@ -89,7 +86,8 @@ final class EraporApprovalReview
                 $label=($item['nomor'] ? $item['nomor'].'. ' : '').$item['teks'];
                 $value=$values['nilai:'.$item['id']] ?? null; $append((string)$label,$scales[(string)$value] ?? null);
             }
-            foreach ($defs['scopes'] as $scope) if (!empty($scope['catatan_wajib'])) $append('Catatan '.$scope['nama'],$values['catatan:'.$scope['id']] ?? null);
+            // Satu narasi Laporan Perkembangan Agama (disimpan pada catatan lingkup wajib pertama).
+            foreach ($defs['scopes'] as $scope) if (!empty($scope['catatan_wajib'])) { $append('Laporan Perkembangan Agama',$values['catatan:'.$scope['id']] ?? null); break; }
         } elseif ($type==='BING') {
             foreach ($defs['items'] as $item) {
                 $label=($item['penanda_cetak'] ? $item['penanda_cetak'].' ' : '').$item['label_cetak'];

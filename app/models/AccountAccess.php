@@ -31,10 +31,11 @@ class AccountAccess
             ['/murid', 'Murid', 'Manajemen Murid'],
             ['/kelas', 'Murid', 'Manajemen Kelas'],
             ['/rapor-murid', 'Murid', 'Rapor Murid'],
-            ['/erapor/persetujuan/penugasan', 'eRapor', 'Penugasan Penyetuju'],
-            ['/erapor/persetujuan', 'eRapor', 'Persetujuan'],
+            // Guru yang juga wali kelas/koordinator tetap mendarat di Portal Guru, bukan antrean persetujuan.
             ['/portal-guru/dashboard', 'Portal Guru', 'Dashboard'],
             ['/portal-guru/murid', 'Portal Guru', 'Daftar Murid'],
+            ['/erapor/persetujuan/penugasan', 'eRapor', 'Penugasan Penyetuju'],
+            ['/erapor/persetujuan', 'eRapor', 'Persetujuan'],
             ['/erapor/profil-penandatangan', 'eRapor', 'Profil Penandatangan'],
             ['/rbac', 'Sistem', 'RBAC'],
         ];

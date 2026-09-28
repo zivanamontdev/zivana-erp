@@ -121,11 +121,12 @@ final class DataBaseline
     ],
     ];
 
-    /** Izin eRapor: Superadmin/Admin mengelola & menyetujui; Guru mengelola profil tanda tangannya sendiri. */
+    /** Izin eRapor: Superadmin/Admin mengelola & menyetujui; Guru mengelola profil tanda tangannya sendiri dan
+     *  menyetujui bila ditugaskan (koordinator) atau menjadi wali kelas. Menu Persetujuan tetap hanya tampil untuk pemegang tugas. */
     public const RBAC_ERAPOR = [
         'Superadmin' => ['Persetujuan', 'Penugasan Penyetuju', 'Profil Penandatangan'],
         'Admin' => ['Persetujuan', 'Penugasan Penyetuju', 'Profil Penandatangan'],
-        'Guru' => ['Profil Penandatangan'],
+        'Guru' => ['Persetujuan', 'Profil Penandatangan'],
     ];
 
     /** Tambahkan jabatan yang belum ada; tidak mengubah jabatan yang sudah ada. */

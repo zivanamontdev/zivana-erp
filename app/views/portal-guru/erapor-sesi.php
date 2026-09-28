@@ -111,7 +111,8 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <?php elseif ($canSend && $session['status'] === 'TELAH_DIISI'): ?>
                     <?= uiButton('Konfirmasi Penerimaan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-reception'=>true]]) ?>
                 <?php elseif (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
-                    <span class="teacher-report-action teacher-report-action--pending"><?= $session['status'] === 'SELESAI' ? 'Rapor telah disetujui' : 'Menunggu proses persetujuan' ?></span>
+                    <?php $allApproved = !empty($form['approvals']) && !array_filter($form['approvals'], fn($a) => $a['status'] !== 'DISETUJUI'); ?>
+                    <span class="teacher-report-action teacher-report-action--pending"><?= $session['status'] === 'SELESAI' || $allApproved ? 'Rapor telah disetujui' : 'Menunggu proses persetujuan' ?></span>
                 <?php endif; ?>
                 <a class="ui-button ui-button--outline" href="<?= e($pdfUrl) ?>" target="_blank" rel="noopener" data-erapor-pdf><?= e($pdfLabel) ?></a>
                 <?= uiButton('Kembali ke Dashboard', 'outline', ['marginVertical'=>0, 'attributes'=>['onclick'=>'window.location.href=\''.BASE_PATH.'/portal-guru/dashboard\'']]) ?>
@@ -123,6 +124,24 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <?php if ($kelasLabel !== ''): ?> · <?= e($kelasLabel) ?><?php endif; ?>
             · Status <?= e(str_replace('_', ' ', $session['status'])) ?>
         </p>
+        <?php if (!empty($form['approvals'])): ?>
+            <?php
+            $pendingRank = null;
+            foreach ($form['approvals'] as $approval) if ($approval['status'] !== 'DISETUJUI') { $pendingRank = $pendingRank === null ? (int)$approval['urutan'] : min($pendingRank, (int)$approval['urutan']); }
+            ?>
+            <ol class="erapor-approval-track" aria-label="Posisi rapor dalam alur persetujuan">
+                <?php foreach ($form['approvals'] as $approval): ?>
+                    <?php $state = $approval['status'] === 'DISETUJUI' ? 'done' : ((int)$approval['urutan'] === $pendingRank ? 'current' : 'next'); ?>
+                    <li class="erapor-approval-step is-<?= $state ?>">
+                        <span class="erapor-approval-dot" aria-hidden="true"><?= $state === 'done' ? '&#10003;' : (int)$approval['urutan'] ?></span>
+                        <span>
+                            <strong><?= e($approval['label']) ?></strong>
+                            <small><?= $state === 'done' ? e('Disetujui ' . ($approval['nama'] ?? '') . ($approval['disetujui_pada'] ? ' · ' . date('d/m/Y', strtotime($approval['disetujui_pada'])) : '')) : ($state === 'current' ? 'Sedang ditinjau' : 'Menunggu tahap sebelumnya') ?></small>
+                        </span>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        <?php endif; ?>
         <?php if (!$canEdit): ?>
             <p class="erapor-session-notice" role="status">
                 <?= e($readonlyMessages[$form['capabilities']['read_only_reason'] ?? ''] ?? 'Sesi ini hanya dapat dilihat.') ?>

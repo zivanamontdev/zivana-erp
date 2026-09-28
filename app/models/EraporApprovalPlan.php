@@ -17,15 +17,20 @@ final class EraporApprovalPlan
             $docs[(int)$d['id']]=$d; $rubrics[(int)$d['rubrik_id']]=$d; $types[$d['jenis_dokumen']]=true;
         }
         $byId=[]; $codes=[];
+        // V2 (ada tahap Wali Kelas): Koordinator (1) -> Wali Kelas (2) -> Kepala Sekolah (3); Koordinator Agama/Al-Qur'an
+        // mencakup Ummi + Agama. V1 (snapshot sesi lama tanpa Wali Kelas): Koordinator (1) -> Kepala Sekolah (2), Quran = Ummi.
+        $v2=in_array('WALI_KELAS',array_column($flows,'kode'),true);
+        $ranks=$v2?['KOORDINATOR_QURAN'=>1,'KOORDINATOR_BING'=>1,'WALI_KELAS'=>2,'KEPALA_SEKOLAH'=>3]:['KOORDINATOR_QURAN'=>1,'KOORDINATOR_BING'=>1,'KEPALA_SEKOLAH'=>2];
+        $coordinatorTypes=['KOORDINATOR_QURAN'=>$v2?['UMMI','AGAMA']:['UMMI'],'KOORDINATOR_BING'=>['BING']];
         foreach ($flows as $f) {
             self::positive($f['id'] ?? null);
-            if (!in_array($f['kode'] ?? null,['KOORDINATOR_QURAN','KOORDINATOR_BING','KEPALA_SEKOLAH'],true)
+            if (!in_array($f['kode'] ?? null,['KOORDINATOR_QURAN','KOORDINATOR_BING','WALI_KELAS','KEPALA_SEKOLAH'],true)
                 || !in_array($f['aktif'] ?? null,[0,1,'0','1',false,true],true)
                 || isset($byId[(int)$f['id']]) || isset($codes[$f['kode']])) throw new DomainException('Alur penyetuju duplikat/tidak valid.');
             self::positive($f['urutan'] ?? null);
             if (!is_string($f['label'] ?? null) || trim($f['label'])==='') throw new DomainException('Label penyetuju kosong.');
-            $head=$f['kode']==='KEPALA_SEKOLAH';
-            if ((int)$f['urutan']!==($head?2:1) || ($f['cakupan'] ?? null)!==($head?'SEMUA':'TERBATAS')) throw new DomainException('Urutan/cakupan penyetuju tidak sesuai.');
+            $rank=$ranks[$f['kode']];
+            if ((int)$f['urutan']!==$rank || ($f['cakupan'] ?? null)!==($rank>1?'SEMUA':'TERBATAS')) throw new DomainException('Urutan/cakupan penyetuju tidak sesuai.');
             $byId[(int)$f['id']]=$f; $codes[$f['kode']]=$f;
         }
         $scopes=[];
@@ -35,13 +40,12 @@ final class EraporApprovalPlan
             if (!isset($byId[$id]) || $byId[$id]['cakupan']!=='TERBATAS' || isset($scopes[$id][$rid])) throw new DomainException('Mapping cakupan tidak valid.');
             $scopes[$id][$rid]=true;
             if (isset($rubrics[$rid])) {
-                $expected=$byId[$id]['kode']==='KOORDINATOR_QURAN'?'UMMI':'BING';
-                if ($rubrics[$rid]['jenis_dokumen']!==$expected) throw new DomainException('Koordinator tidak boleh menyetujui dokumen bidang lain.');
+                if (!in_array($rubrics[$rid]['jenis_dokumen'],$coordinatorTypes[$byId[$id]['kode']],true)) throw new DomainException('Koordinator tidak boleh menyetujui dokumen bidang lain.');
             }
         }
-        $required=['KEPALA_SEKOLAH'=>array_keys($docs)];
-        foreach (['KOORDINATOR_QURAN'=>'UMMI','KOORDINATOR_BING'=>'BING'] as $code=>$type) {
-            foreach ($docs as $id=>$d) if ($d['jenis_dokumen']===$type) $required[$code][]=$id;
+        $required=$v2?['WALI_KELAS'=>array_keys($docs),'KEPALA_SEKOLAH'=>array_keys($docs)]:['KEPALA_SEKOLAH'=>array_keys($docs)];
+        foreach ($coordinatorTypes as $code=>$types) {
+            foreach ($docs as $id=>$d) if (in_array($d['jenis_dokumen'],$types,true)) $required[$code][]=$id;
         }
         $output=[];
         foreach ($required as $code=>$ids) {

@@ -24,6 +24,12 @@ final class EraporPdfAccess
             JOIN karyawan k ON k.id=u.karyawan_id AND k.is_active=1 JOIN jabatan j ON j.id=k.jabatan_id AND j.is_active=1
             WHERE sp.sesi_id=? AND sp.cakupan='SEMUA' AND (sp.kode<>'KEPALA_SEKOLAH' OR j.nama='Kepala Sekolah') LIMIT 1");
         $q->execute([$userId, $sessionId]);
+        if ($q->fetchColumn()) return true;
+        // Wali kelas memegang tahap WALI_KELAS (cakupan SEMUA) untuk sesi di kelasnya.
+        $q = $db->prepare("SELECT 1 FROM erapor_sesi s JOIN erapor_sesi_penyetuju sp ON sp.sesi_id=s.id AND sp.kode='WALI_KELAS'
+            JOIN erapor_wali_kelas w ON w.kelas_id=s.kelas_id AND w.user_id=? JOIN users u ON u.id=w.user_id AND u.is_active=1
+            WHERE s.id=? LIMIT 1");
+        $q->execute([$userId, $sessionId]);
         return (bool) $q->fetchColumn();
     }
 

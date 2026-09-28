@@ -26,7 +26,11 @@ Semua akun lain, karyawan, data sekolah + media, tahun ajaran, periode, kelas, m
 
 Isian **File Data Guru & Murid (.xlsx)** di halaman reset (opsional) membaca format "Data Piloting E-Rapor" (No, Nama Anak, NISN, Kelas, Nama Guru, Keterangan, Jenis Kelamin, Tempat, Tanggal Lahir, Agama, Anak Ke-, Jumlah Bersaudara, …) lewat `PilotDataImport`:
 
-- Guru dan murid fiktif diganti isi file; Kepala Sekolah, Admin, dan kelas seed tetap. Kelas di file yang belum ada (mis. "Ranting Cemara") ditambahkan.
+- Guru dan murid fiktif diganti isi file; Admin dan kelas seed tetap. Kelas di file yang belum ada (mis. "Ranting Cemara") ditambahkan.
+- Format lengkap (docs/Data Piloting E-Rapor Zivana.xlsx): blok pimpinan di atas tabel (Nama Kepala, English Coordinator, Koordinator Agama + NUPTK + tautan TTD) serta kolom Nama Wali Kelas, NUPTK, TTD Wali Kelas, Nama Guru PIC.
+  - Kepala Sekolah dari file menggantikan kepala fiktif; Koordinator Bahasa Inggris → tahap KOORDINATOR_BING, Koordinator Agama → tahap KOORDINATOR_QURAN.
+  - Wali kelas ditetapkan per kelas (tahap WALI_KELAS, dapat diubah di Detail Kelas → Ubah Data Kelas). Guru PIC mengisi rapor.
+  - TTD diunduh dari tautan Google Drive (harus dapat diakses publik), dipotong/diperkecil, lalu disimpan di Profil Penandatangan akun terkait. Gagal unduh hanya menjadi peringatan; unggah manual lewat Profil Penandatangan.
 - Guru dibuat sebagai Guru Kelas dengan email `nama.depan@sekolahzivanamontessori.sch.id` dari nama tanpa gelar.
 - Kolom yang tidak ada di file (NIK, no. akta, telepon, pendidikan orang tua) diisi `-`; tanggal masuk = awal tahun ajaran. Lengkapi lewat Manajemen Murid.
 - Rapor contoh berisi nilai **tidak** dibuat untuk data asli.
