@@ -91,6 +91,9 @@ $router->get('/rapor-murid/{id}', [RaporMuridController::class, 'show']);
 $router->get('/erapor/persetujuan', [EraporApprovalController::class, 'index']);
 $router->get('/erapor/persetujuan/{sessionId}/{approvalId}', [EraporApprovalController::class, 'review']);
 $router->post('/erapor/persetujuan/{sessionId}/{approvalId}/setujui', [EraporApprovalController::class, 'approve']);
+$router->post('/erapor/persetujuan/{sessionId}/{approvalId}/terbitkan', [EraporApprovalController::class, 'publish']);
+// Link unduh rapor untuk orang tua (publik, bertoken): diteruskan ke URL R2 private bertanda tangan.
+$router->get('/rapor/unduh/{token}', [EraporDownloadController::class, 'show']);
 $router->get('/erapor/persetujuan/penugasan', [EraporApprovalSetupController::class, 'index']);
 $router->post('/erapor/persetujuan/penugasan', [EraporApprovalSetupController::class, 'update']);
 $router->get('/erapor/profil-penandatangan', [EraporSignerProfileController::class, 'index']);
@@ -114,6 +117,7 @@ $router->post('/api/erapor/sesi/{id}/konfirmasi-isi', [EraporTeacherApiControlle
 $router->post('/api/erapor/sesi/{id}/konfirmasi-penerimaan', [EraporTeacherApiController::class, 'confirmReception']);
 $router->post('/portal-guru/sesi/siapkan', [PortalGuruController::class, 'prepareEraporSession']);
 $router->get('/portal-guru/sesi/{id}', [PortalGuruController::class, 'showEraporSession']);
+$router->post('/portal-guru/sesi/{id}/bagikan', [PortalGuruController::class, 'shareEraporSession']);
 $router->get('/portal-guru/dashboard', [PortalGuruController::class, 'dashboard']);
 $router->get('/portal-guru/profil', [ProfileController::class, 'index']);
 $router->post('/portal-guru/profil', [ProfileController::class, 'update']);

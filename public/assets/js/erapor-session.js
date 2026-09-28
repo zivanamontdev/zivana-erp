@@ -567,6 +567,25 @@
       if (field.tagName === 'SELECT' || field.type === 'checkbox' || field.dataset.eraporRadio === 'true') noteChange(field);
     });
 
+    // Bagikan ke Orang Tua: tautan wa.me terbuka seperti biasa; pembagian dicatat di server (keepalive).
+    document.addEventListener('click', function (event) {
+      var link = event.target.closest('[data-erapor-share]');
+      if (!link) return;
+      var body = new FormData();
+      body.append('csrf_token', root.dataset.csrfToken);
+      body.append('penerima', link.dataset.eraporShare);
+      fetch(window.location.pathname.replace(/\/$/, '') + '/bagikan', {method: 'POST', body: body, credentials: 'same-origin', keepalive: true})
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (data) {
+          if (!data || !data.ok) { if (window.uiToast) window.uiToast('Pembagian belum tercatat. Coba lagi.', 'error'); return; }
+          document.querySelectorAll('[data-erapor-share-status]').forEach(function (status) {
+            status.innerHTML = '<span class="badge badge-positif">Dibagikan ke Orang Tua</span>';
+          });
+          if (window.uiToast) window.uiToast('Rapor dibagikan ke orang tua.', 'success');
+        })
+        .catch(function () { if (window.uiToast) window.uiToast('Pembagian belum tercatat. Coba lagi.', 'error'); });
+    });
+
     // Konfirmasi memakai modal aplikasi (#erapor-confirm-modal), bukan window.confirm() bawaan browser.
     var confirmModal = root.querySelector('#erapor-confirm-modal');
     // Pindahkan ke <body> agar overlay menutupi action bar fixed (root membentuk stacking context sendiri).

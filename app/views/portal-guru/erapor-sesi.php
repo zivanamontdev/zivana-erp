@@ -92,6 +92,35 @@ require VIEW_PATH . '/layouts/focus-header.php';
       data-login-url="<?= e(BASE_PATH . '/login') ?>"
       data-csrf-token="<?= e(getCsrfToken()) ?>"
       data-can-submit="<?= $canSend ? 'true' : 'false' ?>">
+    <?php
+    // Bagikan ke Orang Tua: satu kontak = tombol langsung membuka WhatsApp ke nomor itu; dua kontak = dropdown Ayah/Ibu;
+    // tanpa kontak = nonaktif. Klik dicatat (Dibagikan ke Orang Tua) oleh erapor-session.js.
+    $renderShare = static function (bool $iconOnly) use ($share, $session): string {
+        if (empty($share)) return '';
+        $label = 'Bagikan ke Orang Tua';
+        $content = '<span class="ui-button-icon" aria-hidden="true">' . icon('icon_share') . '</span>' . ($iconOnly ? '' : '<span class="ui-button-label">' . e($label) . '</span>');
+        $class = 'ui-button ui-button--primary' . ($iconOnly ? ' ui-button--icon-only' : '');
+        $contacts = $share['contacts'];
+        if (!$contacts) {
+            return '<span class="erapor-share-disabled" title="Kontak orang tua belum tersedia di data murid">'
+                . uiButton($label, 'disabled', ['icon'=>'icon_share', 'iconOnly'=>$iconOnly, 'marginVertical'=>0, 'disabled'=>true, 'attributes'=>['aria-describedby'=>'erapor-share-hint']]) . '</span>';
+        }
+        if (count($contacts) === 1) {
+            $code = array_key_first($contacts); $contact = $contacts[$code];
+            return '<a class="' . $class . '" href="' . e($contact['wa_url']) . '" target="_blank" rel="noopener" data-erapor-share="' . e($code) . '"'
+                . ' title="' . e($label . ' (' . $contact['label'] . ')') . '" aria-label="' . e($label . ' (' . $contact['label'] . ')') . '">' . $content . '</a>';
+        }
+        $items = '';
+        foreach ($contacts as $code => $contact) {
+            $items .= '<a href="' . e($contact['wa_url']) . '" target="_blank" rel="noopener" data-erapor-share="' . e($code) . '">'
+                . '<strong>' . e($contact['label']) . '</strong><small>+' . e($contact['phone']) . '</small></a>';
+        }
+        return '<div class="action-menu erapor-share-menu" data-action-menu>'
+            . '<button type="button" class="' . $class . '" data-action-menu-toggle aria-haspopup="menu" title="' . e($label) . '" aria-label="' . e($label) . '">' . $content
+            . ($iconOnly ? '' : '<span class="ui-button-icon erapor-share-caret" aria-hidden="true">' . icon('icon_chevron') . '</span>') . '</button>'
+            . '<div class="action-menu-dropdown erapor-share-dropdown" role="menu">' . $items . '</div></div>';
+    };
+    ?>
     <?php // Tombol kembali: di luar kartu judul pada desktop, di dalam kartu pada mobile. ?>
     <a class="ui-button ui-button--outline ui-button--icon-only pengisian-back pengisian-back--outside" href="<?= BASE_PATH ?>/portal-guru/dashboard" aria-label="Kembali ke Dashboard" title="Kembali ke Dashboard"><span class="ui-button-icon" aria-hidden="true"><?= icon('icon_chevron') ?></span></a>
     <section class="pengisian-header-card">
@@ -106,17 +135,21 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <p class="pengisian-student-name"><?= e($student['nama_lengkap']) ?></p>
                 <?php if (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
                     <?php $allApproved = !empty($form['approvals']) && !array_filter($form['approvals'], fn($a) => $a['status'] !== 'DISETUJUI'); ?>
-                    <p class="pengisian-approval-status"><?= $session['status'] === 'SELESAI' || $allApproved ? uiBadge('Rapor telah disetujui', 'positif') : uiBadge('Menunggu proses persetujuan', 'peringatan') ?></p>
+                    <p class="pengisian-approval-status" data-erapor-share-status><?= !empty($share['shared_at']) ? uiBadge('Dibagikan ke Orang Tua', 'positif') : ($session['status'] === 'SELESAI' ? uiBadge('Rapor telah terbit', 'positif') : ($allApproved ? uiBadge('Rapor telah disetujui', 'positif') : uiBadge('Menunggu proses persetujuan', 'peringatan'))) ?></p>
+                    <?php if (!empty($share['shared_at'])): ?><p class="erapor-share-hint">Dibagikan ke <?= e($share['shared_to'] === 'AYAH' ? 'Ayah' : 'Ibu') ?> · <?= e(date('d/m/Y H:i', strtotime($share['shared_at']))) ?> · diunduh <?= (int)$share['downloads'] ?> kali · tautan berlaku sampai <?= e(date('d/m/Y', strtotime($share['expires_at']))) ?></p><?php endif; ?>
+                    <?php if (!empty($share) && !$share['contacts']): ?><p class="erapor-share-hint" id="erapor-share-hint">Kontak orang tua belum tersedia. Lengkapi nomor HP ayah/ibu di data murid untuk membagikan rapor.</p><?php endif; ?>
                 <?php endif; ?>
             </div>
             <?php // Mobile: aksi header diringkas jadi tombol ikon; navigasi & Selesaikan ada di bar bawah (pager). ?>
             <div class="pengisian-header-icons">
                 <?= uiButton($pdfLabel, 'outline', ['icon'=>'icon_file_text', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>$pdfLabel, 'data-erapor-open-url'=>$pdfUrl]]) ?>
                 <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
+                <?= $renderShare(true) ?>
             </div>
             <div class="pengisian-header-actions">
                 <a class="ui-button ui-button--outline" href="<?= e($pdfUrl) ?>" target="_blank" rel="noopener" data-erapor-pdf><?= e($pdfLabel) ?></a>
                 <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
+                <?= $renderShare(false) ?>
                 <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
                     <?php // Aktif setelah semua rapor wajib lengkap (diatur erapor-session.js dari data server). ?>
                     <?= uiButton('Selesaikan Rapor', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm'=>true]]) ?>
@@ -522,6 +555,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
     <div class="modal-actions"><?= uiButton('Tutup', 'outline', ['marginVertical'=>0, 'attributes'=>['data-modal-close'=>true]]) ?></div>
     <?= uiModal('erapor-approval-modal', 'Alur Persetujuan', ob_get_clean(), ['variant'=>'delete']) ?>
 <?php endif; ?>
+<script src="<?= BASE_PATH ?>/assets/js/action-menu.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/action-menu.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/modal.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/modal.js') ?>"></script>
 
 <script src="<?= BASE_PATH ?>/assets/js/ui-select.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-select.js') ?>"></script>

@@ -16,7 +16,7 @@ foreach($router->routes as [$verb,$path,$handler]) {
     fclose($pipes[1]); fclose($pipes[2]); $code=proc_close($process);
     $result=json_decode($output,true);
     // Opt-in eRapor HTML routes stay undiscoverable while disabled; token-gated system tools (migration, data reset) are 404 without their .env token.
-    $expectedStatus = str_starts_with($path, '/erapor/') || in_array($path, ['/sistem/migrasi-erapor', '/sistem/reset-data'], true) ? 404 : 403;
+    $expectedStatus = str_starts_with($path, '/erapor/') || str_starts_with($path, '/rapor/unduh/') || in_array($path, ['/sistem/migrasi-erapor', '/sistem/reset-data'], true) ? 404 : 403;
     if($code!==0 || ($result['status']??0)!==$expectedStatus || ($result['employees']??-1)!==0) throw new RuntimeException("Route guard failed: $verb $path: $output $error");
     $count++;
 }

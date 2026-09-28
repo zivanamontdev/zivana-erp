@@ -95,6 +95,15 @@ define('SMTP_USER', envValue($env, 'SMTP_USER'));
 define('SMTP_PASS', envValue($env, 'SMTP_PASS'));
 define('SMTP_FROM_EMAIL', envValue($env, 'SMTP_FROM_EMAIL'));
 
+// --- Cloudflare R2 (S3-compatible): PDF rapor terbit disimpan di bucket private ---
+define('R2_ENABLED', filter_var(envValue($env, 'R2_ENABLED', 'false'), FILTER_VALIDATE_BOOLEAN));
+define('R2_ACCESS_KEY_ID', trim((string) envValue($env, 'R2_ACCESS_KEY_ID', '')));
+define('R2_SECRET_ACCESS_KEY', trim((string) envValue($env, 'R2_SECRET_ACCESS_KEY', '')));
+define('R2_ENDPOINT', rtrim(trim((string) envValue($env, 'R2_ENDPOINT', '')), '/'));
+define('R2_PRIVATE_BUCKET', trim((string) envValue($env, 'R2_PRIVATE_BUCKET', '')));
+// Opsional: CA bundle untuk PHP lokal tanpa sertifikat bawaan (mis. Windows); kosongkan di server.
+define('R2_CA_BUNDLE', trim((string) envValue($env, 'R2_CA_BUNDLE', '')));
+
 // --- Error reporting sesuai APP_DEBUG ---
 if (APP_DEBUG) {
     error_reporting(E_ALL);

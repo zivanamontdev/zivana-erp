@@ -1,6 +1,6 @@
 # Migrasi eRapor lewat Browser (Hostinger, tanpa SSH)
 
-Pengganti `erapor-cpanel-cron.md` bila Cron tidak menampilkan output. Menjalankan logika yang sama (`EraporPilotInstaller`) dengan `database/run-erapor-pilot.php`: 19 migrasi ber-checksum (termasuk tahap Wali Kelas), seed rubrik RTS/UMMI/PPI/BING/AGAMA, dan seed alur persetujuan. Tidak mengimpor dump, tidak mengubah data rapor lama, tidak membuat assignment penyetuju, dan tidak menyalakan `ERAPOR_API_ENABLED`.
+Pengganti `erapor-cpanel-cron.md` bila Cron tidak menampilkan output. Menjalankan logika yang sama (`EraporPilotInstaller`) dengan `database/run-erapor-pilot.php`: 20 migrasi ber-checksum (termasuk tahap Wali Kelas dan distribusi rapor terbit ke R2), seed rubrik RTS/UMMI/PPI/BING/AGAMA, dan seed alur persetujuan. Tidak mengimpor dump, tidak mengubah data rapor lama, tidak membuat assignment penyetuju, dan tidak menyalakan `ERAPOR_API_ENABLED`.
 
 ## Pengaman
 

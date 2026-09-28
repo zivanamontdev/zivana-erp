@@ -71,6 +71,25 @@ class PortalGuruController extends Controller
         }
     }
 
+    /** Guru PIC mencatat pembagian tautan rapor ke orang tua (WhatsApp dibuka oleh browser). */
+    public function shareEraporSession(string $id): void
+    {
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'Portal Guru', 'Dashboard', 'lihat');
+        if (!defined('ERAPOR_API_ENABLED') || !ERAPOR_API_ENABLED || !preg_match('/^[1-9][0-9]*$/D', $id)) {
+            $this->json(['ok'=>false], 404); return;
+        }
+        try {
+            EraporDistribution::markShared(Database::getInstance(), (int)$id, (int)($_SESSION['user_id'] ?? 0), (string)($_POST['penerima'] ?? ''));
+            $this->json(['ok'=>true]);
+        } catch (DomainException $e) {
+            $this->json(['ok'=>false,'message'=>$e->getMessage()], 422);
+        } catch (Throwable $e) {
+            error_log('Erapor share failed: '.get_class($e));
+            $this->json(['ok'=>false,'message'=>'Pembagian gagal dicatat.'], 500);
+        }
+    }
+
     public function showEraporSession(string $id): void
     {
         $this->middleware(AuthMiddleware::class);
@@ -84,6 +103,7 @@ class PortalGuruController extends Controller
             $this->view('portal-guru.erapor-sesi', [
                 'pageTitle'=>'Pengisian Rapor','form'=>$form,'activeNavItem'=>'portal-dashboard',
                 'hasOfficialPdf'=>EraporPdfAccess::hasOfficial(Database::getInstance(), (int)$id),
+                'share'=>EraporDistribution::shareState(Database::getInstance(), (int)$id),
             ]);
         } catch (DomainException) {
             http_response_code(404); require VIEW_PATH.'/errors/404.php';

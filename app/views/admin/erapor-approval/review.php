@@ -10,6 +10,10 @@ if (!empty($canPdf)) $headerActions .= '<a class="ui-button ui-button--outline" 
 if ($canApprove) {
     $headerActions .= ' ' . uiButton('Setujui', 'primary', ['marginVertical' => 0, 'attributes' => ['data-modal-open' => $modalId]]);
 }
+$publishModalId = 'modal-terbitkan-erapor-' . $sessionId;
+if (!empty($canPublish)) {
+    $headerActions .= ' ' . uiButton('Terbitkan Rapor', 'primary', ['marginVertical' => 0, 'attributes' => ['data-modal-open' => $publishModalId]]);
+}
 header('Cache-Control: private, no-store, max-age=0');
 header('X-Robots-Tag: noindex, nofollow');
 require VIEW_PATH . '/layouts/shell-header.php';
@@ -27,9 +31,12 @@ require VIEW_PATH . '/layouts/shell-header.php';
 </div>
 
 <div class="erapor-approval-state" role="status">
-    <?php if ($review['all_approved']): ?>
-        <?= uiBadge('Menunggu publikasi', 'peringatan') ?>
-        <?= uiText('Semua tahap persetujuan tercatat. Rapor belum diterbitkan dan belum berstatus selesai.', 'body-sm') ?>
+    <?php if ($review['session']['status'] === 'SELESAI'): ?>
+        <?= uiBadge('Terbit', 'positif') ?>
+        <?= uiText('Rapor sudah diterbitkan. Guru PIC dapat membagikan tautan unduh kepada orang tua.', 'body-sm') ?>
+    <?php elseif ($review['all_approved']): ?>
+        <?= uiBadge('Menunggu diterbitkan', 'peringatan') ?>
+        <?= uiText('Semua tahap persetujuan tercatat. Kepala Sekolah dapat menerbitkan rapor.', 'body-sm') ?>
     <?php elseif ($approval['status'] === 'DISETUJUI'): ?>
         <?= uiBadge('Persetujuan tercatat', 'positif') ?>
         <?= uiText('Persetujuan ini sudah tercatat dan tidak dapat diulang.', 'body-sm') ?>
@@ -102,6 +109,21 @@ $chevron = '<span class="ui-disclosure-chevron" aria-hidden="true">' . icon('ico
     <?php echo uiModal($modalId, 'Setujui Persetujuan?', ob_get_clean(), [
         'variant' => 'delete',
         'description' => 'Persetujuan ini akan dicatat sebagai bukti resmi dan tidak dapat dibatalkan. Pastikan seluruh dokumen dalam cakupan Anda sudah ditinjau.',
+    ]); ?>
+<?php endif; ?>
+
+<?php if (!empty($canPublish)): ?>
+    <?php ob_start(); ?>
+    <form method="POST" action="<?= BASE_PATH ?>/erapor/persetujuan/<?= $sessionId ?>/<?= $approvalId ?>/terbitkan">
+        <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
+        <div class="modal-actions">
+            <?= uiButton('Batal', 'outline', ['marginVertical' => 0, 'attributes' => ['data-modal-close' => true]]) ?>
+            <?= uiButton('Terbitkan Rapor', 'primary', ['type' => 'submit', 'marginVertical' => 0]) ?>
+        </div>
+    </form>
+    <?php echo uiModal($publishModalId, 'Terbitkan Rapor?', ob_get_clean(), [
+        'variant' => 'delete',
+        'description' => 'PDF resmi disimpan ke penyimpanan rapor dan tautan unduh untuk orang tua dibuat (berlaku ' . EraporDistribution::LINK_DAYS . ' hari). Rapor berstatus Selesai dan tidak dapat diubah lagi.',
     ]); ?>
 <?php endif; ?>
 

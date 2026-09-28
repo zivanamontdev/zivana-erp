@@ -45,12 +45,16 @@ final class EraporApprovalController extends Controller
 
         $canApprove = (new RoleMiddleware())->check('eRapor', 'Persetujuan', 'edit');
         $canApprove = $canApprove && $review['can_approve'];
+        // Terbitkan: Kepala Sekolah, setelah seluruh persetujuan tercatat dan rapor belum terbit.
+        $canPublish = !$monitor && (new RoleMiddleware())->check('eRapor', 'Persetujuan', 'edit')
+            && $review['approval']['kode'] === 'KEPALA_SEKOLAH' && $review['all_approved'] && $review['session']['status'] === 'MENUNGGU_TTD';
         $this->view('admin.erapor-approval.review', [
             'pageTitle' => 'Tinjau Persetujuan',
             'breadcrumb' => breadcrumb(['Persetujuan eRapor', '/erapor/persetujuan'], 'Tinjau'),
             'activeNavItem' => 'erapor-approval',
             'review' => $review,
             'canApprove' => $canApprove,
+            'canPublish' => $canPublish,
             // PDF memuat seluruh paket: hanya penyetuju bercakupan SEMUA (Kepala Sekolah) atau Superadmin.
             'canPdf' => EraporPdfAccess::canView(Database::getInstance(), (int) $sessionId, (int) $_SESSION['user_id'])
                 || EraporPdfAccess::scopedDocumentIds(Database::getInstance(), (int) $sessionId, (int) $_SESSION['user_id']) !== [],
@@ -89,6 +93,27 @@ final class EraporApprovalController extends Controller
             ];
         }
 
+        $this->redirect('/erapor/persetujuan/' . (int) $sessionId . '/' . (int) $approvalId);
+    }
+
+    public function publish(string $sessionId, string $approvalId): void
+    {
+        if (!$this->enabled()) return;
+        $this->middleware(AuthMiddleware::class);
+        $this->middleware(RoleMiddleware::class, 'eRapor', 'Persetujuan', 'edit');
+        if (!$this->validId($sessionId) || !$this->validId($approvalId)) {
+            $this->notFound();
+            return;
+        }
+        try {
+            EraporDistribution::publish(Database::getInstance(), (int) $sessionId, (int) $approvalId, (int) $_SESSION['user_id']);
+            $_SESSION['erapor_approval_notice'] = ['type' => 'success', 'message' => 'Rapor diterbitkan. Guru PIC kini dapat membagikan tautan unduh kepada orang tua.'];
+        } catch (DomainException $exception) {
+            $_SESSION['erapor_approval_notice'] = ['type' => 'error', 'message' => $exception->getMessage()];
+        } catch (Throwable $exception) {
+            error_log('eRapor publish failed: ' . $exception->getMessage());
+            $_SESSION['erapor_approval_notice'] = ['type' => 'error', 'message' => 'Rapor gagal diterbitkan (unggah atau penyimpanan gagal). Tidak ada perubahan; coba lagi.'];
+        }
         $this->redirect('/erapor/persetujuan/' . (int) $sessionId . '/' . (int) $approvalId);
     }
 
