@@ -339,9 +339,9 @@ final class EraporPackagePdfRenderer
         $html.='<td style="'.$width.'"><div class="sign-job">Mengetahui,<br>Orang Tua Siswa</div><div class="sign-image"></div><div class="sign-line">&nbsp;</div></td>';
         foreach ($definitions as $definition) {
             $role=(string)$definition['peran'];
-            // "English Teacher" pada Rapor Bahasa Inggris adalah guru pengisi, bukan wali kelas.
-            $signerKey=$d['jenis_dokumen']==='BING' && $role==='GURU_KELAS' && isset($block['signers']['GURU_PENGISI'])?'GURU_PENGISI':$role;
-            $signer=$block['signers'][$signerKey] ?? null;
+            // "English Teacher" di Rapor Bahasa Inggris = guru kelas murid (SPEK_RUBRIK_BING.md bagian 2), sama dengan
+            // kolom Guru Kelas di RTS/Agama: wali kelas pada paket bertahap Wali Kelas, guru pengisi pada paket lama.
+            $signer=$block['signers'][$role] ?? null;
             $job=str_replace('{nama_kelas}',(string)($p['student']['nama_kelas'] ?? ''),(string)$definition['jabatan_cetak']);
             // Tinggi area jabatan tetap (maks. 3 baris) agar gambar dan garis nama ketiga kolom sejajar.
             $html.='<td style="'.$width.'"><div class="sign-job">'.(!empty($definition['prefiks'])?e($definition['prefiks']).'<br>':'').e($job).'</div>';

@@ -256,8 +256,8 @@ final class EraporPublication
     private static function signatureBlock(PDO $db,array $session,array $currentApprovals,?DateTimeImmutable $currentDate,string $place): array
     {
         $signers=[]; $teacher=self::one($db,'SELECT guru_nama AS nama,guru_nuptk AS nuptk,guru_ttd_png AS ttd_png,guru_ttd_sha256 AS ttd_sha256,guru_ttd_disetujui_pada AS consent_at FROM erapor_sesi_penerimaan WHERE sesi_id=?',[$session['id']]);
-        // Guru pengisi (penerimaan) tetap menjadi "English Teacher" di Rapor Bahasa Inggris.
-        if ($teacher) $signers['GURU_KELAS']=$signers['GURU_PENGISI']=self::normalizeSigner($teacher);
+        // Paket lama tanpa tahap Wali Kelas: kolom Guru Kelas/English Teacher ditandatangani guru pengisi (penerimaan).
+        if ($teacher) $signers['GURU_KELAS']=self::normalizeSigner($teacher);
         // Paket dengan tahap Wali Kelas: kolom Guru Kelas ditandatangani wali kelas setelah ia menyetujui (kosong sebelumnya).
         if (self::one($db,"SELECT 1 FROM erapor_sesi_penyetuju WHERE sesi_id=? AND kode='WALI_KELAS'",[$session['id']])) unset($signers['GURU_KELAS']);
         $approvals=self::all($db,'SELECT a.id,a.sesi_id,a.kode,s.nama,s.nuptk,s.ttd_png,s.ttd_sha256,s.ttd_disetujui_pada AS consent_at
