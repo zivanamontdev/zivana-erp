@@ -162,7 +162,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     <?php // Aktif setelah semua rapor wajib lengkap (diatur erapor-session.js dari data server). ?>
                     <?= uiButton('Selesaikan Rapor', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm'=>true]]) ?>
                 <?php elseif ($canSend && $session['status'] === 'TELAH_DIISI'): ?>
-                    <?= uiButton('Konfirmasi Penerimaan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-reception'=>true]]) ?>
+                    <?= uiButton('Finalisasi', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-reception'=>true]]) ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -522,7 +522,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
         <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
             <?= uiButton('Selesaikan Rapor', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm'=>true, 'data-erapor-pager-submit'=>true]]) ?>
         <?php elseif ($canSend && $session['status'] === 'TELAH_DIISI'): ?>
-            <?= uiButton('Konfirmasi Penerimaan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-reception'=>true, 'data-erapor-pager-submit'=>true]]) ?>
+            <?= uiButton('Finalisasi', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-reception'=>true, 'data-erapor-pager-submit'=>true]]) ?>
         <?php endif; ?>
     </nav>
 
