@@ -47,12 +47,13 @@ final class EraporCompleteness
                 // Rapor Ummi opsional: seluruh isian (termasuk Catatan Guru) tidak menghalangi Selesaikan Rapor.
                 $rows=[];
             } elseif ($type==='AGAMA') {
-                $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.teks AS label,p.kolom_cetak AS value
+                $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.teks AS label,CASE WHEN b.item_id IS NOT NULL THEN '-' ELSE p.kolom_cetak END AS value
                     FROM erapor_agama_item i JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id
                     LEFT JOIN erapor_agama_nilai n ON n.item_id=i.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=l.rubrik_id
                     LEFT JOIN erapor_agama_pilihan p ON p.rubrik_id=l.rubrik_id AND p.tahapan_id=n.tahapan_id AND p.tahapan_kode=n.tahapan_kode
                         AND p.subtingkat_id <=> n.subtingkat_id AND p.subtingkat_kode <=> n.subtingkat_kode
-                    WHERE l.rubrik_id=? AND i.semester=? AND i.aktif=1 ORDER BY i.id",[...$args,$session['semester']]);
+                    LEFT JOIN erapor_agama_belum_dikenalkan b ON b.item_id=i.id AND b.sesi_id=? AND b.dokumen_id=? AND b.rubrik_id=l.rubrik_id
+                    WHERE l.rubrik_id=? AND i.semester=? AND i.aktif=1 ORDER BY i.id",[$session['id'],$doc['id'],$session['id'],$doc['id'],$rid,$session['semester']]);
                 // Satu narasi "Laporan Perkembangan Agama" disimpan pada catatan lingkup wajib pertama.
                 $rows=array_merge($rows,self::rows($db,"SELECT CONCAT('catatan:',l.id) AS field,'Laporan Perkembangan Agama' AS label,n.isi AS value
                     FROM erapor_agama_lingkup l LEFT JOIN erapor_agama_catatan n ON n.lingkup_id=l.id AND n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=l.rubrik_id

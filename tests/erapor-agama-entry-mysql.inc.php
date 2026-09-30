@@ -3,6 +3,10 @@ require_once ROOT_PATH.'/app/models/EraporAgamaEntry.php';
 $agamaValuesFile=ROOT_PATH.'/database/migrations/20260924_erapor_agama_values.sql';
 catalogCheck(EraporMigrationRunner::apply($db,$agamaValuesFile)==='applied','Agama value schema');
 catalogCheck(EraporMigrationRunner::apply($db,$agamaValuesFile)==='already_applied','Agama value schema retry');
+$agamaDashFile=ROOT_PATH.'/database/migrations/20260930_erapor_agama_tanpa_keterangan.sql';
+catalogCheck(EraporMigrationRunner::apply($db,$agamaDashFile)==='applied','Agama no-note value schema');
+catalogCheck(EraporMigrationRunner::apply($db,$agamaDashFile)==='already_applied','Agama no-note value schema retry');
+require_once ROOT_PATH.'/app/models/EraporTeacherForm.php';
 $agamaActor=(int)$abkStudent['actor_id']; $annualDoc=null;
 $agamaText="  Aqidah: baik ﷺ\r\n- Catatan & <teks> tetap 😊  ";
 foreach ([(int)$abkSession['id'],(int)$nextAbk['id']] as $agamaSession) {
@@ -14,8 +18,8 @@ foreach ([(int)$abkSession['id'],(int)$nextAbk['id']] as $agamaSession) {
     $agamaItems=$db->query('SELECT id FROM erapor_agama_item WHERE semester='.$db->quote($agamaCtx['semester']).' ORDER BY id')->fetchAll(PDO::FETCH_COLUMN);
     $agamaNotes=$db->query('SELECT id FROM erapor_agama_lingkup ORDER BY urutan')->fetchAll(PDO::FETCH_COLUMN);
     $agamaChanges=[];
-    $choices=['TELADAN','TALQIN','TAHFIZH/D','TAHFIZH/J','TAHFIZH/M','TAFHIM','TADIB'];
-    foreach ($agamaItems as $n=>$i) $agamaChanges[]=['key'=>'nilai:'.$i,'value'=>$choices[$n%7],'expected'=>null];
+    $choices=['-','TELADAN','TALQIN','TAHFIZH/D','TAHFIZH/J','TAHFIZH/M','TAFHIM','TADIB'];
+    foreach ($agamaItems as $n=>$i) $agamaChanges[]=['key'=>'nilai:'.$i,'value'=>$choices[$n%8],'expected'=>null];
     foreach ($agamaNotes as $i) $agamaChanges[]=['key'=>'catatan:'.$i,'value'=>$agamaText,'expected'=>null];
     $agamaSave=fn($changes)=>EraporAgamaEntry::save($db,$agamaSession,$agamaDoc,$agamaActor,$changes,$agamaClock);
     $agamaBefore=catalogFingerprints($db);
@@ -25,21 +29,37 @@ foreach ([(int)$abkSession['id'],(int)$nextAbk['id']] as $agamaSession) {
     catalogCheck(catalogFingerprints($db)===$agamaBefore,'Agama values rollback when audit fails');
     $needed=$agamaCtx['semester']==='GANJIL'?43:42;
     catalogCheck($agamaSave($agamaChanges)===['changed'=>$needed,'filled'=>$needed,'required'=>$needed,'complete'=>true],'Correct semester completion');
+    $firstGrade=$agamaChanges[0];
+    $firstItem=(int)substr($firstGrade['key'],6);
+    catalogCheck((int)$db->query('SELECT COUNT(*) FROM erapor_agama_belum_dikenalkan WHERE sesi_id='.$agamaSession.' AND dokumen_id='.$agamaDoc.' AND item_id='.$firstItem)->fetchColumn()===1
+        && (int)$db->query('SELECT COUNT(*) FROM erapor_agama_nilai WHERE sesi_id='.$agamaSession.' AND dokumen_id='.$agamaDoc.' AND item_id='.$firstItem)->fetchColumn()===0,
+        'Dash answer stored separately from rubric stages');
+    $agamaSessionRow=$db->query('SELECT * FROM erapor_sesi WHERE id='.$agamaSession)->fetch(PDO::FETCH_ASSOC);
+    $agamaDocumentRow=['id'=>$agamaDoc,'rubrik_id'=>(int)$db->query('SELECT rubrik_id FROM erapor_dokumen WHERE id='.$agamaDoc)->fetchColumn(),'jenis_dokumen'=>'AGAMA'];
+    $agamaForm=EraporTeacherForm::documentForm($db,$agamaSessionRow,$agamaDocumentRow);
+    catalogCheck(array_column($agamaForm['definitions']['scale'],'kolom_cetak')[0]==='-'
+        && $agamaForm['definitions']['scale'][0]['label']==='-'
+        && $agamaForm['values'][$firstGrade['key']]==='-', 'Dash choice appears first and round-trips through teacher form');
     $agamaStable=catalogFingerprints($db);
     catalogCheck($agamaSave($agamaChanges)['changed']===0,'Agama retry no-op');
     catalogCheck(catalogFingerprints($db)===$agamaStable,'Agama retry audit/timestamps unchanged');
     foreach ($db->query('SELECT isi FROM erapor_agama_catatan WHERE sesi_id='.$agamaSession)->fetchAll(PDO::FETCH_COLUMN) as $text) catalogCheck($text===$agamaText,'Raw Agama note preserved');
     foreach (array_slice($agamaChanges,0,7) as $choice) {
         $itemId=(int)substr($choice['key'],6);
-        $stored=$db->query('SELECT tahapan_kode,subtingkat_kode FROM erapor_agama_nilai WHERE sesi_id='.$agamaSession.' AND item_id='.$itemId)->fetch(PDO::FETCH_ASSOC);
-        $split=explode('/',$choice['value']);
-        catalogCheck($stored===['tahapan_kode'=>$split[0],'subtingkat_kode'=>$split[1] ?? null],'Stage/sublevel stored separately');
+        if ($choice['value']==='-') {
+            catalogCheck((int)$db->query('SELECT COUNT(*) FROM erapor_agama_belum_dikenalkan WHERE sesi_id='.$agamaSession.' AND item_id='.$itemId)->fetchColumn()===1,
+                'Dash answer retained');
+        } else {
+            $stored=$db->query('SELECT tahapan_kode,subtingkat_kode FROM erapor_agama_nilai WHERE sesi_id='.$agamaSession.' AND item_id='.$itemId)->fetch(PDO::FETCH_ASSOC);
+            $split=explode('/',$choice['value']);
+            catalogCheck($stored===['tahapan_kode'=>$split[0],'subtingkat_kode'=>$split[1] ?? null],'Stage/sublevel stored separately');
+        }
     }
     $wrongSemester=(int)$db->query('SELECT id FROM erapor_agama_item WHERE semester<>'.$db->quote($agamaCtx['semester']).' LIMIT 1')->fetchColumn();
     catalogReject(fn()=>$agamaSave([['key'=>'nilai:'.$wrongSemester,'value'=>'TELADAN','expected'=>null]]),'bukan milik rubrik/semester');
-    $firstGrade=$agamaChanges[0]; $note=$agamaChanges[count($agamaItems)];
+    $note=$agamaChanges[count($agamaItems)];
     foreach (['TAHFIZH','TAFHIM/D','TAHFIZH/X','EXCELLENT'] as $badGrade) {
-        catalogReject(fn()=>$agamaSave([['key'=>$firstGrade['key'],'value'=>$badGrade,'expected'=>'TELADAN']]),'Tahapan/subtingkat');
+        catalogReject(fn()=>$agamaSave([['key'=>$firstGrade['key'],'value'=>$badGrade,'expected'=>'-']]),'Tahapan/subtingkat');
     }
     catalogReject(fn()=>$agamaSave([['key'=>$firstGrade['key'],'value'=>'TALQIN','expected'=>null]]),'Isian telah berubah');
     catalogReject(fn()=>$agamaSave([$firstGrade,$firstGrade]),'duplikat');
@@ -48,12 +68,12 @@ foreach ([(int)$abkSession['id'],(int)$nextAbk['id']] as $agamaSession) {
     catalogReject(fn()=>EraporAgamaEntry::save($db,$agamaSession,$agamaDoc,999999,[$note],$agamaClock),'Sesi bukan milik');
     catalogReject(fn()=>EraporAgamaEntry::save($db,$agamaSession,999999,$agamaActor,[$note],$agamaClock),'Dokumen tidak tersedia');
     catalogReject(fn()=>EraporAgamaEntry::save($db,$agamaSession,$agamaDoc,$agamaActor,[$note],$agamaClock->modify('+1 day')),'Batas waktu');
-    $update=['key'=>$firstGrade['key'],'value'=>'TAHFIZH/D','expected'=>'TELADAN'];
+    $update=['key'=>$firstGrade['key'],'value'=>'TAHFIZH/D','expected'=>'-'];
     catalogReject(fn()=>$agamaSave([$update,['key'=>'nilai:999999','value'=>'TELADAN','expected'=>null]]),'bukan milik rubrik/semester');
     catalogCheck(catalogFingerprints($db)===$agamaStable,'Batch invalid later field rolls back');
     catalogCheck($agamaSave([$update])['changed']===1,'Change from stage to Tahfizh');
     $audit=$db->query('SELECT nilai_lama,nilai_baru,aktor_id,status_sesi FROM erapor_isian_log ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
-    catalogCheck(json_decode($audit['nilai_lama'],true)==='TELADAN' && json_decode($audit['nilai_baru'],true)==='TAHFIZH/D'
+    catalogCheck(json_decode($audit['nilai_lama'],true)==='-' && json_decode($audit['nilai_baru'],true)==='TAHFIZH/D'
         && (int)$audit['aktor_id']===$agamaActor && $audit['status_sesi']==='BELUM_DIISI','Agama audit old/new/status/actor');
     catalogCheck($agamaSave([['key'=>$firstGrade['key'],'value'=>'TAFHIM','expected'=>'TAHFIZH/D']])['changed']===1,'Leaving Tahfizh clears sublevel');
     $db->exec("UPDATE erapor_sesi SET status='TELAH_DIISI' WHERE id=$agamaSession");
@@ -76,7 +96,9 @@ foreach ([(int)$abkSession['id'],(int)$nextAbk['id']] as $agamaSession) {
     }
     $db->exec("UPDATE erapor_sesi SET status='BELUM_DIISI' WHERE id=$agamaSession"); // Disposable fixture only.
 }
-catalogCheck((int)$db->query('SELECT COUNT(*) FROM erapor_agama_nilai')->fetchColumn()===73,'Both semester values retained in annual document');
+catalogCheck((int)$db->query('SELECT COUNT(*) FROM erapor_agama_nilai')->fetchColumn()===63,'Graded semester values retained in annual document');
+catalogCheck((int)$db->query('SELECT COUNT(*) FROM erapor_agama_belum_dikenalkan')->fetchColumn()===10,'No-note values retained in annual document');
 catalogCheck((int)$db->query('SELECT COUNT(*) FROM erapor_agama_catatan')->fetchColumn()===12,'Six independent notes per session');
 catalogReject(fn()=>$db->exec('INSERT INTO erapor_agama_nilai SELECT * FROM erapor_agama_nilai LIMIT 1'),'Duplicate');
+catalogReject(fn()=>$db->exec('INSERT INTO erapor_agama_belum_dikenalkan SELECT * FROM erapor_agama_belum_dikenalkan LIMIT 1'),'Duplicate');
 catalogReject(fn()=>$db->exec('INSERT INTO erapor_agama_catatan SELECT * FROM erapor_agama_catatan LIMIT 1'),'Duplicate');

@@ -47,8 +47,8 @@ $form = [
                 'subscopes'=>[['id'=>5,'lingkup_id'=>4,'implisit'=>false,'huruf'=>'a','nama'=>'Tahfizh']],
                 'items'=>[['id'=>6,'sub_id'=>5,'nomor'=>1,'teks'=>'Membaca surah','semester'=>'GANJIL']],
                 'names'=>[],
-                'scale'=>[['kolom_cetak'=>'TAHFIZH/D','label'=>'Belum berkembang']],
-            ], 'values'=>[],
+                'scale'=>[['kolom_cetak'=>'-','label'=>'-'],['kolom_cetak'=>'TAHFIZH/D','label'=>'Belum berkembang']],
+            ], 'values'=>['nilai:6'=>'-'],
         ]],
         ['id'=>103,'nama'=>'Rapor Ummi','jenis_dokumen'=>'UMMI','form'=>[
             'definitions'=>[
@@ -116,7 +116,11 @@ eraporUiCheck($xpath->query('//section[@data-erapor-page]')->length === 5 && $xp
 eraporUiCheck($xpath->query('//*[@data-erapor-question]//*[@data-erapor-entry="RTS"]')->length === 1, 'Each assessment question has its own card');
 eraporUiCheck($xpath->query('//nav[@data-erapor-pager]//button[@data-erapor-next]')->length === 1 && $xpath->query('//nav[@data-erapor-pager]//button[@data-erapor-prev]')->length === 1, 'Pager offers previous/next navigation');
 eraporUiCheck($xpath->query('//section[@data-erapor-type="UMMI" and @data-erapor-optional="true"]')->length === 1, 'Ummi page is optional');
-eraporUiCheck($xpath->query('//select[@data-erapor-entry="AGAMA"]')->length === 1, 'Agama choice mapped from rubric definitions');
+$agamaSelect = $xpath->query('//select[@data-erapor-entry="AGAMA"]')->item(0);
+eraporUiCheck($agamaSelect !== null
+    && $xpath->query('./option[2][@value="-"][normalize-space()="-"]', $agamaSelect)->length === 1
+    && $xpath->query('./option[@value="-" and @selected]', $agamaSelect)->length === 1,
+    'Agama no-note dash is the first selectable value and saved value is selected');
 eraporUiCheck($xpath->query('//select[@data-erapor-entry="BING"]')->length === 1 && $xpath->query('//textarea[@data-erapor-entry="BING"]')->length === 1, 'BING grade and comment controls rendered');
 eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="PPI" and not(@disabled)]')->length === 1, 'PPI session field is editable through shared textarea component');
 eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="UMMI" and @data-erapor-key="catatan" and @aria-required="false"]')->length === 1, 'Ummi period note is optional and uses shared textarea component');

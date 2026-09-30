@@ -2,7 +2,7 @@
 
 /** Internal Agama autosave, no HTTP route. Actor/clock are trusted server context.
  * Changes: key nilai:<item_id> or catatan:<lingkup_id>, value/expected string|null.
- * Seven print keys map to separate stage/sublevel columns; semester comes from session.
+ * Seven official print keys map to stage/sublevel columns; '-' is stored separately.
  */
 final class EraporAgamaEntry
 {
@@ -58,27 +58,48 @@ final class EraporAgamaEntry
                     $expected=EraporSessionPolicy::textForStorage($expected);
                     if (($value!==null && strlen($value)>65535) || ($expected!==null && strlen($expected)>65535)) throw new DomainException('Teks melebihi kapasitas penyimpanan.');
                 } else {
-                    foreach ([$value,$expected] as $grade) if ($grade!==null && !in_array($grade,$grades,true)) throw new DomainException('Tahapan/subtingkat Agama tidak valid.');
+                    foreach ([$value,$expected] as $grade) if ($grade!==null && $grade!=='-' && !in_array($grade,$grades,true)) throw new DomainException('Tahapan/subtingkat Agama tidak valid.');
                 }
                 // All identifiers below come from fields(), never directly from request keys.
                 $keys=['sesi_id'=>$sessionId,'dokumen_id'=>$documentId,'rubrik_id'=>$rubricId]+$field['ids'];
                 $where=implode(' AND ',array_map(fn($k)=>$k.'=?',array_keys($keys)));
                 $old=self::one($db,'SELECT '.self::valueSql($field).' AS value FROM '.$field['table'].' WHERE '.$where.' FOR UPDATE',array_values($keys));
-                $oldValue=$old?$old['value']:null;
+                $withoutNote=$field['column']==='nilai'
+                    ? self::one($db,'SELECT 1 AS value FROM erapor_agama_belum_dikenalkan WHERE '.$where.' FOR UPDATE',array_values($keys))
+                    : false;
+                if ($old && $withoutNote) throw new DomainException('Isian Agama memiliki dua nilai tersimpan.');
+                $oldValue=$withoutNote?'-':($old?$old['value']:null);
                 if ($oldValue!==$expected) {
                     if ($oldValue===$value) continue;
                     throw new DomainException('Isian telah berubah; muat ulang sebelum menyimpan.');
                 }
                 if ($oldValue===$value) continue;
-                $values=$field['column']==='isi'?['isi'=>$value]:($value===null?[]:$gradeMap[$value]);
-                if ($value===null) {
-                    $db->prepare('DELETE FROM '.$field['table'].' WHERE '.$where)->execute(array_values($keys));
-                } elseif ($old) {
-                    $set=implode(',',array_map(fn($k)=>$k.'=?',array_keys($values)));
-                    $db->prepare('UPDATE '.$field['table'].' SET '.$set.',diisi_oleh=?,diisi_pada=CURRENT_TIMESTAMP WHERE '.$where)->execute([...array_values($values),$actorId,...array_values($keys)]);
+                if ($field['column']==='isi') {
+                    $values=['isi'=>$value];
+                    if ($value===null) $db->prepare('DELETE FROM '.$field['table'].' WHERE '.$where)->execute(array_values($keys));
+                    elseif ($old) {
+                        $db->prepare('UPDATE '.$field['table'].' SET isi=?,diisi_oleh=?,diisi_pada=CURRENT_TIMESTAMP WHERE '.$where)->execute([$value,$actorId,...array_values($keys)]);
+                    } else {
+                        $row=$keys+$values+['diisi_oleh'=>$actorId];
+                        $db->prepare('INSERT INTO '.$field['table'].' ('.implode(',',array_keys($row)).') VALUES ('.implode(',',array_fill(0,count($row),'?')).')')->execute(array_values($row));
+                    }
+                } elseif ($value===null) {
+                    $db->prepare('DELETE FROM erapor_agama_nilai WHERE '.$where)->execute(array_values($keys));
+                    $db->prepare('DELETE FROM erapor_agama_belum_dikenalkan WHERE '.$where)->execute(array_values($keys));
+                } elseif ($value==='-') {
+                    $db->prepare('DELETE FROM erapor_agama_nilai WHERE '.$where)->execute(array_values($keys));
+                    $row=$keys+['diisi_oleh'=>$actorId];
+                    $db->prepare('INSERT INTO erapor_agama_belum_dikenalkan ('.implode(',',array_keys($row)).') VALUES ('.implode(',',array_fill(0,count($row),'?')).')')->execute(array_values($row));
                 } else {
-                    $row=$keys+$values+['diisi_oleh'=>$actorId];
-                    $db->prepare('INSERT INTO '.$field['table'].' ('.implode(',',array_keys($row)).') VALUES ('.implode(',',array_fill(0,count($row),'?')).')')->execute(array_values($row));
+                    $values=$gradeMap[$value];
+                    $db->prepare('DELETE FROM erapor_agama_belum_dikenalkan WHERE '.$where)->execute(array_values($keys));
+                    if ($old) {
+                        $set=implode(',',array_map(fn($k)=>$k.'=?',array_keys($values)));
+                        $db->prepare('UPDATE '.$field['table'].' SET '.$set.',diisi_oleh=?,diisi_pada=CURRENT_TIMESTAMP WHERE '.$where)->execute([...array_values($values),$actorId,...array_values($keys)]);
+                    } else {
+                        $row=$keys+$values+['diisi_oleh'=>$actorId];
+                        $db->prepare('INSERT INTO '.$field['table'].' ('.implode(',',array_keys($row)).') VALUES ('.implode(',',array_fill(0,count($row),'?')).')')->execute(array_values($row));
+                    }
                 }
                 $db->prepare('INSERT INTO erapor_isian_log(sesi_id,dokumen_id,jenis,kunci,nilai_lama,nilai_baru,aktor_id,status_sesi) VALUES(?,?,?,?,?,?,?,?)')
                     ->execute([$sessionId,$documentId,$type,$change['key'],$oldValue===null?null:json_encode($oldValue,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),
@@ -92,7 +113,11 @@ final class EraporAgamaEntry
                 $keys=['sesi_id'=>$sessionId,'dokumen_id'=>$documentId,'rubrik_id'=>$rubricId]+$field['ids'];
                 $where=implode(' AND ',array_map(fn($k)=>$k.'=?',array_keys($keys)));
                 $row=self::one($db,'SELECT '.self::valueSql($field).' AS value FROM '.$field['table'].' WHERE '.$where,array_values($keys));
-                if ($row && ($field['column']==='isi'?!EraporSessionPolicy::isBlank($row['value']):in_array($row['value'],$grades,true))) $filled++;
+                $withoutNote=$field['column']==='nilai'
+                    ? self::one($db,'SELECT 1 AS value FROM erapor_agama_belum_dikenalkan WHERE '.$where,array_values($keys))
+                    : false;
+                if ($row && $withoutNote) throw new DomainException('Isian Agama memiliki dua nilai tersimpan.');
+                if ($withoutNote || ($row && ($field['column']==='isi'?!EraporSessionPolicy::isBlank($row['value']):in_array($row['value'],$grades,true)))) $filled++;
             }
             $db->commit(); return ['changed'=>$updated,'filled'=>$filled,'required'=>$required,'complete'=>$required>0 && $filled===$required];
         } catch (Throwable $e) {

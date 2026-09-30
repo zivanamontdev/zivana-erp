@@ -122,7 +122,7 @@ final class EraporPackagePdfRenderer
         $values=$d['period_values'] ?? []; $scopeNames=[]; $subs=[]; $names=$d['item_names'] ?? [];
         foreach ($f['scopes'] ?? [] as $s) $scopeNames[(int)$s['id']]=$s;
         foreach ($f['subscopes'] ?? [] as $s) $subs[(int)$s['id']]=$s;
-        $printColumns=['TELADAN','TALQIN','TAHFIZH/D','TAHFIZH/J','TAHFIZH/M','TAFHIM','TADIB'];
+        $printColumns=['-','TELADAN','TALQIN','TAHFIZH/D','TAHFIZH/J','TAHFIZH/M','TAFHIM','TADIB'];
         // Capaian Semester Genap hanya dicetak bila periode genap sudah berisi; kolom Akhir Semester hanya
         // bila Rapor Akhir Semester sudah berisi. Template mengikuti semester pratinjaunya.
         $filled=static function (array $keys) use ($values): bool {
@@ -132,13 +132,14 @@ final class EraporPackagePdfRenderer
         $showGenap=!empty($p['template']) ? ($p['period']['semester'] ?? '')==='GENAP' : $filled(['TENGAH_GENAP','AKHIR_GENAP']);
         $showAkhir=empty($p['template']) && $filled(['AKHIR_GANJIL','AKHIR_GENAP']);
         $periodTypes=$showAkhir?['TENGAH','AKHIR']:['TENGAH'];
-        $gradeCols=7*count($periodTypes); $allCols=$gradeCols+1;
+        $gradeCols=count($printColumns)*count($periodTypes); $allCols=$gradeCols+1;
         // Dompdf (table-layout:fixed) mengambil lebar kolom dari baris pertama dan mengabaikan colgroup;
         // baris pengukur tak terlihat ini mengunci lebar Ruang Lingkup dan kolom nilai (lebih lega tanpa Akhir Semester).
-        $sizer='<tr class="col-sizer"><th style="width:'.($showAkhir?30:37).'%"></th>'.str_repeat('<th style="width:'.($showAkhir?5:9).'%"></th>',$gradeCols).'</tr>';
-        $stageRow='<th rowspan="2">TELADAN</th><th rowspan="2">TALQIN</th><th colspan="3">TAHFIZH</th><th rowspan="2">TAFHIM</th><th rowspan="2">TA\'DIB</th>';
+        $labelWidth=$showAkhir?30:37; $gradeWidth=(100-$labelWidth)/$gradeCols;
+        $sizer='<tr class="col-sizer"><th style="width:'.$labelWidth.'%"></th>'.str_repeat('<th style="width:'.$gradeWidth.'%"></th>',$gradeCols).'</tr>';
+        $stageRow='<th rowspan="2">-</th><th rowspan="2">TELADAN</th><th rowspan="2">TALQIN</th><th colspan="3">TAHFIZH</th><th rowspan="2">TAFHIM</th><th rowspan="2">TA\'DIB</th>';
         $html='<table class="report-table agama-table'.($showAkhir?'':' agama-wide').'"><thead>'.$sizer.self::tableIdentity($p,$d,$allCols,$showAkhir?4:3)
-            .'<tr><th rowspan="3">Ruang Lingkup / Capaian</th><th colspan="7">TENGAH SEMESTER</th>'.($showAkhir?'<th colspan="7">AKHIR SEMESTER</th>':'').'</tr>'
+            .'<tr><th rowspan="3">Ruang Lingkup / Capaian</th><th colspan="8">TENGAH SEMESTER</th>'.($showAkhir?'<th colspan="8">AKHIR SEMESTER</th>':'').'</tr>'
             .'<tr class="agama-stage">'.str_repeat($stageRow,count($periodTypes)).'</tr>'
             .'<tr>'.str_repeat('<th>D</th><th>J</th><th>M</th>',count($periodTypes)).'</tr></thead><tbody>';
         $openScope=null; $openSub=null; $openSemester=null;

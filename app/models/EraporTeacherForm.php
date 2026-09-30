@@ -83,10 +83,17 @@ final class EraporTeacherForm
                 foreach (self::rows($db,'SELECT n.aspek_id,n.kolom_id,n.isi FROM erapor_ppi_isian n JOIN erapor_ppi_kolom c ON c.id=n.kolom_id AND c.rubrik_id=n.rubrik_id WHERE n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=? AND c.diisi_di_sesi=1',$args) as $v) $values[$v['aspek_id'].':'.$v['kolom_id']]=$v['isi'];
                 break;
             case 'AGAMA':
+                // Pilihan tambahan di luar skala Agama V1; '-' berarti tanpa keterangan.
+                array_unshift($defs['scale'], ['kolom_cetak'=>'-', 'label'=>'-', 'urutan'=>0]);
                 $defs['subscopes']=self::rows($db,'SELECT s.* FROM erapor_agama_sub s JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? ORDER BY l.urutan,s.urutan',[$rid]);
                 $defs['items']=self::rows($db,'SELECT i.* FROM erapor_agama_item i JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? AND i.semester=? AND i.aktif=1 ORDER BY l.urutan,s.urutan,i.urutan',[$rid,$s['semester']]);
                 $defs['names']=self::rows($db,'SELECT n.* FROM erapor_agama_item_nama n JOIN erapor_agama_item i ON i.id=n.item_id JOIN erapor_agama_sub s ON s.id=i.sub_id JOIN erapor_agama_lingkup l ON l.id=s.lingkup_id WHERE l.rubrik_id=? AND i.semester=? AND i.aktif=1 ORDER BY l.urutan,s.urutan,i.urutan,n.urutan',[$rid,$s['semester']]);
                 foreach (self::rows($db,'SELECT n.item_id,p.kolom_cetak FROM erapor_agama_nilai n JOIN erapor_agama_pilihan p ON p.rubrik_id=n.rubrik_id AND p.tahapan_id=n.tahapan_id AND p.subtingkat_id <=> n.subtingkat_id JOIN erapor_agama_item i ON i.id=n.item_id WHERE n.sesi_id=? AND n.dokumen_id=? AND n.rubrik_id=? AND i.semester=?',[...$args,$s['semester']]) as $v) $values['nilai:'.$v['item_id']]=$v['kolom_cetak'];
+                foreach (self::rows($db,'SELECT item_id FROM erapor_agama_belum_dikenalkan WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args) as $v) {
+                    $key='nilai:'.$v['item_id'];
+                    if (isset($values[$key])) throw new DomainException('Isian Agama memiliki dua nilai tersimpan.');
+                    $values[$key]='-';
+                }
                 foreach (self::rows($db,'SELECT lingkup_id,isi FROM erapor_agama_catatan WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args) as $v) $values['catatan:'.$v['lingkup_id']]=$v['isi'];
                 break;
             case 'UMMI':

@@ -24,6 +24,7 @@ final class EraporPilotInstaller
         '20260926_erapor_rts_belum_dikenalkan.sql',
         '20260928_erapor_wali_kelas.sql',
         '20260929_erapor_publikasi_distribusi.sql',
+        '20260930_erapor_agama_tanpa_keterangan.sql',
     ];
 
     private const SEEDS = [

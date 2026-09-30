@@ -59,6 +59,10 @@ $withRas=$agamaDoc; $withRas['period_values']['AKHIR_GANJIL']=['nilai:1'=>'TADIB
 $withRasHtml=$agama->invoke(null,$package,$withRas);
 $check(str_contains($withRasHtml,'AKHIR SEMESTER') && !str_contains($withRasHtml,'agama-wide'),'Agama prints Akhir Semester columns once RAS is filled');
 $check(str_contains($agamaHtml,'<p class="signature-title">Pengesahan Rapor Agama Islam</p>') && !str_contains($agamaHtml,'signature-identity'),'Signature block uses a centered title without the report header when it stays on the page');
+$withDash=$agamaDoc; $withDash['period_values']['TENGAH_GANJIL']['nilai:1']='-';
+$withDashHtml=$agama->invoke(null,$package,$withDash);
+$check(str_contains($withDashHtml,'<th rowspan="2">-</th>')
+    && str_contains($withDashHtml,'<td class="grade agama-grade"><img src="data:image/svg+xml;base64,'), 'Agama no-note dash is visible in the printed assessment');
 
 $rts=new ReflectionMethod(EraporPackagePdfRenderer::class,'rts');
 $rtsDoc=['jenis_dokumen'=>'RTS','nama'=>'RTS','judul_cetak'=>'RTS','signers'=>$signers,'period_values'=>[],
