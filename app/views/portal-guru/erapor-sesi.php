@@ -133,6 +133,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <div class="pengisian-title">
                 <h1>Pengisian Rapor</h1>
                 <p class="pengisian-student-name"><?= e($student['nama_lengkap']) ?></p>
+                <?php if ($session['status'] === 'BELUM_DIISI'): ?>
+                    <?php // Status draft: diperbarui erapor-session.js setelah Simpan Draft. ?>
+                    <p class="pengisian-approval-status" data-erapor-draft-status<?= empty($draftAt) ? ' hidden' : '' ?>><?= uiBadge('Draft', 'netral') ?> <span class="erapor-draft-time" data-erapor-draft-time><?= !empty($draftAt) ? e('Tersimpan ' . date('d/m/Y H:i', strtotime($draftAt))) : '' ?></span></p>
+                <?php endif; ?>
                 <?php if (in_array($session['status'], ['MENUNGGU_TTD', 'SELESAI'], true)): ?>
                     <?php $allApproved = !empty($form['approvals']) && !array_filter($form['approvals'], fn($a) => $a['status'] !== 'DISETUJUI'); ?>
                     <p class="pengisian-approval-status" data-erapor-share-status><?= !empty($share['shared_at']) ? uiBadge('Dibagikan ke Orang Tua', 'positif') : ($session['status'] === 'SELESAI' ? uiBadge('Rapor telah terbit', 'positif') : ($allApproved ? uiBadge('Rapor telah disetujui', 'positif') : uiBadge('Menunggu proses persetujuan', 'peringatan'))) ?></p>
@@ -144,12 +148,16 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <div class="pengisian-header-icons">
                 <?= uiButton($pdfLabel, 'outline', ['icon'=>'icon_file_text', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>$pdfLabel, 'data-erapor-open-url'=>$pdfUrl]]) ?>
                 <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
+                <?php if ($canEdit && $session['status'] === 'BELUM_DIISI'): ?><?= uiButton('Simpan Draft', 'outline', ['icon'=>'icon_save', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Simpan Draft', 'data-erapor-draft'=>true]]) ?><?php endif; ?>
                 <?= $renderShare(true) ?>
             </div>
             <div class="pengisian-header-actions">
                 <a class="ui-button ui-button--outline" href="<?= e($pdfUrl) ?>" target="_blank" rel="noopener" data-erapor-pdf><?= e($pdfLabel) ?></a>
                 <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
                 <?= $renderShare(false) ?>
+                <?php if ($canEdit && $session['status'] === 'BELUM_DIISI'): ?>
+                    <?= uiButton('Simpan Draft', 'outline', ['icon'=>'icon_save', 'marginVertical'=>0, 'attributes'=>['data-erapor-draft'=>true]]) ?>
+                <?php endif; ?>
                 <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
                     <?php // Aktif setelah semua rapor wajib lengkap (diatur erapor-session.js dari data server). ?>
                     <?= uiButton('Selesaikan Rapor', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm'=>true]]) ?>
@@ -555,6 +563,8 @@ require VIEW_PATH . '/layouts/focus-header.php';
     <div class="modal-actions"><?= uiButton('Tutup', 'outline', ['marginVertical'=>0, 'attributes'=>['data-modal-close'=>true]]) ?></div>
     <?= uiModal('erapor-approval-modal', 'Alur Persetujuan', ob_get_clean(), ['variant'=>'delete']) ?>
 <?php endif; ?>
+<?= uiToastRegion() ?>
+<script src="<?= BASE_PATH ?>/assets/js/ui-toast.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/ui-toast.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/action-menu.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/action-menu.js') ?>"></script>
 <script src="<?= BASE_PATH ?>/assets/js/modal.js?v=<?= filemtime(ROOT_PATH . '/public/assets/js/modal.js') ?>"></script>
 

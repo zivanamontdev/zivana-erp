@@ -297,7 +297,8 @@
       try {
         var data = await request(url, {changes: changes});
         fields.forEach(function (field, index) {
-          var saved = changes[index].value;
+          // RTS mengirim 'nilai' (bukan 'value'); tanpa ini nilai tersimpan menjadi "undefined" dan perubahan berikutnya ditolak (409).
+          var saved = 'nilai' in changes[index] ? changes[index].nilai : changes[index].value;
           if (field.dataset.eraporEntry === 'UMMI_TEST') {
             if (saved === null && field.dataset.eraporDeleteTest === 'true') {
               var parentList = field.parentElement;
@@ -329,7 +330,7 @@
           setStatus('Data rapor berubah di sisi server. Isian yang tampak di layar belum tersimpan; salin perubahan yang diperlukan sebelum memuat ulang.', 'error');
           recovery.hidden = false;
         } else {
-          setStatus(error.message || 'Gagal menyimpan. Periksa koneksi lalu coba lagi.', 'error');
+          setStatus(error.status ? (error.message || 'Gagal menyimpan. Periksa koneksi lalu coba lagi.') : 'Koneksi terputus. Perubahan belum tersimpan; tekan Simpan Draft setelah koneksi kembali.', 'error');
           recovery.hidden = false;
         }
       } finally {
@@ -565,6 +566,69 @@
         if (ummiCard) updateUmmiReadingCount(ummiCard);
       }
       if (field.tagName === 'SELECT' || field.type === 'checkbox' || field.dataset.eraporRadio === 'true') noteChange(field);
+    });
+
+    // ---- Simpan Draft (cadangan manual; autosave tetap berjalan) ----
+    // Kumpulkan SEMUA isian yang nilainya berbeda dari nilai tersimpan (termasuk yang terlewat autosave),
+    // kirim lewat endpoint simpan per dokumen sampai tidak ada yang tertunda, lalu catat waktu draft.
+    function sameValue(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+    function dirtyFields() {
+      var fields = Array.from(root.querySelectorAll('[data-erapor-entry]:not([type="radio"])')).filter(function (field) {
+        if (field.disabled || !field.dataset.eraporDocumentId) return false;
+        if (field.dataset.eraporEntry === 'UMMI_TEST') {
+          if (field.dataset.eraporDeleteTest === 'true') return true;
+          return testRowValue(field) !== null && !sameValue(testRowValue(field), expectedOf(field));
+        }
+        return !sameValue(valueOf(field), expectedOf(field));
+      });
+      return fields;
+    }
+    function waitSaving() {
+      return new Promise(function (resolve) {
+        (function check() { if (!saving) resolve(); else window.setTimeout(check, 100); })();
+      });
+    }
+    var draftBusy = false;
+    async function saveDraft() {
+      if (draftBusy) return;
+      if (blocked) { setStatus('Penyimpanan diblokir. Muat ulang sesi sebelum menyimpan draft.', 'error'); return; }
+      draftBusy = true;
+      var buttons = Array.from(document.querySelectorAll('[data-erapor-draft]'));
+      buttons.forEach(function (button) { button.disabled = true; });
+      try {
+        await waitSaving();
+        var dirty = dirtyFields();
+        dirty.forEach(function (field) { pending.set(field, true); });
+        var total = pending.size;
+        var guard = 0;
+        while (pending.size && !blocked && guard++ < 50) {
+          var before = pending.size;
+          await flush();
+          await waitSaving();
+          if (pending.size >= before) break; // gagal jaringan: jangan berputar terus
+        }
+        if (pending.size || blocked) throw new Error('Sebagian isian belum tersimpan. Periksa koneksi lalu coba lagi.');
+        var data = await request(apiUrl + '/draft', {});
+        var time = new Date(String(data.draft_at).replace(' ', 'T'));
+        var label = 'Tersimpan ' + time.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'}) + ' ' + time.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}).replace('.', ':');
+        document.querySelectorAll('[data-erapor-draft-status]').forEach(function (el) { el.hidden = false; });
+        document.querySelectorAll('[data-erapor-draft-time]').forEach(function (el) { el.textContent = label; });
+        setStatus('Draft tersimpan.', 'success');
+        if (window.uiToast) window.uiToast(total ? 'Draft tersimpan (' + total + ' isian ikut disimpan).' : 'Draft tersimpan. Semua isian sudah aman.', 'success');
+      } catch (error) {
+        setStatus(error.message || 'Draft gagal disimpan.', 'error');
+        if (window.uiToast) window.uiToast(error.message || 'Draft gagal disimpan.', 'error');
+      } finally {
+        draftBusy = false;
+        buttons.forEach(function (button) { button.disabled = false; });
+      }
+    }
+    document.addEventListener('click', function (event) {
+      if (event.target.closest('[data-erapor-draft]')) saveDraft();
+    });
+    // Peringatkan bila halaman ditutup saat masih ada isian yang belum tersimpan.
+    window.addEventListener('beforeunload', function (event) {
+      if (pending.size || saving || (!blocked && dirtyFields().length)) { event.preventDefault(); event.returnValue = ''; }
     });
 
     // Bagikan ke Orang Tua: tautan wa.me terbuka seperti biasa; pembagian dicatat di server (keepalive).

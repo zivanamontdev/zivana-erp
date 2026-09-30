@@ -114,6 +114,7 @@ $router->post('/sistem/reset-data', [DataResetController::class, 'run']);
 $router->get('/api/erapor/sesi/{id}', [EraporTeacherApiController::class, 'show']);
 $router->post('/api/erapor/sesi/{id}/dokumen/{documentId}/simpan', [EraporTeacherApiController::class, 'save']);
 $router->post('/api/erapor/sesi/{id}/konfirmasi-isi', [EraporTeacherApiController::class, 'confirmFilled']);
+$router->post('/api/erapor/sesi/{id}/draft', [EraporTeacherApiController::class, 'saveDraft']);
 $router->post('/api/erapor/sesi/{id}/konfirmasi-penerimaan', [EraporTeacherApiController::class, 'confirmReception']);
 $router->post('/portal-guru/sesi/siapkan', [PortalGuruController::class, 'prepareEraporSession']);
 $router->get('/portal-guru/sesi/{id}', [PortalGuruController::class, 'showEraporSession']);

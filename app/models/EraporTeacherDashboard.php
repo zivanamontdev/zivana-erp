@@ -84,7 +84,8 @@ final class EraporTeacherDashboard
                 $students = self::all($db, "SELECT m.id,m.nama_lengkap,m.status_kondisi,m.status AS status_murid,
                         k.level_kelas,k.nama_kelas,s.id AS sesi_id,s.guru_user_id AS sesi_guru_id,
                         s.tahun_ajaran_id AS sesi_tahun_ajaran_id,s.semester AS sesi_semester,s.jenis AS sesi_jenis,
-                        s.status AS sesi_status,s.paket_sha256
+                        s.status AS sesi_status,s.paket_sha256,
+                        (SELECT MAX(l.created_at) FROM erapor_sesi_log l WHERE l.sesi_id=s.id AND l.aksi='DRAFT_DISIMPAN') AS draft_pada
                     FROM kelas_guru_murid a JOIN murid m ON m.id=a.murid_id AND m.kelas_id=a.kelas_id
                     JOIN kelas k ON k.id=a.kelas_id
                     LEFT JOIN erapor_sesi s ON s.murid_id=m.id AND s.periode_id=?
@@ -118,7 +119,7 @@ final class EraporTeacherDashboard
                                 $student['action'] = 'open';
                                 $student['reason'] = null;
                                 $student['action_label'] = match ($student['sesi_status']) {
-                                    'BELUM_DIISI' => 'Isi Rapor',
+                                    'BELUM_DIISI' => $student['draft_pada'] ? 'Lanjutkan Draft' : 'Isi Rapor',
                                     'TELAH_DIISI','SELESAI' => 'Lihat Rapor',
                                     'MENUNGGU_TTD' => 'Menunggu Persetujuan',
                                     default => 'Perlu pemeriksaan',

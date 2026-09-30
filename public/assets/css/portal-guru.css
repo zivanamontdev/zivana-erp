@@ -602,6 +602,8 @@ button.teacher-report-action:focus-visible,
 /* ---------- eRapor: posisi rapor dalam alur persetujuan (guru pengisi) ---------- */
 .erapor-approval-track { display:grid; gap:var(--space-3); margin:0; padding:0; list-style:none; }
 .pengisian-approval-status { margin:var(--space-2) 0 0; }
+.pengisian-approval-status[hidden] { display:none; }
+.erapor-draft-time { margin-left:var(--space-2); color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
 /* Bagikan ke Orang Tua */
 .erapor-share-hint { margin:var(--space-1) 0 0; color:var(--color-neutral-500); font-size:var(--font-size-caption-md); }
 .erapor-share-disabled { display:inline-flex; cursor:not-allowed; }

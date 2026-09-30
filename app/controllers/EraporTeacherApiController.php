@@ -47,6 +47,14 @@ class EraporTeacherApiController extends Controller
             return $saved;
         });
     }
+    /** Simpan Draft: dipanggil setelah semua isian yang belum tersimpan dikirim lewat save(). */
+    public function saveDraft(string $id): void
+    {
+        $this->execute('edit',function($db,$actor) use($id) {
+            $this->body([]);
+            return EraporDraft::save($db,$this->id($id),$actor);
+        });
+    }
     public function confirmFilled(string $id): void
     {
         $this->execute('kirim',function($db,$actor) use($id) {

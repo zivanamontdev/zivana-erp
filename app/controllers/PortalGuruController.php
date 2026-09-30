@@ -104,6 +104,7 @@ class PortalGuruController extends Controller
                 'pageTitle'=>'Pengisian Rapor','form'=>$form,'activeNavItem'=>'portal-dashboard',
                 'hasOfficialPdf'=>EraporPdfAccess::hasOfficial(Database::getInstance(), (int)$id),
                 'share'=>EraporDistribution::shareState(Database::getInstance(), (int)$id),
+                'draftAt'=>EraporDraft::last(Database::getInstance(), (int)$id),
             ]);
         } catch (DomainException) {
             http_response_code(404); require VIEW_PATH.'/errors/404.php';
