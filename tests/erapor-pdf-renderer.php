@@ -13,8 +13,28 @@ $student=['nama_lengkap'=>'<Nama Murid>','nama_panggilan'=>'Ananda','nisn'=>'123
     'tanggal_lahir'=>'2020-01-01','nama_kelas'=>'Ranting Akasia','usia'=>'6 tahun'];
 $package=['student'=>$student,'period'=>['jenis'=>'TENGAH','label'=>'Tengah Semester Ganjil','tahun_label'=>'2025/2026','semester_label'=>'GANJIL'],
     'school'=>['snapshot'=>['nama_komersial'=>'TK Zivana'],'logo_data_uri'=>'']];
-$signers=[['peran'=>'GURU_KELAS','jabatan_cetak'=>'Guru Kelas','posisi_cetak'=>'kiri','urutan'=>1]];
+$signers=[
+    ['peran'=>'GURU_KELAS','jabatan_cetak'=>'Guru Kelas','posisi_cetak'=>'kiri','urutan'=>1],
+    ['peran'=>'KEPALA_SEKOLAH','jabatan_cetak'=>'Kepala Sekolah','posisi_cetak'=>'tengah','urutan'=>2],
+];
 $emptySignature=['signers'=>[],'tempat'=>'','tanggal'=>null];
+
+$signatureBlock=new ReflectionMethod(EraporPackagePdfRenderer::class,'signatureBlock');
+$signatureHtml=$signatureBlock->invoke(null,$package,[
+    'signers'=>[
+        ['peran'=>'KOORDINATOR_BING','jabatan_cetak'=>'English Coordinator','posisi_cetak'=>'kiri','urutan'=>1],
+        ['peran'=>'GURU_KELAS','jabatan_cetak'=>'English Teacher','posisi_cetak'=>'kanan','urutan'=>2],
+        ['peran'=>'KEPALA_SEKOLAH','jabatan_cetak'=>'Principal','posisi_cetak'=>'tengah','urutan'=>3],
+    ],
+], 'Pengesahan Rapor', ['signers'=>[
+    'GURU_KELAS'=>['nama'=>'Wali Kelas','ttd_data_uri'=>'data:image/png;base64,d2FsaQ=='],
+    'KOORDINATOR_BING'=>['nama'=>'Koordinator Inggris','ttd_data_uri'=>null],
+    'KEPALA_SEKOLAH'=>['nama'=>'Kepala Sekolah','ttd_data_uri'=>null],
+], 'tempat'=>'Makassar','tanggal'=>'1 Oktober 2026']);
+$check(!str_contains($signatureHtml,'English Teacher') && !str_contains($signatureHtml,'Wali Kelas'),
+    'Class-teacher signature label and evidence are omitted from report previews');
+$check(str_contains($signatureHtml,'English Coordinator') && str_contains($signatureHtml,'Principal')
+    && str_contains($signatureHtml,'Orang Tua Siswa'),'Coordinator, principal, and parent receipt slots remain visible');
 
 $bing=new ReflectionMethod(EraporPackagePdfRenderer::class,'bing');
 $bingHtml=$bing->invoke(null,$package,[
@@ -32,6 +52,8 @@ $bingHtml=$bing->invoke(null,$package,[
 ]);
 $check(substr_count($bingHtml,'Speaking Test Result')===1,'BING group heading appears once for its contiguous indicators');
 $check(str_contains($bingHtml,'&lt;Nama Murid&gt;') && !str_contains($bingHtml,'<Nama Murid>'),'PDF identity text is escaped');
+$check(str_contains($bingHtml,'Acknowledged by') && str_contains($bingHtml,'Student&#039;s Parent')
+    && !str_contains($bingHtml,'Orang Tua Siswa'),'BING signature caption uses English parent wording');
 
 $agama=new ReflectionMethod(EraporPackagePdfRenderer::class,'agama');
 $agamaDoc=[
@@ -70,6 +92,7 @@ $rtsDoc=['jenis_dokumen'=>'RTS','nama'=>'RTS','judul_cetak'=>'RTS','signers'=>$s
     'signature_periods'=>['GANJIL'=>$emptySignature]];
 $rtsHtml=$rts->invoke(null,$package,$rtsDoc);
 $check(substr_count($rtsHtml,'signature-block')===1 && str_contains($rtsHtml,'Pengesahan Tengah Semester Ganjil<'),'RTS prints only the Ganjil signature block before TS Genap exists');
+$check(str_contains($rtsHtml,'Mengetahui,<br>Orang Tua Siswa'),'Non-BING signature caption remains Indonesian');
 $rtsDoc['signature_periods']['GENAP']=$emptySignature;
 $rtsHtml=$rts->invoke(null,$package,$rtsDoc);
 $check(substr_count($rtsHtml,'signature-block')===1 && str_contains($rtsHtml,'Pengesahan Tengah Semester Ganjil dan Genap'),'RTS merges Ganjil and Genap into one signature block');

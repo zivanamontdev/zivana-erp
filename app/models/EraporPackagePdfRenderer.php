@@ -3,7 +3,7 @@
 /** Deterministic, offline renderer for a frozen eRapor package snapshot. */
 final class EraporPackagePdfRenderer
 {
-    private const VERSION = 'erapor-print-v6';
+    private const VERSION = 'erapor-print-v7';
     /** Margin atas halaman (16mm) dalam pt; blok tanda tangan yang mulai di sini berarti pindah halaman. */
     private const PAGE_TOP_PT = 45.35;
 
@@ -232,7 +232,7 @@ final class EraporPackagePdfRenderer
         foreach ($f['comments'] ?? [] as $comment) $html.='<tr><th>'.e($comment['label_cetak']).':</th><td>'.self::bullets($vals['komentar:'.$comment['id']] ?? '').'</td></tr>';
         $html.='</tbody></table><div class="page-break"></div>'.self::bingHeader($p,$d).'<h2>REMARKS</h2><table class="report-table bing-remarks"><tbody>';
         foreach ($f['scale'] ?? [] as $scale) $html.='<tr><th>'.e($scale['label']).'</th><td>'.self::text($scale['definisi'] ?? '').'</td></tr>';
-        $html.='</tbody></table>'.self::signatureBlock($p,$d,'English Report Endorsement',$d['signature_current'] ?? null);
+        $html.='</tbody></table>'.self::signatureBlock($p,$d,'English Report Endorsement',$d['signature_current'] ?? null,'Acknowledged by',"Student's Parent");
         return $html;
     }
 
@@ -314,15 +314,16 @@ final class EraporPackagePdfRenderer
         return $html.'</tr></table>';
     }
 
-    private static function signatureBlock(array $p,array $d,string $title,?array $block): string
+    private static function signatureBlock(array $p,array $d,string $title,?array $block,string $parentPrefix='Mengetahui,',string $parentLabel='Orang Tua Siswa'): string
     {
         $definitions=$d['signers'] ?? [];
+        // Wali kelas meninjau dan menyetujui rapor, tetapi tidak menandatanganinya.
+        // GURU_KELAS juga mencakup label "English Teacher" di rubrik Bahasa Inggris.
+        $definitions=array_values(array_filter($definitions,static fn($row)=>!in_array($row['peran'] ?? '',['GURU_KELAS','ORANG_TUA'],true)));
         if ($definitions===[]) throw new DomainException('Rubrik tidak memiliki definisi penandatangan.');
         $positionRank=['kiri'=>0,'tengah'=>1,'kanan'=>2];
         usort($definitions,static fn($a,$b)=>(($positionRank[$a['posisi_cetak'] ?? ''] ?? 3)<=>($positionRank[$b['posisi_cetak'] ?? ''] ?? 3))?:((int)$a['urutan']<=>(int)$b['urutan']));
-        // Orang tua selalu ditandatangani di kolom paling kiri pada setiap jenis rapor, termasuk rubrik
-        // yang definisinya tidak memuat peran orang tua; peran ORANG_TUA dari rubrik tidak dicetak dua kali.
-        $definitions=array_values(array_filter($definitions,static fn($row)=>($row['peran'] ?? '')!=='ORANG_TUA'));
+        // Orang tua tetap mendapat kolom tanda terima tersendiri; peran rubriknya tidak dicetak dua kali.
         $count=count($definitions)+1;
         $width='width:'.round(100/$count,3).'%';
         $date=$block && !empty($block['tanggal'])?e($block['tempat']).', '.e($block['tanggal']):'&nbsp;';
@@ -337,11 +338,9 @@ final class EraporPackagePdfRenderer
         $dateSpan=$count>=4?2:1;
         $html.='<table class="signatures"><tbody><tr>'.str_repeat('<td style="'.$width.'"></td>',$count-$dateSpan)
             .'<td class="place-date"'.($dateSpan>1?' colspan="2" style="text-align:right;padding-right:10pt"':' style="'.$width.'"').'>'.$date.'</td></tr><tr>';
-        $html.='<td style="'.$width.'"><div class="sign-job">Mengetahui,<br>Orang Tua Siswa</div><div class="sign-image"></div><div class="sign-line">&nbsp;</div></td>';
+        $html.='<td style="'.$width.'"><div class="sign-job">'.e($parentPrefix).'<br>'.e($parentLabel).'</div><div class="sign-image"></div><div class="sign-line">&nbsp;</div></td>';
         foreach ($definitions as $definition) {
             $role=(string)$definition['peran'];
-            // "English Teacher" di Rapor Bahasa Inggris = guru kelas murid (SPEK_RUBRIK_BING.md bagian 2), sama dengan
-            // kolom Guru Kelas di RTS/Agama: wali kelas pada paket bertahap Wali Kelas, guru pengisi pada paket lama.
             $signer=$block['signers'][$role] ?? null;
             $job=str_replace('{nama_kelas}',(string)($p['student']['nama_kelas'] ?? ''),(string)$definition['jabatan_cetak']);
             // Tinggi area jabatan tetap (maks. 3 baris) agar gambar dan garis nama ketiga kolom sejajar.

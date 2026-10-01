@@ -255,16 +255,13 @@ final class EraporPublication
 
     private static function signatureBlock(PDO $db,array $session,array $currentApprovals,?DateTimeImmutable $currentDate,string $place): array
     {
-        $signers=[]; $teacher=self::one($db,'SELECT guru_nama AS nama,guru_nuptk AS nuptk,guru_ttd_png AS ttd_png,guru_ttd_sha256 AS ttd_sha256,guru_ttd_disetujui_pada AS consent_at FROM erapor_sesi_penerimaan WHERE sesi_id=?',[$session['id']]);
-        // Paket lama tanpa tahap Wali Kelas: kolom Guru Kelas/English Teacher ditandatangani guru pengisi (penerimaan).
-        if ($teacher) $signers['GURU_KELAS']=self::normalizeSigner($teacher);
-        // Paket dengan tahap Wali Kelas: kolom Guru Kelas ditandatangani wali kelas setelah ia menyetujui (kosong sebelumnya).
-        if (self::one($db,"SELECT 1 FROM erapor_sesi_penyetuju WHERE sesi_id=? AND kode='WALI_KELAS'",[$session['id']])) unset($signers['GURU_KELAS']);
+        // Wali kelas hanya menyetujui; tanda tangannya tidak menjadi bagian dari rapor.
+        $signers=[];
         $approvals=self::all($db,'SELECT a.id,a.sesi_id,a.kode,s.nama,s.nuptk,s.ttd_png,s.ttd_sha256,s.ttd_disetujui_pada AS consent_at
             FROM erapor_sesi_penyetuju a JOIN erapor_persetujuan_snapshot s ON s.sesi_penyetuju_id=a.id AND s.sesi_id=a.sesi_id WHERE a.sesi_id=? AND a.status=\'DISETUJUI\'',[$session['id']]);
         foreach ($approvals as $row) {
             if ((int)($row['sesi_id'] ?? 0)!==(int)$session['id']) continue;
-            $role=match($row['kode'] ?? '') {'KEPALA_SEKOLAH'=>'KEPALA_SEKOLAH','KOORDINATOR_QURAN'=>'KOORDINATOR_QURAN','KOORDINATOR_BING'=>'KOORDINATOR_BING','WALI_KELAS'=>'GURU_KELAS',default=>null};
+            $role=match($row['kode'] ?? '') {'KEPALA_SEKOLAH'=>'KEPALA_SEKOLAH','KOORDINATOR_QURAN'=>'KOORDINATOR_QURAN','KOORDINATOR_BING'=>'KOORDINATOR_BING',default=>null};
             if ($role) $signers[$role]=self::normalizeSigner($row);
         }
         $date=$currentDate?self::indonesianDate($currentDate):(!empty($session['tanggal_pengesahan'])?self::indonesianDate(new DateTimeImmutable($session['tanggal_pengesahan'])):null);
