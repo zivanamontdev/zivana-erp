@@ -126,9 +126,7 @@ final class EraporDistribution
 
     private static function downloadName(PDO $db, array $session): string
     {
-        $student = self::one($db, 'SELECT nama_lengkap FROM murid WHERE id=?', [(int) $session['murid_id']]);
-        $name = preg_replace('/[^A-Za-z0-9]+/', '-', (string) ($student['nama_lengkap'] ?? 'Murid'));
-        return 'Rapor-' . trim((string) $name, '-') . '-' . ($session['jenis'] === 'AKHIR' ? 'AS' : 'TS') . '-' . ucfirst(strtolower((string) $session['semester'])) . '.pdf';
+        return EraporPdfFilename::forSession($db, (int) $session['id']);
     }
 
     private static function one(PDO $db, string $sql, array $args): array|false { $q = $db->prepare($sql); $q->execute($args); return $q->fetch(PDO::FETCH_ASSOC); }

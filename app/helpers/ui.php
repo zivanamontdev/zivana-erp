@@ -304,7 +304,7 @@ function uiField(string $name, string $label, array $options = []): string
                 . '</button></div>';
         } elseif (!empty($options['iconCalendar']) && $type === 'date') {
             $control = '<div class="' . uiClassList($wrapperClasses) . '" data-datepicker>' . $control
-                . '<button type="button" class="field-icon-toggle" data-datepicker-toggle aria-label="' . e('Pilih ' . $label) . '" aria-expanded="false" aria-haspopup="dialog">'
+                . '<button type="button" class="field-icon-toggle" data-datepicker-toggle aria-label="' . e('Pilih ' . $label) . '" aria-expanded="false" aria-haspopup="dialog"' . (!empty($options['disabled']) || !empty($options['readonly']) || $state === 'viewonly' ? ' disabled' : '') . '>'
                 . '<span aria-hidden="true">' . icon($iconName) . '</span></button></div>';
         } else {
             $control = '<div class="' . uiClassList($wrapperClasses) . '">' . $control

@@ -24,10 +24,11 @@ final class EraporPdfController extends Controller
         try {
             $official = EraporPdfAccess::officialArtifact($db, (int) $sessionId);
             if ($official) {
-                $this->send($official['bytes'], $official['filename'], $download);
+                // Rename the download without changing immutable historical PDF bytes.
+                $this->send($official['bytes'], EraporPdfFilename::forSession($db, (int) $sessionId), $download);
             }
             $package = EraporPublication::draftPackage($db, (int) $sessionId);
-            $this->send(EraporPackagePdfRenderer::render($package), 'draf-erapor-' . (int) $sessionId . '.pdf', $download);
+            $this->send(EraporPackagePdfRenderer::render($package), EraporPdfFilename::forSession($db, (int) $sessionId, true), $download);
         } catch (DomainException $e) {
             http_response_code(422);
             header('Content-Type: text/plain; charset=UTF-8');
@@ -45,7 +46,7 @@ final class EraporPdfController extends Controller
             if ($package['documents'] === []) $this->notFound();
             $package['scoped'] = true;
             if (EraporPdfAccess::hasOfficial($db, $sessionId)) unset($package['draft']);
-            $this->send(EraporPackagePdfRenderer::render($package), 'pratinjau-erapor-' . $sessionId . '.pdf', $download);
+            $this->send(EraporPackagePdfRenderer::render($package), EraporPdfFilename::forSession($db, $sessionId, !EraporPdfAccess::hasOfficial($db, $sessionId)), $download);
         } catch (DomainException $e) {
             http_response_code(422);
             header('Content-Type: text/plain; charset=UTF-8');

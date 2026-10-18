@@ -36,12 +36,15 @@ final class EraporDownloadController extends Controller
     private function page(string $title, string $message): void
     {
         header('Content-Type: text/html; charset=UTF-8');
-        echo '<!doctype html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
-            . '<meta property="og:title" content="' . e($title) . '"><title>' . e($title) . '</title>'
-            . '<link rel="stylesheet" href="' . BASE_PATH . '/assets/css/tokens.css?v=' . filemtime(ROOT_PATH . '/public/assets/css/tokens.css') . '">'
-            . '<style>body{margin:0;display:grid;place-items:center;min-height:100vh;background:var(--color-red-50);font-family:var(--font-family-base);color:var(--color-neutral-900)}'
-            . 'main{max-width:22rem;margin:var(--space-4);padding:var(--space-5);border-radius:1rem;background:var(--color-neutral-white);text-align:center}'
-            . 'h1{font-size:var(--font-size-body-md);margin:0 0 var(--space-2)}p{margin:0;color:var(--color-neutral-600);font-size:var(--font-size-body-sm);line-height:1.5}</style>'
-            . '</head><body><main><h1>' . e($title) . '</h1><p>' . e($message) . '</p></main></body></html>';
+        $pageTitle = $title;
+        echo '<!doctype html><html lang="id"><head><meta property="og:title" content="' . e($title) . '">';
+        // Public pages use the app font, shared components, and generated color tokens too.
+        require VIEW_PATH . '/layouts/head.php';
+        echo '<style>body{margin:0;display:grid;place-items:center;min-height:100vh;background:var(--color-page-background);font-family:var(--font-family-base);color:var(--color-neutral-900)}'
+            . '.erapor-download-card{max-width:22rem;margin:var(--space-4);padding:var(--space-5);background:var(--color-neutral-white);text-align:center}'
+            . '.erapor-download-card h1{margin:0 0 var(--space-2)}.erapor-download-card p{margin:0;line-height:1.5}</style></head><body>';
+        echo uiCard(uiText($title, 'body-md', ['tag' => 'h1', 'weight' => 'bold'])
+            . uiText($message, 'body-sm', ['tag' => 'p', 'tone' => 'muted']), 'outlined', ['tag' => 'main', 'class' => 'erapor-download-card']);
+        echo '</body></html>';
     }
 }

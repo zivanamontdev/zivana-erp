@@ -63,7 +63,7 @@ final class EraporPublication
             'signers'=>self::signerManifest($data),'source_sha256'=>$sourceHash,'pdf_sha256'=>$pdfHash,
         ];
         $manifestJson=json_encode($manifest,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR);
-        $filename='erapor-'.$sessionId.'-'.$now->format('Ymd').'.pdf';
+        $filename=EraporPdfFilename::build($data['student']['nama_lengkap'],$data['period']['jenis'],$data['period']['semester'],$data['period']['tahun_label']);
         $insert=$db->prepare("INSERT INTO erapor_publikasi_pdf
             (sesi_id,disiapkan_oleh,renderer_versi,filename,ukuran_byte,pdf_sha256,sumber_sha256,manifest,pdf_bytes,status_kirim)
             VALUES(?,?,?,?,?,?,?,?,?,'SIAP_DIKIRIM')");
@@ -141,7 +141,13 @@ final class EraporPublication
             $doc=self::describeDocument($db,$doc,$tests,$student['nama_lengkap'],$session['semester']);
             unset($doc['status']); $documents[]=$doc;
         }
-        return ['session'=>$session,'period'=>['jenis'=>$cal['jenis'],'semester'=>$cal['semester'],
+        $watermark=null;
+        if (in_array($session['status'],['MENUNGGU_TTD','SELESAI'],true)) {
+            $mark=file_get_contents(ROOT_PATH.'/assets/logo-icon.png');
+            if (!is_string($mark) || !str_starts_with($mark,"\x89PNG\r\n\x1a\n")) throw new DomainException('Logo watermark tidak tersedia.');
+            $watermark=['data_uri'=>'data:image/png;base64,'.base64_encode($mark),'sha256'=>hash('sha256',$mark)];
+        }
+        return ['session'=>$session,'watermark'=>$watermark,'period'=>['jenis'=>$cal['jenis'],'semester'=>$cal['semester'],
             'semester_label'=>$cal['semester']==='GANJIL'?'GANJIL':'GENAP',
             'label'=>($cal['jenis']==='TENGAH'?'Tengah':'Akhir').' Semester '.($cal['semester']==='GANJIL'?'Ganjil':'Genap'),
             'tahun_label'=>(int)$period['tahun_awal'].'/'.(int)$period['tahun_akhir']],
@@ -255,13 +261,18 @@ final class EraporPublication
 
     private static function signatureBlock(PDO $db,array $session,array $currentApprovals,?DateTimeImmutable $currentDate,string $place): array
     {
-        // Wali kelas hanya menyetujui; tanda tangannya tidak menjadi bagian dari rapor.
         $signers=[];
+        // New sessions use the class-mapped WALI_KELAS approval snapshot, never the PIC's current profile.
+        // Preserve the original teacher snapshot only for historical sessions without a WALI_KELAS stage.
+        if (!self::one($db,"SELECT 1 FROM erapor_sesi_penyetuju WHERE sesi_id=? AND kode='WALI_KELAS'",[$session['id']])) {
+            $teacher=self::one($db,'SELECT guru_nama AS nama,guru_nuptk AS nuptk,guru_ttd_png AS ttd_png,guru_ttd_sha256 AS ttd_sha256,guru_ttd_disetujui_pada AS consent_at FROM erapor_sesi_penerimaan WHERE sesi_id=?',[$session['id']]);
+            if ($teacher) $signers['GURU_KELAS']=self::normalizeSigner($teacher);
+        }
         $approvals=self::all($db,'SELECT a.id,a.sesi_id,a.kode,s.nama,s.nuptk,s.ttd_png,s.ttd_sha256,s.ttd_disetujui_pada AS consent_at
             FROM erapor_sesi_penyetuju a JOIN erapor_persetujuan_snapshot s ON s.sesi_penyetuju_id=a.id AND s.sesi_id=a.sesi_id WHERE a.sesi_id=? AND a.status=\'DISETUJUI\'',[$session['id']]);
         foreach ($approvals as $row) {
             if ((int)($row['sesi_id'] ?? 0)!==(int)$session['id']) continue;
-            $role=match($row['kode'] ?? '') {'KEPALA_SEKOLAH'=>'KEPALA_SEKOLAH','KOORDINATOR_QURAN'=>'KOORDINATOR_QURAN','KOORDINATOR_BING'=>'KOORDINATOR_BING',default=>null};
+            $role=match($row['kode'] ?? '') {'KEPALA_SEKOLAH'=>'KEPALA_SEKOLAH','KOORDINATOR_QURAN'=>'KOORDINATOR_QURAN','KOORDINATOR_BING'=>'KOORDINATOR_BING','WALI_KELAS'=>'GURU_KELAS',default=>null};
             if ($role) $signers[$role]=self::normalizeSigner($row);
         }
         $date=$currentDate?self::indonesianDate($currentDate):(!empty($session['tanggal_pengesahan'])?self::indonesianDate(new DateTimeImmutable($session['tanggal_pengesahan'])):null);
@@ -294,6 +305,7 @@ final class EraporPublication
     {
         return ['renderer'=>EraporPackagePdfRenderer::version(),'session'=>$data['session']['id'],
             'period'=>$data['period'],'student'=>$data['student'],'school'=>$data['school']['snapshot'],
+            'watermark_sha256'=>$data['watermark']['sha256'] ?? null,
             'documents'=>array_map(static fn($d)=>['id'=>$d['id'],'rubrik_id'=>$d['rubrik_id'],'kode'=>$d['kode'],'versi'=>$d['versi'],'seed_sha256'=>$d['seed_sha256'],'period_values'=>$d['period_values'],'form'=>$d['form'],'narrative_template_version'=>$d['narrative_version'] ?? null,'narrative'=>$d['narrative'] ?? null],$data['documents']),
             'published_at'=>$data['published_at']];
     }

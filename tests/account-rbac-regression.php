@@ -6,6 +6,7 @@ session_start();
 define('ROOT_PATH', dirname(__DIR__));
 define('VIEW_PATH', ROOT_PATH . '/app/views');
 define('BASE_PATH', '');
+define('APP_NAME', 'Zivana Uji'); // Public token pages now load the shared application head.
 define('CSRF_TOKEN_NAME', 'csrf_token');
 class Database { public static PDO $db; public static function getInstance(): PDO { return self::$db; } }
 spl_autoload_register(function ($class) {

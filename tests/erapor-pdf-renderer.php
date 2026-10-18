@@ -31,10 +31,27 @@ $signatureHtml=$signatureBlock->invoke(null,$package,[
     'KOORDINATOR_BING'=>['nama'=>'Koordinator Inggris','ttd_data_uri'=>null],
     'KEPALA_SEKOLAH'=>['nama'=>'Kepala Sekolah','ttd_data_uri'=>null],
 ], 'tempat'=>'Makassar','tanggal'=>'1 Oktober 2026']);
-$check(!str_contains($signatureHtml,'English Teacher') && !str_contains($signatureHtml,'Wali Kelas'),
-    'Class-teacher signature label and evidence are omitted from report previews');
+$check(str_contains($signatureHtml,'English Teacher') && str_contains($signatureHtml,'Wali Kelas'),
+    'Class-mapped teacher signature and English Teacher slot remain visible');
 $check(str_contains($signatureHtml,'English Coordinator') && str_contains($signatureHtml,'Principal')
     && str_contains($signatureHtml,'Orang Tua Siswa'),'Coordinator, principal, and parent receipt slots remain visible');
+
+$dualHtml=$signatureBlock->invoke(null,$package,[
+    'signers'=>[
+        ['peran'=>'KOORDINATOR_BING','jabatan_cetak'=>'English Coordinator','posisi_cetak'=>'kiri','urutan'=>1],
+        ['peran'=>'GURU_KELAS','jabatan_cetak'=>'English Teacher','posisi_cetak'=>'kanan','urutan'=>2],
+    ],
+], '', ['signers'=>[
+    'GURU_KELAS'=>['nama'=>'Guru Dua Peran','ttd_data_uri'=>'data:image/png;base64,d2FsaQ=='],
+    'KOORDINATOR_BING'=>['nama'=>'Guru Dua Peran','ttd_data_uri'=>'data:image/png;base64,d2FsaQ=='],
+]]);
+$check(substr_count($dualHtml,'Guru Dua Peran')===2 && substr_count($dualHtml,'data:image/png;base64,d2FsaQ==')===2,
+    'The same person signs in both role slots; signatures are not deduplicated by name');
+foreach (['BELUM_DIISI'=>false,'TELAH_DIISI'=>false,'MENUNGGU_TTD'=>true,'SELESAI'=>true] as $state=>$marked) {
+    $check(EraporPackagePdfRenderer::watermarkEnabled(['session'=>['status'=>$state],'draft'=>true])===$marked,
+        'Watermark follows Finalisasi status rather than approval or draft flag: '.$state);
+}
+$check(!EraporPackagePdfRenderer::watermarkEnabled(['session'=>['status'=>'SELESAI'],'template'=>true]),'Blank curriculum templates do not receive a finalization watermark');
 
 $bing=new ReflectionMethod(EraporPackagePdfRenderer::class,'bing');
 $bingHtml=$bing->invoke(null,$package,[

@@ -171,6 +171,9 @@ eraporUiCheck($receptionXPath->query('//button[@data-erapor-confirm-reception an
 $form['session']['status'] = 'MENUNGGU_TTD';
 $form['capabilities']['can_edit'] = false;
 $form['capabilities']['can_confirm_reception'] = false;
+$form['documents'][2]['form']['definitions']['initialization_required'] = false;
+$form['documents'][2]['form']['values'] = ['mulai_pra_tk'=>false,'catatan'=>'Catatan terkunci',
+    'tes:0123456789abcdef0123456789abcdef'=>['urutan'=>1,'tanggal_tes'=>'2026-09-24','jilid'=>'I','nilai'=>'A']];
 ob_start();
 eval('?>' . $source);
 $pendingHtml = ob_get_clean();
@@ -180,6 +183,11 @@ $pendingXPath = new DOMXPath($pendingDom);
 eraporUiCheck($pendingXPath->query('//button[@data-erapor-confirm or @data-erapor-confirm-reception]')->length === 0
     && str_contains($pendingHtml, 'Menunggu proses persetujuan'),
     'Once received, teacher cannot submit again and sees the pending approval state');
+eraporUiCheck($pendingXPath->query('//*[@data-ummi-test-field and not(@disabled)]')->length === 0
+    && $pendingXPath->query('//*[@data-ummi-test-field="tanggal_tes" and @disabled]')->length > 0,
+    'Finalized Ummi test date, volume, grade and order controls are disabled');
+eraporUiCheck($pendingXPath->query('//button[@data-datepicker-toggle and not(@disabled)]')->length === 0,
+    'Finalized Ummi calendar toggle cannot reopen an editable date picker');
 
 $script = file_get_contents(ROOT_PATH . '/public/assets/js/erapor-session.js');
 eraporUiCheck(str_contains($script, "'/konfirmasi-penerimaan'")

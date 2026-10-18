@@ -19,6 +19,10 @@
     var pending = new Map();
     var timer = null;
     var saving = false;
+    // Retry the exact immutable batch before sending newer edits. A lost response may already have committed.
+    var retryBatch = null;
+    var saveFailures = 0;
+    var maxAutoRetries = 3;
     var blocked = false;
     var serverStatus = null;
     var lastCompletion = null;
@@ -64,7 +68,7 @@
     }
 
     function updateConfirmState() {
-      var busy = pending.size > 0 || saving || hasIncompleteTestRows();
+      var busy = pending.size > 0 || retryBatch !== null || saving || blocked || hasIncompleteTestRows();
       var incomplete = incompleteDocuments();
       setConfirmDisabled(serverStatus !== 'BELUM_DIISI' || busy || incomplete.length > 0);
       setReceptionDisabled(serverStatus !== 'TELAH_DIISI' || busy || incomplete.length > 0);
@@ -181,14 +185,20 @@
 
     function schedule() {
       if (timer) window.clearTimeout(timer);
-      timer = window.setTimeout(flush, 550);
+      timer = null;
+      if (blocked || saveFailures > maxAutoRetries || navigator.onLine === false) return;
+      timer = window.setTimeout(flush, saveFailures ? Math.min(8000, 550 * Math.pow(2, saveFailures)) : 550);
     }
 
     function noteChange(field) {
-      if (blocked || field.disabled) return;
+      if (field.disabled) return;
       refreshQuestion(field);
       updateSectionCounts();
       pending.set(field, true);
+      if (blocked) {
+        setStatus('Penyimpanan terhenti. Perubahan di layar belum tersimpan; jangan tutup halaman. Periksa pesan kesalahan sebelum mencoba lagi.', 'error');
+        return;
+      }
       setConfirmDisabled(true);
       setReceptionDisabled(true);
       setStatus('Ada perubahan yang belum disimpan…', 'pending');
@@ -260,8 +270,16 @@
         options.method = 'POST';
         options.body = JSON.stringify(body);
       }
-      var response = await fetch(url, options);
-      var json = await response.json();
+      var controller = new AbortController();
+      options.signal = controller.signal;
+      var timeout = window.setTimeout(function () { controller.abort(); }, 20000);
+      var response, json;
+      try {
+        response = await fetch(url, options);
+        json = await response.json();
+      } finally {
+        window.clearTimeout(timeout);
+      }
       if (typeof json.csrf_token === 'string') token = json.csrf_token;
       root.dataset.csrfToken = token;
       if (response.status === 419 && body !== undefined && !retried && typeof json.csrf_token === 'string') {
@@ -277,17 +295,22 @@
     }
 
     async function flush() {
-      if (saving || blocked || pending.size === 0) return;
+      if (saving || blocked || (!retryBatch && pending.size === 0)) return false;
       if (timer) window.clearTimeout(timer);
       timer = null;
 
-      var first = pending.keys().next().value;
-      var documentId = first.dataset.eraporDocumentId;
-      var fields = Array.from(pending.keys()).filter(function (field) {
-        return field.dataset.eraporDocumentId === documentId;
-      });
-      fields.forEach(function (field) { pending.delete(field); });
-      var changes = fields.map(payloadFor);
+      if (!retryBatch) {
+        var first = pending.keys().next().value;
+        var documentId = first.dataset.eraporDocumentId;
+        var fields = Array.from(pending.keys()).filter(function (field) {
+          return field.dataset.eraporDocumentId === documentId;
+        });
+        fields.forEach(function (field) { pending.delete(field); });
+        retryBatch = {documentId: documentId, fields: fields, changes: fields.map(payloadFor)};
+      }
+      var documentId = retryBatch.documentId;
+      var fields = retryBatch.fields;
+      var changes = retryBatch.changes;
       var url = apiUrl + '/dokumen/' + encodeURIComponent(documentId) + '/simpan';
       saving = true;
       setConfirmDisabled(true);
@@ -302,41 +325,53 @@
           if (field.dataset.eraporEntry === 'UMMI_TEST') {
             if (saved === null && field.dataset.eraporDeleteTest === 'true') {
               var parentList = field.parentElement;
+              pending.delete(field);
               field.remove();
               renumberTests(parentList);
               return;
             }
             field.dataset.savedValue = saved === null ? '' : JSON.stringify(saved);
-            field.dataset.eraporIncomplete = 'false';
+            var incompleteTest = testRowValue(field) === null;
+            field.dataset.eraporIncomplete = incompleteTest ? 'true' : 'false';
             field.dataset.eraporDeleteTest = 'false';
             var testStatus = field.querySelector('[data-ummi-test-status]');
             if (testStatus) testStatus.textContent = '';
+            // An unfinished edit made during the request is not a request to delete the stored test.
+            if (incompleteTest) { pending.delete(field); return; }
           } else {
             field.dataset.savedValue = saved === null ? '' : String(saved);
           }
           field.removeAttribute('aria-invalid');
+          // The teacher may have edited again while this batch was in flight.
+          if (!sameValue(valueOf(field), saved)) pending.set(field, true);
+          else pending.delete(field);
         });
+        retryBatch = null;
+        saveFailures = 0;
+        recovery.hidden = true;
         applyState(data);
-        if (pending.size === 0) setStatus('Semua perubahan tersimpan.', 'success');
+        if (pending.size === 0 && hasIncompleteTestRows()) setStatus('Lengkapi atau hapus baris tes Ummi yang belum lengkap. Isian lain sudah tersimpan.', 'pending');
+        else if (pending.size === 0) setStatus('Semua perubahan tersimpan.', 'success');
         else setStatus('Perubahan tersimpan. Menyimpan perubahan berikutnya…', 'pending');
+        return true;
       } catch (error) {
-        if (error.status === 401) {
-          window.location.assign(root.dataset.loginUrl);
-          return;
-        }
-        fields.forEach(function (field) { if (!pending.has(field)) pending.set(field, true); });
-        blocked = error.status === 409 || error.status === 419 || error.status === 422 || error.status === 403;
+        // Do not replace this batch with newer field values: retrying its original payload is idempotent.
+        saveFailures++;
+        blocked = [401, 403, 409, 419, 422].includes(error.status);
         if (error.status === 409) {
-          setStatus('Data rapor berubah di sisi server. Isian yang tampak di layar belum tersimpan; salin perubahan yang diperlukan sebelum memuat ulang.', 'error');
-          recovery.hidden = false;
+          setStatus('Data atau status rapor berubah di sisi server. Isian di layar belum tersimpan; jangan tutup halaman. Salin perubahan sebelum memuat ulang.', 'error');
+        } else if (error.status === 401) {
+          setStatus('Sesi login berakhir. Jangan tutup halaman ini. Login kembali di tab lain, lalu tekan Coba simpan lagi.', 'error');
         } else {
-          setStatus(error.status ? (error.message || 'Gagal menyimpan. Periksa koneksi lalu coba lagi.') : 'Koneksi terputus. Perubahan belum tersimpan; tekan Simpan Draft setelah koneksi kembali.', 'error');
-          recovery.hidden = false;
+          var message = error.status ? (error.message || 'Gagal menyimpan.') : 'Koneksi terputus atau waktu simpan habis.';
+          setStatus(message + ' Isian tetap ditahan di halaman ini. ' + (saveFailures <= maxAutoRetries && !blocked ? 'Penyimpanan akan dicoba kembali.' : 'Tekan Coba simpan lagi atau Simpan Draft setelah koneksi pulih.'), 'error');
         }
+        recovery.hidden = false;
+        return false;
       } finally {
         saving = false;
-        if (!blocked && pending.size) schedule();
-        if (!blocked) updateConfirmState();
+        if (!blocked && (retryBatch || pending.size)) schedule();
+        updateConfirmState();
       }
     }
 
@@ -349,7 +384,7 @@
         pending.delete(row);
         if (statusLine) statusLine.textContent = '';
         updateConfirmState();
-        if (pending.size === 0 && timer) { window.clearTimeout(timer); timer = null; }
+        if (pending.size === 0 && !retryBatch && timer) { window.clearTimeout(timer); timer = null; }
         setStatus('Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum menyelesaikan rapor.', 'pending');
         return;
       }
@@ -591,7 +626,8 @@
     var draftBusy = false;
     async function saveDraft() {
       if (draftBusy) return;
-      if (blocked) { setStatus('Penyimpanan diblokir. Muat ulang sesi sebelum menyimpan draft.', 'error'); return; }
+      if (blocked) { setStatus('Penyimpanan diblokir. Jangan tutup halaman; periksa pesan kesalahan dan salin isian sebelum memuat ulang.', 'error'); return; }
+      saveFailures = 0;
       draftBusy = true;
       var buttons = Array.from(document.querySelectorAll('[data-erapor-draft]'));
       buttons.forEach(function (button) { button.disabled = true; });
@@ -599,15 +635,14 @@
         await waitSaving();
         var dirty = dirtyFields();
         dirty.forEach(function (field) { pending.set(field, true); });
-        var total = pending.size;
+        var total = pending.size + (retryBatch ? retryBatch.fields.length : 0);
         var guard = 0;
-        while (pending.size && !blocked && guard++ < 50) {
-          var before = pending.size;
-          await flush();
+        while ((retryBatch || pending.size) && !blocked && guard++ < 50) {
+          if (!(await flush())) break;
           await waitSaving();
-          if (pending.size >= before) break; // gagal jaringan: jangan berputar terus
         }
-        if (pending.size || blocked) throw new Error('Sebagian isian belum tersimpan. Periksa koneksi lalu coba lagi.');
+        if (retryBatch || pending.size || blocked) throw new Error('Sebagian isian belum tersimpan. Periksa koneksi lalu coba lagi.');
+        if (hasIncompleteTestRows()) throw new Error('Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum menyimpan draft.');
         var data = await request(apiUrl + '/draft', {});
         var time = new Date(String(data.draft_at).replace(' ', 'T'));
         var label = 'Tersimpan ' + time.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'}) + ' ' + time.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}).replace('.', ':');
@@ -628,7 +663,10 @@
     });
     // Peringatkan bila halaman ditutup saat masih ada isian yang belum tersimpan.
     window.addEventListener('beforeunload', function (event) {
-      if (pending.size || saving || (!blocked && dirtyFields().length)) { event.preventDefault(); event.returnValue = ''; }
+      if (retryBatch || pending.size || saving || hasIncompleteTestRows() || dirtyFields().length) { event.preventDefault(); event.returnValue = ''; }
+    });
+    window.addEventListener('online', function () {
+      if (!blocked && (retryBatch || pending.size)) { saveFailures = 0; schedule(); }
     });
 
     // Bagikan ke Orang Tua: tautan wa.me terbuka seperti biasa; pembagian dicatat di server (keepalive).
@@ -689,9 +727,9 @@
 
     root.addEventListener('click', async function (event) {
       var step = event.target.closest('[data-erapor-step]');
-      if (step) { showPage(Number(step.dataset.eraporStep), true); return; }
-      if (event.target.closest('[data-erapor-prev]')) { showPage(currentPage - 1, true); return; }
-      if (event.target.closest('[data-erapor-next]')) { showPage(currentPage + 1, true); return; }
+      if (step) { flush(); showPage(Number(step.dataset.eraporStep), true); return; }
+      if (event.target.closest('[data-erapor-prev]')) { flush(); showPage(currentPage - 1, true); return; }
+      if (event.target.closest('[data-erapor-next]')) { flush(); showPage(currentPage + 1, true); return; }
       var filterButton = event.target.closest('[data-erapor-filter]');
       if (filterButton) { filterMode = filterButton.dataset.eraporFilter; applyFilter(); return; }
       var bingStart = event.target.closest('[data-erapor-bing-start]');
@@ -716,7 +754,7 @@
       var addTest = event.target.closest('[data-erapor-add-test]');
       if (addTest) {
         if (blocked || saving) return;
-        if (pending.size) {
+        if (retryBatch || pending.size) {
           setStatus('Tunggu sampai perubahan lain tersimpan sebelum menambah baris tes.', 'pending');
           return;
         }
@@ -750,7 +788,7 @@
       var removeTest = event.target.closest('[data-erapor-remove-test]');
       if (removeTest) {
         var testRow = removeTest.closest('[data-erapor-entry="UMMI_TEST"]');
-        if (!testRow || blocked || saving) return;
+        if (!testRow || blocked || saving || retryBatch) return;
         if (!testRow.dataset.savedValue) {
           pending.delete(testRow);
           var testList = testRow.parentElement;
@@ -772,7 +810,7 @@
 
       var initUmmi = event.target.closest('[data-erapor-ummi-init]');
       if (initUmmi) {
-        if (blocked || saving || pending.size) {
+        if (blocked || saving || retryBatch || pending.size) {
           setStatus('Simpan perubahan yang tertunda terlebih dahulu, lalu mulai pengisian Ummi.', 'pending');
           return;
         }
@@ -783,6 +821,13 @@
         setStatus('Menyiapkan setelan periode Ummi…', 'saving');
         try {
           await request(apiUrl + '/dokumen/' + encodeURIComponent(initUmmi.dataset.eraporDocumentId) + '/simpan', {changes: []});
+          // Initialization has been acknowledged; do not trigger the unsaved-change unload guard.
+          // If another section was edited during the request, retain it instead of reloading over it.
+          if (retryBatch || pending.size) {
+            setStatus('Setelan Ummi tersimpan. Tunggu perubahan lain tersimpan, lalu tekan Mulai pengisian Ummi lagi.', 'pending');
+            return;
+          }
+          saving = false;
           window.location.reload();
           return;
         } catch (error) {
@@ -793,6 +838,7 @@
         } finally {
           saving = false;
           initUmmi.disabled = blocked;
+          if (!blocked && (retryBatch || pending.size)) schedule();
           if (!blocked) updateConfirmState();
         }
         return;
@@ -801,6 +847,7 @@
       var retry = event.target.closest('[data-erapor-retry]');
       if (retry) {
         blocked = false;
+        saveFailures = 0;
         recovery.hidden = true;
         schedule();
         return;
@@ -813,7 +860,7 @@
       var confirmButton = event.target.closest('[data-erapor-confirm]');
       var receiveButton = event.target.closest('[data-erapor-confirm-reception]');
       if ((!confirmButton && !receiveButton) || (confirmButton && confirmButton.disabled)
-        || (receiveButton && receiveButton.disabled) || pending.size || saving || blocked) return;
+        || (receiveButton && receiveButton.disabled) || retryBatch || pending.size || saving || blocked) return;
       if (hasIncompleteTestRows()) {
         setStatus('Lengkapi atau hapus baris tes Ummi yang belum lengkap sebelum melanjutkan.', 'error');
         var incompleteRow = Array.from(root.querySelectorAll('[data-erapor-entry="UMMI_TEST"]')).find(function (row) {
@@ -825,11 +872,11 @@
       if (!validateRequired()) return;
       var receiving = Boolean(receiveButton);
       var confirmation = receiving
-        ? 'Konfirmasi penerimaan akan mengunci seluruh isian rapor dan mengirimkannya ke antrean persetujuan. Setelah dilanjutkan, nilai tidak dapat diubah.'
-        : 'Konfirmasi ini menandai pengisian guru telah selesai. Anda masih dapat meninjau dan mengubah isian sebelum konfirmasi penerimaan.';
-      if (!(await askConfirm(receiving ? 'Konfirmasi Penerimaan?' : 'Selesaikan Rapor?', confirmation,
-        receiving ? 'Konfirmasi Penerimaan' : 'Selesaikan Rapor'))) return;
-      if (pending.size || saving || blocked) return;
+        ? 'Finalisasi mengunci seluruh isian rapor dan mengirimkannya ke antrean persetujuan. Setelah dilanjutkan, nilai tidak dapat diubah.'
+        : 'Konfirmasi ini menandai pengisian guru telah selesai. Anda masih dapat meninjau dan mengubah isian sebelum Finalisasi.';
+      if (!(await askConfirm(receiving ? 'Finalisasi Rapor?' : 'Selesaikan Rapor?', confirmation,
+        receiving ? 'Finalisasi' : 'Selesaikan Rapor'))) return;
+      if (retryBatch || pending.size || saving || blocked) return;
       setConfirmDisabled(true);
       setReceptionDisabled(true);
       try {
