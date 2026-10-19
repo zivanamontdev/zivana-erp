@@ -192,7 +192,7 @@ eraporUiCheck($pendingXPath->query('//button[@data-datepicker-toggle and not(@di
 $script = file_get_contents(ROOT_PATH . '/public/assets/js/erapor-session.js');
 eraporUiCheck(str_contains($script, "'/konfirmasi-penerimaan'")
     && str_contains($script, 'data-erapor-confirm-reception')
-    && str_contains($script, 'tidak dapat diubah'),
+    && str_contains($script, 'Finalisasi mengunci rapor utama'),
     'Client routes reception separately and warns about the irreversible lock');
 // SPEK_RUBRIK_RTS 6: sesi Tengah Genap menampilkan nilai TS Ganjil hanya-baca di baris yang sama.
 eraporUiCheck($xpath->query('//*[@data-erapor-reference]')->length === 0, 'No TS Ganjil reference outside Tengah Genap');
@@ -213,4 +213,27 @@ eraporUiCheck($xpath->query('//*[@data-erapor-filter="all"]')->length === 1 && $
 eraporUiCheck($xpath->query('//section[@data-erapor-type="BING" and @data-erapor-optional="true"]//*[@data-erapor-bing-fields and @hidden]')->length === 1
     && $xpath->query('//button[@data-erapor-bing-start]')->length === 1, 'Empty optional BING waits for explicit start');
 eraporUiCheck($xpath->query('//textarea[@data-erapor-entry="AGAMA" and starts-with(@data-erapor-key,"catatan:")]')->length === 1, 'Agama has one Laporan Perkembangan Agama textarea');
-echo "PASS: E-Rapor session editor markup covers RTS, Agama, BING, PPI, Ummi, and server-gated submission.\n";
+// Independent PPI locks must not be inferred from the main package status.
+$form['session']['status']='SELESAI';
+$form['capabilities']['can_edit']=false;$form['capabilities']['can_edit_ppi']=true;
+$form['ppi']=['included'=>false,'separate'=>true,'status'=>'BELUM_DIAJUKAN','label'=>'Belum diajukan','can_submit'=>true,
+    'progress'=>['filled'=>1,'required'=>1,'complete'=>true]];
+$form['documents'][4]['form']['definitions']['columns'][0]['wajib']=1;
+$form['documents'][4]['form']['values']=['9:10'=>'Nilai tetap <aman>'];
+$form['completion']['documents'][4]=['jenis'=>'PPI','required'=>0,'filled'=>0,'complete'=>true];
+ob_start();eval('?>'.$source);$ppiHtml=ob_get_clean();$ppiDom=new DOMDocument();@$ppiDom->loadHTML($ppiHtml);$px=new DOMXPath($ppiDom);
+eraporUiCheck($px->query('//textarea[@data-erapor-entry="PPI" and not(@disabled)]')->length===1
+    &&$px->query('//input[@type="radio" and not(@disabled)]')->length===0,'After main publication only detached, unsubmitted PPI remains editable');
+eraporUiCheck($px->query('//button[@data-erapor-submit-ppi and not(@disabled)]')->length===1
+    &&$px->query('//button[@data-erapor-confirm or @data-erapor-confirm-reception]')->length===0,'Separate PPI has its own explicit submit action, never a repeated main finalization');
+eraporUiCheck(str_contains($ppiHtml,'Nilai tetap &lt;aman&gt;')&&str_contains($ppiHtml,'Pengajuan Terpisah'),'PPI values remain escaped and separate status is not misleadingly labelled optional');
+$form['capabilities']['can_edit_ppi']=false;$form['ppi']['status']='MENUNGGU_WALI';$form['ppi']['label']='Menunggu Wali Kelas';$form['ppi']['can_submit']=false;
+ob_start();eval('?>'.$source);$lockedPpi=ob_get_clean();$ld=new DOMDocument();@$ld->loadHTML($lockedPpi);$lx=new DOMXPath($ld);
+eraporUiCheck($lx->query('//textarea[@data-erapor-entry="PPI" and not(@disabled)]')->length===0
+    &&$lx->query('//button[@data-erapor-submit-ppi]')->length===0,'Submitted PPI values and repeat-submission controls are locked');
+$form['session']['status']='BELUM_DIISI';$form['capabilities']['can_edit']=true;$form['capabilities']['can_edit_ppi']=true;
+$form['ppi']['included']=true;$form['ppi']['separate']=false;$form['ppi']['status']='BELUM_DIAJUKAN';
+ob_start();eval('?>'.$source);$choiceHtml=ob_get_clean();$cd=new DOMDocument();@$cd->loadHTML($choiceHtml);$cx=new DOMXPath($cd);
+eraporUiCheck($cx->query('//input[@data-erapor-ppi-choice and @checked]')->length===1
+    &&$cx->query('//*[@data-erapor-ppi-final-choice and @hidden]//input[@id="final-include-ppi"]')->length===1,'PIC has an explicit inclusion choice and an isolated Finalisasi modal choice');
+echo "PASS: E-Rapor session editor markup covers RTS, Agama, BING, PPI, Ummi, independent PPI locks and server-gated submission.\n";

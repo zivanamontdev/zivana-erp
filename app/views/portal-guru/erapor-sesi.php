@@ -10,6 +10,9 @@ $filled = array_sum(array_column($form['completion']['documents'], 'filled'));
 $kelasLabel = trim(($student['level_kelas'] ?? '') . ' ' . ($student['nama_kelas'] ?? ''));
 $canEdit = uiCan('Portal Guru', 'Daftar Murid', 'edit') && !empty($form['capabilities']['can_edit']);
 $canSend = uiCan('Portal Guru', 'Daftar Murid', 'kirim');
+$canEditPpi = uiCan('Portal Guru', 'Daftar Murid', 'edit') && ($form['capabilities']['can_edit_ppi'] ?? $canEdit);
+$canSaveDraft = $canEdit || $canEditPpi;
+$ppiState = $form['ppi'] ?? null;
 $readonlyMessages = [
     'STATUS_TERKUNCI' => 'Sesi ini sudah terkunci. Nilai dapat dilihat, tetapi tidak dapat diubah.',
     'TENGGAT_BERAKHIR' => 'Tenggat pengisian periode ini telah berakhir. Nilai dapat dilihat, tetapi tidak dapat diubah.',
@@ -64,12 +67,12 @@ $renderScale = static function (array $document, array $item, array $scales, ?in
     }
     return $html . '</div>';
 };
-$renderText = static function (array $document, string $type, string $key, string $label, ?string $value, bool $disabled = false, bool $required = true, bool $hideLabel = false) use ($canEdit): string {
+$renderText = static function (array $document, string $type, string $key, string $label, ?string $value, bool $disabled = false, bool $required = true, bool $hideLabel = false) use ($canEdit, $canEditPpi): string {
     return uiField('erapor_' . (int)$document['id'] . '_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $key), $label, [
         'type' => 'textarea', 'variant' => 'form',
         'id' => 'erapor-field-' . (int)$document['id'] . '-' . substr(hash('sha256', $key), 0, 12),
         'value' => $value ?? '', 'placeholder' => 'Tulis ' . mb_strtolower($label, 'UTF-8'),
-        'disabled' => $disabled || !$canEdit,
+        'disabled' => $disabled || !($type === 'PPI' ? $canEditPpi : $canEdit),
         'hideLabel' => $hideLabel,
         'inputAttributes' => [
             'rows' => 3,
@@ -133,6 +136,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <div class="pengisian-title">
                 <h1>Pengisian Rapor</h1>
                 <p class="pengisian-student-name"><?= e($student['nama_lengkap']) ?></p>
+                <?php if (!empty($ppiState['separate'])): ?><p class="erapor-share-hint" data-erapor-ppi-status>PPI terpisah: <?= e($ppiState['label']) ?> · lihat tab Rapor PPI.</p><?php endif; ?>
                 <?php if ($session['status'] === 'BELUM_DIISI'): ?>
                     <?php // Status draft: diperbarui erapor-session.js setelah Simpan Draft. ?>
                     <p class="pengisian-approval-status" data-erapor-draft-status<?= empty($draftAt) ? ' hidden' : '' ?>><?= uiBadge('Draft', 'netral') ?> <span class="erapor-draft-time" data-erapor-draft-time><?= !empty($draftAt) ? e('Tersimpan ' . date('d/m/Y H:i', strtotime($draftAt))) : '' ?></span></p>
@@ -148,14 +152,14 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <div class="pengisian-header-icons">
                 <?= uiButton($pdfLabel, 'outline', ['icon'=>'icon_file_text', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>$pdfLabel, 'data-erapor-open-url'=>$pdfUrl]]) ?>
                 <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
-                <?php if ($canEdit && $session['status'] === 'BELUM_DIISI'): ?><?= uiButton('Simpan Draft', 'outline', ['icon'=>'icon_save', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Simpan Draft', 'data-erapor-draft'=>true]]) ?><?php endif; ?>
+                <?php if ($canSaveDraft): ?><?= uiButton('Simpan Draft', 'outline', ['icon'=>'icon_save', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Simpan Draft', 'data-erapor-draft'=>true]]) ?><?php endif; ?>
                 <?= $renderShare(true) ?>
             </div>
             <div class="pengisian-header-actions">
                 <a class="ui-button ui-button--outline" href="<?= e($pdfUrl) ?>" target="_blank" rel="noopener" data-erapor-pdf><?= e($pdfLabel) ?></a>
                 <?php if (!empty($form['approvals'])): ?><?= uiButton('Alur Persetujuan', 'outline', ['icon'=>'icon_clipboard_check', 'iconOnly'=>true, 'marginVertical'=>0, 'attributes'=>['title'=>'Alur Persetujuan', 'data-modal-open'=>'erapor-approval-modal']]) ?><?php endif; ?>
                 <?= $renderShare(false) ?>
-                <?php if ($canEdit && $session['status'] === 'BELUM_DIISI'): ?>
+                <?php if ($canSaveDraft): ?>
                     <?= uiButton('Simpan Draft', 'outline', ['icon'=>'icon_save', 'marginVertical'=>0, 'attributes'=>['data-erapor-draft'=>true]]) ?>
                 <?php endif; ?>
                 <?php if ($canSend && $session['status'] === 'BELUM_DIISI'): ?>
@@ -174,6 +178,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
         <?php if (!$canEdit): ?>
             <p class="erapor-session-notice" role="status">
                 <?= e($readonlyMessages[$form['capabilities']['read_only_reason'] ?? ''] ?? 'Sesi ini hanya dapat dilihat.') ?>
+                <?php if ($canEditPpi && !empty($ppiState['separate'])): ?> PPI terpisah masih dapat diisi pada tab Rapor PPI.<?php endif; ?>
             </p>
         <?php endif; ?>
         <div class="pengisian-rapor-progress" aria-label="Progress isian rapor">
@@ -200,7 +205,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 <span class="erapor-step-index" aria-hidden="true"><?= $index + 1 ?></span>
                 <span class="erapor-step-text">
                     <span class="erapor-step-name"><?= e(['RTS' => 'RTS', 'RAS' => 'RAS', 'AGAMA' => 'Rapor PAI', 'UMMI' => 'Rapor Ummi', 'BING' => 'Rapor BING', 'PPI' => 'Rapor PPI'][$document['jenis_dokumen']] ?? $document['nama']) ?></span>
-                    <small data-erapor-step-progress="<?= e($document['jenis_dokumen']) ?>"><?= (int)$stepProgress['required'] ? (int)$stepProgress['filled'] . ' / ' . (int)$stepProgress['required'] : 'Opsional' ?></small>
+                    <small data-erapor-step-progress="<?= e($document['jenis_dokumen']) ?>"><?= (int)$stepProgress['required'] ? (int)$stepProgress['filled'] . ' / ' . (int)$stepProgress['required'] : ($document['jenis_dokumen']==='PPI' && !empty($ppiState['separate']) ? 'Terpisah' : 'Opsional') ?></small>
                 </span>
             </button>
         <?php endforeach; ?>
@@ -219,10 +224,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
             <header class="erapor-page-intro">
                 <div class="erapor-page-intro-top">
                     <div>
-                        <?= uiText('Bagian ' . ($index + 1) . ' dari ' . $pageTotal . ($optional ? ' · Opsional' : ''), 'caption-md', ['tone'=>'muted']) ?>
+                        <?= uiText('Bagian ' . ($index + 1) . ' dari ' . $pageTotal . ($type==='PPI' && !empty($ppiState['separate']) ? ' · Pengajuan Terpisah' : ($optional ? ' · Opsional' : '')), 'caption-md', ['tone'=>'muted']) ?>
                         <h2><?= e($document['nama']) ?></h2>
                     </div>
-                    <span class="teacher-session-document-progress" data-erapor-document-progress><?= $optional ? 'Opsional' : (int)$progress['filled'] . ' / ' . (int)$progress['required'] . ' terisi' ?></span>
+                    <span class="teacher-session-document-progress" data-erapor-document-progress><?= $type==='PPI' && !empty($ppiState['separate']) ? (int)$ppiState['progress']['filled'].' / '.(int)$ppiState['progress']['required'].' · Terpisah' : ($optional ? 'Opsional' : (int)$progress['filled'] . ' / ' . (int)$progress['required'] . ' terisi') ?></span>
                 </div>
 
             <?php if ($type === 'RTS'): ?>
@@ -331,6 +336,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 ?>
                 <p class="erapor-page-help">Isi setiap kolom Program Pembelajaran Individual untuk tiap aspek perkembangan.</p>
             </header>
+                <?php if ($ppiState): require VIEW_PATH . '/portal-guru/_ppi-workflow.php'; endif; ?>
                 <?php foreach ($definitions['aspects'] as $aspect): ?>
                     <div class="erapor-question erapor-question--group" data-erapor-question>
                         <h3 class="erapor-question-title"><?= e($aspect['nama']) ?></h3>
@@ -528,7 +534,8 @@ require VIEW_PATH . '/layouts/focus-header.php';
 
     <?php // Konfirmasi memakai modal aplikasi (sama dengan halaman persetujuan), bukan window.confirm() bawaan browser. ?>
     <?php // Varian konfirmasi standar aplikasi (judul, deskripsi, tombol) dengan jarak antarbagian dari ui-modal--delete. ?>
-    <?= uiModal('erapor-confirm-modal', 'Konfirmasi', '<p class="ui-modal-description" data-erapor-confirm-message></p><div class="modal-actions">'
+    <?= uiModal('erapor-confirm-modal', 'Konfirmasi', '<p class="ui-modal-description" data-erapor-confirm-message></p>'
+        . ($ppiState ? '<div data-erapor-ppi-final-choice hidden>' . uiCheckbox('final_include_ppi', 'Sertakan PPI dalam rapor utama', (bool)$ppiState['included'], ['id'=>'final-include-ppi']) . '</div>' : '') . '<div class="modal-actions">'
         . uiButton('Batal', 'outline', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-cancel'=>true]])
         . uiButton('Lanjutkan', 'primary', ['marginVertical'=>0, 'attributes'=>['data-erapor-confirm-accept'=>true]])
         . '</div>', ['variant'=>'delete']) ?>
@@ -538,6 +545,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
         'completion' => $form['completion'],
         'capabilities' => $form['capabilities'],
         'session' => $session,
+        'ppi' => $ppiState,
     ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?></script>
 </main>
 

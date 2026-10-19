@@ -18,7 +18,7 @@ class EraporTeacherForm {
     public static function read($db,$id,$actor): array {
         if ($id===99) throw new DomainException('secret student identity');
         if ($id===98) throw new RuntimeException('secret database credentials');
-        return ['actor'=>$actor,'documents'=>[['id'=>2,'jenis_dokumen'=>'UMMI']],
+        return ['actor'=>$actor,'ppi'=>['included'=>EraporPpiWorkflow::$choice],'documents'=>[['id'=>2,'jenis_dokumen'=>'UMMI']],
             'completion'=>['complete'=>false,'documents'=>[]],
             'capabilities'=>['can_confirm_filled'=>false],
             'session'=>['id'=>$id,'status'=>'BELUM_DIISI']];
@@ -26,7 +26,12 @@ class EraporTeacherForm {
 }
 class EraporUmmiEntry { public static function save($db,$sid,$did,$actor,$changes): array { return ['actor'=>$actor,'session'=>$sid,'document'=>$did,'changes'=>$changes]; } }
 class EraporConfirmFilled { public static function confirm($db,$sid,$actor): array { return ['result'=>'confirmed','actor'=>$actor]; } }
-class EraporConfirmReception { public static function confirm($db,$sid,$actor): array { return ['result'=>'confirmed','actor'=>$actor]; } }
+class EraporConfirmReception { public static function confirm($db,$sid,$actor,$include=null): array { return ['result'=>'confirmed','actor'=>$actor,'include_ppi'=>$include]; } }
+class EraporPpiWorkflow {
+    public static ?bool $choice=null;
+    public static function choose($db,$sid,$actor,bool $include): array {self::$choice=$include;return ['actor'=>$actor];}
+    public static function submit($db,$sid,$actor): array {return ['result'=>'submitted','actor'=>$actor];}
+}
 class ApiHarness extends EraporTeacherApiController { protected function rawBody(): string { return stream_get_contents(STDIN); } }
 $db=Database::$db=new PDO('sqlite::memory:',null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);
 $db->exec("CREATE TABLE users(id INTEGER PRIMARY KEY,karyawan_id INTEGER,role_id INTEGER,is_active INTEGER);
@@ -44,8 +49,8 @@ $_SERVER['HTTP_X_CSRF_TOKEN']=getCsrfToken();
 if ($mode==='guest') $_SESSION=[];
 if ($mode==='inactive') $db->exec('UPDATE users SET is_active=0');
 if ($mode==='denied') $db->exec('DELETE FROM role_permissions');
-if ($mode==='no-edit') $db->exec('DELETE FROM role_permissions WHERE permission_id=2');
-if ($mode==='no-send') $db->exec('DELETE FROM role_permissions WHERE permission_id=3');
+if (in_array($mode,['no-edit','ppi-choice-no-edit'],true)) $db->exec('DELETE FROM role_permissions WHERE permission_id=2');
+if (in_array($mode,['no-send','ppi-submit-no-send'],true)) $db->exec('DELETE FROM role_permissions WHERE permission_id=3');
 if ($mode==='csrf') $_SERVER['HTTP_X_CSRF_TOKEN']='invalid';
 register_shutdown_function(function() {
     $body=ob_get_clean(); echo json_encode(['status'=>http_response_code() ?: 200,'body'=>json_decode($body,true)]);
@@ -54,4 +59,6 @@ $api=new ApiHarness();
 if ($_SERVER['REQUEST_METHOD']==='GET') $api->show(match($mode) {'wrong-id'=>'1oops','foreign'=>'99','failure'=>'98',default=>'1'});
 elseif (in_array($mode,['filled','no-send'])) $api->confirmFilled('1');
 elseif ($mode==='reception') $api->confirmReception('1');
+elseif (str_starts_with($mode,'ppi-choice')) $api->choosePpi('1');
+elseif (str_starts_with($mode,'ppi-submit')) $api->submitPpi('1');
 else $api->save('1',$mode==='foreign-doc'?'3':'2');

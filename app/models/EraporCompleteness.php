@@ -62,6 +62,8 @@ final class EraporCompleteness
             if (!$rows && !in_array($type,['UMMI','BING'],true)) throw new DomainException('Definisi wajib kosong: '.$type);
             $missing=[];
             foreach ($rows as $row) if ($row['value']===null || EraporSessionPolicy::isBlank((string)$row['value'])) $missing[]=['key'=>$row['field'],'label'=>$row['label']];
+            // Separating PPI never deletes its values; only the main package completeness excludes it.
+            if ($type==='PPI' && !empty($session['ppi_terpisah'])) { $rows=[]; $missing=[]; }
             $done=$missing===[]; $complete=$complete && $done;
             $result[]=['dokumen_id'=>(int)$doc['id'],'jenis'=>$type,'required'=>count($rows),'filled'=>count($rows)-count($missing),'complete'=>$done,'missing'=>$missing];
         }

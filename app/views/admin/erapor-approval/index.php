@@ -3,7 +3,8 @@
 $filterLink = static fn(string $label, string $query, bool $active): string => '<a class="ui-button ui-button--' . ($active ? 'tabular-active' : 'tabular-inactive') . ' erapor-approval-filter"'
     . ($active ? ' aria-current="page"' : '') . ' href="' . BASE_PATH . '/erapor/persetujuan' . $query . '">' . e($label) . '</a>';
 $headerActions = '<div class="erapor-approval-filters" role="group" aria-label="Filter persetujuan">'
-    . $filterLink('Butuh Persetujuan', '', empty($done)) . $filterLink('Selesai', '?status=selesai', !empty($done)) . '</div>';
+    . $filterLink('Butuh Persetujuan', '', empty($done)) . $filterLink('Selesai', '?status=selesai', !empty($done))
+    . (!empty($ppiAvailable) ? '<a class="ui-button ui-button--outline" href="' . BASE_PATH . '/erapor/ppi">PPI Terpisah</a>' : '') . '</div>';
 header('Cache-Control: private, no-store, max-age=0');
 header('X-Robots-Tag: noindex, nofollow');
 require VIEW_PATH . '/layouts/shell-header.php';

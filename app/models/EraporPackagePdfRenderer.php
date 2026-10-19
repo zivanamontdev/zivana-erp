@@ -3,7 +3,7 @@
 /** Deterministic, offline renderer for a frozen eRapor package snapshot. */
 final class EraporPackagePdfRenderer
 {
-    private const VERSION = 'erapor-print-v8';
+    private const VERSION = 'erapor-print-v9';
     /** Margin atas halaman (16mm) dalam pt; blok tanda tangan yang mulai di sini berarti pindah halaman. */
     private const PAGE_TOP_PT = 45.35;
 
@@ -22,7 +22,11 @@ final class EraporPackagePdfRenderer
         if (!class_exists(\Dompdf\Dompdf::class)) throw new RuntimeException('Dompdf belum tersedia.');
         $types=array_column($package['documents'] ?? [],'jenis_dokumen');
         $expected=['RTS','AGAMA','UMMI','BING'];
-        if (($package['student']['status_kondisi'] ?? '')==='ABK') $expected[]='PPI';
+        if (($package['student']['status_kondisi'] ?? '')==='ABK' && empty($package['exclude_ppi'])) $expected[]='PPI';
+        if (!empty($package['standalone_ppi'])) {
+            if (($package['student']['status_kondisi'] ?? '')!=='ABK') throw new DomainException('PPI hanya tersedia untuk ABK.');
+            $expected=['PPI'];
+        }
         // Template Manajemen Template dan pratinjau koordinator (cakupan terbatas) boleh berisi sebagian rubrik;
         // paket rapor murid wajib lengkap sesuai kondisi.
         $valid=!empty($package['template']) || !empty($package['scoped']) ? ($types!==[] && array_values(array_intersect($expected,$types))===$types) : $types===$expected;

@@ -117,6 +117,7 @@ final class EraporPublication
         $documents=[];
         foreach ($docs as $doc) {
             if ($doc['status']!=='terkunci') throw new DomainException('Rubrik yang dipakai belum dikunci.');
+            if ($doc['jenis_dokumen']==='PPI' && !empty($session['ppi_terpisah'])) continue;
             $doc['form']=EraporTeacherForm::documentForm($db,$session,$doc);
             $defs=$doc['form']['definitions']; $periodValues=[]; $tests=[]; $signatures=[]; $signatureCurrent=null;
             $sourceSession->execute([$doc['id'],$session['id']]); $related=$sourceSession->fetchAll(PDO::FETCH_ASSOC);
@@ -147,7 +148,7 @@ final class EraporPublication
             if (!is_string($mark) || !str_starts_with($mark,"\x89PNG\r\n\x1a\n")) throw new DomainException('Logo watermark tidak tersedia.');
             $watermark=['data_uri'=>'data:image/png;base64,'.base64_encode($mark),'sha256'=>hash('sha256',$mark)];
         }
-        return ['session'=>$session,'watermark'=>$watermark,'period'=>['jenis'=>$cal['jenis'],'semester'=>$cal['semester'],
+        return ['session'=>$session,'watermark'=>$watermark,'exclude_ppi'=>!empty($session['ppi_terpisah']),'period'=>['jenis'=>$cal['jenis'],'semester'=>$cal['semester'],
             'semester_label'=>$cal['semester']==='GANJIL'?'GANJIL':'GENAP',
             'label'=>($cal['jenis']==='TENGAH'?'Tengah':'Akhir').' Semester '.($cal['semester']==='GANJIL'?'Ganjil':'Genap'),
             'tahun_label'=>(int)$period['tahun_awal'].'/'.(int)$period['tahun_akhir']],
@@ -190,8 +191,8 @@ final class EraporPublication
         return $doc;
     }
 
-    /** Pratinjau PDF draf dari nilai terkini (belum tentu disetujui). Tidak menulis apa pun; renderer menandai DRAF. */
-    public static function draftPackage(PDO $db,int $sessionId,?DateTimeImmutable $clock=null): array
+    /** Read-only current-value preview; finalized drafts receive the background logo, earlier drafts print cleanly. */
+    public static function draftPackage(PDO $db,int $sessionId,?DateTimeImmutable $clock=null,bool $withSeparatedPpi=false): array
     {
         $session=self::one($db,'SELECT * FROM erapor_sesi WHERE id=?',[$sessionId]);
         if (!$session) throw new DomainException('Sesi tidak tersedia.');
@@ -199,6 +200,15 @@ final class EraporPublication
         $now=($clock ?? new DateTimeImmutable('now',new DateTimeZone('Asia/Makassar')))->setTimezone(new DateTimeZone('Asia/Makassar'));
         $data=self::capture($db,$session,$approvals,$now);
         $data['draft']=true;
+        if ($withSeparatedPpi && !empty($session['ppi_terpisah'])) {
+            $doc=self::one($db,"SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,r.judul_cetak,r.versi FROM erapor_sesi_dokumen sd
+                JOIN erapor_dokumen d ON d.id=sd.dokumen_id JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? AND r.jenis_dokumen='PPI'",[$sessionId]);
+            if ($doc) {
+                $doc['form']=EraporTeacherForm::documentForm($db,$session,$doc);
+                $doc['period_values']=['CURRENT'=>$doc['form']['values']];$doc['signature_periods']=[];$doc['signature_current']=null;
+                $data['documents'][]=self::describeDocument($db,$doc,[],$data['student']['nama_lengkap'],$session['semester']);
+            }
+        }
         return $data;
     }
 
@@ -305,7 +315,7 @@ final class EraporPublication
     {
         return ['renderer'=>EraporPackagePdfRenderer::version(),'session'=>$data['session']['id'],
             'period'=>$data['period'],'student'=>$data['student'],'school'=>$data['school']['snapshot'],
-            'watermark_sha256'=>$data['watermark']['sha256'] ?? null,
+            'watermark_sha256'=>$data['watermark']['sha256'] ?? null,'exclude_ppi'=>!empty($data['exclude_ppi']),
             'documents'=>array_map(static fn($d)=>['id'=>$d['id'],'rubrik_id'=>$d['rubrik_id'],'kode'=>$d['kode'],'versi'=>$d['versi'],'seed_sha256'=>$d['seed_sha256'],'period_values'=>$d['period_values'],'form'=>$d['form'],'narrative_template_version'=>$d['narrative_version'] ?? null,'narrative'=>$d['narrative'] ?? null],$data['documents']),
             'published_at'=>$data['published_at']];
     }

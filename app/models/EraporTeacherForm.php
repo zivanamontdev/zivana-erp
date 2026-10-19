@@ -33,18 +33,21 @@ final class EraporTeacherForm
             if (!in_array($session['status'],EraporSessionPolicy::STATES,true)) throw new DomainException('Status sesi tidak valid.');
             $locked=!in_array($session['status'],['BELUM_DIISI','TELAH_DIISI'],true);
             $reason=$locked?'STATUS_TERKUNCI':($today>$period['akhir_periode']?'TENGGAT_BERAKHIR':null);
+            $ppi=array_key_exists('ppi_disertakan',$session)?EraporPpiWorkflow::state($db,$session):null;
+            $canEditPpi=$ppi && $ppi['separate'] ? ($ppi['status']==='BELUM_DIAJUKAN' && $today<=$period['akhir_periode']) : $reason===null;
             $docs=self::rows($db,'SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,sd.urutan FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan',[$sessionId]);
             foreach ($docs as &$doc) {
                 $doc['form']=self::documentForm($db,$session,$doc);
                 $doc['reference']=self::rtsReference($db,$session,$doc);
+                $doc['can_edit']=$doc['jenis_dokumen']==='PPI' ? (bool)$canEditPpi : $reason===null;
             }
             unset($doc);
             // Posisi rapor dalam alur persetujuan (untuk guru pengisi): tahap, status, dan nama penyetuju yang sudah menyetujui.
             $approvals=self::rows($db,'SELECT a.label,a.kode,a.urutan,a.status,s.nama,s.disetujui_pada FROM erapor_sesi_penyetuju a
                 LEFT JOIN erapor_persetujuan_snapshot s ON s.sesi_penyetuju_id=a.id AND s.sesi_id=a.sesi_id WHERE a.sesi_id=? ORDER BY a.urutan,a.id',[$sessionId]);
-            $result=['session'=>['id'=>$sessionId,'status'=>$session['status'],'kondisi'=>$session['kondisi']],
+            $result=['session'=>['id'=>$sessionId,'status'=>$session['status'],'kondisi'=>$session['kondisi']], 'ppi'=>$ppi,
                 'student'=>$student,'period'=>$period,'documents'=>$docs,'completion'=>$completion,'approvals'=>$approvals,
-                'capabilities'=>['can_edit'=>$reason===null,'read_only_reason'=>$reason,
+                'capabilities'=>['can_edit'=>$reason===null,'can_edit_ppi'=>(bool)$canEditPpi,'read_only_reason'=>$reason,
                     'can_confirm_filled'=>$session['status']==='BELUM_DIISI' && $completion['complete'],
                     'can_confirm_reception'=>$session['status']==='TELAH_DIISI' && $completion['complete']]];
             $db->commit(); return $result;

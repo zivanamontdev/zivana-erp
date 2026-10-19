@@ -101,6 +101,11 @@ $chevron = '<span class="ui-disclosure-chevron" aria-hidden="true">' . icon('ico
     <?php ob_start(); ?>
     <form method="POST" action="<?= BASE_PATH ?>/erapor/persetujuan/<?= $sessionId ?>/<?= $approvalId ?>/setujui" class="modal-body">
         <input type="hidden" name="csrf_token" value="<?= e(getCsrfToken()) ?>">
+        <?php if (($approval['kode'] ?? '') === 'KEPALA_SEKOLAH' && ($review['session']['kondisi'] ?? '') === 'ABK' && !empty($review['session']['ppi_available']) && empty($review['session']['ppi_terpisah'])): ?>
+            <input type="hidden" name="ppi_choice_present" value="1">
+            <?= uiCheckbox('include_ppi', 'Sertakan PPI pada PDF rapor utama', true, ['value'=>'1']) ?>
+            <p class="text-caption-md">Jika tidak disertakan, nilai PPI tetap tersimpan dan PIC harus mengajukannya lagi sebagai PPI terpisah.</p>
+        <?php endif; ?>
         <div class="modal-actions">
             <?= uiButton('Batal', 'outline', ['marginVertical' => 0, 'attributes' => ['data-modal-close' => true]]) ?>
             <?= uiButton('Setujui Persetujuan', 'primary', ['type' => 'submit', 'marginVertical' => 0]) ?>

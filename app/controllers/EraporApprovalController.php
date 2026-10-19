@@ -20,6 +20,7 @@ final class EraporApprovalController extends Controller
             'tasks' => $inbox['tasks'],
             'done' => $done,
             'monitor' => $monitor,
+            'ppiAvailable' => EraporPpiWorkflow::available(Database::getInstance()),
             'notice' => $this->takeNotice(),
         ]);
     }
@@ -73,7 +74,13 @@ final class EraporApprovalController extends Controller
         }
 
         try {
-            $result = EraporApprove::approve(Database::getInstance(), (int) $sessionId, (int) $approvalId, (int) $_SESSION['user_id']);
+            $includePpi=null;
+            if ($this->input('ppi_choice_present')==='1') {
+                $value=$this->input('include_ppi','0');
+                if (!in_array($value,['0','1'],true)) throw new DomainException('Pilihan PPI tidak valid.');
+                $includePpi=$value==='1';
+            }
+            $result = EraporApprove::approve(Database::getInstance(), (int) $sessionId, (int) $approvalId, (int) $_SESSION['user_id'], $includePpi);
             $_SESSION['erapor_approval_notice'] = [
                 'type' => 'success',
                 'message' => $result['all_approved']

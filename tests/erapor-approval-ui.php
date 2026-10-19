@@ -76,4 +76,13 @@ $readOnly = renderApprovalView($reviewFile, ['pageTitle'=>'Tinjau Persetujuan','
 approvalUiCheck(!str_contains($readOnly, 'data-modal-open="modal-setujui-erapor-55-9"')
     && str_contains($readOnly, 'Persetujuan tercatat'), 'Read-only/completed review has no approval control');
 
-echo "PASS: approval inbox/review templates use shared UI, scoped values, escaped content, and irreversible CSRF-confirmed action.\n";
+$review['session']+=['kondisi'=>'ABK','ppi_available'=>true,'ppi_terpisah'=>false];
+$review['approval']['kode']='KEPALA_SEKOLAH';$review['approval']['status']='MENUNGGU';
+$headHtml=renderApprovalView($reviewFile,['review'=>$review,'canApprove'=>true,'notice'=>null]);
+$hd=new DOMDocument();@$hd->loadHTML($headHtml);$hx=new DOMXPath($hd);
+approvalUiCheck($hx->query('//input[@name="ppi_choice_present" and @value="1"]')->length===1
+    &&$hx->query('//input[@name="include_ppi" and @checked]')->length===1,'Head may exclude included PPI before its final approval');
+$review['session']['ppi_terpisah']=true;
+$separated=renderApprovalView($reviewFile,['review'=>$review,'canApprove'=>true,'notice'=>null]);
+approvalUiCheck(!str_contains($separated,'name="include_ppi"'),'Already separated PPI cannot be silently appended by the head');
+echo "PASS: approval inbox/review templates use shared UI, scoped values, escaped content, CSRF-confirmed actions and pre-artifact PPI exclusion.\n";

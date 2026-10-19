@@ -54,6 +54,7 @@ final class EraporApprovalReview
             JOIN erapor_dokumen d ON d.id=sd.dokumen_id
             JOIN erapor_rubrik r ON r.id=d.rubrik_id
             WHERE p.sesi_penyetuju_id=? AND p.sesi_id=? ORDER BY sd.urutan',[$approvalId,$sessionId]);
+        if (!empty($session['ppi_terpisah'])) $documents=array_values(array_filter($documents,static fn($d)=>$d['jenis_dokumen']!=='PPI'));
         if (!$documents) throw new DomainException('Cakupan dokumen persetujuan kosong.');
         if ($includeValues) foreach ($documents as &$document) {
             $document['form']=EraporTeacherForm::documentForm($db,$session,$document);
@@ -62,7 +63,7 @@ final class EraporApprovalReview
         unset($document);
 
         return [
-            'session'=>['id'=>$sessionId,'status'=>$session['status'],'semester'=>$session['semester'],'jenis'=>$session['jenis'],'kondisi'=>$session['kondisi']],
+            'session'=>['id'=>$sessionId,'status'=>$session['status'],'semester'=>$session['semester'],'jenis'=>$session['jenis'],'kondisi'=>$session['kondisi'],'ppi_available'=>array_key_exists('ppi_disertakan',$session),'ppi_terpisah'=>(bool)($session['ppi_terpisah'] ?? false)],
             'student'=>$student,'period'=>$period,'approval'=>$targetRow,'approvals'=>$approvals,
             'documents'=>$documents,'completion'=>$completion,
             'waiting_for'=>$waiting,

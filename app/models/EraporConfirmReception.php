@@ -5,7 +5,7 @@
  */
 final class EraporConfirmReception
 {
-    public static function confirm(PDO $db,int $sessionId,int $actorId): array
+    public static function confirm(PDO $db,int $sessionId,int $actorId,?bool $includePpi=null): array
     {
         if ($db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql' || $db->inTransaction()) throw new RuntimeException('Dedicated MySQL connection required.');
         if (min($sessionId,$actorId)<1) throw new DomainException('Identitas sesi tidak valid.');
@@ -24,6 +24,7 @@ final class EraporConfirmReception
             if (!in_array($session['status'],['TELAH_DIISI','MENUNGGU_TTD'],true)) throw new DomainException('Status tidak mengizinkan konfirmasi penerimaan.');
             $snapshot=self::one($db,'SELECT * FROM erapor_sesi_penerimaan WHERE sesi_id=?',[$sessionId]);
             if ($session['status']==='MENUNGGU_TTD') {
+                if ($includePpi!==null && (bool)($session['ppi_disertakan'] ?? true)!==$includePpi) throw new DomainException('Pilihan PPI sudah dikunci saat Finalisasi.');
                 $event=self::one($db,"SELECT id FROM erapor_sesi_log WHERE sesi_id=? AND aktor_id=? AND aksi='KONFIRMASI_PENERIMAAN' LIMIT 1",[$sessionId,$actorId]);
                 $count=self::one($db,'SELECT COUNT(*) AS jumlah FROM erapor_sesi_penyetuju WHERE sesi_id=?',[$sessionId]);
                 if (!$snapshot || (int)$snapshot['guru_user_id']!==$actorId || !$event || (int)$count['jumlah']===0) throw new DomainException('Jejak penerimaan tidak lengkap.');
@@ -31,6 +32,7 @@ final class EraporConfirmReception
                 return ['result'=>'already_confirmed','status'=>'MENUNGGU_TTD'];
             }
             if ($snapshot) throw new DomainException('Snapshot penerimaan sudah tersedia pada status yang salah.');
+            if ($includePpi!==null) EraporPpiWorkflow::choiceWithin($db,$session,$actorId,$includePpi);
             $event=self::one($db,"SELECT id FROM erapor_sesi_log WHERE sesi_id=? AND aksi='KONFIRMASI_ISI' LIMIT 1",[$sessionId]);
             if (!$event) throw new DomainException('Status tidak memiliki jejak konfirmasi isi.');
             $period=self::one($db,'SELECT * FROM periode_penilaian WHERE id=? FOR UPDATE',[$session['periode_id']]);
@@ -39,13 +41,15 @@ final class EraporConfirmReception
             if ($p['tahun_ajaran_id']!==(int)$session['tahun_ajaran_id'] || $p['semester']!==$session['semester'] || $p['jenis']!==$session['jenis']) throw new DomainException('Identitas periode berubah.');
             $completion=EraporCompleteness::inspect($db,$session);
             if (!$completion['complete']) {
+                $ppi=array_key_exists('ppi_disertakan',$session)?EraporPpiWorkflow::state($db,$session):null;
                 $db->commit();
-                return ['result'=>'incomplete','status'=>'TELAH_DIISI','completion'=>$completion];
+                return ['result'=>'incomplete','status'=>'TELAH_DIISI','completion'=>$completion,'ppi'=>$ppi];
             }
             $q=$db->prepare('SELECT d.id,d.rubrik_id,r.jenis_dokumen FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan');
             $q->execute([$sessionId]); $documents=$q->fetchAll(PDO::FETCH_ASSOC);
             $flows=$db->query('SELECT * FROM erapor_alur_penyetuju ORDER BY id FOR UPDATE')->fetchAll(PDO::FETCH_ASSOC);
             $scopes=$db->query('SELECT * FROM erapor_alur_dokumen ORDER BY penyetuju_id,rubrik_id FOR UPDATE')->fetchAll(PDO::FETCH_ASSOC);
+            if (array_key_exists('ppi_disertakan',$session) && !$session['ppi_disertakan']) $documents=array_values(array_filter($documents,static fn($d)=>$d['jenis_dokumen']!=='PPI'));
             $plan=EraporApprovalPlan::build($documents,$flows,$scopes);
             $profile=self::one($db,'SELECT * FROM erapor_profil_penandatangan WHERE user_id=? FOR UPDATE',[$actorId]);
             $signer=EraporSignerSnapshot::build($teacher['nama'],$profile ?: null);
@@ -61,8 +65,10 @@ final class EraporConfirmReception
             $next=EraporSessionPolicy::confirmReception($session['status'],true);
             $db->prepare('UPDATE erapor_sesi SET status=? WHERE id=?')->execute([$next,$sessionId]);
             $db->prepare("INSERT INTO erapor_sesi_log(sesi_id,aktor_id,aksi,status_lama,status_baru) VALUES(?,?,'KONFIRMASI_PENERIMAAN',?,?)")->execute([$sessionId,$actorId,$session['status'],$next]);
+            $session['status']=$next;
+            $ppi=array_key_exists('ppi_disertakan',$session)?EraporPpiWorkflow::state($db,$session):null;
             $db->commit();
-            return ['result'=>'confirmed','status'=>$next,'completion'=>$completion];
+            return ['result'=>'confirmed','status'=>$next,'completion'=>$completion,'ppi'=>$ppi];
         } catch (Throwable $e) {
             if ($db->inTransaction()) $db->rollBack(); throw $e;
         } finally { $q=$db->prepare('SELECT RELEASE_LOCK(?)'); $q->execute([$lock]); }

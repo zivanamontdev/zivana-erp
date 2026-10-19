@@ -26,6 +26,8 @@
     var blocked = false;
     var serverStatus = null;
     var lastCompletion = null;
+    var lastPpi = null;
+    var ppiBusy = false;
     var pages = Array.from(root.querySelectorAll('[data-erapor-page]'));
     var steps = Array.from(root.querySelectorAll('[data-erapor-step]'));
     var currentPage = 0;
@@ -68,11 +70,14 @@
     }
 
     function updateConfirmState() {
-      var busy = pending.size > 0 || retryBatch !== null || saving || blocked || hasIncompleteTestRows();
+      var busy = pending.size > 0 || retryBatch !== null || saving || blocked || ppiBusy || hasIncompleteTestRows();
       var incomplete = incompleteDocuments();
       setConfirmDisabled(serverStatus !== 'BELUM_DIISI' || busy || incomplete.length > 0);
       setReceptionDisabled(serverStatus !== 'TELAH_DIISI' || busy || incomplete.length > 0);
       updatePagerHint(incomplete);
+      root.querySelectorAll('[data-erapor-submit-ppi]').forEach(function (button) {
+        button.disabled = busy || !lastPpi || !lastPpi.can_submit || root.dataset.canSubmit !== 'true';
+      });
     }
 
     // Di halaman terakhir, jelaskan mengapa Selesaikan Rapor belum aktif dan tawarkan penanda isian kosong.
@@ -226,14 +231,16 @@
         totalRequired += Number(item.required || 0);
         totalFilled += Number(item.filled || 0);
         var optional = Number(item.required || 0) === 0;
+        var detachedPpi = item.jenis === 'PPI' && lastPpi && lastPpi.separate;
         var stepLabel = root.querySelector('[data-erapor-step-progress="' + CSS.escape(item.jenis) + '"]');
-        if (stepLabel) stepLabel.textContent = optional ? 'Opsional' : item.filled + ' / ' + item.required;
+        if (stepLabel) stepLabel.textContent = detachedPpi ? 'Terpisah' : (optional ? 'Opsional' : item.filled + ' / ' + item.required);
         var card = root.querySelector('[data-erapor-page][data-erapor-type="' + CSS.escape(item.jenis) + '"]');
         if (!card) return;
+        card.dataset.eraporOptional = optional ? 'true' : 'false';
         card.dataset.eraporRequired = item.required;
         card.dataset.eraporFilled = item.filled;
         var label = card.querySelector('[data-erapor-document-progress]');
-        if (label) label.textContent = optional ? 'Opsional' : item.filled + ' / ' + item.required + ' terisi';
+        if (label) label.textContent = detachedPpi ? lastPpi.progress.filled + ' / ' + lastPpi.progress.required + ' · Terpisah' : (optional ? 'Opsional' : item.filled + ' / ' + item.required + ' terisi');
       });
       var count = root.querySelector('[data-erapor-overall-count]');
       var bar = root.querySelector('[data-erapor-overall-bar]');
@@ -246,6 +253,11 @@
 
     function applyState(data) {
       if (!data) return;
+      if (data.ppi) {
+        lastPpi = data.ppi;
+        root.querySelectorAll('[data-erapor-ppi-progress]').forEach(function (el) { el.textContent = lastPpi.progress.filled + ' / ' + lastPpi.progress.required + ' isian tersimpan'; });
+        root.querySelectorAll('[data-erapor-ppi-choice]').forEach(function (el) { el.checked = lastPpi.included; });
+      }
       updateProgress(data.completion);
       if (data.session && data.session.status) {
         var statusLine = root.querySelector('.pengisian-rapor-warning');
@@ -254,7 +266,7 @@
         }
       }
       if (data.completion) lastCompletion = data.completion;
-      var currentStatus = data.session && data.session.status;
+      var currentStatus = (data.session && data.session.status) || data.status || serverStatus;
       serverStatus = root.dataset.canSubmit === 'true' ? currentStatus : null;
       updateConfirmState();
     }
@@ -591,6 +603,8 @@
     });
 
     root.addEventListener('change', function (event) {
+      var ppiChoiceField = event.target.closest('[data-erapor-ppi-choice]');
+      if (ppiChoiceField) { changePpi(false, ppiChoiceField.checked); return; }
       var testRow = event.target.closest('[data-erapor-entry="UMMI_TEST"]');
       if (testRow) { handleTestRowChange(testRow); return; }
       var field = event.target.closest('[data-erapor-entry]');
@@ -625,7 +639,7 @@
     }
     var draftBusy = false;
     async function saveDraft() {
-      if (draftBusy) return;
+      if (draftBusy || ppiBusy) return;
       if (blocked) { setStatus('Penyimpanan diblokir. Jangan tutup halaman; periksa pesan kesalahan dan salin isian sebelum memuat ulang.', 'error'); return; }
       saveFailures = 0;
       draftBusy = true;
@@ -661,6 +675,57 @@
     document.addEventListener('click', function (event) {
       if (event.target.closest('[data-erapor-draft]')) saveDraft();
     });
+    // PPI transitions drain the same immutable autosave queue, then freeze controls while the server locks/submits.
+    async function changePpi(submit, include) {
+      if (ppiBusy || draftBusy || blocked) return;
+      var approved = await askConfirm(submit ? 'Ajukan Rapor PPI?' : 'Ubah Penyertaan PPI?',
+        submit ? 'PPI akan dikunci dan diajukan ke Wali Kelas lalu Kepala Sekolah sebagai file tersendiri. Rapor utama tidak diubah.'
+          : (include ? 'PPI akan menjadi bagian rapor utama. Isian wajib PPI harus lengkap sebelum Finalisasi.' : 'PPI tidak masuk rapor utama. Semua nilai tetap tersimpan dan dapat diajukan terpisah setelah Finalisasi.'),
+        submit ? 'Ajukan Rapor PPI' : 'Simpan Pilihan');
+      if (!approved) {
+        root.querySelectorAll('[data-erapor-ppi-choice]').forEach(function (el) { el.checked = lastPpi.included; });
+        return;
+      }
+      if (ppiBusy || draftBusy || blocked) return;
+      dirtyFields().forEach(function (field) { pending.set(field, true); });
+      var controls = Array.from(root.querySelectorAll('input,textarea,select,button')).map(function (el) { var old = el.disabled; el.disabled = true; return [el, old]; });
+      ppiBusy = true;
+      updateConfirmState();
+      var dispatched = false;
+      var leaving = false;
+      try {
+        await waitSaving();
+        var guard = 0;
+        while ((retryBatch || pending.size) && !blocked && guard++ < 50) {
+          if (!(await flush())) break;
+          await waitSaving();
+        }
+        if (retryBatch || pending.size || blocked || hasIncompleteTestRows()) throw new Error('Pastikan seluruh perubahan tersimpan terlebih dahulu.');
+        dispatched = true;
+        await request(apiUrl + (submit ? '/ppi/ajukan' : '/ppi-pilihan'), submit ? {} : {include: include});
+        leaving = true;
+        window.location.reload();
+      } catch (error) {
+        setStatus(error.message || 'Perubahan PPI belum dapat dikonfirmasi. Silakan coba lagi.', 'error');
+        if (window.uiToast) window.uiToast(error.message || 'Perubahan PPI belum dapat dikonfirmasi. Silakan coba lagi.', 'error');
+        controls.forEach(function (pair) {
+          // A lost submission response may already have locked PPI. Retry the action before allowing more edits.
+          if (submit && dispatched && pair[0].matches('input,textarea,select') && pair[0].closest('[data-erapor-type="PPI"]')) return;
+          pair[0].disabled = pair[1];
+        });
+        root.querySelectorAll('[data-erapor-ppi-choice]').forEach(function (el) { el.checked = lastPpi.included; });
+      } finally {
+        if (!leaving) {
+          ppiBusy = false;
+          updateConfirmState();
+        }
+      }
+    }
+    root.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-erapor-submit-ppi]');
+      if (button && !button.disabled) changePpi(true);
+    });
+
     // Peringatkan bila halaman ditutup saat masih ada isian yang belum tersimpan.
     window.addEventListener('beforeunload', function (event) {
       if (retryBatch || pending.size || saving || hasIncompleteTestRows() || dirtyFields().length) { event.preventDefault(); event.returnValue = ''; }
@@ -671,19 +736,20 @@
 
     // Bagikan ke Orang Tua: tautan wa.me terbuka seperti biasa; pembagian dicatat di server (keepalive).
     document.addEventListener('click', function (event) {
-      var link = event.target.closest('[data-erapor-share]');
+      var link = event.target.closest('[data-erapor-share],[data-erapor-share-ppi]');
       if (!link) return;
       var body = new FormData();
       body.append('csrf_token', root.dataset.csrfToken);
-      body.append('penerima', link.dataset.eraporShare);
-      fetch(window.location.pathname.replace(/\/$/, '') + '/bagikan', {method: 'POST', body: body, credentials: 'same-origin', keepalive: true})
+      var ppiShare = link.hasAttribute('data-erapor-share-ppi');
+      body.append('penerima', ppiShare ? link.dataset.eraporSharePpi : link.dataset.eraporShare);
+      fetch(window.location.pathname.replace(/\/$/, '') + (ppiShare ? '/ppi/bagikan' : '/bagikan'), {method: 'POST', body: body, credentials: 'same-origin', keepalive: true})
         .then(function (response) { return response.ok ? response.json() : null; })
         .then(function (data) {
           if (!data || !data.ok) { if (window.uiToast) window.uiToast('Pembagian belum tercatat. Coba lagi.', 'error'); return; }
-          document.querySelectorAll('[data-erapor-share-status]').forEach(function (status) {
-            status.innerHTML = '<span class="badge badge-positif">Dibagikan ke Orang Tua</span>';
+          document.querySelectorAll(ppiShare ? '[data-erapor-ppi-share-status]' : '[data-erapor-share-status]').forEach(function (status) {
+            status.textContent = ppiShare ? 'PPI dibagikan ke orang tua.' : 'Dibagikan ke Orang Tua';
           });
-          if (window.uiToast) window.uiToast('Rapor dibagikan ke orang tua.', 'success');
+          if (window.uiToast) window.uiToast((ppiShare ? 'PPI' : 'Rapor') + ' dibagikan ke orang tua.', 'success');
         })
         .catch(function () { if (window.uiToast) window.uiToast('Pembagian belum tercatat. Coba lagi.', 'error'); });
     });
@@ -692,10 +758,15 @@
     var confirmModal = root.querySelector('#erapor-confirm-modal');
     // Pindahkan ke <body> agar overlay menutupi action bar fixed (root membentuk stacking context sendiri).
     if (confirmModal) document.body.appendChild(confirmModal);
-    function askConfirm(title, message, acceptLabel) {
+    function askConfirm(title, message, acceptLabel, showPpiChoice) {
       if (!confirmModal) return Promise.resolve(window.confirm(message));
       var accept = confirmModal.querySelector('[data-erapor-confirm-accept]');
       var cancel = confirmModal.querySelector('[data-erapor-confirm-cancel]');
+      var choice = confirmModal.querySelector('[data-erapor-ppi-final-choice]');
+      if (choice) {
+        choice.hidden = !showPpiChoice;
+        if (lastPpi) choice.querySelector('input').checked = lastPpi.included;
+      }
       var opener = document.activeElement;
       confirmModal.querySelector('.modal-title').textContent = title;
       confirmModal.querySelector('[data-erapor-confirm-message]').textContent = message;
@@ -872,16 +943,25 @@
       if (!validateRequired()) return;
       var receiving = Boolean(receiveButton);
       var confirmation = receiving
-        ? 'Finalisasi mengunci seluruh isian rapor dan mengirimkannya ke antrean persetujuan. Setelah dilanjutkan, nilai tidak dapat diubah.'
+        ? 'Finalisasi mengunci rapor utama dan mengirimkannya ke antrean persetujuan. PPI yang tidak disertakan tetap tersimpan dan dapat diajukan tersendiri.'
         : 'Konfirmasi ini menandai pengisian guru telah selesai. Anda masih dapat meninjau dan mengubah isian sebelum Finalisasi.';
       if (!(await askConfirm(receiving ? 'Finalisasi Rapor?' : 'Selesaikan Rapor?', confirmation,
-        receiving ? 'Finalisasi' : 'Selesaikan Rapor'))) return;
-      if (retryBatch || pending.size || saving || blocked) return;
-      setConfirmDisabled(true);
-      setReceptionDisabled(true);
+        receiving ? 'Finalisasi' : 'Selesaikan Rapor', receiving && Boolean(lastPpi)))) return;
+      if (retryBatch || pending.size || saving || blocked || ppiBusy) return;
+      var controls = Array.from(root.querySelectorAll('input,textarea,select,button')).map(function (el) { var old = el.disabled; el.disabled = true; return [el, old]; });
+      var leaving = false;
+      var previousPpiIncluded = lastPpi && lastPpi.included;
+      ppiBusy = true;
+      updateConfirmState();
       try {
-        var result = await request(apiUrl + (receiving ? '/konfirmasi-penerimaan' : '/konfirmasi-isi'), {});
-        if (result.result === 'confirmed' || result.result === 'already_confirmed') {
+        var body = {};
+        var ppiChoice = confirmModal && confirmModal.querySelector('[data-erapor-ppi-final-choice] input');
+        if (receiving && lastPpi && ppiChoice) body.include_ppi = ppiChoice.checked;
+        var result = await request(apiUrl + (receiving ? '/konfirmasi-penerimaan' : '/konfirmasi-isi'), body);
+        if (result.result === 'confirmed' || result.result === 'already_confirmed'
+          || (result.ppi && result.ppi.included !== previousPpiIncluded)) {
+          // A changed inclusion choice also changes completeness, labels and capabilities. Render them afresh.
+          leaving = true;
           window.location.reload();
           return;
         }
@@ -895,6 +975,12 @@
         setStatus(error.message || 'Konfirmasi belum dapat dilakukan.', 'error');
         setConfirmDisabled(blocked || serverStatus !== 'BELUM_DIISI');
         setReceptionDisabled(blocked || serverStatus !== 'TELAH_DIISI');
+      } finally {
+        if (!leaving) {
+          controls.forEach(function (pair) { pair[0].disabled = pair[1]; });
+          ppiBusy = false;
+          updateConfirmState();
+        }
       }
     });
 

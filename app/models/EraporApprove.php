@@ -5,7 +5,7 @@
  */
 final class EraporApprove
 {
-    public static function approve(PDO $db,int $sessionId,int $approvalId,int $actorId): array
+    public static function approve(PDO $db,int $sessionId,int $approvalId,int $actorId,?bool $includePpi=null): array
     {
         if ($db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql' || $db->inTransaction()) throw new RuntimeException('Dedicated MySQL connection required.');
         if (min($sessionId,$approvalId,$actorId)<1) throw new DomainException('Identitas persetujuan tidak valid.');
@@ -30,6 +30,7 @@ final class EraporApprove
             self::assertSnapshotScope($db,$session,$rows);
             $existing=self::one($db,'SELECT * FROM erapor_persetujuan_snapshot WHERE sesi_penyetuju_id=?',[$approvalId]);
             if ($target['status']==='DISETUJUI') {
+                if ($includePpi!==null && $includePpi!==empty($session['ppi_terpisah'])) throw new DomainException('Pilihan PPI tidak dapat diubah setelah persetujuan terakhir.');
                 if (!$existing || (int)$existing['user_id']!==$actorId) throw new DomainException('Persetujuan telah diberikan oleh akun lain atau jejak tidak lengkap.');
                 $event=self::one($db,"SELECT id FROM erapor_sesi_log WHERE id=? AND sesi_id=? AND aktor_id=? AND aksi='SETUJUI'",[$existing['log_id'],$sessionId,$actorId]);
                 if (!$event) throw new DomainException('Jejak persetujuan tidak lengkap.');
@@ -46,6 +47,11 @@ final class EraporApprove
                 $evidence=self::one($db,"SELECT s.sesi_penyetuju_id FROM erapor_persetujuan_snapshot s JOIN erapor_sesi_log l ON l.id=s.log_id
                     AND l.sesi_id=s.sesi_id AND l.aktor_id=s.user_id AND l.aksi='SETUJUI' WHERE s.sesi_penyetuju_id=? AND s.sesi_id=?",[$row['id'],$sessionId]);
                 if (!$evidence) throw new DomainException('Jejak persetujuan sebelumnya tidak lengkap.');
+            }
+            if ($includePpi!==null) {
+                if ($target['kode']!=='KEPALA_SEKOLAH') throw new DomainException('Pilihan penerbitan PPI hanya untuk Kepala Sekolah.');
+                if (!$includePpi) EraporPpiWorkflow::detachByHeadWithin($db,$session,$actorId);
+                elseif (!empty($session['ppi_terpisah'])) throw new DomainException('PPI sudah dipisahkan dan harus diajukan sendiri.');
             }
             $profile=self::one($db,'SELECT * FROM erapor_profil_penandatangan WHERE user_id=? FOR UPDATE',[$actorId]);
             $signer=EraporSignerSnapshot::build($actor['nama'],$profile ?: null);
@@ -81,6 +87,7 @@ final class EraporApprove
                 if ($r['cakupan']==='TERBATAS') $scopes[]=['penyetuju_id'=>$r['penyetuju_id'],'rubrik_id'=>$link['rubrik_id']];
             }
         }
+        if (array_key_exists('ppi_disertakan',$session) && !$session['ppi_disertakan']) $docs=array_values(array_filter($docs,static fn($d)=>$d['jenis_dokumen']!=='PPI'));
         $expected=EraporApprovalPlan::build($docs,$flows,$scopes);
         if (count($expected)!==count($rows)) throw new DomainException('Cakupan persetujuan sesi tidak valid.');
         foreach ($expected as $r) {

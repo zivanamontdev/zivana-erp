@@ -35,7 +35,12 @@ final class EraporStructuredEntry
             if (!$period) throw new DomainException('Periode tidak tersedia.');
             $p=EraporCalendar::normalize($period);
             if ($p['tahun_ajaran_id']!==(int)$session['tahun_ajaran_id'] || $p['semester']!==$session['semester'] || $p['jenis']!==$session['jenis']) throw new DomainException('Identitas periode berubah.');
-            EraporSessionPolicy::assertWritable($session['status'],$p['akhir_periode'],$today);
+            $writableStatus=$session['status'];
+            if ($type==='PPI' && !empty($session['ppi_terpisah'])) {
+                EraporPpiWorkflow::assertWritable($db,$session);
+                $writableStatus='BELUM_DIISI'; // Only this detached document is writable, never the main reports.
+            }
+            EraporSessionPolicy::assertWritable($writableStatus,$p['akhir_periode'],$today);
             if ($type==='PPI' && $session['kondisi']!=='ABK') throw new DomainException('PPI hanya tersedia untuk sesi ABK.');
             $doc=self::one($db,"SELECT d.rubrik_id FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id
                 JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? AND d.id=? AND r.jenis_dokumen=?

@@ -44,6 +44,7 @@ class EraporTeacherApiController extends Controller
             $saved['completion']=$state['completion'];
             $saved['capabilities']=$state['capabilities'];
             $saved['session']=$state['session'];
+            $saved['ppi']=$state['ppi'] ?? null;
             return $saved;
         });
     }
@@ -65,8 +66,25 @@ class EraporTeacherApiController extends Controller
     public function confirmReception(string $id): void
     {
         $this->execute('kirim',function($db,$actor) use($id) {
+            $body=$this->body(['include_ppi'],['include_ppi']);
+            if (array_key_exists('include_ppi',$body) && !is_bool($body['include_ppi'])) throw new InvalidArgumentException('include_ppi harus boolean.');
+            return EraporConfirmReception::confirm($db,$this->id($id),$actor,$body['include_ppi'] ?? null);
+        });
+    }
+    public function choosePpi(string $id): void
+    {
+        $this->execute('edit',function($db,$actor) use($id) {
+            $body=$this->body(['include']);
+            if (!is_bool($body['include'])) throw new InvalidArgumentException('include harus boolean.');
+            EraporPpiWorkflow::choose($db,$this->id($id),$actor,$body['include']);
+            return EraporTeacherForm::read($db,$this->id($id),$actor);
+        });
+    }
+    public function submitPpi(string $id): void
+    {
+        $this->execute('kirim',function($db,$actor) use($id) {
             $this->body([]);
-            return EraporConfirmReception::confirm($db,$this->id($id),$actor);
+            return EraporPpiWorkflow::submit($db,$this->id($id),$actor);
         });
     }
     private function execute(string $permission,callable $action): void
@@ -100,7 +118,7 @@ class EraporTeacherApiController extends Controller
     {
         return (string)file_get_contents('php://input',false,null,0,1048577);
     }
-    private function body(array $allowed): array
+    private function body(array $allowed,array $optional=[]): array
     {
         if (strtolower(trim(explode(';',$_SERVER['CONTENT_TYPE'] ?? '')[0]))!=='application/json') throw new InvalidArgumentException('JSON diperlukan.');
         $raw=$this->rawBody();
@@ -109,7 +127,7 @@ class EraporTeacherApiController extends Controller
         if (!$object instanceof stdClass) throw new InvalidArgumentException('Objek JSON diperlukan.');
         if (property_exists($object,'changes') && !is_array($object->changes)) throw new InvalidArgumentException('changes harus array JSON.');
         $body=json_decode($raw,true,32,JSON_THROW_ON_ERROR);
-        if (array_diff(array_keys($body),$allowed) || array_diff($allowed,array_keys($body))) throw new InvalidArgumentException('Field tidak dikenal/tidak lengkap.');
+        if (array_diff(array_keys($body),$allowed) || array_diff(array_diff($allowed,$optional),array_keys($body))) throw new InvalidArgumentException('Field tidak dikenal/tidak lengkap.');
         return $body;
     }
     private function fail(int $status,string $code,string $message): void

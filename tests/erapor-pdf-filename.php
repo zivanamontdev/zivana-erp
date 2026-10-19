@@ -12,5 +12,7 @@ $db->exec('CREATE TABLE murid(id INTEGER,nama_lengkap TEXT);CREATE TABLE tahun_a
 $db->exec("INSERT INTO murid VALUES(1,'Nama Anak');INSERT INTO tahun_ajaran VALUES(1,2026,2027);INSERT INTO erapor_sesi VALUES(5,1,1,'TENGAH','GANJIL')");
 $check(EraporPdfFilename::forSession($db,5)==='Rapor-Nama-Anak-TS-Ganjil-2026-2027.pdf');
 $check(EraporPdfFilename::forSession($db,5,true)==='Draf-Rapor-Nama-Anak-TS-Ganjil-2026-2027.pdf');
+$check(EraporPdfFilename::ppiForSession($db,5)==='PPI-Nama-Anak-TS-Ganjil-2026-2027.pdf');
+$check(EraporPdfFilename::ppiForSession($db,5,true)==='Draf-PPI-Nama-Anak-TS-Ganjil-2026-2027.pdf');
 try{EraporPdfFilename::forSession($db,999);throw new RuntimeException('Missing session accepted');}catch(DomainException){$check(true);}
 echo "PASS: $checks PDF filename checks.\n";

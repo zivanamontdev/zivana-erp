@@ -102,6 +102,13 @@ $router->post('/erapor/profil-penandatangan/cabut', [EraporSignerProfileControll
 $router->get('/erapor/profil-penandatangan/tanda-tangan', [EraporSignerProfileController::class, 'signature']);
 // PDF paket per sesi: artefak resmi bila sudah disetujui, draf bila belum (EraporPdfAccess).
 $router->get('/erapor/sesi/{id}/pdf', [EraporPdfController::class, 'show']);
+$router->get('/erapor/ppi', [EraporPpiController::class, 'index']);
+$router->get('/erapor/ppi/{id}', [EraporPpiController::class, 'review']);
+$router->get('/erapor/ppi/{id}/pdf', [EraporPpiController::class, 'pdf']);
+$router->post('/erapor/ppi/{id}/setujui/{stage}', [EraporPpiController::class, 'approve']);
+$router->post('/erapor/ppi/{id}/terbitkan', [EraporPpiController::class, 'publish']);
+$router->post('/portal-guru/sesi/{id}/ppi/bagikan', [EraporPpiController::class, 'share']);
+$router->get('/rapor/ppi/unduh/{token}', [EraporDownloadController::class, 'ppi']);
 // Migrasi skema pilot via browser (hosting tanpa SSH). 404 kecuali ERAPOR_MIGRATION_TOKEN diisi di .env.
 $router->get('/sistem/migrasi-erapor', [EraporMigrationController::class, 'index']);
 $router->post('/sistem/migrasi-erapor', [EraporMigrationController::class, 'run']);
@@ -115,6 +122,8 @@ $router->get('/api/erapor/sesi/{id}', [EraporTeacherApiController::class, 'show'
 $router->post('/api/erapor/sesi/{id}/dokumen/{documentId}/simpan', [EraporTeacherApiController::class, 'save']);
 $router->post('/api/erapor/sesi/{id}/konfirmasi-isi', [EraporTeacherApiController::class, 'confirmFilled']);
 $router->post('/api/erapor/sesi/{id}/draft', [EraporTeacherApiController::class, 'saveDraft']);
+$router->post('/api/erapor/sesi/{id}/ppi-pilihan', [EraporTeacherApiController::class, 'choosePpi']);
+$router->post('/api/erapor/sesi/{id}/ppi/ajukan', [EraporTeacherApiController::class, 'submitPpi']);
 $router->post('/api/erapor/sesi/{id}/konfirmasi-penerimaan', [EraporTeacherApiController::class, 'confirmReception']);
 $router->post('/portal-guru/sesi/siapkan', [PortalGuruController::class, 'prepareEraporSession']);
 $router->get('/portal-guru/sesi/{id}', [PortalGuruController::class, 'showEraporSession']);

@@ -6,7 +6,10 @@
  */
 final class EraporDownloadController extends Controller
 {
-    public function show(string $token): void
+    public function show(string $token): void { $this->serve($token, false); }
+    public function ppi(string $token): void { $this->serve($token, true); }
+
+    private function serve(string $token, bool $ppi): void
     {
         header('Cache-Control: private, no-store, max-age=0');
         header('X-Robots-Tag: noindex, nofollow');
@@ -15,7 +18,9 @@ final class EraporDownloadController extends Controller
         $agent = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
         $isPreview = (bool) preg_match('/WhatsApp|facebookexternalhit|Facebot|TelegramBot|Twitterbot|Slackbot|Discordbot/i', $agent);
         try {
-            $url = EraporDistribution::downloadUrl(Database::getInstance(), $token, !$isPreview);
+            $url = $ppi
+                ? EraporPpiWorkflow::downloadUrl(Database::getInstance(), $token, !$isPreview)
+                : EraporDistribution::downloadUrl(Database::getInstance(), $token, !$isPreview);
         } catch (Throwable $e) {
             error_log('eRapor parent download failed: ' . $e->getMessage());
             $url = null;

@@ -13,6 +13,11 @@ final class EraporPdfFilename
             . '-' . ($semester === 'GENAP' ? 'Genap' : 'Ganjil') . ($year !== '' ? '-' . $year : '') . '.pdf';
     }
 
+    public static function ppiForSession(PDO $db, int $sessionId, bool $draft = false): string
+    {
+        return ($draft ? 'Draf-' : '') . 'PPI-' . substr(self::forSession($db, $sessionId), strlen('Rapor-'));
+    }
+
     public static function forSession(PDO $db, int $sessionId, bool $draft = false): string
     {
         $q = $db->prepare('SELECT m.nama_lengkap,s.jenis,s.semester,t.tahun_awal,t.tahun_akhir

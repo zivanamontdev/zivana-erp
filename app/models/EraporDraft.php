@@ -12,7 +12,7 @@ final class EraporDraft
     public static function save(PDO $db, int $sessionId, int $actorId): array
     {
         $form = EraporTeacherForm::read($db, $sessionId, $actorId);
-        if (empty($form['capabilities']['can_edit'])) throw new DomainException('Sesi tidak dapat diubah.');
+        if (empty($form['capabilities']['can_edit']) && empty($form['capabilities']['can_edit_ppi'])) throw new DomainException('Sesi tidak dapat diubah.');
         // Bandingkan waktu di MySQL (zona waktu PHP dan MySQL bisa berbeda).
         $q = $db->prepare("SELECT 1 FROM erapor_sesi_log WHERE sesi_id=? AND aksi='DRAFT_DISIMPAN' AND created_at > NOW() - INTERVAL " . self::THROTTLE_SECONDS . " SECOND LIMIT 1");
         $q->execute([$sessionId]);

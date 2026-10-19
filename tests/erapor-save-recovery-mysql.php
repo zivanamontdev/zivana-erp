@@ -67,7 +67,7 @@ try{
     $result=EraporApprove::approve($db,$wsid,(int)$tasks['KEPALA_SEKOLAH']['id'],$head);
     $check($result['all_approved']&&$result['publication']['result']==='prepared','Full cloned approval flow produces an official artifact');
     $artifact=$db->query('SELECT filename,renderer_versi,pdf_bytes,pdf_sha256 FROM erapor_publikasi_pdf WHERE sesi_id='.$wsid)->fetch();
-    $check($artifact['filename']===EraporPdfFilename::forSession($db,$wsid)&&$artifact['renderer_versi']==='erapor-print-v8','Official filename and renderer version are consistent');
+    $check($artifact['filename']===EraporPdfFilename::forSession($db,$wsid)&&$artifact['renderer_versi']===EraporPackagePdfRenderer::version(),'Official filename and renderer version are consistent');
     $check(hash_equals($artifact['pdf_sha256'],hash('sha256',$artifact['pdf_bytes'])),'Official artifact hash verifies');
     $check($fingerprint($live)===$before,'All source table fingerprints, official artifacts, and user data remain unchanged');
     echo "PASS: $checks disposable MySQL checks (lost-ACK retry, repeat edits, rollback, dual-role approval signatures, final PDF, source unchanged).\n";

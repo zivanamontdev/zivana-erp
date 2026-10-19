@@ -22,6 +22,12 @@ final class EraporMigrationRunner
             } elseif (preg_match('/^ALTER TABLE erapor_sesi ADD COLUMN tanggal_pengesahan DATE NULL$/i', $statement)) {
                 // Explicitly allow this one reviewed additive session field; reject arbitrary ALTER clauses.
                 $key='erapor_sesi.tanggal_pengesahan';
+            } elseif (in_array($statement,[
+                'ALTER TABLE erapor_sesi ADD COLUMN ppi_disertakan TINYINT(1) NOT NULL DEFAULT 1',
+                'ALTER TABLE erapor_sesi ADD COLUMN ppi_terpisah TINYINT(1) NOT NULL DEFAULT 0',
+            ],true)) {
+                preg_match('/ADD COLUMN (ppi_[a-z_]+)/',$statement,$column);
+                $key='erapor_sesi.'.$column[1];
             } elseif ($statement===self::WALI_KELAS_CHECK) {
                 // Reviewed: widen the approval-code CHECK for WALI_KELAS. Target "table#constraint".
                 $key='erapor_alur_penyetuju#erapor_alur_kode_v2';

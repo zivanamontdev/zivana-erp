@@ -25,6 +25,7 @@ final class EraporPilotInstaller
         '20260928_erapor_wali_kelas.sql',
         '20260929_erapor_publikasi_distribusi.sql',
         '20260930_erapor_agama_tanpa_keterangan.sql',
+        '20261018_erapor_ppi_terpisah.sql',
     ];
 
     private const SEEDS = [

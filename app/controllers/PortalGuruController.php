@@ -104,6 +104,7 @@ class PortalGuruController extends Controller
                 'pageTitle'=>'Pengisian Rapor','form'=>$form,'activeNavItem'=>'portal-dashboard',
                 'hasOfficialPdf'=>EraporPdfAccess::hasOfficial(Database::getInstance(), (int)$id),
                 'share'=>EraporDistribution::shareState(Database::getInstance(), (int)$id),
+                'ppiShare'=>!empty($form['ppi']['separate']) ? EraporPpiWorkflow::shareState(Database::getInstance(), (int)$id) : null,
                 'draftAt'=>EraporDraft::last(Database::getInstance(), (int)$id),
             ]);
         } catch (DomainException) {
