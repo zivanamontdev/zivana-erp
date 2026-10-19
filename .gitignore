@@ -1,4 +1,6 @@
 .env
+# Private login credentials for local/production testing.
+/credentials
 database/backups/
 # Local database exports/backups placed at repository root.
 /*.sql

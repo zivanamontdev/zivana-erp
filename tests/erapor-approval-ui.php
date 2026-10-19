@@ -34,6 +34,8 @@ $tasks = [
         'documents'=>[],'session_id'=>55,'approval_id'=>10,'can_approve'=>false,'integrity_error'=>true],
     ['student'=>'Murid Berikutnya','period'=>'Tengah Semester · 2025/2026','label'=>'Kepala Sekolah',
         'documents'=>['Rapor Montessori','Rapor Agama'],'session_id'=>56,'approval_id'=>11,'can_approve'=>false,'integrity_error'=>false],
+    ['student'=>'Murid Siap Terbit','period'=>'Tengah Semester · 2025/2026','label'=>'Kepala Sekolah',
+        'documents'=>['Rapor Montessori'],'session_id'=>57,'approval_id'=>12,'can_approve'=>false,'integrity_error'=>false,'ready_to_publish'=>true],
 ];
 $html = renderApprovalView($indexFile, ['pageTitle'=>'Antrean Persetujuan','breadcrumb'=>'','activeNavItem'=>'erapor-approval','tasks'=>$tasks,'notice'=>null]);
 $dom = new DOMDocument(); @$dom->loadHTML($html); $xpath = new DOMXPath($dom);
@@ -43,6 +45,8 @@ approvalUiCheck($xpath->query('//a[contains(@href,"/erapor/persetujuan/55/9") an
 approvalUiCheck($xpath->query('//a[contains(@href,"/erapor/persetujuan/55/10")]')->length === 0
     && str_contains($html, 'Tidak dapat ditinjau'), 'Invalid assignment/snapshot is not linked to a guaranteed 404');
 approvalUiCheck(str_contains($html, 'Rapor Bahasa Inggris') && str_contains($html, 'Menunggu tahap sebelumnya'), 'Inbox shows assigned scope and readiness');
+approvalUiCheck(str_contains($html,'Siap diterbitkan')&&$xpath->query('//a[contains(@href,"/erapor/persetujuan/57/12")]')->length===1,
+    'Head-approved report retains a review action and an explicit pending-publication badge');
 $empty = renderApprovalView($indexFile, ['pageTitle'=>'Antrean Persetujuan','breadcrumb'=>'','activeNavItem'=>'erapor-approval','tasks'=>[],'notice'=>null]);
 approvalUiCheck(str_contains($empty, 'Tidak ada rapor yang menunggu persetujuan'), 'Empty inbox has a useful empty state');
 

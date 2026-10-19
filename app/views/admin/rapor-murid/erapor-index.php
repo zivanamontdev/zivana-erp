@@ -40,7 +40,7 @@ require VIEW_PATH . '/layouts/shell-header.php';
                     <td><?= uiBadge($label, $tone) ?></td>
                     <td class="col-action">
                         <?php if ($row['sesi_id']): ?>
-                        <a class="ui-button ui-button--outline" href="<?= BASE_PATH ?>/erapor/sesi/<?= (int) $row['sesi_id'] ?>/pdf" target="_blank" rel="noopener"><?= $row['status'] === 'TERBIT' ? 'PDF Resmi' : 'Pratinjau PDF' ?></a>
+                        <a class="ui-button ui-button--outline" href="<?= BASE_PATH ?>/erapor/sesi/<?= (int) $row['sesi_id'] ?>/pdf" target="_blank" rel="noopener"><?= !empty($row['has_official_pdf']) ? 'PDF Resmi' : 'Pratinjau PDF' ?></a>
                         <?php endif; ?>
                     </td>
                 </tr>

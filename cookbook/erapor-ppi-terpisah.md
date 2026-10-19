@@ -36,9 +36,11 @@ Komposisi dokumen dasar ABK tetap lima dokumen dan hash paket tidak diubah. Caku
 
 Watermark logo mengikuti Finalisasi **pengajuan PPI sendiri**, bukan status publikasi utama: draf PPI yang belum diajukan bersih, pengajuan PPI bertanda logo besar di belakang isi. Tanda tangan PDF PPI berasal dari persetujuan PPI, bukan tanda tangan utama atau profil PIC saat unduh.
 
-## Aktivasi — tidak dijalankan pada database utama selama pengembangan
+## Aktivasi dan riwayat pengujian
 
-Pengujian menggunakan salinan database lokal acak yang dihapus sesudah pengujian. Semua **82 tabel asli**, termasuk artefak resmi, diverifikasi tidak berubah; `.env` asli tidak diubah. Migrasi baru **belum diterapkan pada database utama/produksi**. Pilihan baru disembunyikan pada skema lama.
+Pada pengembangan 18 Oktober, pengujian menggunakan salinan database lokal acak yang dihapus sesudah pengujian. Semua **82 tabel asli**, termasuk artefak resmi, diverifikasi tidak berubah; `.env` asli tidak diubah. Migrasi tidak diterapkan ke database utama saat pengembangan tersebut.
+
+**Pembaruan 19 Oktober:** production telah dimigrasikan oleh pemilik dan fitur PPI telah diverifikasi lewat browser. Database lokal utama masih 21/22 migrasi; pilihan baru tetap disembunyikan pada skema lama. Lihat [audit production dan perbaikan lanjutan](erapor-production-audit-20261019.md).
 
 Untuk aktivasi, gunakan prosedur migrasi yang sudah ada, bukan reset/bootstrap data:
 
@@ -51,7 +53,7 @@ RAS tidak ditambahkan karena spesifikasi/rubrik resmi belum tersedia. Pengajuan 
 
 ## Verifikasi
 
-- `php tests/erapor-ppi-workflow-mysql.php --run`: **54** pemeriksaan pada clone lokal, migrasi/idempotensi/keutuhan data lama, penyertaan normal, pengecualian PIC/Kepala, nilai terjaga, akses/penugasan yang dicabut, urutan dan replay persetujuan, rollback saat renderer gagal, integritas artefak, gagal unggah/retry, unduh/kedaluwarsa, pemisahan token, dan metadata distribusi utama tidak berubah. R2 menggunakan pengganti in-memory; tidak menghubungi cloud.
+- `php tests/erapor-ppi-workflow-mysql.php --run`: **65** pemeriksaan (termasuk regresi penerbitan dari audit 19 Oktober) pada clone lokal, migrasi/idempotensi/keutuhan data lama, penyertaan normal, pengecualian PIC/Kepala, nilai terjaga, akses/penugasan yang dicabut, urutan dan replay persetujuan, rollback saat renderer gagal, integritas artefak, gagal unggah/retry, unduh/kedaluwarsa, pemisahan token, dan metadata distribusi utama tidak berubah. R2 menggunakan pengganti in-memory; tidak menghubungi cloud.
 - `php tests/erapor-save-recovery-mysql.php --run`: **13** pemeriksaan regresi autosave/konflik/dua peran/PDF resmi pada clone lain.
 - API adapter **37** kasus, RBAC **91** route, render-only editor/persetujuan, penamaan PDF **10**, renderer **24**, artefak PDF **24**, serta regresi profil/penugasan/reset seed dan JS autosave lolos. Semua PHP yang berubah lolos lint; JS lolos syntax check.
 - Browser Chrome Headless: **34** pemeriksaan melalui HTTP/controller/API nyata, database clone, penyimpanan lokal pengganti R2, dan identitas sintetis. Alur lengkap utama terbit dulu → edit/ajukan PPI → Wali → Kepala → terbit → unduh orang tua; pengecualian Kepala; penyertaan kembali PPI belum lengkap; viewport 1440×900, 768×1024, 390×844, 375×812.

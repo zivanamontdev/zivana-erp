@@ -8,7 +8,8 @@ final class EraporOverview
         'BELUM_DIISI' => ['Sedang diisi', 'peringatan'],
         'TELAH_DIISI' => ['Selesai diisi', 'peringatan'],
         'MENUNGGU_TTD' => ['Menunggu persetujuan', 'peringatan'],
-        'TERBIT' => ['Disetujui · PDF terbit', 'positif'],
+        'SIAP_TERBIT' => ['Disetujui · belum diterbitkan', 'peringatan'],
+        'TERBIT' => ['Rapor telah terbit', 'positif'],
         'SELESAI' => ['Selesai', 'positif'],
     ];
 
@@ -35,11 +36,16 @@ final class EraporOverview
             $rows = [];
             foreach ($studentRows as $student) {
                 $session = $sessions[(int) $student['id']] ?? null;
-                $row = $student + ['sesi_id' => null, 'status' => 'BELUM_DIBUKA', 'filled' => 0, 'required' => 0, 'tahap' => '—', 'guru_sesi' => null];
+                $row = $student + ['sesi_id' => null, 'status' => 'BELUM_DIBUKA', 'filled' => 0, 'required' => 0, 'tahap' => '—', 'guru_sesi' => null, 'has_official_pdf' => false];
                 if ($session) {
                     $row['sesi_id'] = (int) $session['id'];
                     $row['guru_sesi'] = $session['guru_sesi'];
-                    $row['status'] = $session['terbit'] ? 'TERBIT' : $session['status'];
+                    $row['has_official_pdf'] = (bool) $session['terbit'];
+                    $ready = $row['has_official_pdf'] && (int) $session['tahap_total'] > 0
+                        && (int) $session['tahap_disetujui'] === (int) $session['tahap_total'];
+                    // Preparing the signed artifact is not publication/distribution to parents.
+                    $row['status'] = $session['status'] === 'SELESAI' && $row['has_official_pdf'] ? 'TERBIT'
+                        : ($session['status'] === 'MENUNGGU_TTD' && $ready ? 'SIAP_TERBIT' : $session['status']);
                     $row['tahap'] = (int) $session['tahap_total'] ? $session['tahap_disetujui'] . '/' . $session['tahap_total'] : '—';
                     try {
                         // Guard paket mensyaratkan transaksi; hanya membaca, lalu di-rollback.

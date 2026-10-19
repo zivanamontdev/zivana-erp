@@ -3,7 +3,7 @@
 /** Approvals (pending or already approved history) are visible only through current explicit user assignments. */
 final class EraporApprovalInbox
 {
-    /** @param bool $done false = butuh persetujuan (MENUNGGU); true = riwayat yang sudah disetujui */
+    /** Pending includes head-approved artifacts still awaiting publication; history remains approval history. */
     public static function read(PDO $db,int $actorId,bool $monitor=false,bool $done=false): array
     {
         if ($db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql' || $db->inTransaction()) throw new RuntimeException('Dedicated MySQL connection required.');
@@ -16,9 +16,14 @@ final class EraporApprovalInbox
                     WHERE u.id=? AND u.is_active=1 AND k.is_active=1 AND j.is_active=1",[$actorId]);
                 if (!$actor) throw new DomainException('Akun penyetuju tidak aktif.');
             }
-            $statusFilter=$done?"a.status='DISETUJUI' AND s.status IN ('MENUNGGU_TTD','SELESAI')":"a.status='MENUNGGU' AND s.status='MENUNGGU_TTD'";
+            $statusFilter=$done?"a.status='DISETUJUI' AND s.status IN ('MENUNGGU_TTD','SELESAI')"
+                :"s.status='MENUNGGU_TTD' AND (a.status='MENUNGGU' OR
+                    (a.kode='KEPALA_SEKOLAH' AND a.status='DISETUJUI'
+                        AND EXISTS (SELECT 1 FROM erapor_publikasi_pdf pdf WHERE pdf.sesi_id=s.id)
+                        AND NOT EXISTS (SELECT 1 FROM erapor_sesi_penyetuju pending WHERE pending.sesi_id=s.id AND pending.status<>'DISETUJUI')))";
             $candidates=self::all($db,"SELECT a.id AS approval_id,a.sesi_id,a.kode,a.label,a.urutan,m.nama_lengkap,p.nama AS periode_nama,
-                    CONCAT(t.tahun_awal,'/',t.tahun_akhir) AS tahun_label,ps.disetujui_pada
+                    CONCAT(t.tahun_awal,'/',t.tahun_akhir) AS tahun_label,ps.disetujui_pada,
+                    EXISTS (SELECT 1 FROM erapor_publikasi_pdf pdf WHERE pdf.sesi_id=s.id) AS has_official_pdf
                 FROM erapor_sesi_penyetuju a
                 JOIN erapor_sesi s ON s.id=a.sesi_id JOIN murid m ON m.id=s.murid_id
                 JOIN periode_penilaian p ON p.id=s.periode_id JOIN tahun_ajaran t ON t.id=p.tahun_ajaran_id
@@ -36,14 +41,16 @@ final class EraporApprovalInbox
                         'student'=>$review['student']['nama_lengkap'],'period'=>$review['period']['nama'].' · '.$review['period']['tahun_label'],
                         'documents'=>array_column($review['documents'],'nama'),'can_approve'=>$review['can_approve'],
                         'waiting_for'=>$review['waiting_for'],'integrity_error'=>false,
-                        'approved_at'=>$candidate['disetujui_pada'],'all_approved'=>$review['all_approved']];
+                        'approved_at'=>$candidate['disetujui_pada'],'all_approved'=>$review['all_approved'],
+                        'ready_to_publish'=>$review['approval']['kode']==='KEPALA_SEKOLAH' && $review['all_approved']
+                            && $review['session']['status']==='MENUNGGU_TTD' && (bool)$candidate['has_official_pdf']];
                 } catch (DomainException $e) {
                     // Keep assigned work visible but non-actionable when its snapshot is inconsistent.
                     $tasks[]=['approval_id'=>(int)$candidate['approval_id'],'session_id'=>(int)$candidate['sesi_id'],
                         'label'=>$candidate['label'],'code'=>$candidate['kode'],'student'=>$candidate['nama_lengkap'],
                         'period'=>$candidate['periode_nama'].' · '.$candidate['tahun_label'],'documents'=>[],
                         'can_approve'=>false,'waiting_for'=>[],'integrity_error'=>true,
-                        'approved_at'=>$candidate['disetujui_pada'],'all_approved'=>false];
+                        'approved_at'=>$candidate['disetujui_pada'],'all_approved'=>false,'ready_to_publish'=>false];
                 }
             }
             $db->commit(); return ['tasks'=>$tasks];

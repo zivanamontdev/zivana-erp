@@ -1,5 +1,5 @@
 <?php
-// Filter sejajar judul: Butuh Persetujuan (antrean) dan Selesai (riwayat yang sudah disetujui akun ini).
+// Antrean mencakup persetujuan dan penerbitan yang belum selesai; Selesai menyimpan riwayat persetujuan.
 $filterLink = static fn(string $label, string $query, bool $active): string => '<a class="ui-button ui-button--' . ($active ? 'tabular-active' : 'tabular-inactive') . ' erapor-approval-filter"'
     . ($active ? ' aria-current="page"' : '') . ' href="' . BASE_PATH . '/erapor/persetujuan' . $query . '">' . e($label) . '</a>';
 $headerActions = '<div class="erapor-approval-filters" role="group" aria-label="Filter persetujuan">'
@@ -45,6 +45,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
                 <td>
                     <?php if ($task['integrity_error']): ?>
                         <?= uiBadge('Perlu diperiksa', 'destruktif') ?>
+                    <?php elseif (!empty($task['ready_to_publish'])): ?>
+                        <?= uiBadge('Siap diterbitkan', 'peringatan') ?>
                     <?php elseif (!empty($done)): ?>
                         <?= uiBadge('Disetujui' . (!empty($task['approved_at']) ? ' ' . date('d/m/Y', strtotime($task['approved_at'])) : ''), 'positif') ?>
                         <?php if (empty($task['all_approved'])): ?><?= uiText('Menunggu penyetuju lain', 'caption-md', ['tone' => 'muted', 'tag' => 'p']) ?><?php endif; ?>
