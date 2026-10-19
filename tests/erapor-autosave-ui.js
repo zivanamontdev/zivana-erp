@@ -20,17 +20,23 @@ function fixture(mode = 'normal', kind = 'RTS') {
     removeAttribute() {}
   }));
   const status = {dataset: {}}, recovery = {hidden: true}, buttons = [{disabled: true, classList: {toggle() {}}}];
+  const ppiClasses = new Set(['ui-button--disabled']);
+  const ppiButton = {disabled: true, classList: {toggle(name, on) { on ? ppiClasses.add(name) : ppiClasses.delete(name); }, contains(name) { return ppiClasses.has(name); }}};
+  const sessionStatus = kind === 'PPI' ? 'SELESAI' : 'BELUM_DIISI';
+  const ppiState = values => ({included: false, separate: true, status: 'BELUM_DIAJUKAN',
+    can_submit: values[1] !== null && values[2] !== null, progress: {required: 2, filled: Object.values(values).filter(v => v !== null).length}});
   const root = {
     dataset: {apiUrl: '/fixture', csrfToken: 'synthetic', canSubmit: 'true'},
     querySelector(selector) {
       if (selector === '[data-erapor-status]') return status;
       if (selector === '[data-erapor-recovery]') return recovery;
-      if (selector === '[data-erapor-initial-state]') return {textContent: JSON.stringify({session: {status: 'BELUM_DIISI'}, completion: {documents: []}})};
+      if (selector === '[data-erapor-initial-state]') return {textContent: JSON.stringify({session: {status: sessionStatus}, completion: {documents: []}, ...(kind === 'PPI' ? {ppi: ppiState({1: initial, 2: null})} : {})})};
       return null;
     },
     querySelectorAll(selector) {
       if (selector === '[data-erapor-entry]:not([type="radio"])') return fields;
       if (selector === '[data-erapor-confirm]') return buttons;
+      if (selector === '[data-erapor-submit-ppi]' && kind === 'PPI') return [ppiButton];
       return [];
     },
     addEventListener(name, callback) { rootEvents[name] = callback; }
@@ -63,7 +69,7 @@ function fixture(mode = 'normal', kind = 'RTS') {
     changes.forEach(c => { state.values[idOf(c)] = valueOf(c); });
     if (state.mode === 'lost-ack' && state.failures++ === 0) throw new TypeError('Connection lost AFTER commit');
     if (state.mode === 'slow') await sleep(25);
-    return {ok: true, status: 200, json: async () => ({ok: true, data: {session: {status: 'BELUM_DIISI'}, completion: {documents: []}}})};
+    return {ok: true, status: 200, json: async () => ({ok: true, data: {session: {status: sessionStatus}, completion: {documents: []}, ...(kind === 'PPI' ? {ppi: ppiState(state.values)} : {})}})};
   };
   vm.runInNewContext(source, {
     document: {querySelector() { return root; }, querySelectorAll() { return []; }, addEventListener(name, callback) { (docEvents[name] ||= []).push(callback); }},
@@ -75,7 +81,7 @@ function fixture(mode = 'normal', kind = 'RTS') {
   state.initUmmi = () => rootEvents.click({target: {closest: query => query === '[data-erapor-ummi-init]' ? {dataset: {eraporDocumentId: '99'}, disabled: false} : null}});
   state.online = () => { state.navigator.onLine = true; windowEvents.online(); };
   state.dirtyWarning = () => { let warned = false; windowEvents.beforeunload({preventDefault() { warned = true; }}); return warned; };
-  state.status = status; state.recovery = recovery;
+  state.status = status; state.recovery = recovery; state.ppiButton = ppiButton;
   state.done = () => status.dataset.state === 'success';
   state.dispose = () => timers.forEach(clearTimeout);
   return state;
@@ -128,7 +134,7 @@ function fixture(mode = 'normal', kind = 'RTS') {
     assert.equal(f.reloaded, true);
     assert.equal(f.reloadWarning, false, 'Acknowledged Ummi initialization must not trigger an unsaved-change unload prompt');
   } finally { f.dispose(); }
-  for (const kind of ['AGAMA', 'BING', 'UMMI']) {
+  for (const kind of ['AGAMA', 'BING', 'UMMI', 'PPI']) {
     f = fixture('lost-ack', kind);
     try {
       f.change(1, 'B'); await until(() => f.calls.length === 1);
@@ -137,5 +143,20 @@ function fixture(mode = 'normal', kind = 'RTS') {
       assert.equal(f.values[2], 'B');
     } finally { f.dispose(); }
   }
-  console.log('PASS: eRapor autosave (RTS/select repeat edits, in-flight edits, lost ACK, bounded retry, manual draft, real conflict, reconnect, unsaved-change warning).');
+  f = fixture('slow', 'PPI');
+  try {
+    assert.equal(f.ppiButton.disabled, true);
+    f.change(2, 'B');
+    assert.equal(f.ppiButton.disabled, true, 'Pending PPI edits cannot be submitted before acknowledgement');
+    await until(() => !f.ppiButton.disabled);
+    assert(f.ppiButton.classList.contains('ui-button--primary'), 'Completed PPI must look enabled, not stay visually grey');
+    assert.equal(f.ppiButton.classList.contains('ui-button--disabled'), false);
+    f.change(1, '');
+    assert.equal(f.ppiButton.disabled, true, 'A new edit immediately disables the previously enabled PPI submission');
+    assert(f.ppiButton.classList.contains('ui-button--disabled'));
+    await until(f.done);
+    assert.equal(f.ppiButton.disabled, true, 'Incomplete PPI remains disabled after server acknowledgement');
+    assert.equal(f.ppiButton.classList.contains('ui-button--primary'), false);
+  } finally { f.dispose(); }
+  console.log('PASS: eRapor autosave (repeat edits, lost ACK, bounded retry, draft, conflict, reconnect, unload warning, PPI submission state and styling).');
 })().catch(error => { console.error(error); process.exitCode = 1; });

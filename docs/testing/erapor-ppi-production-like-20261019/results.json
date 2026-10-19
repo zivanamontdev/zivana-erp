@@ -1,0 +1,401 @@
+{
+  "scope": "Disposable local clone only; no production requests or mutations",
+  "accounts_verified": 17,
+  "workflow_checks": 76,
+  "cases": {
+    "filled": [
+      {
+        "label": "Fixture retains distinct real PIC and class-mapped Wali accounts",
+        "result": "PASS"
+      },
+      {
+        "label": "Entire HTTP workflow uses string numeric fetches like hosting",
+        "result": "PASS"
+      },
+      {
+        "label": "Production-like completed input remains read-only after the real deadline",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to agama",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to bing",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to wali",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to head",
+        "result": "PASS"
+      },
+      {
+        "label": "Main publishes without deleting the retained PPI",
+        "result": "PASS"
+      },
+      {
+        "label": "Complete detached PPI can submit after deadline without reopening editing",
+        "result": "PASS"
+      },
+      {
+        "label": "Backend rejects late edits even while standalone PPI has not yet been submitted",
+        "result": "PASS"
+      },
+      {
+        "label": "PIC cannot supply a different submission actor",
+        "result": "PASS"
+      },
+      {
+        "label": "Wali cannot submit PPI instead of its PIC",
+        "result": "PASS"
+      },
+      {
+        "label": "Class Wali cannot inspect the detached draft before explicit PIC submission",
+        "result": "PASS"
+      },
+      {
+        "label": "PIC explicitly submits the already-filled expired-period PPI",
+        "result": "PASS"
+      },
+      {
+        "label": "PIC with approval permission for another class still cannot sign as this Wali",
+        "result": "PASS"
+      },
+      {
+        "label": "Head cannot skip the separate class-Wali approval",
+        "result": "PASS"
+      },
+      {
+        "label": "English coordinator has no standalone PPI scope",
+        "result": "PASS"
+      },
+      {
+        "label": "Mapped class Wali signs standalone PPI",
+        "result": "PASS"
+      },
+      {
+        "label": "Assigned head approves separate PPI",
+        "result": "PASS"
+      },
+      {
+        "label": "PPI evidence belongs to Wali and head, never substituted by PIC profile",
+        "result": "PASS"
+      },
+      {
+        "label": "Main official bytes stay immutable through standalone PPI workflow",
+        "result": "PASS"
+      },
+      {
+        "label": "Published PPI with missing parent contacts explains its disabled sharing action",
+        "result": "PASS"
+      },
+      {
+        "label": "Admin contact form retains valid required fields",
+        "result": "PASS"
+      },
+      {
+        "label": "Admin saves only synthetic parent contacts through real controller",
+        "result": "PASS"
+      },
+      {
+        "label": "One valid synthetic parent contact yields one direct PPI share link",
+        "result": "PASS"
+      },
+      {
+        "label": "Admin contact form retains valid required fields",
+        "result": "PASS"
+      },
+      {
+        "label": "Admin saves only synthetic parent contacts through real controller",
+        "result": "PASS"
+      },
+      {
+        "label": "Two valid contacts yield independent father/mother links",
+        "result": "PASS"
+      },
+      {
+        "label": "Share message points only to isolated local storage route",
+        "result": "PASS"
+      },
+      {
+        "label": "Parent URL follows the storage redirect and downloads exact standalone PPI bytes",
+        "result": "PASS"
+      },
+      {
+        "label": "Real share click records the PPI audit without opening or sending WhatsApp",
+        "result": "PASS"
+      },
+      {
+        "label": "PIC browser has no application JavaScript exceptions",
+        "result": "PASS"
+      }
+    ],
+    "late": [
+      {
+        "label": "Main approval task assigned to agama",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to bing",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to wali",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to head",
+        "result": "PASS"
+      },
+      {
+        "label": "Head exclusion changes effective publication, not original PIC/approval scope",
+        "result": "PASS"
+      },
+      {
+        "label": "Late exclusion retains frozen scope evidence and all thirty values",
+        "result": "PASS"
+      },
+      {
+        "label": "Main Wali/head signatures never auto-submit or pre-approve separate PPI",
+        "result": "PASS"
+      },
+      {
+        "label": "Head cannot append PPI by replaying approval after immutable main PDF preparation",
+        "result": "PASS"
+      },
+      {
+        "label": "PPI publishes independently while main report still awaits its own publication",
+        "result": "PASS"
+      },
+      {
+        "label": "Late-excluded PPI receives fresh independent Wali/head evidence",
+        "result": "PASS"
+      },
+      {
+        "label": "Main prepared PDF stays identical even if separate PPI publishes first",
+        "result": "PASS"
+      },
+      {
+        "label": "Separate published PPI with contact warning fits 1440px",
+        "result": "PASS"
+      },
+      {
+        "label": "Separate published PPI with contact warning fits 768px",
+        "result": "PASS"
+      },
+      {
+        "label": "Separate published PPI with contact warning fits 390px",
+        "result": "PASS"
+      },
+      {
+        "label": "Separate published PPI with contact warning fits 375px",
+        "result": "PASS"
+      },
+      {
+        "label": "Late-exclusion scenario has no application JavaScript exceptions",
+        "result": "PASS"
+      }
+    ],
+    "incomplete": [
+      {
+        "label": "Excluded incomplete PPI does not block complete main report",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to agama",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to bing",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to wali",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to head",
+        "result": "PASS"
+      },
+      {
+        "label": "Expired incomplete PPI cannot be edited or submitted after main publication",
+        "result": "PASS"
+      },
+      {
+        "label": "Incomplete PPI submission fails without creating approval evidence",
+        "result": "PASS"
+      },
+      {
+        "label": "PIC sees the PPI deadline reason, not only the main report lock",
+        "result": "PASS"
+      },
+      {
+        "label": "Real admin period extension unlocks only unsubmitted PPI, never main values",
+        "result": "PASS"
+      },
+      {
+        "label": "Expired hint clears and main report remains visibly locked",
+        "result": "PASS"
+      },
+      {
+        "label": "PPI autosave response was deliberately lost after server commit",
+        "result": "PASS"
+      },
+      {
+        "label": "Autosave replays idempotently and retains the completed PPI",
+        "result": "PASS"
+      },
+      {
+        "label": "Last autosave changes the PPI submit button from disabled grey to active primary",
+        "result": "PASS"
+      },
+      {
+        "label": "Fresh browser reload retains every original and newly completed value",
+        "result": "PASS"
+      },
+      {
+        "label": "An in-flight edit invalidating PPI completeness cancels submission and restores editable controls",
+        "result": "PASS"
+      },
+      {
+        "label": "Admin extension, late completion and standalone approval never regenerate main PDF",
+        "result": "PASS"
+      },
+      {
+        "label": "Previously incomplete PPI completes its own publication after legitimate extension",
+        "result": "PASS"
+      },
+      {
+        "label": "Incomplete/extended/offline-retry scenario has no JavaScript exceptions",
+        "result": "PASS"
+      }
+    ],
+    "included": [
+      {
+        "label": "Default production-like PPI stays included unless explicitly excluded",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to agama",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to bing",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to wali",
+        "result": "PASS"
+      },
+      {
+        "label": "Main approval task assigned to head",
+        "result": "PASS"
+      },
+      {
+        "label": "Main report with included PPI still publishes through real assignments",
+        "result": "PASS"
+      },
+      {
+        "label": "Included PPI does not create a separate submission",
+        "result": "PASS"
+      },
+      {
+        "label": "Included published PPI has no misleading standalone submission controls",
+        "result": "PASS"
+      },
+      {
+        "label": "Standalone PDF route rejects included PPI",
+        "result": "PASS"
+      },
+      {
+        "label": "Included PPI workflow has no JavaScript exceptions",
+        "result": "PASS"
+      }
+    ]
+  },
+  "pdf": {
+    "files": [
+      {
+        "file": "filled-main-after.pdf",
+        "pages": 13,
+        "sha256": "d41cba92fab16a5f03aa3e8fe63453029aab51f3884d32b7a26302f3991ffae3",
+        "outside_page_words": 0
+      },
+      {
+        "file": "filled-main-before.pdf",
+        "pages": 13,
+        "sha256": "d41cba92fab16a5f03aa3e8fe63453029aab51f3884d32b7a26302f3991ffae3",
+        "outside_page_words": 0
+      },
+      {
+        "file": "filled-parent-download.pdf",
+        "pages": 3,
+        "sha256": "66b79640e2e86c307a7a80b9dd34165cc53a9f661b42e87f8a37736444e2e1ba",
+        "outside_page_words": 0
+      },
+      {
+        "file": "filled-ppi-official.pdf",
+        "pages": 3,
+        "sha256": "66b79640e2e86c307a7a80b9dd34165cc53a9f661b42e87f8a37736444e2e1ba",
+        "outside_page_words": 0
+      },
+      {
+        "file": "included-main.pdf",
+        "pages": 16,
+        "sha256": "4688f96e31d2fef4ca14b04ec2478eca96c6d0230172223b7e5c31520edaeb80",
+        "outside_page_words": 0
+      },
+      {
+        "file": "incomplete-main-after.pdf",
+        "pages": 13,
+        "sha256": "5bf00599a22ca3b2238d54a91d7c4ddf823665ffb408126032513c51bc186bfe",
+        "outside_page_words": 0
+      },
+      {
+        "file": "incomplete-main-before.pdf",
+        "pages": 13,
+        "sha256": "5bf00599a22ca3b2238d54a91d7c4ddf823665ffb408126032513c51bc186bfe",
+        "outside_page_words": 0
+      },
+      {
+        "file": "incomplete-ppi.pdf",
+        "pages": 3,
+        "sha256": "3b0a5639a5466d9f671a60163b38cfbff4a5ec93ab3bc9202677e9211c3137b8",
+        "outside_page_words": 0
+      },
+      {
+        "file": "late-main-after.pdf",
+        "pages": 13,
+        "sha256": "be5b8b676e269394bbe67d45234e0e70fe303c2d47d92bbf2304ff9c41ae96bd",
+        "outside_page_words": 0
+      },
+      {
+        "file": "late-main-before.pdf",
+        "pages": 13,
+        "sha256": "be5b8b676e269394bbe67d45234e0e70fe303c2d47d92bbf2304ff9c41ae96bd",
+        "outside_page_words": 0
+      },
+      {
+        "file": "late-ppi.pdf",
+        "pages": 3,
+        "sha256": "22ecd3114b49471008ef22d8c4549e55f649f218c3a819a1e165b8205cd92b7f",
+        "outside_page_words": 0
+      }
+    ],
+    "main_immutable_pairs": 3,
+    "parent_bytes_exact": true,
+    "included_adds_ppi_pages": true
+  },
+  "cleanup": {
+    "source_tables": 82,
+    "original_unchanged": true,
+    "clone_removed": true,
+    "temporary_config_removed": true
+  },
+  "storage": "Local filesystem R2 substitute, not real R2",
+  "assignments": "Preserved local PIC, Wali and approver mappings; not a fresh production database snapshot",
+  "numeric_fetches": "PDO stringification throughout HTTP workflow"
+}

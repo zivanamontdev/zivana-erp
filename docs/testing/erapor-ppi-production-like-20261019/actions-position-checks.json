@@ -1,0 +1,494 @@
+[
+  {
+    "label": "No page overflow editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Share dropdown fits 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow editable at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress editable at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow editable at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact editable at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal editable at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits editable at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_empty at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_empty at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow published_empty at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact published_empty at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_empty at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow before_final at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress before_final at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow before_final at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact before_final at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal before_final at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits before_final at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_contacts at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_contacts at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow published_contacts at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact published_contacts at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_contacts at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_contacts at 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "Share dropdown fits 1280px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop actions align with right-side progress, beside the flow published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Desktop progress-to-actions gap stays compact published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Share dropdown fits 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Share dropdown fits 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "No page overflow published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Actions are below progress published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Mobile actions precede approval information published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Action heights remain equal published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Info tooltip fits published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Share dropdown fits 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Position-only changes have no application JS exceptions",
+    "result": "PASS"
+  }
+]

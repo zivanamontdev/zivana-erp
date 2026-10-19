@@ -191,6 +191,10 @@ button.teacher-report-action:focus-visible,
 .erapor-session-notice { border: 1px solid var(--color-neutral-75); border-radius: var(--radius-md); background: var(--color-neutral-50); padding: var(--space-4); color: var(--color-neutral-600); }
 .erapor-session-notice h3, .erapor-session-notice p { margin: 0; }
 .erapor-session-notice p { margin-top: var(--space-2); }
+.erapor-ppi-details > p,
+.erapor-ppi-details > .erapor-approval-state { margin: 0; }
+.erapor-ppi-workflow > .erapor-save-actions { align-items: center; margin-top: 0; }
+.erapor-ppi-workflow .erapor-save-actions .ui-button { margin-block: 0; }
 .erapor-ummi-init { display:grid; justify-items:start; gap:var(--space-3); }
 .erapor-ummi-init p { margin:0; }
 .erapor-ummi-controls { gap:var(--space-2); }
@@ -476,6 +480,19 @@ button.teacher-report-action:focus-visible,
 .erapor-page-intro h2 { margin:var(--space-1) 0 0; font-size:var(--font-size-body-lg); line-height:var(--line-height-body-lg); color:var(--color-neutral-900); }
 .erapor-page-help { margin:0; color:var(--color-neutral-600); font-size:var(--font-size-body-sm); }
 .erapor-page-intro .erapor-reference-note { margin:0; }
+/* PPI: progress and actions share the right column, separate from the approval information. */
+.erapor-ppi-intro { grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"heading progress" "details actions"; column-gap:var(--space-4); }
+.erapor-ppi-intro > .erapor-page-intro-top,
+.erapor-ppi-intro > .erapor-ppi-workflow { display:contents; }
+.erapor-ppi-intro > .erapor-page-intro-top > div { grid-area:heading; min-width:0; }
+.erapor-ppi-intro [data-erapor-document-progress] { grid-area:progress; justify-self:end; align-self:end; }
+.erapor-ppi-intro .erapor-ppi-details { grid-area:details; min-width:0; align-self:start; }
+.erapor-ppi-intro .erapor-save-actions { grid-area:actions; justify-content:flex-end; align-self:start; max-width:24rem; }
+@media (max-width:40rem) {
+  .erapor-ppi-intro { grid-template-columns:minmax(0,1fr); grid-template-areas:"heading" "progress" "actions" "details"; }
+  .erapor-ppi-intro [data-erapor-document-progress] { justify-self:start; }
+  .erapor-ppi-intro .erapor-save-actions { justify-content:flex-start; max-width:100%; }
+}
 .erapor-page-heading { margin:var(--space-2) 0 0; }
 .erapor-page > .erapor-subheading { margin:var(--space-1) 0 0 var(--space-2); }
 

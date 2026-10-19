@@ -23,11 +23,14 @@ final class EraporOverview
             FROM murid m JOIN kelas k ON k.id=m.kelas_id WHERE m.status='bersekolah' AND k.tahun_ajaran_id=? ORDER BY m.nama_lengkap");
         $students->execute([$yearId]);
         $studentRows = $students->fetchAll(PDO::FETCH_ASSOC);
-        $sessionQuery = $db->prepare("SELECT s.*,g.nama AS guru_sesi,
+        $ppiAvailable=EraporPpiWorkflow::available($db);
+        $ppiColumn=$ppiAvailable?'ppi.status AS ppi_status':'NULL AS ppi_status';
+        $ppiJoin=$ppiAvailable?'LEFT JOIN erapor_ppi_pengajuan ppi ON ppi.sesi_id=s.id':'';
+        $sessionQuery = $db->prepare("SELECT s.*,g.nama AS guru_sesi,$ppiColumn,
                 (SELECT COUNT(*) FROM erapor_sesi_penyetuju p WHERE p.sesi_id=s.id) AS tahap_total,
                 (SELECT COUNT(*) FROM erapor_sesi_penyetuju p WHERE p.sesi_id=s.id AND p.status='DISETUJUI') AS tahap_disetujui,
                 EXISTS(SELECT 1 FROM erapor_publikasi_pdf a WHERE a.sesi_id=s.id) AS terbit
-            FROM erapor_sesi s LEFT JOIN users u ON u.id=s.guru_user_id LEFT JOIN karyawan g ON g.id=u.karyawan_id WHERE s.periode_id=?");
+            FROM erapor_sesi s LEFT JOIN users u ON u.id=s.guru_user_id LEFT JOIN karyawan g ON g.id=u.karyawan_id $ppiJoin WHERE s.periode_id=?");
         $result = [];
         foreach ($periods->fetchAll(PDO::FETCH_ASSOC) as $period) {
             $sessionQuery->execute([$period['id']]);
@@ -36,10 +39,13 @@ final class EraporOverview
             $rows = [];
             foreach ($studentRows as $student) {
                 $session = $sessions[(int) $student['id']] ?? null;
-                $row = $student + ['sesi_id' => null, 'status' => 'BELUM_DIBUKA', 'filled' => 0, 'required' => 0, 'tahap' => '—', 'guru_sesi' => null, 'has_official_pdf' => false];
+                $row = $student + ['sesi_id' => null, 'status' => 'BELUM_DIBUKA', 'filled' => 0, 'required' => 0, 'tahap' => '—', 'guru_sesi' => null, 'has_official_pdf' => false, 'ppi_pending_submission' => false];
                 if ($session) {
                     $row['sesi_id'] = (int) $session['id'];
                     $row['guru_sesi'] = $session['guru_sesi'];
+                    $row['ppi_pending_submission'] = $ppiAvailable && ($session['kondisi'] ?? null)==='ABK' && !empty($session['ppi_terpisah'])
+                        && in_array($session['status'],['MENUNGGU_TTD','SELESAI'],true)
+                        && ($session['ppi_status'] ?? 'BELUM_DIAJUKAN')==='BELUM_DIAJUKAN';
                     $row['has_official_pdf'] = (bool) $session['terbit'];
                     $ready = $row['has_official_pdf'] && (int) $session['tahap_total'] > 0
                         && (int) $session['tahap_disetujui'] === (int) $session['tahap_total'];

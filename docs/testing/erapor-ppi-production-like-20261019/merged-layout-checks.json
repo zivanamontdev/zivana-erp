@@ -1,0 +1,294 @@
+[
+  {
+    "label": "Single PPI intro card for editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 1440px for editable",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 1440px for published_empty",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 1440px for before_final",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 1440px for published_contacts",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state editable at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_empty at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state before_final at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_contacts at 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher report list fits 1440px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 768px for editable",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 768px for published_empty",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 768px for before_final",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 768px for published_contacts",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state editable at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_empty at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state before_final at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_contacts at 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher report list fits 768px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 390px for editable",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 390px for published_empty",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 390px for before_final",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 390px for published_contacts",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state editable at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_empty at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state before_final at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_contacts at 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher report list fits 390px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 375px for editable",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 375px for published_empty",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 375px for before_final",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Single PPI intro card for published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI page fits 375px for published_contacts",
+    "result": "PASS"
+  },
+  {
+    "label": "PPI action heights match for published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state editable at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_empty at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state before_final at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher list reminder matches current PPI state published_contacts at 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher report list fits 375px",
+    "result": "PASS"
+  },
+  {
+    "label": "Superadmin reminder matches current PPI state editable",
+    "result": "PASS"
+  },
+  {
+    "label": "Superadmin reminder matches current PPI state published_empty",
+    "result": "PASS"
+  },
+  {
+    "label": "Superadmin reminder matches current PPI state before_final",
+    "result": "PASS"
+  },
+  {
+    "label": "Superadmin reminder matches current PPI state published_contacts",
+    "result": "PASS"
+  },
+  {
+    "label": "Teacher and monitor pages have no JS exceptions",
+    "result": "PASS"
+  }
+]

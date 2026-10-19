@@ -221,13 +221,13 @@ require VIEW_PATH . '/layouts/focus-header.php';
         $optional = (int)$progress['required'] === 0;
         ?>
         <section class="erapor-page" id="bagian-<?= $index + 1 ?>" data-erapor-page="<?= $index ?>" data-erapor-document="<?= (int)$document['id'] ?>" data-erapor-type="<?= e($type) ?>" data-erapor-optional="<?= $optional ? 'true' : 'false' ?>" data-erapor-required="<?= (int)$progress['required'] ?>" data-erapor-filled="<?= (int)$progress['filled'] ?>"<?= $index === 0 ? '' : ' hidden' ?>>
-            <header class="erapor-page-intro">
+            <header class="erapor-page-intro<?= $type==='PPI' && !empty($ppiState['separate']) ? ' erapor-ppi-intro' : '' ?>">
                 <div class="erapor-page-intro-top">
                     <div>
                         <?= uiText('Bagian ' . ($index + 1) . ' dari ' . $pageTotal . ($type==='PPI' && !empty($ppiState['separate']) ? ' · Pengajuan Terpisah' : ($optional ? ' · Opsional' : '')), 'caption-md', ['tone'=>'muted']) ?>
                         <h2><?= e($document['nama']) ?></h2>
                     </div>
-                    <span class="teacher-session-document-progress" data-erapor-document-progress><?= $type==='PPI' && !empty($ppiState['separate']) ? (int)$ppiState['progress']['filled'].' / '.(int)$ppiState['progress']['required'].' · Terpisah' : ($optional ? 'Opsional' : (int)$progress['filled'] . ' / ' . (int)$progress['required'] . ' terisi') ?></span>
+                    <span class="teacher-session-document-progress" data-erapor-document-progress><?= $type==='PPI' && !empty($ppiState['separate']) ? (int)$ppiState['progress']['filled'].' / '.(int)$ppiState['progress']['required'] : ($optional ? 'Opsional' : (int)$progress['filled'] . ' / ' . (int)$progress['required'] . ' terisi') ?></span>
                 </div>
 
             <?php if ($type === 'RTS'): ?>
@@ -334,9 +334,10 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 $columnsByBagian = [];
                 foreach ($definitions['columns'] as $column) $columnsByBagian[$column['bagian']][] = $column;
                 ?>
-                <p class="erapor-page-help">Isi setiap kolom Program Pembelajaran Individual untuk tiap aspek perkembangan.</p>
+                <?php if ($ppiState): require VIEW_PATH . '/portal-guru/_ppi-workflow.php'; else: ?>
+                    <p class="erapor-page-help">Isi setiap kolom Program Pembelajaran Individual untuk tiap aspek perkembangan.</p>
+                <?php endif; ?>
             </header>
-                <?php if ($ppiState): require VIEW_PATH . '/portal-guru/_ppi-workflow.php'; endif; ?>
                 <?php foreach ($definitions['aspects'] as $aspect): ?>
                     <div class="erapor-question erapor-question--group" data-erapor-question>
                         <h3 class="erapor-question-title"><?= e($aspect['nama']) ?></h3>

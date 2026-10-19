@@ -37,7 +37,9 @@ require VIEW_PATH . '/layouts/shell-header.php';
                     <td><?= e($row['guru_sesi'] ?? $row['guru'] ?? '—') ?></td>
                     <td><?= $row['required'] ? (int) $row['filled'] . '/' . (int) $row['required'] : '—' ?></td>
                     <td><?= e($row['tahap']) ?></td>
-                    <td><?= uiBadge($label, $tone) ?></td>
+                    <td><div class="erapor-status-badges"><?= uiBadge($label, $tone) ?>
+                        <?php if (!empty($row['ppi_pending_submission'])): ?><span data-erapor-ppi-pending><?= uiBadge('PPI belum diajukan','peringatan') ?></span><?php endif; ?>
+                    </div></td>
                     <td class="col-action">
                         <?php if ($row['sesi_id']): ?>
                         <a class="ui-button ui-button--outline" href="<?= BASE_PATH ?>/erapor/sesi/<?= (int) $row['sesi_id'] ?>/pdf" target="_blank" rel="noopener"><?= !empty($row['has_official_pdf']) ? 'PDF Resmi' : 'Pratinjau PDF' ?></a>

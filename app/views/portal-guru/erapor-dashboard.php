@@ -64,6 +64,9 @@ require VIEW_PATH.'/layouts/shell-header.php';
                                     <?php if (!empty($student['level_kelas']) || !empty($student['nama_kelas'])): ?>
                                         <small><?= e(trim(($student['level_kelas'] ?? '').' '.($student['nama_kelas'] ?? ''))) ?></small>
                                     <?php endif; ?>
+                                    <?php if (!empty($student['ppi_pending_submission'])): ?>
+                                        <span class="erapor-status-badges" data-erapor-ppi-pending><?= uiBadge('PPI belum diajukan','peringatan') ?></span>
+                                    <?php endif; ?>
                                 </span>
                                 <?php if ($student['action']==='create' && $canProvisionErapor): ?>
                                     <form method="POST" action="<?= BASE_PATH ?>/portal-guru/sesi/siapkan" class="teacher-report-action-form">

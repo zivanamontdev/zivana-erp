@@ -76,7 +76,10 @@
       setReceptionDisabled(serverStatus !== 'TELAH_DIISI' || busy || incomplete.length > 0);
       updatePagerHint(incomplete);
       root.querySelectorAll('[data-erapor-submit-ppi]').forEach(function (button) {
-        button.disabled = busy || !lastPpi || !lastPpi.can_submit || root.dataset.canSubmit !== 'true';
+        var disabled = busy || !lastPpi || !lastPpi.can_submit || root.dataset.canSubmit !== 'true';
+        button.disabled = disabled;
+        button.classList.toggle('ui-button--disabled', disabled);
+        button.classList.toggle('ui-button--primary', !disabled);
       });
     }
 
@@ -206,6 +209,7 @@
       }
       setConfirmDisabled(true);
       setReceptionDisabled(true);
+      updateConfirmState();
       setStatus('Ada perubahan yang belum disimpan…', 'pending');
       schedule();
     }
@@ -240,7 +244,7 @@
         card.dataset.eraporRequired = item.required;
         card.dataset.eraporFilled = item.filled;
         var label = card.querySelector('[data-erapor-document-progress]');
-        if (label) label.textContent = detachedPpi ? lastPpi.progress.filled + ' / ' + lastPpi.progress.required + ' · Terpisah' : (optional ? 'Opsional' : item.filled + ' / ' + item.required + ' terisi');
+        if (label) label.textContent = detachedPpi ? lastPpi.progress.filled + ' / ' + lastPpi.progress.required : (optional ? 'Opsional' : item.filled + ' / ' + item.required + ' terisi');
       });
       var count = root.querySelector('[data-erapor-overall-count]');
       var bar = root.querySelector('[data-erapor-overall-bar]');
@@ -701,6 +705,7 @@
           await waitSaving();
         }
         if (retryBatch || pending.size || blocked || hasIncompleteTestRows()) throw new Error('Pastikan seluruh perubahan tersimpan terlebih dahulu.');
+        if (submit && (!lastPpi || !lastPpi.can_submit)) throw new Error('Lengkapi seluruh isian wajib PPI sebelum mengajukan.');
         dispatched = true;
         await request(apiUrl + (submit ? '/ppi/ajukan' : '/ppi-pilihan'), submit ? {} : {include: include});
         leaving = true;

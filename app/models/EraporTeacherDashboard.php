@@ -81,14 +81,18 @@ final class EraporTeacherDashboard
 
             $students = [];
             if ($selected !== null) {
+                $ppiAvailable=EraporPpiWorkflow::available($db);
+                $ppiColumns=$ppiAvailable?"s.ppi_terpisah,ppi.status AS ppi_status":"0 AS ppi_terpisah,NULL AS ppi_status";
+                $ppiJoin=$ppiAvailable?'LEFT JOIN erapor_ppi_pengajuan ppi ON ppi.sesi_id=s.id':'';
                 $students = self::all($db, "SELECT m.id,m.nama_lengkap,m.status_kondisi,m.status AS status_murid,
                         k.level_kelas,k.nama_kelas,s.id AS sesi_id,s.guru_user_id AS sesi_guru_id,
                         s.tahun_ajaran_id AS sesi_tahun_ajaran_id,s.semester AS sesi_semester,s.jenis AS sesi_jenis,
-                        s.status AS sesi_status,s.paket_sha256,
+                        s.status AS sesi_status,s.kondisi AS sesi_kondisi,s.paket_sha256,$ppiColumns,
                         (SELECT MAX(l.created_at) FROM erapor_sesi_log l WHERE l.sesi_id=s.id AND l.aksi='DRAFT_DISIMPAN') AS draft_pada
                     FROM kelas_guru_murid a JOIN murid m ON m.id=a.murid_id AND m.kelas_id=a.kelas_id
                     JOIN kelas k ON k.id=a.kelas_id
                     LEFT JOIN erapor_sesi s ON s.murid_id=m.id AND s.periode_id=?
+                    $ppiJoin
                     WHERE a.guru_id=? ORDER BY m.nama_lengkap,m.id", [$selected['id'],(int)$account['karyawan_id']]);
 
                 $catalog = self::all($db, 'SELECT r.* FROM erapor_rubrik r JOIN erapor_seed_history h ON h.rubrik_id=r.id ORDER BY r.id');
@@ -105,6 +109,7 @@ final class EraporTeacherDashboard
                     $student['action'] = 'blocked';
                     $student['action_label'] = 'Rapor belum tersedia';
                     $student['reason'] = 'KONDISI_TIDAK_VALID';
+                    $student['ppi_pending_submission'] = false;
 
                     if ($student['sesi_id'] !== null) {
                         if ((int)$student['sesi_guru_id'] !== $actorId
@@ -127,6 +132,10 @@ final class EraporTeacherDashboard
                                 if (!in_array($student['sesi_status'], EraporSessionPolicy::STATES, true)) {
                                     $student['action']='blocked'; $student['reason']='STATUS_TIDAK_VALID';
                                 }
+                                $student['ppi_pending_submission'] = $student['action']==='open'
+                                    && $student['sesi_kondisi']==='ABK' && !empty($student['ppi_terpisah'])
+                                    && in_array($student['sesi_status'],['MENUNGGU_TTD','SELESAI'],true)
+                                    && ($student['ppi_status'] ?? 'BELUM_DIAJUKAN')==='BELUM_DIAJUKAN';
                             } catch (DomainException) {
                                 $student['reason'] = 'PAKET_BERUBAH';
                                 $student['action_label'] = 'Perlu pemeriksaan';

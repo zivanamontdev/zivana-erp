@@ -1,4 +1,5 @@
 <?php
+require_once ROOT_PATH.'/app/models/EraporPpiWorkflow.php';
 require_once ROOT_PATH.'/app/models/EraporTeacherDashboard.php';
 $dashBefore=catalogFingerprints($db);
 $dashRead=EraporTeacherDashboard::read($db,(int)$regular['actor_id'],(int)$middle['id'],new DateTimeImmutable($middle['awal_periode'].' 12:00:00',new DateTimeZone('Asia/Makassar')));
@@ -11,6 +12,7 @@ catalogCheck(in_array((int)$regular['murid_id'],$dashStudentIds,true),'Assigned 
 $dashRegularRow=null;
 foreach ($dashRead['students'] as $dashRow) if ((int)$dashRow['id']===(int)$regular['murid_id']) $dashRegularRow=$dashRow;
 catalogCheck($dashRegularRow!==null && $dashRegularRow['kondisi']==='Regular','Dashboard normalizes Regular condition');
+catalogCheck(!$dashRegularRow['ppi_pending_submission'],'Regular/pre-PPI-migration dashboard never reports a false pending PPI');
 catalogCheck($dashRegularRow['action']==='open' && (int)$dashRegularRow['sesi_id']===(int)$sid,'Existing owned session opens by its new session ID');
 $dashEndPeriod=$db->query("SELECT * FROM periode_penilaian WHERE tipe='Akhir Semester' AND semester IN ('ganjil','genap') ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $dashEnd=EraporTeacherDashboard::read($db,(int)$regular['actor_id'],(int)$dashEndPeriod['id']);

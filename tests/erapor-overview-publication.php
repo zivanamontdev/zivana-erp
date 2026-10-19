@@ -3,7 +3,7 @@
 define('ROOT_PATH',dirname(__DIR__));define('VIEW_PATH',ROOT_PATH.'/app/views');define('BASE_PATH','');
 $_SESSION=['csrf_token'=>'overview-fixture','csrf_token_expires'=>time()+3600];
 require ROOT_PATH.'/app/helpers/functions.php';require ROOT_PATH.'/app/helpers/ui.php';
-require ROOT_PATH.'/app/models/EraporOverview.php';require ROOT_PATH.'/app/models/EraporPackagePlan.php';
+require ROOT_PATH.'/app/models/EraporPpiWorkflow.php';require ROOT_PATH.'/app/models/EraporOverview.php';require ROOT_PATH.'/app/models/EraporPackagePlan.php';
 class EraporCompleteness {
     public static function inspect(PDO $db,array $s):array {
         if(!$db->inTransaction())throw new RuntimeException('Projection lost transaction guard');

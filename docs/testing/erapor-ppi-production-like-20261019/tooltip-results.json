@@ -1,0 +1,102 @@
+{
+  "checks": [
+    {
+      "width": 375,
+      "case": "included",
+      "focusable_tooltips": 1,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 375,
+      "case": "deadline",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 375,
+      "case": "complete",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 375,
+      "case": "contacts",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 390,
+      "case": "included",
+      "focusable_tooltips": 1,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 390,
+      "case": "deadline",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 390,
+      "case": "complete",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 390,
+      "case": "contacts",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 768,
+      "case": "included",
+      "focusable_tooltips": 1,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 768,
+      "case": "deadline",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 768,
+      "case": "complete",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 768,
+      "case": "contacts",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 1440,
+      "case": "included",
+      "focusable_tooltips": 1,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 1440,
+      "case": "deadline",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 1440,
+      "case": "complete",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    },
+    {
+      "width": 1440,
+      "case": "contacts",
+      "focusable_tooltips": 2,
+      "all_bubbles_inside_viewport": true
+    }
+  ],
+  "touch_open_cases": 2,
+  "no_database_used": true
+}

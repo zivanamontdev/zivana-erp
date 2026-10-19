@@ -226,7 +226,22 @@ eraporUiCheck($px->query('//textarea[@data-erapor-entry="PPI" and not(@disabled)
     &&$px->query('//input[@type="radio" and not(@disabled)]')->length===0,'After main publication only detached, unsubmitted PPI remains editable');
 eraporUiCheck($px->query('//button[@data-erapor-submit-ppi and not(@disabled)]')->length===1
     &&$px->query('//button[@data-erapor-confirm or @data-erapor-confirm-reception]')->length===0,'Separate PPI has its own explicit submit action, never a repeated main finalization');
+eraporUiCheck($px->query('//section[@data-erapor-type="PPI"]/header[contains(@class,"erapor-page-intro")]//div[contains(@class,"erapor-ppi-workflow")]')->length===1
+    &&$px->query('//section[@data-erapor-type="PPI"]/section[contains(@class,"erapor-ppi-workflow")]')->length===0,'PPI title, state and actions share one intro card instead of a second information card');
+eraporUiCheck($px->query('//section[@data-erapor-type="PPI"]/header[contains(@class,"erapor-ppi-intro")]')->length===1
+    &&$px->query('//*[contains(@class,"erapor-ppi-workflow")]/div[contains(@class,"erapor-save-actions")][following-sibling::div[contains(@class,"erapor-ppi-details")]]')->length===1,'Detached PPI has separate progress/actions and information layout areas; keyboard order puts actions before the lower mobile details');
+$ppiCss=file_get_contents(ROOT_PATH.'/public/assets/css/portal-guru.css');
+eraporUiCheck(str_contains($ppiCss,'grid-template-areas:"heading progress" "details actions"')
+    &&str_contains($ppiCss,'grid-template-areas:"heading" "progress" "actions" "details"'),'Desktop places actions below right-side progress; mobile keeps actions before the approval flow');
+eraporUiCheck($px->query('//*[@data-erapor-ppi-progress]')->length===0&&$px->query('//section[@data-erapor-type="PPI"]//*[@data-erapor-document-progress]')->length===1,'PPI progress is shown once in its merged intro card');
 eraporUiCheck(str_contains($ppiHtml,'Nilai tetap &lt;aman&gt;')&&str_contains($ppiHtml,'Pengajuan Terpisah'),'PPI values remain escaped and separate status is not misleadingly labelled optional');
+$form['capabilities']['can_edit_ppi']=false;$form['capabilities']['ppi_read_only_reason']='TENGGAT_BERAKHIR';
+ob_start();eval('?>'.$source);$ppiExpiredCompleteHtml=ob_get_clean();$dom=new DOMDocument();@$dom->loadHTML('<?xml encoding="UTF-8">'.$ppiExpiredCompleteHtml);$xp=new DOMXPath($dom);
+eraporUiCheck($xp->evaluate('normalize-space(//*[@id="erapor-ppi-deadline-hint"]/text()[1])')==='Isian PPI sudah lengkap'&&$xp->query('//*[@id="erapor-ppi-deadline-hint"]//*[@data-ui-tooltip and @tabindex="0"]')->length===1&&$xp->query('//*[@data-erapor-submit-ppi and not(@disabled) and @aria-describedby="erapor-ppi-deadline-hint"]')->length===1,'Expired complete PPI explains retained values while keeping explicit submission available');
+$form['ppi']['progress']=['required'=>1,'filled'=>0,'complete'=>false];$form['ppi']['can_submit']=false;
+ob_start();eval('?>'.$source);$ppiExpiredIncompleteHtml=ob_get_clean();$dom=new DOMDocument();@$dom->loadHTML('<?xml encoding="UTF-8">'.$ppiExpiredIncompleteHtml);$xp=new DOMXPath($dom);
+eraporUiCheck($xp->evaluate('normalize-space(//*[@id="erapor-ppi-deadline-hint"]/text()[1])')==='Tenggat PPI berakhir'&&str_contains($ppiExpiredIncompleteHtml,'Hubungi admin untuk memperpanjang periode')&&$xp->query('//*[@data-erapor-submit-ppi and @disabled and @aria-describedby="erapor-ppi-deadline-hint"]')->length===1,'Expired incomplete PPI explains the deadline and points to legitimate admin extension without unlocking fields');
+unset($form['capabilities']['ppi_read_only_reason']);$form['ppi']['progress']=['required'=>1,'filled'=>1,'complete'=>true];
 $form['capabilities']['can_edit_ppi']=false;$form['ppi']['status']='MENUNGGU_WALI';$form['ppi']['label']='Menunggu Wali Kelas';$form['ppi']['can_submit']=false;
 ob_start();eval('?>'.$source);$lockedPpi=ob_get_clean();$ld=new DOMDocument();@$ld->loadHTML($lockedPpi);$lx=new DOMXPath($ld);
 eraporUiCheck($lx->query('//textarea[@data-erapor-entry="PPI" and not(@disabled)]')->length===0

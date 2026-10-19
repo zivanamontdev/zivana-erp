@@ -1,0 +1,1092 @@
+[
+  {
+    "width": 1440,
+    "case": "editable",
+    "split": true,
+    "actions": {
+      "top": 89.4375,
+      "bottom": 130.75,
+      "left": 969.15625,
+      "right": 1209.125,
+      "width": 239.96875,
+      "height": 41.3125
+    },
+    "progress": {
+      "top": 58.6875,
+      "bottom": 76.6875,
+      "left": 1159.9375,
+      "right": 1209.125,
+      "width": 49.1875,
+      "height": 18
+    },
+    "details": {
+      "top": 89.4375,
+      "bottom": 145.625,
+      "left": 215.875,
+      "right": 952.15625,
+      "width": 736.28125,
+      "height": 56.1875
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 89.4375,
+        "bottom": 130.75,
+        "left": 969.15625,
+        "right": 1051.359375,
+        "width": 82.203125,
+        "height": 41.3125
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 89.4375,
+        "bottom": 130.75,
+        "left": 1064.109375,
+        "right": 1209.125,
+        "width": 145.015625,
+        "height": 41.3125
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "case": "published_empty",
+    "split": true,
+    "actions": {
+      "top": 89.4375,
+      "bottom": 184.8125,
+      "left": 825.125,
+      "right": 1209.125,
+      "width": 384,
+      "height": 95.375
+    },
+    "progress": {
+      "top": 58.6875,
+      "bottom": 76.6875,
+      "left": 1157.796875,
+      "right": 1209.125,
+      "width": 51.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 89.4375,
+      "bottom": 209.375,
+      "left": 215.875,
+      "right": 808.125,
+      "width": 592.25,
+      "height": 119.9375
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 89.4375,
+        "bottom": 130.75,
+        "left": 950.5,
+        "right": 1032.703125,
+        "width": 82.203125,
+        "height": 41.3125
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 89.4375,
+        "bottom": 130.75,
+        "left": 1045.453125,
+        "right": 1209.125,
+        "width": 163.671875,
+        "height": 41.3125
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 143.5,
+        "bottom": 184.8125,
+        "left": 1064.921875,
+        "right": 1209.125,
+        "width": 144.203125,
+        "height": 41.3125
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "case": "before_final",
+    "split": true,
+    "actions": {
+      "top": 88.9375,
+      "bottom": 130.25,
+      "left": 969.15625,
+      "right": 1209.125,
+      "width": 239.96875,
+      "height": 41.3125
+    },
+    "progress": {
+      "top": 58.1875,
+      "bottom": 76.1875,
+      "left": 1157.796875,
+      "right": 1209.125,
+      "width": 51.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 88.9375,
+      "bottom": 145.125,
+      "left": 215.875,
+      "right": 952.15625,
+      "width": 736.28125,
+      "height": 56.1875
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 88.9375,
+        "bottom": 130.25,
+        "left": 969.15625,
+        "right": 1051.359375,
+        "width": 82.203125,
+        "height": 41.3125
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 88.9375,
+        "bottom": 130.25,
+        "left": 1064.109375,
+        "right": 1209.125,
+        "width": 145.015625,
+        "height": 41.3125
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "case": "published_contacts",
+    "split": true,
+    "actions": {
+      "top": 88.9375,
+      "bottom": 130.25,
+      "left": 827.546875,
+      "right": 1209.125,
+      "width": 381.578125,
+      "height": 41.3125
+    },
+    "progress": {
+      "top": 58.1875,
+      "bottom": 76.1875,
+      "left": 1157.796875,
+      "right": 1209.125,
+      "width": 51.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 88.9375,
+      "bottom": 177,
+      "left": 215.875,
+      "right": 810.546875,
+      "width": 594.671875,
+      "height": 88.0625
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 88.9375,
+        "bottom": 130.25,
+        "left": 827.546875,
+        "right": 909.75,
+        "width": 82.203125,
+        "height": 41.3125
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 88.9375,
+        "bottom": 130.25,
+        "left": 922.5,
+        "right": 1086.171875,
+        "width": 163.671875,
+        "height": 41.3125
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 88.9375,
+        "bottom": 130.25,
+        "left": 1098.921875,
+        "right": 1209.125,
+        "width": 110.203125,
+        "height": 41.3125
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "case": "editable",
+    "split": true,
+    "actions": {
+      "top": 85.59375,
+      "bottom": 124.59375,
+      "left": 872.359375,
+      "right": 1098.5,
+      "width": 226.140625,
+      "height": 39
+    },
+    "progress": {
+      "top": 55.59375,
+      "bottom": 73.59375,
+      "left": 1052.1875,
+      "right": 1098.5,
+      "width": 46.3125,
+      "height": 18
+    },
+    "details": {
+      "top": 85.59375,
+      "bottom": 138.59375,
+      "left": 166.5,
+      "right": 856.359375,
+      "width": 689.859375,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 872.359375,
+        "right": 949.859375,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 961.859375,
+        "right": 1098.5,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "case": "published_empty",
+    "split": true,
+    "actions": {
+      "top": 85.59375,
+      "bottom": 175.59375,
+      "left": 714.5,
+      "right": 1098.5,
+      "width": 384,
+      "height": 90
+    },
+    "progress": {
+      "top": 55.59375,
+      "bottom": 73.59375,
+      "left": 1050.171875,
+      "right": 1098.5,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 85.59375,
+      "bottom": 198.59375,
+      "left": 166.5,
+      "right": 698.5,
+      "width": 532,
+      "height": 113
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 854.796875,
+        "right": 932.296875,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 944.296875,
+        "right": 1098.5,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 136.59375,
+        "bottom": 175.59375,
+        "left": 962.640625,
+        "right": 1098.5,
+        "width": 135.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "case": "before_final",
+    "split": true,
+    "actions": {
+      "top": 85.59375,
+      "bottom": 124.59375,
+      "left": 872.359375,
+      "right": 1098.5,
+      "width": 226.140625,
+      "height": 39
+    },
+    "progress": {
+      "top": 55.59375,
+      "bottom": 73.59375,
+      "left": 1050.171875,
+      "right": 1098.5,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 85.59375,
+      "bottom": 138.59375,
+      "left": 166.5,
+      "right": 856.359375,
+      "width": 689.859375,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 872.359375,
+        "right": 949.859375,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 961.859375,
+        "right": 1098.5,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "case": "published_contacts",
+    "split": true,
+    "actions": {
+      "top": 85.59375,
+      "bottom": 124.59375,
+      "left": 738.9375,
+      "right": 1098.5,
+      "width": 359.5625,
+      "height": 39
+    },
+    "progress": {
+      "top": 55.59375,
+      "bottom": 73.59375,
+      "left": 1050.171875,
+      "right": 1098.5,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 85.59375,
+      "bottom": 168.59375,
+      "left": 166.5,
+      "right": 722.9375,
+      "width": 556.4375,
+      "height": 83
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 738.9375,
+        "right": 816.4375,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 828.4375,
+        "right": 982.640625,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 994.640625,
+        "right": 1098.5,
+        "width": 103.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "case": "editable",
+    "split": true,
+    "actions": {
+      "top": 85.59375,
+      "bottom": 124.59375,
+      "left": 487.859375,
+      "right": 714,
+      "width": 226.140625,
+      "height": 39
+    },
+    "progress": {
+      "top": 55.59375,
+      "bottom": 73.59375,
+      "left": 667.6875,
+      "right": 714,
+      "width": 46.3125,
+      "height": 18
+    },
+    "details": {
+      "top": 85.59375,
+      "bottom": 138.59375,
+      "left": 54,
+      "right": 471.859375,
+      "width": 417.859375,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 487.859375,
+        "right": 565.359375,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 577.359375,
+        "right": 714,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "case": "published_empty",
+    "split": true,
+    "actions": {
+      "top": 115.59375,
+      "bottom": 205.59375,
+      "left": 330,
+      "right": 714,
+      "width": 384,
+      "height": 90
+    },
+    "progress": {
+      "top": 85.59375,
+      "bottom": 103.59375,
+      "left": 665.671875,
+      "right": 714,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 115.59375,
+      "bottom": 228.59375,
+      "left": 54,
+      "right": 314,
+      "width": 260,
+      "height": 113
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 115.59375,
+        "bottom": 154.59375,
+        "left": 470.296875,
+        "right": 547.796875,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 115.59375,
+        "bottom": 154.59375,
+        "left": 559.796875,
+        "right": 714,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 166.59375,
+        "bottom": 205.59375,
+        "left": 578.140625,
+        "right": 714,
+        "width": 135.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "case": "before_final",
+    "split": true,
+    "actions": {
+      "top": 85.59375,
+      "bottom": 124.59375,
+      "left": 487.859375,
+      "right": 714,
+      "width": 226.140625,
+      "height": 39
+    },
+    "progress": {
+      "top": 55.59375,
+      "bottom": 73.59375,
+      "left": 665.671875,
+      "right": 714,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 85.59375,
+      "bottom": 138.59375,
+      "left": 54,
+      "right": 471.859375,
+      "width": 417.859375,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 487.859375,
+        "right": 565.359375,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 85.59375,
+        "bottom": 124.59375,
+        "left": 577.359375,
+        "right": 714,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 768,
+    "case": "published_contacts",
+    "split": true,
+    "actions": {
+      "top": 115.59375,
+      "bottom": 154.59375,
+      "left": 354.4375,
+      "right": 714,
+      "width": 359.5625,
+      "height": 39
+    },
+    "progress": {
+      "top": 85.59375,
+      "bottom": 103.59375,
+      "left": 665.671875,
+      "right": 714,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 115.59375,
+      "bottom": 198.59375,
+      "left": 54,
+      "right": 338.4375,
+      "width": 284.4375,
+      "height": 83
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 115.59375,
+        "bottom": 154.59375,
+        "left": 354.4375,
+        "right": 431.9375,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 115.59375,
+        "bottom": 154.59375,
+        "left": 443.9375,
+        "right": 598.140625,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 115.59375,
+        "bottom": 154.59375,
+        "left": 610.140625,
+        "right": 714,
+        "width": 103.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "case": "editable",
+    "split": true,
+    "actions": {
+      "top": 111.5,
+      "bottom": 150.5,
+      "left": 32,
+      "right": 358,
+      "width": 326,
+      "height": 39
+    },
+    "progress": {
+      "top": 81.5,
+      "bottom": 99.5,
+      "left": 32,
+      "right": 78.3125,
+      "width": 46.3125,
+      "height": 18
+    },
+    "details": {
+      "top": 162.5,
+      "bottom": 215.5,
+      "left": 32,
+      "right": 358,
+      "width": 326,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 121.5,
+        "right": 258.140625,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "case": "published_empty",
+    "split": true,
+    "actions": {
+      "top": 111.5,
+      "bottom": 201.5,
+      "left": 32,
+      "right": 358,
+      "width": 326,
+      "height": 90
+    },
+    "progress": {
+      "top": 81.5,
+      "bottom": 99.5,
+      "left": 32,
+      "right": 80.328125,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 213.5,
+      "bottom": 326.5,
+      "left": 32,
+      "right": 358,
+      "width": 326,
+      "height": 113
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 121.5,
+        "right": 275.703125,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 162.5,
+        "bottom": 201.5,
+        "left": 32,
+        "right": 167.859375,
+        "width": 135.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "case": "before_final",
+    "split": true,
+    "actions": {
+      "top": 153.5,
+      "bottom": 192.5,
+      "left": 32,
+      "right": 376.9375,
+      "width": 344.9375,
+      "height": 39
+    },
+    "progress": {
+      "top": 123.5,
+      "bottom": 141.5,
+      "left": 32,
+      "right": 80.328125,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 204.5,
+      "bottom": 257.5,
+      "left": 32,
+      "right": 376.9375,
+      "width": 344.9375,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 153.5,
+        "bottom": 192.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 153.5,
+        "bottom": 192.5,
+        "left": 121.5,
+        "right": 258.140625,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "case": "published_contacts",
+    "split": true,
+    "actions": {
+      "top": 111.5,
+      "bottom": 201.5,
+      "left": 32,
+      "right": 358,
+      "width": 326,
+      "height": 90
+    },
+    "progress": {
+      "top": 81.5,
+      "bottom": 99.5,
+      "left": 32,
+      "right": 80.328125,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 213.5,
+      "bottom": 296.5,
+      "left": 32,
+      "right": 358,
+      "width": 326,
+      "height": 83
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 121.5,
+        "right": 275.703125,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 162.5,
+        "bottom": 201.5,
+        "left": 32,
+        "right": 135.859375,
+        "width": 103.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "case": "editable",
+    "split": true,
+    "actions": {
+      "top": 111.5,
+      "bottom": 150.5,
+      "left": 32,
+      "right": 343,
+      "width": 311,
+      "height": 39
+    },
+    "progress": {
+      "top": 81.5,
+      "bottom": 99.5,
+      "left": 32,
+      "right": 78.3125,
+      "width": 46.3125,
+      "height": 18
+    },
+    "details": {
+      "top": 162.5,
+      "bottom": 215.5,
+      "left": 32,
+      "right": 343,
+      "width": 311,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 121.5,
+        "right": 258.140625,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "case": "published_empty",
+    "split": true,
+    "actions": {
+      "top": 111.5,
+      "bottom": 201.5,
+      "left": 32,
+      "right": 343,
+      "width": 311,
+      "height": 90
+    },
+    "progress": {
+      "top": 81.5,
+      "bottom": 99.5,
+      "left": 32,
+      "right": 80.328125,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 213.5,
+      "bottom": 326.5,
+      "left": 32,
+      "right": 343,
+      "width": 311,
+      "height": 113
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 121.5,
+        "right": 275.703125,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 162.5,
+        "bottom": 201.5,
+        "left": 32,
+        "right": 167.859375,
+        "width": 135.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "case": "before_final",
+    "split": true,
+    "actions": {
+      "top": 188.5,
+      "bottom": 227.5,
+      "left": 32,
+      "right": 376.9375,
+      "width": 344.9375,
+      "height": 39
+    },
+    "progress": {
+      "top": 158.5,
+      "bottom": 176.5,
+      "left": 32,
+      "right": 80.328125,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 239.5,
+      "bottom": 292.5,
+      "left": 32,
+      "right": 376.9375,
+      "width": 344.9375,
+      "height": 53
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 188.5,
+        "bottom": 227.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Ajukan Rapor PPI",
+        "top": 188.5,
+        "bottom": 227.5,
+        "left": 121.5,
+        "right": 258.140625,
+        "width": 136.640625,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "width": 375,
+    "case": "published_contacts",
+    "split": true,
+    "actions": {
+      "top": 111.5,
+      "bottom": 201.5,
+      "left": 32,
+      "right": 343,
+      "width": 311,
+      "height": 90
+    },
+    "progress": {
+      "top": 81.5,
+      "bottom": 99.5,
+      "left": 32,
+      "right": 80.328125,
+      "width": 48.328125,
+      "height": 18
+    },
+    "details": {
+      "top": 213.5,
+      "bottom": 296.5,
+      "left": 32,
+      "right": 343,
+      "width": 311,
+      "height": 83
+    },
+    "buttons": [
+      {
+        "label": "PDF PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 32,
+        "right": 109.5,
+        "width": 77.5,
+        "height": 39
+      },
+      {
+        "label": "Lihat Pengajuan PPI",
+        "top": 111.5,
+        "bottom": 150.5,
+        "left": 121.5,
+        "right": 275.703125,
+        "width": 154.203125,
+        "height": 39
+      },
+      {
+        "label": "Bagikan PPI",
+        "top": 162.5,
+        "bottom": 201.5,
+        "left": 32,
+        "right": 135.859375,
+        "width": 103.859375,
+        "height": 39
+      }
+    ],
+    "overflow": false
+  }
+]

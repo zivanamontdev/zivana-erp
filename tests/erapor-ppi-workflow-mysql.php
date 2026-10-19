@@ -34,6 +34,13 @@ try{
     foreach(array_keys($before) as $t)$db->exec($live->query('SHOW CREATE TABLE '.$quote($t))->fetch(PDO::FETCH_NUM)[1]);
     foreach(array_keys($before) as $t)$db->exec('INSERT INTO '.$quote($t).' SELECT * FROM '.$quote(DB_NAME).'.'.$quote($t));$db->exec('SET FOREIGN_KEY_CHECKS=1');
     $check($fingerprint($db)===$before,'Clone exactly matches source');
+    if(!EraporPpiWorkflow::available($db)){
+        $old=$db->query("SELECT * FROM erapor_sesi WHERE kondisi='ABK' AND jenis='TENGAH' ORDER BY id LIMIT 1")->fetch();
+        $fallback=EraporTeacherDashboard::read($db,(int)$old['guru_user_id'],(int)$old['periode_id']);
+        $check(!array_filter($fallback['students'],static fn($r)=>$r['ppi_pending_submission']),'Dashboard remains compatible before the additive PPI migration, without false reminders');
+        $overview=EraporOverview::forYear($db,(int)$old['tahun_ajaran_id']);$pending=[];foreach($overview as $p)foreach($p['rows'] as $r)if($r['ppi_pending_submission'])$pending[]=$r;
+        $check($pending===[]&&$fingerprint($db)===$before,'Pre-migration overview badge fallback is read-only and does not access missing PPI columns/tables');
+    }
     $legacy=$fingerprint($db,$columns,true);$file=ROOT_PATH.'/database/migrations/'.$migration.'.sql';
     $check(count(EraporMigrationRunner::plan($file)['steps'])===6,'Exactly two additive flags and four independent tables');
     EraporMigrationRunner::apply($db,$file);$check(EraporMigrationRunner::apply($db,$file)==='already_applied','Migration retry is idempotent');
@@ -63,6 +70,8 @@ try{
     $reject(fn()=>EraporPpiWorkflow::choose($db,$sid,$pic+100000,false),'Non-owner cannot change PPI inclusion');
     EraporPpiWorkflow::choose($db,$sid,$pic,false);$state=EraporTeacherForm::read($db,$sid,$pic,$clock);
     $check($state['completion']['complete']&&$state['ppi']['separate']&&$state['ppi']['progress']['filled']===count($ppiValues),'Filled PPI excluded without deleting values');
+    $beforeFinalRow=null;foreach(EraporTeacherDashboard::read($db,$pic,(int)$s['periode_id'],$clock)['students'] as $row)if((int)$row['sesi_id']===$sid)$beforeFinalRow=$row;
+    $check($beforeFinalRow&&!$beforeFinalRow['ppi_pending_submission'],'Choosing separate PPI before main Finalisasi does not yet create an actionable pending-submission reminder');
     EraporPpiWorkflow::choose($db,$sid,$pic,true);$check(!EraporTeacherForm::read($db,$sid,$pic,$clock)['ppi']['separate'],'PIC can restore inclusion before finalization');
     EraporPpiWorkflow::choose($db,$sid,$pic,false);
     $key=array_key_first($ppiValues);EraporStructuredEntry::save($db,'PPI',$sid,$did,$pic,[['key'=>$key,'value'=>null,'expected'=>$ppiValues[$key]]],$clock);
@@ -74,14 +83,24 @@ try{
     $scope=(int)$db->query('SELECT COUNT(*) FROM erapor_sesi_penyetuju_dokumen WHERE sesi_id='.$sid.' AND dokumen_id='.$did)->fetchColumn();$check($scope===0,'PIC-excluded PPI is outside the main approval scope');
     $reject(fn()=>EraporPpiWorkflow::submit($db,$sid,$pic),'Incomplete standalone PPI cannot submit');
     $check(EraporTeacherForm::read($db,$sid,$pic,$clock)['capabilities']['can_edit_ppi'],'Only detached PPI stays editable after main Finalisasi');
+    $expired=EraporTeacherForm::read($db,$sid,$pic,$clock->modify('+1 day'));
+    $check($expired['capabilities']['read_only_reason']==='STATUS_TERKUNCI'&&$expired['capabilities']['ppi_read_only_reason']==='TENGGAT_BERAKHIR'
+        &&!$expired['capabilities']['can_edit_ppi']&&!$expired['ppi']['can_submit'],'Expired incomplete PPI exposes its own deadline reason independently of the main lock');
     $rts=$docs['RTS'];$first=(int)$rts['form']['definitions']['items'][0]['id'];$reject(fn()=>EraporRtsEntry::save($db,$sid,(int)$rts['id'],$pic,[['indikator_id'=>$first,'nilai'=>1,'expected'=>0]],$clock),'Main RTS remains locked');
     $savePpi();
+    $expiredComplete=EraporTeacherForm::read($db,$sid,$pic,$clock->modify('+1 day'));
+    $check(!$expiredComplete['capabilities']['can_edit_ppi']&&$expiredComplete['capabilities']['ppi_read_only_reason']==='TENGGAT_BERAKHIR'
+        &&$expiredComplete['ppi']['can_submit'],'Complete retained PPI can still submit after deadline without granting edit permission');
     $mainApprove=static function(?bool $include=null)use($db,$sid,$actors,&$tasks){$result=null;uasort($tasks,static fn($a,$b)=>$a['urutan']<=>$b['urutan']);foreach($tasks as $code=>$t)$result=EraporApprove::approve($db,$sid,(int)$t['id'],$actors[$code],$code==='KEPALA_SEKOLAH'?$include:null);return $result;};
     $mainApprove();$main=$db->query('SELECT pdf_sha256,pdf_bytes,manifest FROM erapor_publikasi_pdf WHERE sesi_id='.$sid)->fetch();
     $check(!in_array('PPI',array_column(json_decode($main['manifest'],true)['documents'],'jenis'),true),'Main official artifact contains no PPI');
     // Regression from production: signed PDF preparation must not hide the remaining publication task.
     $taskFor=static fn(array $tasks)=>array_values(array_filter($tasks,static fn($t)=>$t['session_id']===$sid));
     $overviewFor=static function()use($db,$s,$sid){foreach(EraporOverview::forYear($db,(int)$s['tahun_ajaran_id']) as $p)foreach($p['rows'] as $r)if($r['sesi_id']===$sid)return $r;throw new RuntimeException('Overview session missing');};
+    $dashboardFor=static function(?PDO $connection=null)use($db,$s,$sid,$pic,$clock){
+        foreach(EraporTeacherDashboard::read($connection??$db,$pic,(int)$s['periode_id'],$clock)['students'] as $row)if((int)$row['sesi_id']===$sid)return $row;
+        throw new RuntimeException('Dashboard session missing');
+    };
     $readBefore=$fingerprint($db);
     $headPending=$taskFor(EraporApprovalInbox::read($db,$head)['tasks']);
     $check(count($headPending)===1&&$headPending[0]['ready_to_publish']&&!$headPending[0]['can_approve'],'Approved main head task stays in pending queue until publication');
@@ -91,11 +110,13 @@ try{
     $check(count($monitorPending)===1&&$monitorPending[0]['ready_to_publish']&&!$monitorPending[0]['can_approve'],'Superadmin can monitor pending publication without approval authority');
     $check($taskFor(EraporApprovalInbox::read($db,$wali)['tasks'])===[],'Approved coordinator/Wali tasks do not reappear as publish actions');
     $readyOverview=$overviewFor();$check($readyOverview['status']==='SIAP_TERBIT'&&$readyOverview['has_official_pdf'],'Official PDF readiness is distinguished from publication in Superadmin overview');
+    $check($readyOverview['ppi_pending_submission']&&$dashboardFor()['ppi_pending_submission'],'Teacher and Superadmin lists flag detached PPI awaiting explicit submission while main approval is complete');
     $strings=new PDO($dsn.';dbname='.$name,DB_USER,DB_PASS,$options+[PDO::ATTR_STRINGIFY_FETCHES=>true]);
     $stringTasks=$taskFor(EraporApprovalInbox::read($strings,$head)['tasks']);
     $check(count($stringTasks)===1&&$stringTasks[0]['ready_to_publish'],'Pending publication also works with string-typed numeric PDO results, as on MariaDB hosting');
     $stringOverview=null;foreach(EraporOverview::forYear($strings,(int)$s['tahun_ajaran_id']) as $p)foreach($p['rows'] as $r)if($r['sesi_id']===$sid)$stringOverview=$r;
-    $check($stringOverview&&$stringOverview['status']==='SIAP_TERBIT','Overview ready/published distinction is independent of PDO numeric fetch types');$strings=null;
+    $check($stringOverview&&$stringOverview['status']==='SIAP_TERBIT','Overview ready/published distinction is independent of PDO numeric fetch types');
+    $check($stringOverview['ppi_pending_submission']&&$dashboardFor($strings)['ppi_pending_submission'],'Pending PPI badge projection also supports string-typed numeric PDO fetches');$strings=null;
     $check($fingerprint($db)===$readBefore,'Publication queue/history/overview projections do not write data');
     $db->prepare('UPDATE erapor_penyetuju_user SET aktif=0 WHERE user_id=? AND penyetuju_id=?')->execute([$head,$tasks['KEPALA_SEKOLAH']['penyetuju_id']]);
     $check($taskFor(EraporApprovalInbox::read($db,$head)['tasks'])===[],'Revoked head assignment loses pending publication access');
@@ -103,6 +124,7 @@ try{
     $mainStorage=new R2Storage();EraporDistribution::publish($db,$sid,(int)$tasks['KEPALA_SEKOLAH']['id'],$head,$mainStorage);
     $check($taskFor(EraporApprovalInbox::read($db,$head)['tasks'])===[],'Published report leaves the head pending queue');
     $publishedOverview=$overviewFor();$check($publishedOverview['status']==='TERBIT'&&$publishedOverview['has_official_pdf'],'Overview marks a report published only after the publication transition');
+    $check($publishedOverview['ppi_pending_submission']&&$dashboardFor()['ppi_pending_submission'],'Publishing the main report does not hide an unsubmitted detached PPI');
     EraporDistribution::markShared($db,$sid,$pic,'AYAH');
     $mainDistribution=$db->query('SELECT * FROM erapor_publikasi_distribusi WHERE sesi_id='.$sid)->fetch();
     EraporStructuredEntry::save($db,'PPI',$sid,$did,$pic,[['key'=>$key,'value'=>'Nilai PPI setelah rapor utama terbit','expected'=>$ppiValues[$key]]],$clock);
@@ -114,6 +136,7 @@ try{
         &&EraporPpiWorkflow::canView($db,$sid,$pic),'Unsubmitted separate PPI is visible only to its PIC or Superadmin, not future approvers');
     $check(EraporPpiWorkflow::submit($db,$sid,$pic)['result']==='submitted','PIC explicitly submits retained PPI');
     $check(EraporPpiWorkflow::submit($db,$sid,$pic)['result']==='already_submitted','Submission replay is idempotent');
+    $check(!$overviewFor()['ppi_pending_submission']&&!$dashboardFor()['ppi_pending_submission'],'Pending-submission badge clears immediately after PIC submission, not only after publication');
     $reject(fn()=>EraporStructuredEntry::save($db,'PPI',$sid,$did,$pic,[['key'=>$key,'value'=>'Changed','expected'=>$ppiValues[$key]]],$clock),'PPI values lock after independent submission');
     $reject(fn()=>EraporPpiWorkflow::approve($db,$sid,$head,'KEPALA_SEKOLAH'),'Head cannot skip Wali approval');
     $reject(fn()=>EraporPpiWorkflow::approve($db,$sid,$pic,'WALI_KELAS'),'Unmapped PIC cannot sign as Wali');
@@ -162,11 +185,13 @@ try{
     $mainApprove();$manifest=json_decode($db->query('SELECT manifest FROM erapor_publikasi_pdf WHERE sesi_id='.$sid)->fetchColumn(),true);
     $check(in_array('PPI',array_column($manifest['documents'],'jenis'),true)&&!$session()['ppi_terpisah'],'Normal included PPI remains in the main official PDF');
     $reject(fn()=>EraporPpiWorkflow::submit($db,$sid,$pic),'Included PPI cannot be separately submitted');
+    $check(!$overviewFor()['ppi_pending_submission']&&!$dashboardFor()['ppi_pending_submission'],'Included PPI never receives a misleading standalone submission warning');
     $reset();$savePpi();EraporConfirmFilled::confirm($db,$sid,$pic);EraporConfirmReception::confirm($db,$sid,$pic,true);
     $tasks=array_column($db->query('SELECT * FROM erapor_sesi_penyetuju WHERE sesi_id='.$sid)->fetchAll(),null,'kode');$mainApprove(false);
     $manifest=json_decode($db->query('SELECT manifest FROM erapor_publikasi_pdf WHERE sesi_id='.$sid)->fetchColumn(),true);
     $check($session()['ppi_disertakan']===1&&$session()['ppi_terpisah']===1&&!in_array('PPI',array_column($manifest['documents'],'jenis'),true),'Head late exclusion changes publication only, not frozen original approval scope');
     $check((int)$db->query('SELECT COUNT(*) FROM erapor_sesi_penyetuju_dokumen WHERE sesi_id='.$sid.' AND dokumen_id='.$did)->fetchColumn()>0,'Historical included PPI approval evidence remains intact');
+    $check($overviewFor()['ppi_pending_submission']&&$dashboardFor()['ppi_pending_submission'],'Head late exclusion also creates a visible pending PPI submission reminder');
     $check(EraporTeacherForm::read($db,$sid,$pic,$clock)['ppi']['progress']['filled']===count($ppiValues)&&EraporPpiWorkflow::submit($db,$sid,$pic)['result']==='submitted','Late-excluded PPI retains values and requires explicit fresh PIC submission');
     $check($fingerprint($live)===$before,'Every original source table and artifact remains unchanged');
     echo "PASS: $checks disposable MySQL checks (migration, included/excluded/late-excluded PPI, locks, access, rollback, immutable artifacts, storage failure/retry, downloads and sharing).\n";
