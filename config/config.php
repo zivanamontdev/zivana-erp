@@ -79,6 +79,8 @@ define('ERAPOR_API_ENABLED', filter_var($eraporApiEnabled, FILTER_VALIDATE_BOOLE
 define('ERAPOR_MIGRATION_TOKEN', trim((string) envValue($env, 'ERAPOR_MIGRATION_TOKEN', '')));
 // Sama: kosong = /sistem/reset-data 404. Isi hanya saat reset data, lalu hapus lagi.
 define('DATA_RESET_TOKEN', trim((string) envValue($env, 'DATA_RESET_TOKEN', '')));
+// Temporary Superadmin-only PDF diagnostics; empty/removed = 404. Never reuse migration/reset tokens.
+define('ERAPOR_PDF_DIAGNOSTIC_TOKEN', trim((string) envValue($env, 'ERAPOR_PDF_DIAGNOSTIC_TOKEN', '')));
 define('SESSION_LIFETIME', (int) envValue($env, 'SESSION_LIFETIME', 120));
 
 // --- Upload ---

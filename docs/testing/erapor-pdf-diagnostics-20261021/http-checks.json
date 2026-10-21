@@ -1,0 +1,194 @@
+[
+  {
+    "result": "PASS",
+    "label": "Login super"
+  },
+  {
+    "result": "PASS",
+    "label": "Superadmin can open enabled diagnostic page"
+  },
+  {
+    "result": "PASS",
+    "label": "Page is never cached"
+  },
+  {
+    "result": "PASS",
+    "label": "Page cannot be embedded"
+  },
+  {
+    "result": "PASS",
+    "label": "Login pic"
+  },
+  {
+    "result": "PASS",
+    "label": "Enabled page rejects pic"
+  },
+  {
+    "result": "PASS",
+    "label": "Login admin"
+  },
+  {
+    "result": "PASS",
+    "label": "Enabled page rejects admin"
+  },
+  {
+    "result": "PASS",
+    "label": "Login head"
+  },
+  {
+    "result": "PASS",
+    "label": "Enabled page rejects head"
+  },
+  {
+    "result": "PASS",
+    "label": "Invalid CSRF rejected"
+  },
+  {
+    "result": "PASS",
+    "label": "Wrong maintenance token rejected"
+  },
+  {
+    "result": "PASS",
+    "label": "HTTP diagnostic result actor 17"
+  },
+  {
+    "result": "PASS",
+    "label": "Private JSON download actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Download rotates single-use CSRF safely actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Download excludes credentials and report content actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Selected path succeeds actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Quran scope matches actual endpoint"
+  },
+  {
+    "result": "PASS",
+    "label": "Repeated clicks are throttled"
+  },
+  {
+    "result": "PASS",
+    "label": "Login super"
+  },
+  {
+    "result": "PASS",
+    "label": "Report cannot be downloaded from another login session"
+  },
+  {
+    "result": "PASS",
+    "label": "HTTP diagnostic result actor 18"
+  },
+  {
+    "result": "PASS",
+    "label": "Private JSON download actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Download rotates single-use CSRF safely actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Download excludes credentials and report content actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Selected path succeeds actor"
+  },
+  {
+    "result": "PASS",
+    "label": "HTTP diagnostic result actor 18"
+  },
+  {
+    "result": "PASS",
+    "label": "Private JSON download actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Download rotates single-use CSRF safely actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Download excludes credentials and report content actor"
+  },
+  {
+    "result": "PASS",
+    "label": "Selected path succeeds actor"
+  },
+  {
+    "result": "PASS",
+    "label": "HTTP diagnostic result readiness 18"
+  },
+  {
+    "result": "PASS",
+    "label": "Private JSON download readiness"
+  },
+  {
+    "result": "PASS",
+    "label": "Download rotates single-use CSRF safely readiness"
+  },
+  {
+    "result": "PASS",
+    "label": "Download excludes credentials and report content readiness"
+  },
+  {
+    "result": "PASS",
+    "label": "Legacy revision cannot overwrite a PDF"
+  },
+  {
+    "result": "PASS",
+    "label": "HTTP diagnostic result template 0"
+  },
+  {
+    "result": "PASS",
+    "label": "Private JSON download template"
+  },
+  {
+    "result": "PASS",
+    "label": "Download rotates single-use CSRF safely template"
+  },
+  {
+    "result": "PASS",
+    "label": "Download excludes credentials and report content template"
+  },
+  {
+    "result": "PASS",
+    "label": "Selected path succeeds template"
+  },
+  {
+    "result": "PASS",
+    "label": "HTTP diagnostic result render 999999"
+  },
+  {
+    "result": "PASS",
+    "label": "Private JSON download render"
+  },
+  {
+    "result": "PASS",
+    "label": "Download rotates single-use CSRF safely render"
+  },
+  {
+    "result": "PASS",
+    "label": "Download excludes credentials and report content render"
+  },
+  {
+    "result": "PASS",
+    "label": "A failing request reports the exact stage safely"
+  },
+  {
+    "result": "PASS",
+    "label": "Removing token closes page"
+  },
+  {
+    "result": "PASS",
+    "label": "Removing token closes report download too"
+  }
+]

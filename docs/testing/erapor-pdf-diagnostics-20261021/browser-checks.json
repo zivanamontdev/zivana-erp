@@ -1,0 +1,214 @@
+[
+  {
+    "label": "Diagnostic form fits 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic shell keeps application font 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic form fits 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic shell keeps application font 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic form fits 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic shell keeps application font 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic form fits 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic shell keeps application font 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result scoped",
+    "result": "PASS"
+  },
+  {
+    "label": "Token is not echoed back scoped",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits scoped 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport scoped 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits scoped 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport scoped 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits scoped 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport scoped 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits scoped 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport scoped 375",
+    "result": "PASS"
+  },
+  {
+    "label": "JSON download refreshes all single-use CSRF forms",
+    "result": "PASS"
+  },
+  {
+    "label": "Browser downloaded a valid private scoped diagnosis",
+    "result": "PASS"
+  },
+  {
+    "label": "Downloaded JSON excludes maintenance token",
+    "result": "PASS"
+  },
+  {
+    "label": "A new diagnostic after download does not fail CSRF",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result stored",
+    "result": "PASS"
+  },
+  {
+    "label": "Token is not echoed back stored",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits stored 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport stored 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits stored 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport stored 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits stored 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport stored 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits stored 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport stored 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result readiness",
+    "result": "PASS"
+  },
+  {
+    "label": "Token is not echoed back readiness",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits readiness 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport readiness 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits readiness 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport readiness 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits readiness 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport readiness 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits readiness 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport readiness 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result failure",
+    "result": "PASS"
+  },
+  {
+    "label": "Token is not echoed back failure",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits failure 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport failure 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits failure 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport failure 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits failure 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport failure 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Diagnostic result fits failure 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Technical JSON stays within viewport failure 375",
+    "result": "PASS"
+  },
+  {
+    "label": "No diagnostic JavaScript exceptions",
+    "result": "PASS"
+  }
+]

@@ -17,8 +17,9 @@ final class EraporPackagePdfRenderer
     }
 
     /** Render once and expose only non-sensitive PDF metadata for the publication manifest. */
-    public static function renderArtifact(array $package): array
+    public static function renderArtifact(array $package,?callable $observe=null): array
     {
+        if ($observe) $observe('render_validation');
         if (!class_exists(\Dompdf\Dompdf::class)) throw new RuntimeException('Dompdf belum tersedia.');
         $types=array_column($package['documents'] ?? [],'jenis_dokumen');
         $expected=['RTS','AGAMA','UMMI','BING'];
@@ -37,11 +38,13 @@ final class EraporPackagePdfRenderer
         // dirender ulang (lintasan 2) dengan kop identitas rapor agar halaman itu tetap beridentitas.
         self::$signatureHeaders=[];
         $moved=[];
-        [$pdf,$html]=self::renderPdf($package,$moved);
+        [$pdf,$html]=self::renderPdf($package,$moved,$observe);
         if ($moved) {
             self::$signatureHeaders=array_fill_keys($moved,true);
-            [$pdf,$html]=self::renderPdf($package);
+            $secondPass=null;
+            [$pdf,$html]=self::renderPdf($package,$secondPass,$observe);
         }
+        if ($observe) $observe('render_output');
         $bytes=$pdf->output();
         if (!is_string($bytes) || !str_starts_with($bytes,'%PDF-') || strlen($bytes)>33554432) {
             throw new RuntimeException('PDF paket kosong atau melebihi batas 32 MB.');
@@ -52,8 +55,9 @@ final class EraporPackagePdfRenderer
     }
 
     /** @param array<int,string>|null $moved diisi id blok tanda tangan yang mulai di puncak halaman */
-    private static function renderPdf(array $package,?array &$moved=null): array
+    private static function renderPdf(array $package,?array &$moved=null,?callable $observe=null): array
     {
+        if ($observe) $observe('render_html');
         self::$signatureSeq=0;
         $body='';
         foreach ($package['documents'] as $document) {
@@ -72,9 +76,11 @@ final class EraporPackagePdfRenderer
         }
         // Unfinalized drafts print cleanly. A finalized session gets a background logo, even while awaiting approval.
         $html='<!doctype html><html lang="id"><head><meta charset="UTF-8"><style>'.self::css().'</style></head><body>'.$body.'</body></html>';
+        if ($observe) $observe('render_fonts');
         $pdf=new \Dompdf\Dompdf(EraporPrintFont::options());
         $callbacks=[];
         if (self::watermarkEnabled($package)) {
+            if ($observe) $observe('render_watermark');
             $uri=$package['watermark']['data_uri'] ?? '';
             if (!is_string($uri) || !str_starts_with($uri,'data:image/png;base64,')) throw new DomainException('Logo watermark finalisasi tidak tersedia.');
             $dimensions=getimagesize($uri);
@@ -97,6 +103,7 @@ final class EraporPackagePdfRenderer
             }];
         }
         $pdf->setCallbacks($callbacks);
+        if ($observe) $observe('render_layout');
         $pdf->loadHtml($html,'UTF-8'); $pdf->setPaper('A4','portrait'); $pdf->render();
         if ($moved!==null) $moved=array_values(array_unique($moved));
         return [$pdf,$html];

@@ -1,0 +1,118 @@
+{
+  "commit": "89d0df7",
+  "complete": true,
+  "all_passed": false,
+  "passing_assertions": 219,
+  "findings": [
+    {
+      "code": "SCOPED_PDF_ERROR",
+      "id": 14,
+      "condition": "Regular",
+      "role": "quran",
+      "status": 500,
+      "download_status": 500
+    },
+    {
+      "code": "SCOPED_PDF_ERROR",
+      "id": 14,
+      "condition": "Regular",
+      "role": "english",
+      "status": 500,
+      "download_status": 500
+    },
+    {
+      "code": "SCOPED_PDF_ERROR",
+      "id": 9,
+      "condition": "ABK",
+      "role": "quran",
+      "status": 500,
+      "download_status": 500
+    },
+    {
+      "code": "SCOPED_PDF_ERROR",
+      "id": 9,
+      "condition": "ABK",
+      "role": "english",
+      "status": 500,
+      "download_status": 500
+    }
+  ],
+  "accounts_tested": 17,
+  "report_count": 9,
+  "all_report_API_hashes_unchanged": true,
+  "template_count": 10,
+  "template_pages": 40,
+  "template_quicksand_and_parent_policies_passed": true,
+  "official_pdf_count": 9,
+  "official_pages": 175,
+  "all_officials_historical": true,
+  "sampled_previous_hash_matches": 3,
+  "assets": [
+    {
+      "path": "public/assets/css/template-preview.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/css/rapor-document-pdf.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/css/portal-guru.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/js/erapor-session.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/fonts/quicksand/Quicksand-Regular.ttf",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/fonts/quicksand/Quicksand-Bold.ttf",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/fonts/quicksand/Quicksand-Regular.ufm",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/fonts/quicksand/Quicksand-Bold.ufm",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "public/assets/fonts/quicksand/installed-fonts.json",
+      "status": 200,
+      "matches": true
+    }
+  ],
+  "maintenance": [
+    {
+      "path": "/sistem/migrasi-erapor",
+      "status": 404
+    },
+    {
+      "path": "/sistem/reset-data",
+      "status": 404
+    }
+  ],
+  "limitations": [
+    "Live resized principal/stamp image could not be verified: current official artifacts are historical, scoped fresh renders return HTTP errors."
+  ],
+  "guard": {
+    "allowed_write_paths": [
+      "/login"
+    ],
+    "non_login_writes": 0,
+    "blocked_telemetry": 108,
+    "blocked_browser_pdf_stylesheet": 6
+  }
+}

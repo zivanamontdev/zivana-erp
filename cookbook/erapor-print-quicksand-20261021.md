@@ -33,7 +33,7 @@ Fingerprint isi **82 tabel database utama tetap identik** dengan baseline. Hash 
 
 ## Contoh yang dapat dibuka pengguna
 
-Buka **http://127.0.0.1:8013/__local-test**, login **Guru PIC pada `credentials` baris 4**. Password bersama mengacu pada **baris 18**; tidak disalin ke laporan. Panduan privat diperbarui di `.local-ppi-test/AKSES-LOKAL.md`.
+Buka **http://127.0.0.1:8013/__local-test**, login **akun 04 / Guru PIC (Ainul Annisa) pada `credentials`**. Password bersama mengacu pada **baris berawalan `pass:`** (nomor baris berubah setelah anotasi role); tidak disalin ke laporan. Panduan privat diperbarui di `.local-ppi-test/AKSES-LOKAL.md`.
 
 | Contoh sintetis terbaru | Preview PDF |
 | --- | --- |

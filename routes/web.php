@@ -110,6 +110,9 @@ $router->post('/erapor/ppi/{id}/terbitkan', [EraporPpiController::class, 'publis
 $router->post('/portal-guru/sesi/{id}/ppi/bagikan', [EraporPpiController::class, 'share']);
 $router->get('/rapor/ppi/unduh/{token}', [EraporDownloadController::class, 'ppi']);
 // Migrasi skema pilot via browser (hosting tanpa SSH). 404 kecuali ERAPOR_MIGRATION_TOKEN diisi di .env.
+$router->get('/sistem/diagnosis-pdf', [EraporPdfDiagnosticController::class, 'index']);
+$router->post('/sistem/diagnosis-pdf', [EraporPdfDiagnosticController::class, 'run']);
+$router->post('/sistem/diagnosis-pdf/unduh', [EraporPdfDiagnosticController::class, 'download']);
 $router->get('/sistem/migrasi-erapor', [EraporMigrationController::class, 'index']);
 $router->post('/sistem/migrasi-erapor', [EraporMigrationController::class, 'run']);
 // Kosongkan data operasional + seed uji coba. 404 kecuali DATA_RESET_TOKEN diisi di .env.

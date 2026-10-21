@@ -1,0 +1,17 @@
+{
+  "phase": "protected read-only diagnostics and conservative revision readiness; no reissue implementation",
+  "unit_checks": 63,
+  "mysql_clone_checks": 45,
+  "http_checks": 48,
+  "browser_checks": 53,
+  "pdf_renderer_checks": 65,
+  "pdf_artifact_checks": 34,
+  "ppi_workflow_checks": 76,
+  "recovery_checks": 13,
+  "private_route_checks": 94,
+  "source_tables": 82,
+  "source_table_fingerprints_unchanged": true,
+  "production_accessed": false,
+  "schema_migration_required": false,
+  "production_500_fixed": false
+}

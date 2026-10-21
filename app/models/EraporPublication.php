@@ -80,8 +80,9 @@ final class EraporPublication
         return ['result'=>'prepared','sha256'=>$pdfHash,'size'=>strlen($pdf),'delivery_status'=>'SIAP_DIKIRIM'];
     }
 
-    private static function capture(PDO $db,array $session,array $approvals,DateTimeImmutable $now): array
+    private static function capture(PDO $db,array $session,array $approvals,DateTimeImmutable $now,?callable $observe=null): array
     {
+        if ($observe) $observe('capture_identity');
         if ($session['jenis']!=='TENGAH') throw new DomainException('Rapor Akhir Semester belum memiliki rubrik resmi; paket tidak dapat diterbitkan.');
         $period=self::one($db,'SELECT p.*,ta.tahun_awal,ta.tahun_akhir FROM periode_penilaian p JOIN tahun_ajaran ta ON ta.id=p.tahun_ajaran_id WHERE p.id=?',[$session['periode_id']]);
         $student=self::one($db,'SELECT m.id,m.nama_lengkap,m.nama_panggilan,m.nisn,m.tanggal_lahir,m.tempat_lahir,m.status_kondisi,m.jenis_kebutuhan,k.level_kelas,k.nama_kelas
@@ -100,8 +101,10 @@ final class EraporPublication
         $logoData='data:image/png;base64,'.base64_encode(file_get_contents($logo));
         $schoolSnapshot=['id'=>(int)$school['id'],'nama_legal'=>$school['nama_legal'],'nama_komersial'=>$school['nama_komersial'],
             'alamat'=>$address,'tempat_pengesahan'=>$place,'npsn'=>$school['npsn']];
+        if ($observe) $observe('capture_age');
         $student['usia']=self::age($student['tanggal_lahir'],$now);
         $student['nama_kelas']=trim(($student['level_kelas'] ?? '').' '.($student['nama_kelas'] ?? ''));
+        if ($observe) $observe('capture_history_query');
         $sourceSession=$db->prepare("SELECT s.*,s.semester AS period_semester,s.jenis AS period_type,p.nama AS period_name
             FROM erapor_sesi_dokumen sd JOIN erapor_sesi s ON s.id=sd.sesi_id
             JOIN periode_penilaian p ON p.id=s.periode_id
@@ -118,10 +121,13 @@ final class EraporPublication
         foreach ($docs as $doc) {
             if ($doc['status']!=='terkunci') throw new DomainException('Rubrik yang dipakai belum dikunci.');
             if ($doc['jenis_dokumen']==='PPI' && !empty($session['ppi_terpisah'])) continue;
+            if ($observe) $observe('capture_form_'.$doc['jenis_dokumen']);
             $doc['form']=EraporTeacherForm::documentForm($db,$session,$doc);
             $defs=$doc['form']['definitions']; $periodValues=[]; $tests=[]; $signatures=[]; $signatureCurrent=null;
+            if ($observe) $observe('capture_history_'.$doc['jenis_dokumen']);
             $sourceSession->execute([$doc['id'],$session['id']]); $related=$sourceSession->fetchAll(PDO::FETCH_ASSOC);
             foreach ($related as $relatedSession) {
+                if ($observe) $observe('capture_period_'.$doc['jenis_dokumen']);
                 $relatedForm=EraporTeacherForm::documentForm($db,$relatedSession,$doc);
                 $key=match($doc['jenis_dokumen']) {
                     'RTS'=>'TS_'.$relatedSession['period_semester'],
@@ -133,17 +139,20 @@ final class EraporPublication
                     $periodValues[$key]=$relatedForm['values'];
                     if ($doc['jenis_dokumen']==='UMMI') foreach ($relatedForm['values'] as $valueKey=>$value) if (str_starts_with($valueKey,'tes:') && is_array($value)) $tests[$key][]=$value;
                 }
+                if ($observe) $observe('capture_signatures_'.$doc['jenis_dokumen']);
                 $block=self::signatureBlock($db,$relatedSession,$approvals,(int)$session['id']===(int)$relatedSession['id']?$now:null,$schoolSnapshot['tempat_pengesahan']);
                 if ((int)$relatedSession['id']===(int)$session['id']) { $signatureCurrent=$block; $doc['form']=$relatedForm; }
                 if ($doc['jenis_dokumen']==='RTS' && $relatedSession['period_type']==='TENGAH') $signatures[$relatedSession['period_semester']]=$block;
             }
             $doc['period_values']=$periodValues; $doc['signature_periods']=$signatures;
             $doc['signature_current']=$signatureCurrent;
+            if ($observe) $observe('capture_definitions_'.$doc['jenis_dokumen']);
             $doc=self::describeDocument($db,$doc,$tests,$student['nama_lengkap'],$session['semester']);
             unset($doc['status']); $documents[]=$doc;
         }
         $watermark=null;
         if (in_array($session['status'],['MENUNGGU_TTD','SELESAI'],true)) {
+            if ($observe) $observe('capture_watermark');
             $mark=file_get_contents(ROOT_PATH.'/assets/logo-icon.png');
             if (!is_string($mark) || !str_starts_with($mark,"\x89PNG\r\n\x1a\n")) throw new DomainException('Logo watermark tidak tersedia.');
             $watermark=['data_uri'=>'data:image/png;base64,'.base64_encode($mark),'sha256'=>hash('sha256',$mark)];
@@ -192,13 +201,13 @@ final class EraporPublication
     }
 
     /** Read-only current-value preview; finalized drafts receive the background logo, earlier drafts print cleanly. */
-    public static function draftPackage(PDO $db,int $sessionId,?DateTimeImmutable $clock=null,bool $withSeparatedPpi=false): array
+    public static function draftPackage(PDO $db,int $sessionId,?DateTimeImmutable $clock=null,bool $withSeparatedPpi=false,?callable $observe=null): array
     {
         $session=self::one($db,'SELECT * FROM erapor_sesi WHERE id=?',[$sessionId]);
         if (!$session) throw new DomainException('Sesi tidak tersedia.');
         $approvals=self::all($db,'SELECT * FROM erapor_sesi_penyetuju WHERE sesi_id=? ORDER BY urutan,id',[$sessionId]);
         $now=($clock ?? new DateTimeImmutable('now',new DateTimeZone('Asia/Makassar')))->setTimezone(new DateTimeZone('Asia/Makassar'));
-        $data=self::capture($db,$session,$approvals,$now);
+        $data=self::capture($db,$session,$approvals,$now,$observe);
         $data['draft']=true;
         if ($withSeparatedPpi && !empty($session['ppi_terpisah'])) {
             $doc=self::one($db,"SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,r.judul_cetak,r.versi FROM erapor_sesi_dokumen sd
