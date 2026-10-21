@@ -1,0 +1,22 @@
+[
+  {
+    "case": "regular",
+    "pages": 17,
+    "all_pages_pixel_identical": true
+  },
+  {
+    "case": "abk-included",
+    "pages": 20,
+    "all_pages_pixel_identical": true
+  },
+  {
+    "case": "abk-separated-main",
+    "pages": 17,
+    "all_pages_pixel_identical": true
+  },
+  {
+    "case": "ppi-standalone",
+    "pages": 3,
+    "all_pages_pixel_identical": true
+  }
+]

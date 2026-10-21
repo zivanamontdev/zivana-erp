@@ -136,7 +136,7 @@ foreach (['RTS','AGAMA','UMMI','BING','PPI'] as $type) {
     $check(str_contains($html,'Kepala Uji') && str_contains($html,'max-height:108pt'),'Principal retains enlarged signature for '.$type);
     $check(str_contains($html,'width:'.($type==='PPI'?'148.63':($parent?'161.86':'180')).'pt;'),'Signature width respects actual column geometry for '.$type);
 }
-$check(EraporPackagePdfRenderer::version()==='erapor-print-v10','New renders have a new version; historical artifacts stay immutable');
+$check(EraporPackagePdfRenderer::version()==='erapor-print-v11','New renders have a new version; historical artifacts stay immutable');
 // Dompdf stretches explicit width + max-height. Both final dimensions must be proportional.
 foreach (['tall'=>[180,480],'wide'=>[640,150],'small'=>[64,40],'square'=>[360,360]] as $shape=>[$w,$h]) {
     $image=imagecreatetruecolor($w,$h);ob_start();imagepng($image);$png=ob_get_clean();imagedestroy($image);

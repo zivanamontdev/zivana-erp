@@ -3,7 +3,7 @@
 /** Deterministic, offline renderer for a frozen eRapor package snapshot. */
 final class EraporPackagePdfRenderer
 {
-    private const VERSION = 'erapor-print-v10';
+    private const VERSION = 'erapor-print-v11';
     /** Margin atas halaman (16mm) dalam pt; blok tanda tangan yang mulai di sini berarti pindah halaman. */
     private const PAGE_TOP_PT = 45.35;
 
@@ -78,35 +78,62 @@ final class EraporPackagePdfRenderer
         $html='<!doctype html><html lang="id"><head><meta charset="UTF-8"><style>'.self::css().'</style></head><body>'.$body.'</body></html>';
         if ($observe) $observe('render_fonts');
         $pdf=new \Dompdf\Dompdf(EraporPrintFont::options());
-        $callbacks=[];
-        if (self::watermarkEnabled($package)) {
-            if ($observe) $observe('render_watermark');
-            $uri=$package['watermark']['data_uri'] ?? '';
-            if (!is_string($uri) || !str_starts_with($uri,'data:image/png;base64,')) throw new DomainException('Logo watermark finalisasi tidak tersedia.');
-            $dimensions=getimagesize($uri);
-            if (!$dimensions || $dimensions[0]<1 || $dimensions[1]<1) throw new DomainException('Gambar watermark tidak valid.');
-            $ratio=$dimensions[1]/$dimensions[0];
-            // Draw before page content (not an overlay); save/restore keeps text fully opaque.
-            $callbacks[]=['event'=>'begin_page_render','f'=>static function ($frame,$canvas) use ($uri,$ratio): void {
-                $width=min($canvas->get_width()*.88,$canvas->get_height()*.78/$ratio);
-                $height=$width*$ratio;
-                $canvas->save(); $canvas->set_opacity(.10);
-                $canvas->image($uri,($canvas->get_width()-$width)/2,($canvas->get_height()-$height)/2,$width,$height);
-                $canvas->restore();
-            }];
+        $callbacks=[]; $watermarkFile=null;
+        try {
+            if (self::watermarkEnabled($package)) {
+                if ($observe) $observe('render_watermark');
+                [$watermarkFile,$ratio]=self::watermarkFile($package['watermark']['data_uri'] ?? '',$pdf->getOptions()->getTempDir());
+                // Canvas bypasses Dompdf's HTML image cache. Imagick must receive a local PNG,
+                // not a PHP data: stream (hosting policies may reject inline image readers).
+                $callbacks[]=['event'=>'begin_page_render','f'=>static function ($frame,$canvas) use ($watermarkFile,$ratio,$observe): void {
+                    $width=min($canvas->get_width()*.88,$canvas->get_height()*.78/$ratio);
+                    $height=$width*$ratio;
+                    $canvas->save();
+                    try {
+                        $canvas->set_opacity(.10);
+                        if ($observe) $observe('render_watermark_image');
+                        $canvas->image($watermarkFile,($canvas->get_width()-$width)/2,($canvas->get_height()-$height)/2,$width,$height);
+                    } finally { $canvas->restore(); }
+                    if ($observe) $observe('render_layout');
+                }];
+            }
+            if ($moved!==null) {
+                $callbacks[]=['event'=>'begin_frame','f'=>static function ($frame) use (&$moved): void {
+                    $node=$frame->get_node();
+                    if (!$node instanceof DOMElement || !str_starts_with($node->getAttribute('id'),'sig-')) return;
+                    if ((float)$frame->get_position('y')<=self::PAGE_TOP_PT+2) $moved[]=$node->getAttribute('id');
+                }];
+            }
+            $pdf->setCallbacks($callbacks);
+            if ($observe) $observe('render_layout');
+            $pdf->loadHtml($html,'UTF-8'); $pdf->setPaper('A4','portrait'); $pdf->render();
+            if ($moved!==null) $moved=array_values(array_unique($moved));
+            return [$pdf,$html];
+        } finally {
+            if ($watermarkFile!==null && is_file($watermarkFile)) @unlink($watermarkFile);
+            // Dompdf clears these on success; also clear cached signature/logo files when a callback throws.
+            if (!$pdf->getOptions()->getDebugKeepTemp()) \Dompdf\Image\Cache::clear();
         }
-        if ($moved!==null) {
-            $callbacks[]=['event'=>'begin_frame','f'=>static function ($frame) use (&$moved): void {
-                $node=$frame->get_node();
-                if (!$node instanceof DOMElement || !str_starts_with($node->getAttribute('id'),'sig-')) return;
-                if ((float)$frame->get_position('y')<=self::PAGE_TOP_PT+2) $moved[]=$node->getAttribute('id');
-            }];
+    }
+
+    /** Materialize only the validated snapshot PNG; never accept paths or remote URLs. Caller owns cleanup. */
+    private static function watermarkFile(mixed $uri,string $tempDir): array
+    {
+        if (!is_string($uri) || !str_starts_with($uri,'data:image/png;base64,')) throw new DomainException('Logo watermark finalisasi tidak tersedia.');
+        $bytes=base64_decode(substr($uri,22),true);
+        $size=is_string($bytes) && str_starts_with($bytes,"\x89PNG\r\n\x1a\n")?@getimagesizefromstring($bytes):false;
+        if (!$size || $size[0]<1 || $size[1]<1 || $size[2]!==IMAGETYPE_PNG) throw new DomainException('Gambar watermark tidak valid.');
+        if (!is_dir($tempDir) || !is_writable($tempDir)) throw new RuntimeException('File sementara watermark tidak dapat dibuat.');
+        $file=@tempnam($tempDir,'ewm_');
+        if ($file===false) throw new RuntimeException('File sementara watermark tidak dapat dibuat.');
+        register_shutdown_function(static function() use ($file): void { if (is_file($file)) @unlink($file); });
+        try {
+            @chmod($file,0600);
+            if (file_put_contents($file,$bytes,LOCK_EX)!==strlen($bytes) || !is_readable($file)) throw new RuntimeException('File sementara watermark tidak dapat dibuat.');
+            return [$file,$size[1]/$size[0]];
+        } catch (Throwable $error) {
+            @unlink($file); throw $error;
         }
-        $pdf->setCallbacks($callbacks);
-        if ($observe) $observe('render_layout');
-        $pdf->loadHtml($html,'UTF-8'); $pdf->setPaper('A4','portrait'); $pdf->render();
-        if ($moved!==null) $moved=array_values(array_unique($moved));
-        return [$pdf,$html];
     }
 
     public static function version(): string { return self::VERSION; }

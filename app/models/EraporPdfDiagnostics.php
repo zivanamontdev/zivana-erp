@@ -161,7 +161,8 @@ final class EraporPdfDiagnostics
             'Kota pengesahan belum tersedia pada Data Sekolah.','Logo Data Sekolah tidak tersedia untuk PDF.',
             'Snapshot sumber rubrik tidak tersedia.','PDF final menunggu spesifikasi Rapor Akhir Semester.',
             'PDF paket kosong atau melebihi batas 32 MB.','Jumlah halaman PDF berada di luar batas yang diperiksa.',
-            'Artefak PDF tersimpan tidak lolos pemeriksaan integritas.','Registry font Quicksand tidak sesuai.'];
+            'Artefak PDF tersimpan tidak lolos pemeriksaan integritas.','Registry font Quicksand tidak sesuai.',
+            'File sementara watermark tidak dapat dibuat.'];
         if (in_array($text,$fixed,true) || preg_match('/^Berkas font cetak tidak tersedia: (?:Quicksand-(?:Regular|Bold)\\.(?:ttf|ufm)|installed-fonts\\.json)$/',$text)) return $text;
         if (preg_match('/^Undefined (array key|variable|property)/',$text,$undefined)) return 'Undefined '.$undefined[1].' [value redacted]';
         if (preg_match('/^(?:Call to undefined (?:function|method) |Call to a member function |Class .* not found|Allowed memory size of [0-9]+ bytes exhausted|Maximum execution time of [0-9]+ seconds exceeded)/',$text)
@@ -189,7 +190,10 @@ final class EraporPdfDiagnostics
         return ['php'=>PHP_VERSION,'database_version'=>($version[0]??'unknown').(stripos($server,'MariaDB')!==false?' MariaDB':' MySQL'),
             'dompdf'=>class_exists(\Composer\InstalledVersions::class)?\Composer\InstalledVersions::getPrettyVersion('dompdf/dompdf'):null,
             'memory_limit'=>(string)ini_get('memory_limit'),'max_execution_time'=>(int)ini_get('max_execution_time'),
-            'allow_url_fopen'=>(bool)ini_get('allow_url_fopen'),'temp_writable'=>is_writable(sys_get_temp_dir()),'functions'=>$functions];
+            'allow_url_fopen'=>(bool)ini_get('allow_url_fopen'),'temp_writable'=>is_writable(sys_get_temp_dir()),'functions'=>$functions,
+            'image_extensions'=>['gd'=>extension_loaded('gd'),'imagick'=>extension_loaded('imagick'),'gmagick'=>extension_loaded('gmagick')],
+            'renderer'=>EraporPackagePdfRenderer::version(),
+            'watermark_input'=>method_exists(EraporPackagePdfRenderer::class,'watermarkFile')?'validated_local_png':'legacy_canvas_input'];
     }
 
     private static function assertAdmin(PDO $db,int $actor): void

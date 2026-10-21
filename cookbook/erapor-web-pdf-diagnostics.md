@@ -1,5 +1,7 @@
 # Diagnosis PDF melalui halaman web — tanpa SSH
 
+Pembaruan 21 Oktober: hasil diagnosis menunjuk pemrosesan watermark oleh Imagick. Patch renderer **v11** dan langkah verifikasi setelah deploy dijelaskan di [perbaikan watermark Imagick](erapor-watermark-imagick-fix-20261021.md). Panduan di bawah tetap berlaku untuk menjalankan alat diagnosis; PDF lama tidak diterbitkan ulang otomatis.
+
 ## Cakupan deploy tahap pertama
 
 Halaman **`/sistem/diagnosis-pdf`** ditambahkan untuk menemukan exception penyebab HTTP 500 di hosting, tanpa membaca log server secara langsung dan tanpa mengubah rapor. Ini **alat diagnosis, bukan perbaikan 500 yang sudah diketahui penyebabnya**.

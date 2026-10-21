@@ -1,6 +1,8 @@
 .env
 # Private login credentials for local/production testing.
 /credentials
+# Private maintenance diagnosis exports supplied for investigation.
+/diagnosis-pdf*.json
 database/backups/
 # Local database exports/backups placed at repository root.
 /*.sql

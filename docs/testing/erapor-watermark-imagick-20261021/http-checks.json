@@ -1,0 +1,924 @@
+{
+  "checks": [
+    {
+      "label": "Local :8000 login super",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF stored-1",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper stored-1",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF stored-download-1",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper stored-download-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Old stored preview/download bytes unchanged 1",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF stored-3",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper stored-3",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF stored-download-3",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper stored-download-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Old stored preview/download bytes unchanged 3",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF regular-full-waiting",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand regular-full-waiting",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper regular-full-waiting",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page regular-full-waiting",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly regular-full-waiting RTS",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly regular-full-waiting AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly regular-full-waiting UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly regular-full-waiting BING",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF abk-draft-4",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand abk-draft-4",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper abk-draft-4",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page abk-draft-4",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly abk-draft-4 RTS",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly abk-draft-4 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly abk-draft-4 PPI",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF abk-draft-6",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand abk-draft-6",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper abk-draft-6",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page abk-draft-6",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly abk-draft-6 RTS",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly abk-draft-6 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly abk-draft-6 PPI",
+      "result": "PASS"
+    },
+    {
+      "label": "Local :8000 login quran",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF fresh-scoped-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand fresh-scoped-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper fresh-scoped-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page fresh-scoped-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-quran-1 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-quran-1 UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF scoped-download-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand scoped-download-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper scoped-download-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page scoped-download-quran-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-quran-1 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-quran-1 UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "Scoped preview and download work quran 1",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF fresh-scoped-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand fresh-scoped-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper fresh-scoped-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page fresh-scoped-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-quran-2 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-quran-2 UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF scoped-download-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand scoped-download-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper scoped-download-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page scoped-download-quran-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-quran-2 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-quran-2 UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "Scoped preview and download work quran 2",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF fresh-scoped-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand fresh-scoped-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper fresh-scoped-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page fresh-scoped-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-quran-3 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-quran-3 UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF scoped-download-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand scoped-download-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper scoped-download-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page scoped-download-quran-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-quran-3 AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-quran-3 UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "Scoped preview and download work quran 3",
+      "result": "PASS"
+    },
+    {
+      "label": "Local :8000 login english",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF fresh-scoped-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand fresh-scoped-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper fresh-scoped-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page fresh-scoped-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-english-1 BING",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF scoped-download-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand scoped-download-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper scoped-download-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page scoped-download-english-1",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-english-1 BING",
+      "result": "PASS"
+    },
+    {
+      "label": "Scoped preview and download work english 1",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF fresh-scoped-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand fresh-scoped-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper fresh-scoped-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page fresh-scoped-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-english-2 BING",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF scoped-download-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand scoped-download-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper scoped-download-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page scoped-download-english-2",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-english-2 BING",
+      "result": "PASS"
+    },
+    {
+      "label": "Scoped preview and download work english 2",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF fresh-scoped-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand fresh-scoped-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper fresh-scoped-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page fresh-scoped-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly fresh-scoped-english-3 BING",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF scoped-download-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand scoped-download-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper scoped-download-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page scoped-download-english-3",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly scoped-download-english-3 BING",
+      "result": "PASS"
+    },
+    {
+      "label": "Scoped preview and download work english 3",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-RTS-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-RTS-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-RTS-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-RTS-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-RTS-ganjil RTS",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-AGAMA-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-AGAMA-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-AGAMA-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-AGAMA-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-AGAMA-ganjil AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-UMMI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-UMMI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-UMMI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-UMMI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-UMMI-ganjil UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-BING-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-BING-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-BING-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-BING-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-BING-ganjil BING",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-PPI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-PPI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-PPI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-PPI-ganjil",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-PPI-ganjil PPI",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-RTS-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-RTS-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-RTS-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-RTS-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-RTS-genap RTS",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-AGAMA-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-AGAMA-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-AGAMA-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-AGAMA-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-AGAMA-genap AGAMA",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-UMMI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-UMMI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-UMMI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-UMMI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-UMMI-genap UMMI",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-BING-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-BING-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-BING-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-BING-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-BING-genap BING",
+      "result": "PASS"
+    },
+    {
+      "label": "HTTP PDF template-PPI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Embedded Quicksand template-PPI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "No text outside paper template-PPI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Watermark state on every page template-PPI-genap",
+      "result": "PASS"
+    },
+    {
+      "label": "Parent slot retained/removed correctly template-PPI-genap PPI",
+      "result": "PASS"
+    }
+  ],
+  "pdfs": [
+    {
+      "label": "stored-1",
+      "pages": 18,
+      "fonts": [
+        "SUBAAB+DejaVuSans-Bold",
+        "SUBAAC+DejaVuSans"
+      ],
+      "sha256": "c4a0f7dc710ecf06888e3bc1a27fe13e8f2401f3d59a49afcce3c816c9e8445e",
+      "disposition": "inline"
+    },
+    {
+      "label": "stored-download-1",
+      "pages": 18,
+      "fonts": [
+        "SUBAAB+DejaVuSans-Bold",
+        "SUBAAC+DejaVuSans"
+      ],
+      "sha256": "c4a0f7dc710ecf06888e3bc1a27fe13e8f2401f3d59a49afcce3c816c9e8445e",
+      "disposition": "attachment"
+    },
+    {
+      "label": "stored-3",
+      "pages": 17,
+      "fonts": [
+        "SUBAAB+DejaVuSans-Bold",
+        "SUBAAC+DejaVuSans"
+      ],
+      "sha256": "27af7847c65e822181505d6c3a4b382a42a124692e70d1cc3ad28a452d870599",
+      "disposition": "inline"
+    },
+    {
+      "label": "stored-download-3",
+      "pages": 17,
+      "fonts": [
+        "SUBAAB+DejaVuSans-Bold",
+        "SUBAAC+DejaVuSans"
+      ],
+      "sha256": "27af7847c65e822181505d6c3a4b382a42a124692e70d1cc3ad28a452d870599",
+      "disposition": "attachment"
+    },
+    {
+      "label": "regular-full-waiting",
+      "pages": 17,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "d6e0a56eb0fedfb42581f09fb86c5e0b0a168ec84cd6f4479490477190fc5f1f",
+      "disposition": "inline"
+    },
+    {
+      "label": "abk-draft-4",
+      "pages": 15,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "a08d58e802149325d3521fdb03b06bfb5075003b46aa02286b0c69c503faf376",
+      "disposition": "inline"
+    },
+    {
+      "label": "abk-draft-6",
+      "pages": 15,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "d2c0a0de8af92cf70ebacf32cdc346274323f7ea572e95ffcbea88e05f7524d7",
+      "disposition": "inline"
+    },
+    {
+      "label": "fresh-scoped-quran-1",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "8caaa8065ae6ee79bae47245c5dbc3760956f566103b16e21b65e84ab1454215",
+      "disposition": "inline"
+    },
+    {
+      "label": "scoped-download-quran-1",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "e05b85a88a513f4a88349dbdf6939b4a865c4fde532fb22e4260a4e971ac2da8",
+      "disposition": "attachment"
+    },
+    {
+      "label": "fresh-scoped-quran-2",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "50c78fc4b552ec301c87556de23b22869f079463fbee658768fd06d2e80601c8",
+      "disposition": "inline"
+    },
+    {
+      "label": "scoped-download-quran-2",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "15c88d41a1ee345038a617177044c473d9570593bdd1e19798557c143d56ce8f",
+      "disposition": "attachment"
+    },
+    {
+      "label": "fresh-scoped-quran-3",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "c0101c958387ed87c32ac0a536a0ed8388805536cda0d94951a8f630ede088f4",
+      "disposition": "inline"
+    },
+    {
+      "label": "scoped-download-quran-3",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "3dd46512d122603e4f4a550a0c51ec92d7558b67fd2164952c3f088b246ffb40",
+      "disposition": "attachment"
+    },
+    {
+      "label": "fresh-scoped-english-1",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "95df1844dd2a3d142c027a3059a2fa9ea7113b5c6e12a5e7b33946771998b1d4",
+      "disposition": "inline"
+    },
+    {
+      "label": "scoped-download-english-1",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "48ec29bd86e83f2e8f57349c8fc47b3277261a9f3618bb7ecae2ab95546c1c09",
+      "disposition": "attachment"
+    },
+    {
+      "label": "fresh-scoped-english-2",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "2c6894e6afde74e12b6513df0147256ccf5b0ae389e6d691aec4d3e5502daf14",
+      "disposition": "inline"
+    },
+    {
+      "label": "scoped-download-english-2",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "8ede39ccde8368127a61872b187f992188206d8cce50bb099a9b3bcc4edf562c",
+      "disposition": "attachment"
+    },
+    {
+      "label": "fresh-scoped-english-3",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "2229c08a99318da89db56f132619c56941777c00d6f733d7ad548c823934d37a",
+      "disposition": "inline"
+    },
+    {
+      "label": "scoped-download-english-3",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "05ca2d911c74b46af93b73844b3488f0ce94dc763f7e191cd1b8445bacfff302",
+      "disposition": "attachment"
+    },
+    {
+      "label": "template-RTS-ganjil",
+      "pages": 10,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "9294148c77e83fd99872834977a38729af6663cb6d425cdde12bbe7232e88c26",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-AGAMA-ganjil",
+      "pages": 3,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "58afa25660a3ecec524f7c5f40a60d0e07414e3bb792180d8d47cb382df263f5",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-UMMI-ganjil",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "0e26d20efd8a82d336899d9071be294d26a51297184266a001bb4035330bb71b",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-BING-ganjil",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "f59177352d045254ccc0f832ee182ed74ae9f48664788e034396ce2f59dd7a27",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-PPI-ganjil",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "44b1cdc010062cf1af928dd09420cf5b94d89081561272121a1b0d9a9d7811d9",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-RTS-genap",
+      "pages": 10,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "d7ed503069c458cdc01ad3f96a8ddf0fd8bce6076414da5b7a6557e2f4c73f1b",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-AGAMA-genap",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "f303f5741b8d94d55b133886744af61a28dfa2cd3d65aac4ba56ea735d7b1591",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-UMMI-genap",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "b559573cadb75387f49fb89e5898ceb3d60ff864993a1b97b3cc8ceb5c7fcce4",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-BING-genap",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "59d0d4f7ff6130402c961062003dcc50ba85e1c971f8c5f7c7d0739f458bf69c",
+      "disposition": "inline"
+    },
+    {
+      "label": "template-PPI-genap",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "d5aea4841bf3e422f02cc2cb309f5b1b35685b0ac9a8be3d3ec81365a26c4ddf",
+      "disposition": "inline"
+    }
+  ]
+}
