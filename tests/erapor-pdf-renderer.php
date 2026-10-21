@@ -69,8 +69,8 @@ $bingHtml=$bing->invoke(null,$package,[
 ]);
 $check(substr_count($bingHtml,'Speaking Test Result')===1,'BING group heading appears once for its contiguous indicators');
 $check(str_contains($bingHtml,'&lt;Nama Murid&gt;') && !str_contains($bingHtml,'<Nama Murid>'),'PDF identity text is escaped');
-$check(str_contains($bingHtml,'Acknowledged by') && str_contains($bingHtml,'Student&#039;s Parent')
-    && !str_contains($bingHtml,'Orang Tua Siswa'),'BING signature caption uses English parent wording');
+$check(!str_contains($bingHtml,'Acknowledged by') && !str_contains($bingHtml,'Student&#039;s Parent')
+    && !str_contains($bingHtml,'Orang Tua Siswa'),'BING has no parent receipt slot in preview/print');
 
 $agama=new ReflectionMethod(EraporPackagePdfRenderer::class,'agama');
 $agamaDoc=[
@@ -121,6 +121,36 @@ $ummiBase=[
     'form'=>['definitions'=>['scale'=>[],'volumes'=>[],'items'=>[]]],
 ];
 $emptyUmmiHtml=$ummi->invoke(null,$package,$ummiBase);
+$check(!str_contains($emptyUmmiHtml,'Orang Tua Siswa'),'Ummi has no parent receipt slot');
+$check(str_contains($agamaHtml,'Orang Tua Siswa'),'Agama retains its parent receipt slot');
+foreach (['RTS','AGAMA','UMMI','BING','PPI'] as $type) {
+    $doc=['jenis_dokumen'=>$type,'signers'=>array_merge($signers,[
+        ['peran'=>'ORANG_TUA','jabatan_cetak'=>'Parent','posisi_cetak'=>'kiri','urutan'=>0],
+    ])];
+    $html=$signatureBlock->invoke(null,$package,$doc,'Pengesahan',[
+        'signers'=>['KEPALA_SEKOLAH'=>['nama'=>'Kepala Uji','ttd_data_uri'=>'data:image/png;base64,dGVzdA==']],
+    ]);
+    $parent=in_array($type,['RTS','AGAMA','PPI'],true);
+    $check(substr_count($html,'Orang Tua Siswa')===(int)$parent,'Parent slot policy for '.$type);
+    $check(!str_contains($html,'<br>Parent'),'Rubric parent role never creates a duplicate slot for '.$type);
+    $check(str_contains($html,'Kepala Uji') && str_contains($html,'max-height:108pt'),'Principal retains enlarged signature for '.$type);
+    $check(str_contains($html,'width:'.($type==='PPI'?'148.63':($parent?'161.86':'180')).'pt;'),'Signature width respects actual column geometry for '.$type);
+}
+$check(EraporPackagePdfRenderer::version()==='erapor-print-v10','New renders have a new version; historical artifacts stay immutable');
+// Dompdf stretches explicit width + max-height. Both final dimensions must be proportional.
+foreach (['tall'=>[180,480],'wide'=>[640,150],'small'=>[64,40],'square'=>[360,360]] as $shape=>[$w,$h]) {
+    $image=imagecreatetruecolor($w,$h);ob_start();imagepng($image);$png=ob_get_clean();imagedestroy($image);
+    foreach (['GURU_KELAS'=>90,'KEPALA_SEKOLAH'=>108] as $role=>$heightLimit) {
+        $html=$signatureBlock->invoke(null,$package,['jenis_dokumen'=>'PPI','signers'=>$signers],'',[
+            'signers'=>[$role=>['nama'=>'Penandatangan','ttd_data_uri'=>'data:image/png;base64,'.base64_encode($png)]],
+        ]);
+        preg_match('/style="width:([0-9.]+)pt;height:([0-9.]+)pt"/',$html,$size);
+        $width=(float)($size[1] ?? 0);$height=(float)($size[2] ?? 0);
+        $check($width>0 && $height>0 && abs($width/$height-$w/$h)<.002,'Aspect ratio preserved: '.$shape.' '.$role);
+        $check($width<=148.63 && $height<=$heightLimit,'Image stays inside PPI column/height: '.$shape.' '.$role);
+        if ($shape==='small') $check($width>$w,'Small uploaded signatures are enlarged rather than left at native size: '.$role);
+    }
+}
 $emptyTestTable=substr($emptyUmmiHtml,strpos($emptyUmmiHtml,'<h2>TES KENAIKAN JILID</h2>'));
 $emptyTestTable=substr($emptyTestTable,0,strpos($emptyTestTable,'</table>')+8);
 preg_match('~<tbody>(.*?)</tbody>~s',$emptyTestTable,$emptyTestBody);

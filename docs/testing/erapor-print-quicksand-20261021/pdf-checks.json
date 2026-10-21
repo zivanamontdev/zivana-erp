@@ -1,0 +1,1400 @@
+[
+  {
+    "label": "PDF has pages print-included-draft",
+    "result": "PASS",
+    "detail": 20
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-included-draft",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-included-draft",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-included-draft",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-included-draft",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-included-draft Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 15,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-included-draft English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 17,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-included-draft Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 13,
+      "parent": true
+    }
+  },
+  {
+    "label": "Parent signature policy print-included-draft Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "Parent signature policy print-included-draft Pengesahan Program Pembelajaran Individu",
+    "result": "PASS",
+    "detail": {
+      "page": 20,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-included-official",
+    "result": "PASS",
+    "detail": 20
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-included-official",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-included-official",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-included-official",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-included-official",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-included-official Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 15,
+      "parent": false
+    }
+  },
+  {
+    "label": "Image stays inside page print-included-official 15",
+    "result": "PASS",
+    "detail": [
+      418.385009765625,
+      88.6870346069336,
+      510.385009765625,
+      122.39703369140625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 15",
+    "result": "PASS",
+    "detail": [
+      80.84500122070312,
+      578.592041015625,
+      253.64500427246094,
+      686.592041015625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 15",
+    "result": "PASS",
+    "detail": [
+      338.0350036621094,
+      578.592041015625,
+      518.0350341796875,
+      650.592041015625
+    ]
+  },
+  {
+    "label": "Parent signature policy print-included-official English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 17,
+      "parent": false
+    }
+  },
+  {
+    "label": "Image stays inside page print-included-official 17",
+    "result": "PASS",
+    "detail": [
+      37.599998474121094,
+      68.20903778076172,
+      137.60000610351562,
+      104.85003662109375
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 17",
+    "result": "PASS",
+    "detail": [
+      42.849998474121094,
+      544.2540283203125,
+      204.70999145507812,
+      608.9940185546875
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 17",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      544.2540283203125,
+      378.57000732421875,
+      645.4140625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 17",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      544.2540283203125,
+      552.4299926757812,
+      608.9940185546875
+    ]
+  },
+  {
+    "label": "Parent signature policy print-included-official Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 13,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-included-official 13",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      240.10400390625,
+      378.57000732421875,
+      341.2640075683594
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 13",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      240.10400390625,
+      552.4299926757812,
+      304.843994140625
+    ]
+  },
+  {
+    "label": "Parent signature policy print-included-official Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-included-official 10",
+    "result": "PASS",
+    "detail": [
+      444.4389953613281,
+      79.4060287475586,
+      536.43896484375,
+      113.11602783203125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 10",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      638.5169677734375,
+      378.57000732421875,
+      739.677001953125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 10",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      638.5170288085938,
+      552.4299926757812,
+      703.2570190429688
+    ]
+  },
+  {
+    "label": "Parent signature policy print-included-official Pengesahan Program Pembelajaran Individu",
+    "result": "PASS",
+    "detail": {
+      "page": 20,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-included-official 20",
+    "result": "PASS",
+    "detail": [
+      432.86700439453125,
+      68.0930404663086,
+      524.8670043945312,
+      101.80303955078125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 20",
+    "result": "PASS",
+    "detail": [
+      223.3249969482422,
+      421.092041015625,
+      371.95501708984375,
+      513.9820556640625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-included-official 20",
+    "result": "PASS",
+    "detail": [
+      383.95599365234375,
+      421.0920104980469,
+      532.5859985351562,
+      480.5420227050781
+    ]
+  },
+  {
+    "label": "PDF has pages print-legacy-template",
+    "result": "PASS",
+    "detail": 1
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-legacy-template",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-legacy-template",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-legacy-template",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-legacy-template",
+    "result": "PASS"
+  },
+  {
+    "label": "PDF has pages print-long-content",
+    "result": "PASS",
+    "detail": 27
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-long-content",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-long-content",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-long-content",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-long-content",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-long-content Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 16,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-long-content English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 19,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-long-content Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 13,
+      "parent": true
+    }
+  },
+  {
+    "label": "Parent signature policy print-long-content Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "Parent signature policy print-long-content Pengesahan Program Pembelajaran Individu",
+    "result": "PASS",
+    "detail": {
+      "page": 27,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-ppi-standalone",
+    "result": "PASS",
+    "detail": 3
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-ppi-standalone",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-ppi-standalone",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-ppi-standalone",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-ppi-standalone",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-ppi-standalone Pengesahan Program Pembelajaran Individu",
+    "result": "PASS",
+    "detail": {
+      "page": 3,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-ppi-standalone 3",
+    "result": "PASS",
+    "detail": [
+      432.86700439453125,
+      68.0930404663086,
+      524.8670043945312,
+      101.80303955078125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-ppi-standalone 3",
+    "result": "PASS",
+    "detail": [
+      223.3249969482422,
+      421.092041015625,
+      371.95501708984375,
+      513.9820556640625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-ppi-standalone 3",
+    "result": "PASS",
+    "detail": [
+      383.95599365234375,
+      421.0920104980469,
+      532.5859985351562,
+      480.5420227050781
+    ]
+  },
+  {
+    "label": "PDF has pages print-regular-draft",
+    "result": "PASS",
+    "detail": 17
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-regular-draft",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-regular-draft",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-regular-draft",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-regular-draft",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-regular-draft Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 15,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-regular-draft English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 17,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-regular-draft Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 13,
+      "parent": true
+    }
+  },
+  {
+    "label": "Parent signature policy print-regular-draft Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-regular-official",
+    "result": "PASS",
+    "detail": 17
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-regular-official",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-regular-official",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-regular-official",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-regular-official",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-regular-official Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 15,
+      "parent": false
+    }
+  },
+  {
+    "label": "Image stays inside page print-regular-official 15",
+    "result": "PASS",
+    "detail": [
+      418.385009765625,
+      88.6870346069336,
+      510.385009765625,
+      122.39703369140625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 15",
+    "result": "PASS",
+    "detail": [
+      80.84500122070312,
+      578.592041015625,
+      253.64500427246094,
+      686.592041015625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 15",
+    "result": "PASS",
+    "detail": [
+      338.0350036621094,
+      578.592041015625,
+      518.0350341796875,
+      650.592041015625
+    ]
+  },
+  {
+    "label": "Parent signature policy print-regular-official English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 17,
+      "parent": false
+    }
+  },
+  {
+    "label": "Image stays inside page print-regular-official 17",
+    "result": "PASS",
+    "detail": [
+      37.599998474121094,
+      68.20903778076172,
+      137.60000610351562,
+      104.85003662109375
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 17",
+    "result": "PASS",
+    "detail": [
+      42.849998474121094,
+      544.2540283203125,
+      204.70999145507812,
+      608.9940185546875
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 17",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      544.2540283203125,
+      378.57000732421875,
+      645.4140625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 17",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      544.2540283203125,
+      552.4299926757812,
+      608.9940185546875
+    ]
+  },
+  {
+    "label": "Parent signature policy print-regular-official Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 13,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-regular-official 13",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      240.10400390625,
+      378.57000732421875,
+      341.2640075683594
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 13",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      240.10400390625,
+      552.4299926757812,
+      304.843994140625
+    ]
+  },
+  {
+    "label": "Parent signature policy print-regular-official Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-regular-official 10",
+    "result": "PASS",
+    "detail": [
+      444.4389953613281,
+      79.4060287475586,
+      536.43896484375,
+      113.11602783203125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 10",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      638.5169677734375,
+      378.57000732421875,
+      739.677001953125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-regular-official 10",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      638.5170288085938,
+      552.4299926757812,
+      703.2570190429688
+    ]
+  },
+  {
+    "label": "PDF has pages print-separate-draft",
+    "result": "PASS",
+    "detail": 17
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-separate-draft",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-separate-draft",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-separate-draft",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-separate-draft",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-separate-draft Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 15,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-separate-draft English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 17,
+      "parent": false
+    }
+  },
+  {
+    "label": "Parent signature policy print-separate-draft Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 13,
+      "parent": true
+    }
+  },
+  {
+    "label": "Parent signature policy print-separate-draft Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-separate-official",
+    "result": "PASS",
+    "detail": 17
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-separate-official",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-separate-official",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-separate-official",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-separate-official",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-separate-official Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 15,
+      "parent": false
+    }
+  },
+  {
+    "label": "Image stays inside page print-separate-official 15",
+    "result": "PASS",
+    "detail": [
+      418.385009765625,
+      88.6870346069336,
+      510.385009765625,
+      122.39703369140625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 15",
+    "result": "PASS",
+    "detail": [
+      80.84500122070312,
+      578.592041015625,
+      253.64500427246094,
+      686.592041015625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 15",
+    "result": "PASS",
+    "detail": [
+      338.0350036621094,
+      578.592041015625,
+      518.0350341796875,
+      650.592041015625
+    ]
+  },
+  {
+    "label": "Parent signature policy print-separate-official English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 17,
+      "parent": false
+    }
+  },
+  {
+    "label": "Image stays inside page print-separate-official 17",
+    "result": "PASS",
+    "detail": [
+      37.599998474121094,
+      68.20903778076172,
+      137.60000610351562,
+      104.85003662109375
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 17",
+    "result": "PASS",
+    "detail": [
+      42.849998474121094,
+      544.2540283203125,
+      204.70999145507812,
+      608.9940185546875
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 17",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      544.2540283203125,
+      378.57000732421875,
+      645.4140625
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 17",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      544.2540283203125,
+      552.4299926757812,
+      608.9940185546875
+    ]
+  },
+  {
+    "label": "Parent signature policy print-separate-official Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 13,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-separate-official 13",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      240.10400390625,
+      378.57000732421875,
+      341.2640075683594
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 13",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      240.10400390625,
+      552.4299926757812,
+      304.843994140625
+    ]
+  },
+  {
+    "label": "Parent signature policy print-separate-official Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "Image stays inside page print-separate-official 10",
+    "result": "PASS",
+    "detail": [
+      444.4389953613281,
+      79.4060287475586,
+      536.43896484375,
+      113.11602783203125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 10",
+    "result": "PASS",
+    "detail": [
+      216.7100067138672,
+      638.5169677734375,
+      378.57000732421875,
+      739.677001953125
+    ]
+  },
+  {
+    "label": "Image stays inside page print-separate-official 10",
+    "result": "PASS",
+    "detail": [
+      390.57000732421875,
+      638.5170288085938,
+      552.4299926757812,
+      703.2570190429688
+    ]
+  },
+  {
+    "label": "PDF has pages print-shape-small",
+    "result": "PASS",
+    "detail": 3
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-shape-small",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-shape-small",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-shape-small",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-shape-small",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-shape-small English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 3,
+      "parent": false
+    }
+  },
+  {
+    "label": "PDF has pages print-shape-square",
+    "result": "PASS",
+    "detail": 3
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-shape-square",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-shape-square",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-shape-square",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-shape-square",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-shape-square English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 3,
+      "parent": false
+    }
+  },
+  {
+    "label": "PDF has pages print-shape-tall",
+    "result": "PASS",
+    "detail": 3
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-shape-tall",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-shape-tall",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-shape-tall",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-shape-tall",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-shape-tall English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 3,
+      "parent": false
+    }
+  },
+  {
+    "label": "PDF has pages print-shape-wide",
+    "result": "PASS",
+    "detail": 3
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-shape-wide",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-shape-wide",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-shape-wide",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-shape-wide",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-shape-wide English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 3,
+      "parent": false
+    }
+  },
+  {
+    "label": "PDF has pages print-template-agama-ganjil",
+    "result": "PASS",
+    "detail": 3
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-agama-ganjil",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-agama-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-agama-ganjil",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-agama-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-agama-ganjil Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 3,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-template-agama-genap",
+    "result": "PASS",
+    "detail": 5
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-agama-genap",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-agama-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-agama-genap",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-agama-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-agama-genap Pengesahan Rapor Agama Islam",
+    "result": "PASS",
+    "detail": {
+      "page": 5,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-template-bing-ganjil",
+    "result": "PASS",
+    "detail": 2
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-bing-ganjil",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-bing-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-bing-ganjil",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-bing-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-bing-ganjil English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 2,
+      "parent": false
+    }
+  },
+  {
+    "label": "PDF has pages print-template-bing-genap",
+    "result": "PASS",
+    "detail": 2
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-bing-genap",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-bing-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-bing-genap",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-bing-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-bing-genap English Report Endorsement",
+    "result": "PASS",
+    "detail": {
+      "page": 2,
+      "parent": false
+    }
+  },
+  {
+    "label": "PDF has pages print-template-ppi-ganjil",
+    "result": "PASS",
+    "detail": 2
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-ppi-ganjil",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-ppi-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-ppi-ganjil",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-ppi-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-ppi-ganjil Pengesahan Program Pembelajaran Individu",
+    "result": "PASS",
+    "detail": {
+      "page": 2,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-template-ppi-genap",
+    "result": "PASS",
+    "detail": 2
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-ppi-genap",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-ppi-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-ppi-genap",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-ppi-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-ppi-genap Pengesahan Program Pembelajaran Individu",
+    "result": "PASS",
+    "detail": {
+      "page": 2,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-template-rts-ganjil",
+    "result": "PASS",
+    "detail": 10
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-rts-ganjil",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-rts-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-rts-ganjil",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-rts-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-rts-ganjil Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-template-rts-genap",
+    "result": "PASS",
+    "detail": 10
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-rts-genap",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-rts-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-rts-genap",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-rts-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-rts-genap Pengesahan Tengah Semester",
+    "result": "PASS",
+    "detail": {
+      "page": 10,
+      "parent": true
+    }
+  },
+  {
+    "label": "PDF has pages print-template-ummi-ganjil",
+    "result": "PASS",
+    "detail": 2
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-ummi-ganjil",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-ummi-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-ummi-ganjil",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-ummi-ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-ummi-ganjil Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 2,
+      "parent": false
+    }
+  },
+  {
+    "label": "PDF has pages print-template-ummi-genap",
+    "result": "PASS",
+    "detail": 2
+  },
+  {
+    "label": "All document text uses embedded Quicksand print-template-ummi-genap",
+    "result": "PASS",
+    "detail": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "label": "Regular/bold embedded print-template-ummi-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "No text outside any page print-template-ummi-genap",
+    "result": "PASS",
+    "detail": []
+  },
+  {
+    "label": "No replacement characters print-template-ummi-genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Parent signature policy print-template-ummi-genap Pengesahan Rapor Al-Qur'an Metode Ummi",
+    "result": "PASS",
+    "detail": {
+      "page": 2,
+      "parent": false
+    }
+  },
+  {
+    "label": "Included ABK prints PPI",
+    "result": "PASS"
+  },
+  {
+    "label": "Regular student does not print PPI",
+    "result": "PASS"
+  },
+  {
+    "label": "Separated main report excludes PPI",
+    "result": "PASS"
+  }
+]

@@ -4,6 +4,7 @@ define('ROOT_PATH',dirname(__DIR__));
 require ROOT_PATH.'/vendor/autoload.php';
 require ROOT_PATH.'/app/helpers/functions.php';
 require ROOT_PATH.'/app/models/EraporPackagePdfRenderer.php';
+require ROOT_PATH.'/app/models/EraporPrintFont.php';
 $logo='data:image/png;base64,'.base64_encode(file_get_contents(ROOT_PATH.'/assets/logo-icon.png'));
 $signer=['nama'=>'Guru Uji Dua Peran','ttd_data_uri'=>$logo];
 $package=[
@@ -27,11 +28,20 @@ $package=[
     ]],
 ];
 $checks=0;$check=static function(bool $ok,string $label)use(&$checks){if(!$ok)throw new RuntimeException($label);$checks++;};
+$fontOptions=EraporPrintFont::options();
+$check($fontOptions['defaultFont']==='Quicksand' && !$fontOptions['isRemoteEnabled'],'Print uses bundled Quicksand without network');
+$fontManifest=$fontOptions['fontDir'].'/installed-fonts.json';
+$fontManifestBefore=file_get_contents($fontManifest);
 $render=new ReflectionMethod(EraporPackagePdfRenderer::class,'renderPdf');
 foreach(['BELUM_DIISI'=>false,'TELAH_DIISI'=>false,'MENUNGGU_TTD'=>true,'SELESAI'=>true] as $state=>$marked){
     $package['session']['status']=$state;
     [$pdf,$html]=$render->invoke(null,$package);
     $check(!str_contains($html,'draft-mark')&&!str_contains($html,'DRAF ·'),'Draft print is free of the previous draft watermark');
+    $fontFamilies=$pdf->getFontMetrics()->getFontFamilies();
+    foreach (['normal'=>'Regular','bold'=>'Bold'] as $weight=>$file) {
+        $check(str_replace('\\','/',$fontFamilies['quicksand'][$weight])===str_replace('\\','/',$fontOptions['fontDir'].'/Quicksand-'.$file),
+            'Quicksand '.$weight.' resolves to a portable bundled static font');
+    }
     $objects=$pdf->getCanvas()->get_cpdf()->objects;$pages=0;
     foreach($objects as $object){
         if(($object['t']??'')!=='page')continue;
@@ -43,4 +53,5 @@ foreach(['BELUM_DIISI'=>false,'TELAH_DIISI'=>false,'MENUNGGU_TTD'=>true,'SELESAI
     $check($pages>=2,'Both English report pages were rendered');
     $bytes=$pdf->output();$check(str_starts_with($bytes,'%PDF-'),'Actual valid PDF output for '.$state);
 }
+$check(file_get_contents($fontManifest)===$fontManifestBefore,'Rendering does not rewrite the bundled font registry');
 echo "PASS: $checks PDF artifact checks (clean drafts, finalization watermark on every page behind text, role slots).\n";

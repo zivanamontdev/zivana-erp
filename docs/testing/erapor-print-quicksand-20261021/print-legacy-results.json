@@ -1,0 +1,250 @@
+[
+  {
+    "label": "Legacy HTML paper uses local Quicksand tengah 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal tengah 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit tengah 1440",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy HTML paper uses local Quicksand tengah 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal tengah 768",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit tengah 768",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy HTML paper uses local Quicksand tengah 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal tengah 390",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit tengah 390",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy HTML paper uses local Quicksand tengah 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal tengah 375",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit tengah 375",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy HTML paper uses local Quicksand akhir 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal akhir 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit akhir 1440",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy HTML paper uses local Quicksand akhir 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal akhir 768",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit akhir 768",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy HTML paper uses local Quicksand akhir 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal akhir 390",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit akhir 390",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy HTML paper uses local Quicksand akhir 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Shell preserved and preview scroll stays internal akhir 375",
+    "result": "PASS"
+  },
+  {
+    "label": "All four HTML paper pages fit akhir 375",
+    "result": "PASS",
+    "detail": [
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      },
+      {
+        "height": 875,
+        "scroll": 875
+      }
+    ]
+  },
+  {
+    "label": "Legacy download uses Quicksand print font options",
+    "result": "PASS"
+  },
+  {
+    "label": "No application JS exception in HTML preview",
+    "result": "PASS"
+  }
+]

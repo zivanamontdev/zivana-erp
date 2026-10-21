@@ -154,7 +154,7 @@ class PengisianRaporController extends Controller
         require VIEW_PATH . '/admin/rapor-murid/_document.php';
         $document = ob_get_clean();
         $css = file_get_contents(ROOT_PATH . '/public/assets/css/rapor-document-pdf.css');
-        $pdf = new \Dompdf\Dompdf(['defaultFont'=>'DejaVu Sans','isRemoteEnabled'=>false]);
+        $pdf = new \Dompdf\Dompdf(EraporPrintFont::options());
         $pdf->loadHtml('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body>' . $document . '</body></html>');
         $pdf->setPaper('A4','portrait');
         $pdf->render();

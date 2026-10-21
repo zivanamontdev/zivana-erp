@@ -1,3 +1,18 @@
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../fonts/quicksand/Quicksand-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../fonts/quicksand/Quicksand-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 /* Fixed paper geometry: 622.64 × 874.67 at the 16px root baseline.
    The viewport scrolls, not the individual sheets; no content is cropped. */
 .template-preview {
@@ -28,7 +43,7 @@
   flex-direction: column;
   background: var(--color-neutral-white);
   color: var(--color-page-title);
-  font-family: var(--font-family-base);
+  font-family: 'Quicksand', sans-serif;
   font-size: .6875rem;
   line-height: 1.5;
 }
@@ -50,7 +65,7 @@
 .template-paper-columns { margin-top: 1rem; }
 .template-paper-columns--two { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
 .template-paper-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: .25rem; font-size: .5625rem; line-height: 1.5; color: var(--color-report-table-heading); }
-.template-paper-table th, .template-paper-table td { border: 1px solid var(--color-neutral-200); padding: .3125rem .4375rem; text-align: left; }
+.template-paper-table th, .template-paper-table td { border: 1px solid var(--color-neutral-200); padding: .25rem .4375rem; text-align: left; }
 .template-paper-table th { font-weight: 700; }
 .template-paper-table thead th { background: var(--color-orange-200); white-space: nowrap; }
 .template-paper-table thead .template-paper-area { text-align: center; background: var(--color-orange-400); font-size: .6875rem; color: var(--color-page-title); }

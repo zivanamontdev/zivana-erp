@@ -3,7 +3,7 @@
 /** Deterministic, offline renderer for a frozen eRapor package snapshot. */
 final class EraporPackagePdfRenderer
 {
-    private const VERSION = 'erapor-print-v9';
+    private const VERSION = 'erapor-print-v10';
     /** Margin atas halaman (16mm) dalam pt; blok tanda tangan yang mulai di sini berarti pindah halaman. */
     private const PAGE_TOP_PT = 45.35;
 
@@ -72,7 +72,7 @@ final class EraporPackagePdfRenderer
         }
         // Unfinalized drafts print cleanly. A finalized session gets a background logo, even while awaiting approval.
         $html='<!doctype html><html lang="id"><head><meta charset="UTF-8"><style>'.self::css().'</style></head><body>'.$body.'</body></html>';
-        $pdf=new \Dompdf\Dompdf(['defaultFont'=>'DejaVu Sans','isRemoteEnabled'=>false,'isHtml5ParserEnabled'=>true]);
+        $pdf=new \Dompdf\Dompdf(EraporPrintFont::options());
         $callbacks=[];
         if (self::watermarkEnabled($package)) {
             $uri=$package['watermark']['data_uri'] ?? '';
@@ -257,7 +257,7 @@ final class EraporPackagePdfRenderer
         foreach ($f['comments'] ?? [] as $comment) $html.='<tr><th>'.e($comment['label_cetak']).':</th><td>'.self::bullets($vals['komentar:'.$comment['id']] ?? '').'</td></tr>';
         $html.='</tbody></table><div class="page-break"></div>'.self::bingHeader($p,$d).'<h2>REMARKS</h2><table class="report-table bing-remarks"><tbody>';
         foreach ($f['scale'] ?? [] as $scale) $html.='<tr><th>'.e($scale['label']).'</th><td>'.self::text($scale['definisi'] ?? '').'</td></tr>';
-        $html.='</tbody></table>'.self::signatureBlock($p,$d,'English Report Endorsement',$d['signature_current'] ?? null,'Acknowledged by',"Student's Parent");
+        $html.='</tbody></table>'.self::signatureBlock($p,$d,'English Report Endorsement',$d['signature_current'] ?? null);
         return $html;
     }
 
@@ -339,7 +339,7 @@ final class EraporPackagePdfRenderer
         return $html.'</tr></table>';
     }
 
-    private static function signatureBlock(array $p,array $d,string $title,?array $block,string $parentPrefix='Mengetahui,',string $parentLabel='Orang Tua Siswa'): string
+    private static function signatureBlock(array $p,array $d,string $title,?array $block): string
     {
         $definitions=$d['signers'] ?? [];
         // Keep role-based slots distinct: a coordinator who is also wali kelas signs twice after both approvals.
@@ -348,8 +348,9 @@ final class EraporPackagePdfRenderer
         if ($definitions===[]) throw new DomainException('Rubrik tidak memiliki definisi penandatangan.');
         $positionRank=['kiri'=>0,'tengah'=>1,'kanan'=>2];
         usort($definitions,static fn($a,$b)=>(($positionRank[$a['posisi_cetak'] ?? ''] ?? 3)<=>($positionRank[$b['posisi_cetak'] ?? ''] ?? 3))?:((int)$a['urutan']<=>(int)$b['urutan']));
-        // Orang tua tetap mendapat kolom tanda terima tersendiri; peran rubriknya tidak dicetak dua kali.
-        $count=count($definitions)+1;
+        // Ummi/Bahasa Inggris hanya pengesahan sekolah; tanda terima orang tua tetap pada RTS/Agama/PPI.
+        $withParent=!in_array($d['jenis_dokumen'] ?? '',['UMMI','BING'],true);
+        $count=count($definitions)+(int)$withParent;
         $width='width:'.round(100/$count,3).'%';
         $date=$block && !empty($block['tanggal'])?e($block['tempat']).', '.e($block['tanggal']):'&nbsp;';
         // Blok tidak dipotong ke halaman berikutnya. Judul pengesahan rata tengah; kop identitas rapor hanya
@@ -363,15 +364,29 @@ final class EraporPackagePdfRenderer
         $dateSpan=$count>=4?2:1;
         $html.='<table class="signatures"><tbody><tr>'.str_repeat('<td style="'.$width.'"></td>',$count-$dateSpan)
             .'<td class="place-date"'.($dateSpan>1?' colspan="2" style="text-align:right;padding-right:10pt"':' style="'.$width.'"').'>'.$date.'</td></tr><tr>';
-        $html.='<td style="'.$width.'"><div class="sign-job">'.e($parentPrefix).'<br>'.e($parentLabel).'</div><div class="sign-image"></div><div class="sign-line">&nbsp;</div></td>';
+        if ($withParent) $html.='<td style="'.$width.'"><div class="sign-job">Mengetahui,<br>Orang Tua Siswa</div><div class="sign-image"></div><div class="sign-line">&nbsp;</div></td>';
         foreach ($definitions as $definition) {
             $role=(string)$definition['peran'];
             $signer=$block['signers'][$role] ?? null;
             $job=str_replace('{nama_kelas}',(string)($p['student']['nama_kelas'] ?? ''),(string)$definition['jabatan_cetak']);
             // Tinggi area jabatan tetap (maks. 3 baris) agar gambar dan garis nama ketiga kolom sejajar.
             $html.='<td style="'.$width.'"><div class="sign-job">'.(!empty($definition['prefiks'])?e($definition['prefiks']).'<br>':'').e($job).'</div>';
-            $imageWidth=round(min(150,521.57/$count-12),2);
-            if ($signer && !empty($signer['ttd_data_uri'])) $html.='<div class="sign-image"><img src="'.e($signer['ttd_data_uri']).'" style="max-width:'.$imageWidth.'pt" alt=""></div>';
+            // PPI has narrower paper margins. Compute BOTH dimensions: Dompdf's width + max-height
+            // can stretch tall/square images instead of preserving their aspect ratio.
+            $paperWidth=($d['jenis_dokumen'] ?? '')==='PPI'?481.89:521.57;
+            $imageWidth=round(min(180,$paperWidth/$count-12),2);
+            $imageHeight=$role==='KEPALA_SEKOLAH'?108:90;
+            $imageStyle='width:'.$imageWidth.'pt;max-height:'.$imageHeight.'pt';
+            if ($signer && !empty($signer['ttd_data_uri'])) {
+                $uri=$signer['ttd_data_uri'];
+                $bytes=str_starts_with($uri,'data:image/png;base64,')?base64_decode(substr($uri,22),true):false;
+                $size=$bytes!==false?@getimagesizefromstring($bytes):false;
+                if ($size && $size[0]>0 && $size[1]>0) {
+                    $scale=min($imageWidth/$size[0],$imageHeight/$size[1]);
+                    $imageStyle='width:'.round($size[0]*$scale,2).'pt;height:'.round($size[1]*$scale,2).'pt';
+                }
+                $html.='<div class="sign-image"><img src="'.e($uri).'" style="'.$imageStyle.'" alt=""></div>';
+            }
             else $html.='<div class="sign-image"></div>';
             $html.=($signer['nama'] ?? '')!==''?'<div class="sign-name">'.e($signer['nama']).'</div>':'<div class="sign-line">&nbsp;</div>';
             if (!empty($definition['cetak_nuptk']) && !empty($signer['nuptk'])) $html.='<div class="sign-nuptk">NUPTK: '.e($signer['nuptk']).'</div>';
@@ -422,6 +437,6 @@ final class EraporPackagePdfRenderer
     {
         $ink=colorToken('neutral-900'); $muted=colorToken('neutral-500'); $line=colorToken('neutral-150');
         $surface=colorToken('neutral-50'); $section=colorToken('neutral-75'); $white=colorToken('neutral-white');
-        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:DejaVu Sans,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:14pt}.agama-grade img{width:11pt;height:11pt;vertical-align:middle}.agama-table .agama-narrative td{font-size:8pt;padding:5pt}.agama-table .agama-narrative td.narrative{text-align:justify;line-height:1.5}.sign-job{height:34pt;overflow:hidden}.sign-image{height:82pt;margin:2pt auto}.sign-image img{max-height:72pt;max-width:100%;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}.signature-title{margin:10pt 0 4pt;text-align:center;font-size:10pt;font-weight:bold}.agama-wide{font-size:8pt}.agama-wide th,.agama-wide td{padding:3pt}.agama-wide .agama-stage th{font-size:6.5pt}.agama-wide .agama-grade img{width:12pt;height:12pt}.agama-wide .agama-narrative td{font-size:8.5pt}';
+        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:Quicksand,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:14pt}.agama-grade img{width:11pt;height:11pt;vertical-align:middle}.agama-table .agama-narrative td{font-size:8pt;padding:5pt}.agama-table .agama-narrative td.narrative{text-align:justify;line-height:1.5}.sign-job{height:34pt;overflow:hidden}.sign-image{height:116pt;margin:2pt auto}.sign-image img{max-width:100%;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}.signature-title{margin:10pt 0 4pt;text-align:center;font-size:10pt;font-weight:bold}.agama-wide{font-size:8pt}.agama-wide th,.agama-wide td{padding:3pt}.agama-wide .agama-stage th{font-size:6.5pt}.agama-wide .agama-grade img{width:12pt;height:12pt}.agama-wide .agama-narrative td{font-size:8.5pt}';
     }
 }

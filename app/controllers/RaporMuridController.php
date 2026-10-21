@@ -170,7 +170,7 @@ class RaporMuridController extends Controller
         $css = file_get_contents(ROOT_PATH . '/public/assets/css/rapor-document-pdf.css');
         $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body>' . $documentHtml . '</body></html>';
 
-        $dompdf = new \Dompdf\Dompdf(['defaultFont' => 'DejaVu Sans', 'isRemoteEnabled' => false]);
+        $dompdf = new \Dompdf\Dompdf(EraporPrintFont::options());
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();

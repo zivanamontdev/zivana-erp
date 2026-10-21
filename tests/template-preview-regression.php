@@ -29,4 +29,9 @@ foreach (['Tengah', 'Akhir'] as $semester) {
 $css = file_get_contents(ROOT_PATH . '/public/assets/css/template-preview.css');
 (new Sabberworm\CSS\Parser($css))->parse();
 verifyPreview(!preg_match('/#[0-9a-f]{3,8}\b/i', $css), 'Colors must use the color bank.');
+verifyPreview(substr_count($css, '@font-face') === 2 && str_contains($css, "font-family: 'Quicksand', sans-serif"), 'Paper preview uses locally bundled regular/bold Quicksand.');
+foreach (['Regular', 'Bold'] as $weight) {
+    verifyPreview(is_file(ROOT_PATH . '/public/assets/fonts/quicksand/Quicksand-' . $weight . '.ttf'), 'Bundled preview/print font exists.');
+}
+verifyPreview(!preg_match('/(?:^|})\s*body\s*\{[^}]*Quicksand/s', $css), 'Quicksand is scoped to the report paper, not the application shell.');
 echo "PASS: four-page preview for both semesters, fixture content, CSS syntax and color tokens.\n";

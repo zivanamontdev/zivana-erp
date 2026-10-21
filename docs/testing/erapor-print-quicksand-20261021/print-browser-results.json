@@ -1,0 +1,238 @@
+[
+  {
+    "label": "Inline preview PDF regular",
+    "result": "PASS"
+  },
+  {
+    "label": "Print/download attachment regular",
+    "result": "PASS"
+  },
+  {
+    "label": "Preview and download are identical bytes regular",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow regular 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1425
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available regular 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow regular 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available regular 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow regular 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available regular 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow regular 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available regular 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Inline preview PDF included",
+    "result": "PASS"
+  },
+  {
+    "label": "Print/download attachment included",
+    "result": "PASS"
+  },
+  {
+    "label": "Preview and download are identical bytes included",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow included 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1425
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available included 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow included 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available included 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow included 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available included 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow included 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available included 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Inline preview PDF separate",
+    "result": "PASS"
+  },
+  {
+    "label": "Print/download attachment separate",
+    "result": "PASS"
+  },
+  {
+    "label": "Preview and download are identical bytes separate",
+    "result": "PASS"
+  },
+  {
+    "label": "Separate PPI preview/download identical",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow separate 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1425
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available separate 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow separate 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available separate 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow separate 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available separate 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Editor remains themed and no page overflow separate 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375
+    }
+  },
+  {
+    "label": "App font unchanged and PDF action available separate 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview rts ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview agama ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview ummi ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview bing ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview ppi ganjil",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview rts genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview agama genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview ummi genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview bing genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview ppi genap",
+    "result": "PASS"
+  },
+  {
+    "label": "Template preview embeds the same PDF renderer",
+    "result": "PASS"
+  },
+  {
+    "label": "No application JS exception pic",
+    "result": "PASS"
+  },
+  {
+    "label": "No application JS exception super",
+    "result": "PASS"
+  }
+]
