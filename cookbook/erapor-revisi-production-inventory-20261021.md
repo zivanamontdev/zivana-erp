@@ -33,4 +33,24 @@ Preview koordinator yang scoped dapat memakai Quicksand melalui render baru wala
 - Browser interception menolak request di luar daftar baca-saja; telemetry, favicon dan landing `/sekolah` yang tidak dibutuhkan diblokir. Akses otomatis HTTP sebelumnya 403, tetapi pemeriksaan browser kali ini berhasil.
 - Bukti privat/skrip berada di direktori Temp, bukan repository. Tidak ada password, token, nilai murid atau gambar TTD asli dalam laporan ini.
 
-Hasil ini adalah snapshot waktu pemeriksaan; perubahan operator setelahnya dapat mengubah pilihan revisi. Panduan tindakan: [revisi PDF](erapor-pdf-revisions.md).
+Hasil di atas adalah snapshot pemeriksaan awal. Panduan tindakan: [revisi PDF](erapor-pdf-revisions.md).
+
+## Pemeriksaan akhir setelah aktivasi oleh pemilik
+
+Pemeriksaan ulang preview penuh mengonfirmasi **9/9 HTTP 200**, sumber `revision`, dan font tertanam **Quicksand Regular/Bold tanpa DejaVu**:
+
+| Sesi | Revisi aktif |
+| ---: | ---: |
+| 8 | 2 |
+| 9 | 3 |
+| 10 | 4 |
+| 11 | 5 |
+| 12 | 1 |
+| 13 | 6 |
+| 14 | 7 |
+| 15 | 8 |
+| 16 | 9 |
+
+Sampel koordinator Agama sesi 14, Agama/Wali sesi 16, dan English sesi 14 juga memakai Quicksand. Scope English sesi 16 kosong satu halaman, sama seperti sebelum aktivasi (konten BING opsional); bukan temuan font lama baru.
+
+Status sesi 15 tetap disetujui tetapi belum diterbitkan. Pemeriksaan akhir tidak melakukan POST selain login. Pemeriksaan otomatis endpoint maintenance terhenti pada network fetch, sehingga penutupan token **belum dikonfirmasi**: pemilik perlu menghapus token revisi/diagnosis dari `.env`, lalu memastikan halaman tools 404 dan preview normal tetap berjalan. Tidak perlu migrasi/reset/penerbitan ulang untuk menutup pekerjaan desain ini.
