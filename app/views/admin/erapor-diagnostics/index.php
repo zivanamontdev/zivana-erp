@@ -11,7 +11,7 @@ require VIEW_PATH.'/layouts/shell-header.php';
 <div class="erapor-migration-result" data-pdf-diagnostic-result>
     <div class="erapor-migration-result-head">
         <?= uiText('Hasil pemeriksaan','body-md',['tag'=>'h2','weight'=>'bold','tone'=>'heading']) ?>
-        <?= isset($report['revision'])?uiBadge('Revisi diblokir','peringatan'):(!empty($report['ok'])?uiBadge('Berhasil','positif'):uiBadge('Perlu diperiksa','destruktif')) ?>
+        <?= isset($report['revision'])?uiBadge(!empty($report['revision']['ready'])?'Sumber terverifikasi':'Revisi diblokir',!empty($report['revision']['ready'])?'positif':'peringatan'):(!empty($report['ok'])?uiBadge('Berhasil','positif'):uiBadge('Perlu diperiksa','destruktif')) ?>
     </div>
     <?php if(isset($report['revision'])): ?>
         <p class="text-body-sm"><?= e($report['revision']['message']) ?></p>
@@ -20,7 +20,7 @@ require VIEW_PATH.'/layouts/shell-header.php';
         <p class="text-body-sm">Berhenti pada <strong><?= e($report['error']['stage']) ?></strong>. Unduh hasil diagnosis untuk diperiksa; jangan mengaktifkan debug publik.</p>
         <pre class="erapor-migration-log"><?= e(($report['error']['class']??'Error')."\n".mb_strimwidth((string)($report['error']['message']??''),0,220,'…').(!empty($report['error']['file'])?"\n".$report['error']['file'].':'.(int)($report['error']['line']??0):'')) ?></pre>
     <?php else: ?>
-        <p class="text-body-sm"><?= ($report['path']??'')==='stored_official'?'Akun ini mengambil PDF resmi tersimpan. Renderer baru tidak dijalankan.':'Pemeriksaan berhasil. PDF uji hanya dibuat di memori; tidak disimpan atau diterbitkan.' ?></p>
+        <p class="text-body-sm"><?= in_array(($report['path']??''),['stored_official','stored_revision'],true)?'Akun ini mengambil PDF resmi tersimpan. Renderer baru tidak dijalankan.':'Pemeriksaan berhasil. PDF uji hanya dibuat di memori; tidak disimpan atau diterbitkan.' ?></p>
         <?php if(!empty($report['pdf']['pages'])): ?><?= uiText($report['pdf']['pages'].' halaman · '.number_format($report['pdf']['bytes']).' byte','caption-md') ?><?php endif; ?>
     <?php endif; ?>
     <details class="ui-disclosure"><summary class="ui-disclosure-trigger">Rincian teknis yang telah disaring</summary><pre class="erapor-migration-log"><?= e(json_encode($report,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE)) ?></pre></details>

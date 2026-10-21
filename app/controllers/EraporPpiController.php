@@ -48,9 +48,11 @@ final class EraporPpiController extends Controller
         $this->ready();$this->middleware(AuthMiddleware::class);$this->readPermission();$sid=$this->id($id);$db=Database::getInstance();
         if (!EraporPpiWorkflow::canView($db,$sid,(int)$_SESSION['user_id'])) $this->missing();
         try{
-            $artifact=EraporPpiWorkflow::artifact($db,$sid);
+            $artifact=EraporPdfRevision::activeArtifact($db,$sid,'PPI')??EraporPpiWorkflow::artifact($db,$sid);
+            header('X-Erapor-Pdf-Source: '.(($artifact['source']??'')==='revision'?'revision':'original'));
+            if (isset($artifact['id'])) header('X-Erapor-Pdf-Revision: '.(int)$artifact['id']);
             $bytes=$artifact['bytes']??EraporPackagePdfRenderer::render(EraporPpiWorkflow::package($db,$sid));
-            $name=EraporPdfFilename::ppiForSession($db,$sid,$artifact===null);
+            $name=($artifact['source']??'')==='revision'?$artifact['filename']:EraporPdfFilename::ppiForSession($db,$sid,$artifact===null);
         }catch(DomainException){http_response_code(422);echo 'PDF PPI belum dapat dibuat.';return;}
         header('Content-Type: application/pdf');header('Content-Disposition: '.($this->input('unduh','')==='1'?'attachment':'inline').'; filename="'.$name.'"');
         header('Content-Length: '.strlen($bytes));header('Cache-Control: private, no-store');header('X-Robots-Tag: noindex');echo $bytes;exit;

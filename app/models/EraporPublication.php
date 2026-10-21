@@ -77,10 +77,11 @@ final class EraporPublication
         if ($currentDate===null) $db->prepare('UPDATE erapor_sesi SET tanggal_pengesahan=? WHERE id=? AND status=\'MENUNGGU_TTD\' AND tanggal_pengesahan IS NULL')->execute([$date,$sessionId]);
         $db->prepare("INSERT INTO erapor_sesi_log(sesi_id,aktor_id,aksi,status_lama,status_baru) VALUES(?,?,'PDF_DISIAPKAN','MENUNGGU_TTD','MENUNGGU_TTD')")
             ->execute([$sessionId,$actorId]);
+        EraporPdfRevision::archiveWithin($db,'RAPOR',$data,$sourceHash,$pdfHash);
         return ['result'=>'prepared','sha256'=>$pdfHash,'size'=>strlen($pdf),'delivery_status'=>'SIAP_DIKIRIM'];
     }
 
-    private static function capture(PDO $db,array $session,array $approvals,DateTimeImmutable $now,?callable $observe=null): array
+    private static function capture(PDO $db,array $session,array $approvals,DateTimeImmutable $now,?callable $observe=null,?int $historyCutoff=null): array
     {
         if ($observe) $observe('capture_identity');
         if ($session['jenis']!=='TENGAH') throw new DomainException('Rapor Akhir Semester belum memiliki rubrik resmi; paket tidak dapat diterbitkan.');
@@ -105,13 +106,14 @@ final class EraporPublication
         $student['usia']=self::age($student['tanggal_lahir'],$now);
         $student['nama_kelas']=trim(($student['level_kelas'] ?? '').' '.($student['nama_kelas'] ?? ''));
         if ($observe) $observe('capture_history_query');
+        $historicalFilter=$historyCutoff===null?'':" AND (s.id=? OR EXISTS(SELECT 1 FROM erapor_publikasi_pdf old_pdf WHERE old_pdf.sesi_id=s.id AND UNIX_TIMESTAMP(old_pdf.dibuat_pada)<=?))";
         $sourceSession=$db->prepare("SELECT s.*,s.semester AS period_semester,s.jenis AS period_type,p.nama AS period_name
             FROM erapor_sesi_dokumen sd JOIN erapor_sesi s ON s.id=sd.sesi_id
             JOIN periode_penilaian p ON p.id=s.periode_id
             WHERE sd.dokumen_id=? AND (s.status='SELESAI' OR s.id=?
                 -- Pilot: sesi yang sudah disetujui penuh tetap MENUNGGU_TTD, tetapi artefaknya sudah terbit.
                 OR EXISTS(SELECT 1 FROM erapor_publikasi_pdf a WHERE a.sesi_id=s.id))
-            ORDER BY s.tahun_ajaran_id,s.semester,p.tipe");
+            $historicalFilter ORDER BY s.tahun_ajaran_id,s.semester,p.tipe");
         $docs=self::all($db,'SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,r.judul_cetak,r.versi,r.status
             FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id
             JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan',[$session['id']]);
@@ -125,7 +127,9 @@ final class EraporPublication
             $doc['form']=EraporTeacherForm::documentForm($db,$session,$doc);
             $defs=$doc['form']['definitions']; $periodValues=[]; $tests=[]; $signatures=[]; $signatureCurrent=null;
             if ($observe) $observe('capture_history_'.$doc['jenis_dokumen']);
-            $sourceSession->execute([$doc['id'],$session['id']]); $related=$sourceSession->fetchAll(PDO::FETCH_ASSOC);
+            $historyArgs=[$doc['id'],$session['id']];
+            if ($historyCutoff!==null) array_push($historyArgs,$session['id'],$historyCutoff);
+            $sourceSession->execute($historyArgs); $related=$sourceSession->fetchAll(PDO::FETCH_ASSOC);
             foreach ($related as $relatedSession) {
                 if ($observe) $observe('capture_period_'.$doc['jenis_dokumen']);
                 $relatedForm=EraporTeacherForm::documentForm($db,$relatedSession,$doc);
@@ -198,6 +202,15 @@ final class EraporPublication
         if (!$seed) throw new DomainException('Snapshot sumber rubrik tidak tersedia.');
         $doc['seed_sha256']=$seed['source_sha256'];
         return $doc;
+    }
+
+    /** Legacy candidates are untrusted until their original source/signature hashes have been verified. */
+    public static function historicalPackage(PDO $db,int $sid,DateTimeImmutable $clock,int $cutoff): array
+    {
+        $session=self::one($db,'SELECT * FROM erapor_sesi WHERE id=?',[$sid]);
+        if (!$session || !in_array($session['status'],['MENUNGGU_TTD','SELESAI'],true)) throw new DomainException('HISTORICAL_SESSION_NOT_FINAL');
+        $approvals=self::all($db,'SELECT * FROM erapor_sesi_penyetuju WHERE sesi_id=? ORDER BY urutan,id',[$sid]);
+        return self::capture($db,$session,$approvals,$clock,null,$cutoff);
     }
 
     /** Read-only current-value preview; finalized drafts receive the background logo, earlier drafts print cleanly. */
@@ -320,7 +333,7 @@ final class EraporPublication
         $months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
         return (int)$date->format('j').' '.$months[(int)$date->format('n')-1].' '.$date->format('Y');
     }
-    private static function manifestSource(array $data): array
+    public static function manifestSource(array $data): array
     {
         return ['renderer'=>EraporPackagePdfRenderer::version(),'session'=>$data['session']['id'],
             'period'=>$data['period'],'student'=>$data['student'],'school'=>$data['school']['snapshot'],
@@ -328,7 +341,7 @@ final class EraporPublication
             'documents'=>array_map(static fn($d)=>['id'=>$d['id'],'rubrik_id'=>$d['rubrik_id'],'kode'=>$d['kode'],'versi'=>$d['versi'],'seed_sha256'=>$d['seed_sha256'],'period_values'=>$d['period_values'],'form'=>$d['form'],'narrative_template_version'=>$d['narrative_version'] ?? null,'narrative'=>$d['narrative'] ?? null],$data['documents']),
             'published_at'=>$data['published_at']];
     }
-    private static function signerManifest(array $data): array
+    public static function signerManifest(array $data): array
     {
         $out=[]; foreach ($data['documents'] as $doc) foreach (['signature_current','signature_periods'] as $key) {
             $blocks=$key==='signature_current'?['CURRENT'=>$doc[$key] ?? null]:($doc[$key] ?? []);

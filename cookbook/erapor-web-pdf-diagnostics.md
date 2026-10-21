@@ -1,5 +1,7 @@
 # Diagnosis PDF melalui halaman web — tanpa SSH
 
+Revisi arsip kini mempunyai [fitur revisi PDF terpisah](erapor-pdf-revisions.md). Setelah migrasi revisi dipasang, mode Kesiapan dapat memverifikasi sumber, bukan selalu memblokir. Menjalankan diagnosis tetap hanya baca dan tidak membuat/mengaktifkan revisi. Verifikasi produksi Imagick v11 telah dinyatakan berhasil oleh pemilik; token diagnosis bisa ditutup.
+
 Pembaruan 21 Oktober: hasil diagnosis menunjuk pemrosesan watermark oleh Imagick. Patch renderer **v11** dan langkah verifikasi setelah deploy dijelaskan di [perbaikan watermark Imagick](erapor-watermark-imagick-fix-20261021.md). Panduan di bawah tetap berlaku untuk menjalankan alat diagnosis; PDF lama tidak diterbitkan ulang otomatis.
 
 ## Cakupan deploy tahap pertama

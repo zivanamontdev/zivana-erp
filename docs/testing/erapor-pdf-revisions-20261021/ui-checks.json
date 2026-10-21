@@ -1,0 +1,788 @@
+[
+  {
+    "label": "Revision page fits form 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1440,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved form 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response form 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits form 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved form 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response form 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits form 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved form 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response form 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits form 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved form 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response form 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Browser submits read-only source inspection",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits ready 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved ready 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response ready 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits ready 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved ready 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response ready 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits ready 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved ready 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response ready 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits ready 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved ready 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response ready 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Existing active revision is reused without false inactive notice",
+    "result": "PASS"
+  },
+  {
+    "label": "Browser restores original explicitly",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits candidate 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved candidate 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response candidate 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits candidate 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved candidate 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response candidate 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits candidate 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved candidate 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response candidate 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits candidate 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved candidate 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response candidate 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Compared original/revision is privately readable in this login",
+    "result": "PASS"
+  },
+  {
+    "label": "Compared original/revision is privately readable in this login",
+    "result": "PASS"
+  },
+  {
+    "label": "Browser activates only after comparison and confirmation",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits active 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved active 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response active 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits active 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved active 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response active 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits active 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved active 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response active 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits active 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved active 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response active 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Legacy standalone PPI blocks unsafe reconstruction",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits blocked 1440",
+    "result": "PASS",
+    "detail": {
+      "width": 1440,
+      "scroll": 1425,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved blocked 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response blocked 1440",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits blocked 768",
+    "result": "PASS",
+    "detail": {
+      "width": 768,
+      "scroll": 768,
+      "overflow": []
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved blocked 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response blocked 768",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits blocked 390",
+    "result": "PASS",
+    "detail": {
+      "width": 390,
+      "scroll": 390,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved blocked 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response blocked 390",
+    "result": "PASS"
+  },
+  {
+    "label": "Revision page fits blocked 375",
+    "result": "PASS",
+    "detail": {
+      "width": 375,
+      "scroll": 375,
+      "overflow": [
+        {
+          "tag": "TABLE",
+          "cls": "data-table",
+          "right": 625
+        },
+        {
+          "tag": "THEAD",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 427
+        },
+        {
+          "tag": "TH",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TBODY",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TR",
+          "cls": "",
+          "right": 625
+        },
+        {
+          "tag": "TD",
+          "cls": "",
+          "right": 427
+        }
+      ]
+    }
+  },
+  {
+    "label": "Existing ERP typography preserved blocked 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Tokens blank after response blocked 375",
+    "result": "PASS"
+  },
+  {
+    "label": "Missing official report has safe non-mutating failure",
+    "result": "PASS"
+  },
+  {
+    "label": "No JavaScript exceptions in new workflow",
+    "result": "PASS"
+  }
+]

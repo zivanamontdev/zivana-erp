@@ -1,0 +1,41 @@
+[
+  {
+    "case": 17,
+    "old_pages": 17,
+    "new_pages": 17,
+    "old_fonts": [
+      "SUBAAB+DejaVuSans-Bold",
+      "SUBAAC+DejaVuSans"
+    ],
+    "new_fonts": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "case": 18,
+    "old_pages": 20,
+    "new_pages": 20,
+    "old_fonts": [
+      "SUBAAB+DejaVuSans-Bold",
+      "SUBAAC+DejaVuSans"
+    ],
+    "new_fonts": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  },
+  {
+    "case": 19,
+    "old_pages": 17,
+    "new_pages": 17,
+    "old_fonts": [
+      "SUBAAB+DejaVuSans-Bold",
+      "SUBAAC+DejaVuSans"
+    ],
+    "new_fonts": [
+      "SUBAAB+Quicksand-Bold",
+      "SUBAAC+Quicksand-Regular"
+    ]
+  }
+]

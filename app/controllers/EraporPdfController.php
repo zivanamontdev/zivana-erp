@@ -22,10 +22,12 @@ final class EraporPdfController extends Controller
             $this->sendScoped($db, (int) $sessionId, $scope, $download);
         }
         try {
-            $official = EraporPdfAccess::officialArtifact($db, (int) $sessionId);
+            $official = EraporPdfAccess::previewArtifact($db, (int) $sessionId);
             if ($official) {
-                // Rename the download without changing immutable historical PDF bytes.
-                $this->send($official['bytes'], EraporPdfFilename::forSession($db, (int) $sessionId), $download);
+                header('X-Erapor-Pdf-Source: '.(($official['source']??'')==='revision'?'revision':'original'));
+                if (isset($official['id'])) header('X-Erapor-Pdf-Revision: '.(int)$official['id']);
+                // Internal revision selection never changes the original artifact/public download.
+                $this->send($official['bytes'], ($official['source']??'')==='revision'?$official['filename']:EraporPdfFilename::forSession($db, (int) $sessionId), $download);
             }
             $package = EraporPublication::draftPackage($db, (int) $sessionId);
             $this->send(EraporPackagePdfRenderer::render($package), EraporPdfFilename::forSession($db, (int) $sessionId, true), $download);
@@ -41,12 +43,15 @@ final class EraporPdfController extends Controller
     private function sendScoped(PDO $db, int $sessionId, array $documentIds, bool $download): never
     {
         try {
-            $package = EraporPublication::draftPackage($db, $sessionId);
+            $frozen = EraporPdfRevision::activePackage($db,$sessionId);
+            $package = $frozen??EraporPublication::draftPackage($db, $sessionId);
             $package['documents'] = array_values(array_filter($package['documents'], static fn(array $doc): bool => in_array((int) $doc['id'], $documentIds, true)));
             if ($package['documents'] === []) $this->notFound();
             $package['scoped'] = true;
             if (EraporPdfAccess::hasOfficial($db, $sessionId)) unset($package['draft']);
-            $this->send(EraporPackagePdfRenderer::render($package), EraporPdfFilename::forSession($db, $sessionId, !EraporPdfAccess::hasOfficial($db, $sessionId)), $download);
+            header('X-Erapor-Pdf-Source: '.($frozen!==null?'frozen_scoped':'fresh_scoped'));
+            $name=$frozen!==null?EraporPdfRevision::packageFilename($package):EraporPdfFilename::forSession($db,$sessionId,!EraporPdfAccess::hasOfficial($db,$sessionId));
+            $this->send(EraporPackagePdfRenderer::render($package),$name,$download);
         } catch (DomainException $e) {
             http_response_code(422);
             header('Content-Type: text/plain; charset=UTF-8');

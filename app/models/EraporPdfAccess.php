@@ -64,6 +64,13 @@ final class EraporPdfAccess
         return ['filename' => $row['filename'], 'bytes' => $bytes];
     }
 
+    /** Internal preview only. Publication/distribution must keep using officialArtifact (the original). */
+    public static function previewArtifact(PDO $db,int $sessionId): ?array
+    {
+        $revision=EraporPdfRevision::activeArtifact($db,$sessionId);
+        return $revision??self::officialArtifact($db,$sessionId);
+    }
+
     public static function hasOfficial(PDO $db, int $sessionId): bool
     {
         $q = $db->prepare('SELECT 1 FROM erapor_publikasi_pdf WHERE sesi_id=?');

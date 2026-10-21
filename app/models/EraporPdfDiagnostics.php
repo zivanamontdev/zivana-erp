@@ -57,9 +57,13 @@ final class EraporPdfDiagnostics
                     $observe('official_artifact');
                     $official=EraporPdfAccess::officialArtifact($db,$sid);
                     $report['official']=['exists'=>$official!==null,'integrity_checked'=>true,'sha256'=>$official?hash('sha256',$official['bytes']):null];
-                    // Legacy manifests contain a hash, not the complete frozen render input. Never guess/reissue it.
-                    $report['revision']=['ready'=>false,'code'=>$official?'HISTORICAL_SOURCE_NOT_ARCHIVED':'NO_OFFICIAL_ARTIFACT',
-                        'message'=>$official?'PDF asli aman. Paket sumber historis lengkap belum diarsipkan; revisi otomatis diblokir.':'Belum ada PDF resmi untuk diperiksa.'];
+                    if (EraporPdfRevision::available($db)) {
+                        $report['revision']=EraporPdfRevision::readiness($db,$operator,$sid);
+                        $report['revision']['message']=$report['revision']['ready']?'Sumber terverifikasi. Revisi harus disiapkan dan dibandingkan terpisah melalui halaman Revisi PDF; belum ada file diubah.':'Revisi diblokir: '.$report['revision']['code'].'. PDF asli tidak diubah.';
+                    } else {
+                        $report['revision']=['ready'=>false,'code'=>$official?'HISTORICAL_SOURCE_NOT_ARCHIVED':'NO_OFFICIAL_ARTIFACT',
+                            'message'=>$official?'PDF asli aman. Tabel revisi belum dipasang; paket historis belum diverifikasi.':'Belum ada PDF resmi untuk diperiksa.'];
+                    }
                     $report['ok']=true; return $report;
                 }
                 $scope=null;
@@ -73,10 +77,11 @@ final class EraporPdfDiagnostics
                     }
                     if ($full) {
                         $observe('official_artifact');
-                        $official=EraporPdfAccess::officialArtifact($db,$sid);
+                        $official=EraporPdfAccess::previewArtifact($db,$sid);
                         if ($official) {
                             $report['official']=['exists'=>true,'integrity_checked'=>true,'sha256'=>hash('sha256',$official['bytes'])];
-                            $report['path']='stored_official'; $report['ok']=true;
+                            $report['path']=($official['source']??'')==='revision'?'stored_revision':'stored_official'; $report['ok']=true;
+                            if(isset($official['id']))$report['revision_id']=$official['id'];
                             $report['pdf']=['bytes'=>strlen($official['bytes']),'sha256'=>hash('sha256',$official['bytes'])];
                             return $report;
                         }
@@ -88,7 +93,9 @@ final class EraporPdfDiagnostics
                 $report['official']=['exists'=>$hasOfficial,'integrity_checked'=>false];
                 $report['path']=$scope!==null?'fresh_scoped':'fresh_full';
                 $observe('package_capture');
-                $package=EraporPublication::draftPackage($db,$sid,null,false,$observe);
+                $frozen=$scope!==null?EraporPdfRevision::activePackage($db,$sid):null;
+                $package=$frozen??EraporPublication::draftPackage($db,$sid,null,false,$observe);
+                if($frozen!==null){$report['path']='frozen_scoped';$observe('active_frozen_source');}
                 if ($scope!==null) {
                     $observe('scope_filter');
                     $package['documents']=array_values(array_filter($package['documents'],static fn($d)=>in_array((int)$d['id'],$scope,true)));
@@ -138,7 +145,7 @@ final class EraporPdfDiagnostics
     public static function safeMessage(string $text): string
     {
         foreach (['DB_HOST','DB_NAME','DB_USER','DB_PASS','SMTP_USER','SMTP_PASS','R2_ACCESS_KEY_ID','R2_SECRET_ACCESS_KEY',
-            'R2_ENDPOINT','ERAPOR_PDF_DIAGNOSTIC_TOKEN','ERAPOR_MIGRATION_TOKEN','DATA_RESET_TOKEN'] as $key) {
+            'R2_ENDPOINT','ERAPOR_PDF_DIAGNOSTIC_TOKEN','ERAPOR_PDF_REVISION_TOKEN','ERAPOR_MIGRATION_TOKEN','DATA_RESET_TOKEN'] as $key) {
             if (defined($key) && is_string(constant($key)) && strlen(constant($key))>=3) $text=str_replace(constant($key),'[redacted]',$text);
         }
         if (defined('ROOT_PATH')) $text=str_replace([ROOT_PATH,str_replace('/','\\',ROOT_PATH)],'[project]',$text);

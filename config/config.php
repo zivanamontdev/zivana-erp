@@ -81,6 +81,8 @@ define('ERAPOR_MIGRATION_TOKEN', trim((string) envValue($env, 'ERAPOR_MIGRATION_
 define('DATA_RESET_TOKEN', trim((string) envValue($env, 'DATA_RESET_TOKEN', '')));
 // Temporary Superadmin-only PDF diagnostics; empty/removed = 404. Never reuse migration/reset tokens.
 define('ERAPOR_PDF_DIAGNOSTIC_TOKEN', trim((string) envValue($env, 'ERAPOR_PDF_DIAGNOSTIC_TOKEN', '')));
+// Temporary Superadmin-only design-revision UI; never expose its private token in URLs or Git.
+define('ERAPOR_PDF_REVISION_TOKEN', trim((string) envValue($env, 'ERAPOR_PDF_REVISION_TOKEN', '')));
 define('SESSION_LIFETIME', (int) envValue($env, 'SESSION_LIFETIME', 120));
 
 // --- Upload ---

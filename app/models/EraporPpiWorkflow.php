@@ -133,12 +133,14 @@ final class EraporPpiWorkflow
             if ($code==='KEPALA_SEKOLAH') {
                 $package=self::package($db,$sid);$rendered=EraporPackagePdfRenderer::renderArtifact($package);
                 $hash=hash('sha256',$rendered['bytes']);
-                $manifest=['kind'=>'PPI','tanggal_pengesahan'=>$date,'renderer'=>EraporPackagePdfRenderer::version(),'session'=>$sid,'pages'=>$rendered['pages'],'pdf_sha256'=>$hash,
+                $sourceHash=hash('sha256',json_encode($package,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
+                $manifest=['kind'=>'PPI','source_sha256'=>$sourceHash,'tanggal_pengesahan'=>$date,'renderer'=>EraporPackagePdfRenderer::version(),'session'=>$sid,'pages'=>$rendered['pages'],'pdf_sha256'=>$hash,
                     'values_sha256'=>hash('sha256',json_encode($package['documents'][0]['form']['values'],JSON_THROW_ON_ERROR)),
                     'signers'=>array_map(static fn($r)=>['role'=>$r['kode'],'user_id'=>(int)$r['user_id'],'signature_sha256'=>$r['ttd_sha256']],
                         self::all($db,'SELECT kode,user_id,ttd_sha256 FROM erapor_ppi_persetujuan WHERE sesi_id=? ORDER BY kode',[$sid]))];
                 $db->prepare('INSERT INTO erapor_ppi_pdf(sesi_id,filename,renderer_versi,pdf_bytes,pdf_sha256,ukuran_byte,manifest) VALUES(?,?,?,?,?,?,?)')
                     ->execute([$sid,EraporPdfFilename::ppiForSession($db,$sid),EraporPackagePdfRenderer::version(),$rendered['bytes'],$hash,strlen($rendered['bytes']),json_encode($manifest,JSON_THROW_ON_ERROR)]);
+                EraporPdfRevision::archiveWithin($db,'PPI',$package,$sourceHash,$hash);
             }
             return ['result'=>'approved','status'=>$next];
         });
@@ -159,7 +161,7 @@ final class EraporPpiWorkflow
             $png=$r['ttd_png'];
             if ($png!==null && !hash_equals((string)$r['ttd_sha256'],hash('sha256',$png))) throw new DomainException('Bukti TTD PPI tidak valid.');
             $role=$r['kode']==='WALI_KELAS'?'GURU_KELAS':'KEPALA_SEKOLAH';
-            $signers[$role]=['nama'=>$r['nama'],'nuptk'=>$r['nuptk'],'ttd_data_uri'=>$png!==null?'data:image/png;base64,'.base64_encode($png):null];
+            $signers[$role]=['nama'=>$r['nama'],'nuptk'=>$r['nuptk'],'ttd_data_uri'=>$png!==null?'data:image/png;base64,'.base64_encode($png):null,'ttd_sha256'=>$r['ttd_sha256'],'consent_at'=>$r['ttd_disetujui_pada']];
         }
         $p['documents'][0]['signature_current']=['signers'=>$signers,'tempat'=>$p['school']['snapshot']['tempat_pengesahan'],'tanggal'=>$date];
         $p['standalone_ppi']=true;unset($p['exclude_ppi']);

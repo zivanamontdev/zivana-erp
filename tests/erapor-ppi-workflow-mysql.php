@@ -45,13 +45,15 @@ try{
     $check(count(EraporMigrationRunner::plan($file)['steps'])===6,'Exactly two additive flags and four independent tables');
     EraporMigrationRunner::apply($db,$file);$check(EraporMigrationRunner::apply($db,$file)==='already_applied','Migration retry is idempotent');
     $check($fingerprint($db,$columns,true)===$legacy,'Migration preserves all legacy fields, signature snapshots and official PDF bytes');
+    EraporMigrationRunner::apply($db,ROOT_PATH.'/database/migrations/'.EraporPdfRevision::MIGRATION.'.sql');
+    $admin=(int)$db->query("SELECT u.id FROM users u JOIN roles r ON r.id=u.role_id WHERE r.nama='Superadmin' AND u.is_active=1 LIMIT 1")->fetchColumn();
     $s=$db->query("SELECT * FROM erapor_sesi WHERE kondisi='ABK' AND jenis='TENGAH' ORDER BY (status='MENUNGGU_TTD') DESC,id LIMIT 1")->fetch();
     if(!$s)throw new RuntimeException('Requires one local ABK session to clone');
     $sid=(int)$s['id'];$pic=(int)$s['guru_user_id'];
     $clock=new DateTimeImmutable($db->query('SELECT akhir_periode FROM periode_penilaian WHERE id='.(int)$s['periode_id'])->fetchColumn().' 10:00:00',new DateTimeZone('Asia/Makassar'));
     $db->prepare("UPDATE murid SET nama_lengkap='Murid Uji PPI',nama_panggilan='Uji',telp_ayah='081234567890',telp_ibu='081234567891' WHERE id=?")->execute([$s['murid_id']]);
     $reset=static function()use($db,$sid){
-        foreach(['erapor_ppi_pdf','erapor_ppi_persetujuan','erapor_ppi_log','erapor_ppi_pengajuan','erapor_publikasi_distribusi','erapor_publikasi_pdf','erapor_persetujuan_snapshot',
+        foreach(['erapor_pdf_revisi_log','erapor_pdf_aktif','erapor_pdf_revisi','erapor_pdf_sumber','erapor_ppi_pdf','erapor_ppi_persetujuan','erapor_ppi_log','erapor_ppi_pengajuan','erapor_publikasi_distribusi','erapor_publikasi_pdf','erapor_persetujuan_snapshot',
             'erapor_sesi_penyetuju_dokumen','erapor_sesi_penyetuju','erapor_sesi_penerimaan','erapor_sesi_log'] as $t)$db->exec('DELETE FROM '.$t.' WHERE sesi_id='.$sid);
         $db->exec("UPDATE erapor_sesi SET status='BELUM_DIISI',tanggal_pengesahan=NULL,ppi_disertakan=1,ppi_terpisah=0 WHERE id=$sid");
     };
@@ -94,6 +96,8 @@ try{
     $mainApprove=static function(?bool $include=null)use($db,$sid,$actors,&$tasks){$result=null;uasort($tasks,static fn($a,$b)=>$a['urutan']<=>$b['urutan']);foreach($tasks as $code=>$t)$result=EraporApprove::approve($db,$sid,(int)$t['id'],$actors[$code],$code==='KEPALA_SEKOLAH'?$include:null);return $result;};
     $mainApprove();$main=$db->query('SELECT pdf_sha256,pdf_bytes,manifest FROM erapor_publikasi_pdf WHERE sesi_id='.$sid)->fetch();
     $check(!in_array('PPI',array_column(json_decode($main['manifest'],true)['documents'],'jenis'),true),'Main official artifact contains no PPI');
+    $mainReady=EraporPdfRevision::readiness($db,$admin,$sid);
+    $check($mainReady['ready']&&$mainReady['method']==='SAAT_PERSETUJUAN','Real final approval archives the entire main render source');
     // Regression from production: signed PDF preparation must not hide the remaining publication task.
     $taskFor=static fn(array $tasks)=>array_values(array_filter($tasks,static fn($t)=>$t['session_id']===$sid));
     $overviewFor=static function()use($db,$s,$sid){foreach(EraporOverview::forYear($db,(int)$s['tahun_ajaran_id']) as $p)foreach($p['rows'] as $r)if($r['sesi_id']===$sid)return $r;throw new RuntimeException('Overview session missing');};
@@ -121,7 +125,11 @@ try{
     $db->prepare('UPDATE erapor_penyetuju_user SET aktif=0 WHERE user_id=? AND penyetuju_id=?')->execute([$head,$tasks['KEPALA_SEKOLAH']['penyetuju_id']]);
     $check($taskFor(EraporApprovalInbox::read($db,$head)['tasks'])===[],'Revoked head assignment loses pending publication access');
     $db->prepare('UPDATE erapor_penyetuju_user SET aktif=1 WHERE user_id=? AND penyetuju_id=?')->execute([$head,$tasks['KEPALA_SEKOLAH']['penyetuju_id']]);
+    $revisionId=EraporPdfRevision::prepare($db,$admin,$sid,'RAPOR',$mainReady['package_sha256'],$mainReady['design_sha256'],'Uji revisi internal sebelum publikasi utama.');
+    $revision=EraporPdfRevision::reviewArtifact($db,$admin,$sid,'RAPOR',$revisionId);
+    EraporPdfRevision::activate($db,$admin,$sid,'RAPOR',$revisionId,'asli',$revision['sha256'],'Uji aktivasi internal, publikasi tetap asli.');
     $mainStorage=new R2Storage();EraporDistribution::publish($db,$sid,(int)$tasks['KEPALA_SEKOLAH']['id'],$head,$mainStorage);
+    $check(array_values($mainStorage->objects)===[$main['pdf_bytes']],'Publication still uploads the original even when internal revision is active');
     $check($taskFor(EraporApprovalInbox::read($db,$head)['tasks'])===[],'Published report leaves the head pending queue');
     $publishedOverview=$overviewFor();$check($publishedOverview['status']==='TERBIT'&&$publishedOverview['has_official_pdf'],'Overview marks a report published only after the publication transition');
     $check($publishedOverview['ppi_pending_submission']&&$dashboardFor()['ppi_pending_submission'],'Publishing the main report does not hide an unsubmitted detached PPI');
@@ -154,6 +162,12 @@ try{
     foreach($signers as $r){$q=$db->prepare('INSERT INTO erapor_rubrik_penandatangan('.implode(',',array_keys($r)).') VALUES('.implode(',',array_fill(0,count($r),'?')).')');$q->execute(array_values($r));}
     EraporPpiWorkflow::approve($db,$sid,$head,'KEPALA_SEKOLAH');$artifact=EraporPpiWorkflow::artifact($db,$sid);
     $check($artifact&&str_starts_with($artifact['bytes'],'%PDF-')&&$artifact['filename']==='PPI-Murid-Uji-PPI-TS-'.ucfirst(strtolower($s['semester'])).'-'.str_replace('/','-',$form['period']['tahun_label']).'.pdf','Separate immutable child PDF and child-specific filename');
+    $ppiReady=EraporPdfRevision::readiness($db,$admin,$sid,'PPI');
+    $check($ppiReady['ready']&&$ppiReady['method']==='SAAT_PERSETUJUAN','Real separate PPI approval freezes its complete identity, values, dates and signatures');
+    $ppiRevisionId=EraporPdfRevision::prepare($db,$admin,$sid,'PPI',$ppiReady['package_sha256'],$ppiReady['design_sha256'],'Uji revisi PPI terpisah sebelum publikasi.');
+    $ppiRevision=EraporPdfRevision::reviewArtifact($db,$admin,$sid,'PPI',$ppiRevisionId);
+    EraporPdfRevision::activate($db,$admin,$sid,'PPI',$ppiRevisionId,'asli',$ppiRevision['sha256'],'Uji aktivasi PPI untuk preview internal saja.');
+    $check(EraporPdfRevision::activeArtifact($db,$sid,'PPI')['bytes']===$ppiRevision['bytes'],'Separate PPI internal preview uses its own revision');
     $savedManifest=$db->query('SELECT manifest FROM erapor_ppi_pdf WHERE sesi_id='.$sid)->fetchColumn();
     $db->exec("UPDATE erapor_ppi_pdf SET manifest='{}' WHERE sesi_id=$sid");$reject(fn()=>EraporPpiWorkflow::artifact($db,$sid),'Corrupt child manifest fails closed instead of silently serving or rerendering an official file');
     $db->prepare('UPDATE erapor_ppi_pdf SET manifest=? WHERE sesi_id=?')->execute([$savedManifest,$sid]);
@@ -164,6 +178,7 @@ try{
     $storage=new R2Storage();$storage->fail=true;try{EraporPpiWorkflow::publish($db,$sid,$head,$storage);throw new LogicException('Upload failure expected');}catch(RuntimeException){$check(true,'Failed upload leaves PPI unpublished');}
     $storage->fail=false;EraporPpiWorkflow::publish($db,$sid,$head,$storage);EraporPpiWorkflow::publish($db,$sid,$head,$storage);
     $check(count($storage->objects)===1,'Publication replay does not upload or overwrite another artifact');
+    $check(array_values($storage->objects)===[$artifact['bytes']],'Separate PPI publication retains original bytes despite its active internal revision');
     $token=$db->query('SELECT unduh_token FROM erapor_ppi_pdf WHERE sesi_id='.$sid)->fetchColumn();$check((bool)EraporPpiWorkflow::downloadUrl($db,$token,false,$storage),'Standalone anonymous download token works');
     $check((int)$db->query('SELECT jumlah_unduh FROM erapor_ppi_pdf WHERE sesi_id='.$sid)->fetchColumn()===0,'Messaging preview does not count as parent download');
     EraporPpiWorkflow::downloadUrl($db,$token,true,$storage);$check((int)$db->query('SELECT jumlah_unduh FROM erapor_ppi_pdf WHERE sesi_id='.$sid)->fetchColumn()===1,'Parent download counted separately');

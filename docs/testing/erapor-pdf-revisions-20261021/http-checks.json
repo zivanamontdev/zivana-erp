@@ -1,0 +1,643 @@
+{
+  "assertions": 132,
+  "checks": [
+    {
+      "result": "PASS",
+      "label": "Anonymous maintenance redirects to authentication"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture super"
+    },
+    {
+      "result": "PASS",
+      "label": "Superadmin opens revision page before migration"
+    },
+    {
+      "result": "PASS",
+      "label": "Private no-cache/frame headers"
+    },
+    {
+      "result": "PASS",
+      "label": "Revision token never reflected"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture pic"
+    },
+    {
+      "result": "PASS",
+      "label": "Maintenance rejected for pic"
+    },
+    {
+      "result": "PASS",
+      "label": "Original maintenance PDF rejected for pic"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture admin"
+    },
+    {
+      "result": "PASS",
+      "label": "Maintenance rejected for admin"
+    },
+    {
+      "result": "PASS",
+      "label": "Original maintenance PDF rejected for admin"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture head"
+    },
+    {
+      "result": "PASS",
+      "label": "Maintenance rejected for head"
+    },
+    {
+      "result": "PASS",
+      "label": "Original maintenance PDF rejected for head"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture agama"
+    },
+    {
+      "result": "PASS",
+      "label": "Maintenance rejected for agama"
+    },
+    {
+      "result": "PASS",
+      "label": "Original maintenance PDF rejected for agama"
+    },
+    {
+      "result": "PASS",
+      "label": "Foreign CSRF rejected before operation"
+    },
+    {
+      "result": "PASS",
+      "label": "Wrong maintenance token has no effect"
+    },
+    {
+      "result": "PASS",
+      "label": "Schema installation refuses live API mode"
+    },
+    {
+      "result": "PASS",
+      "label": "Browser-only additive migration succeeds"
+    },
+    {
+      "result": "PASS",
+      "label": "Regular business PDF unavailable during explicit migration maintenance"
+    },
+    {
+      "result": "PASS",
+      "label": "Browser migration retry is idempotent"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 starts with original preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 original bytes remain identical"
+    },
+    {
+      "result": "PASS",
+      "label": "original-17 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "original-17 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "original-17 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 exact legacy source proof succeeds"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 prepares without activation"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 preparation does not replace preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Cannot activate without opening both original and revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 review opens exact original"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 protected revised PDF opens"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-17 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-17 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-17 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Revision cannot be downloaded under another session"
+    },
+    {
+      "result": "PASS",
+      "label": "Revision cannot be downloaded under another package kind"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture super"
+    },
+    {
+      "result": "PASS",
+      "label": "Review receipt is bound to this authenticated login session"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 activates only after comparison"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 regular preview now serves revised Quicksand bytes"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 internal download matches revised preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture pic"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 full-access pic receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture wali"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 full-access wali receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture head"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 full-access head receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture agama"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 coordinator agama uses frozen, scoped source"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-17 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-17 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-17 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture bing"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 17 coordinator bing uses frozen, scoped source"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-17 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-17 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-17 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "A stale restore cannot overwrite another active selection"
+    },
+    {
+      "result": "PASS",
+      "label": "Explicit restore reselects original, retaining history"
+    },
+    {
+      "result": "PASS",
+      "label": "Restored regular preview is byte-identical original"
+    },
+    {
+      "result": "PASS",
+      "label": "Reviewed revision can be selected again without regeneration"
+    },
+    {
+      "result": "PASS",
+      "label": "Removing token closes maintenance page"
+    },
+    {
+      "result": "PASS",
+      "label": "Removing token closes maintenance PDF route"
+    },
+    {
+      "result": "PASS",
+      "label": "Removing token does NOT revert or disable normal selected preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 starts with original preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 original bytes remain identical"
+    },
+    {
+      "result": "PASS",
+      "label": "original-18 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "original-18 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "original-18 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 exact legacy source proof succeeds"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 prepares without activation"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 preparation does not replace preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 review opens exact original"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 protected revised PDF opens"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-18 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-18 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-18 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 activates only after comparison"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 regular preview now serves revised Quicksand bytes"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 internal download matches revised preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture pic"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 full-access pic receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture wali"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 full-access wali receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture head"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 full-access head receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture agama"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 coordinator agama uses frozen, scoped source"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-18 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-18 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-18 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture bing"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 18 coordinator bing uses frozen, scoped source"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-18 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-18 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-18 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 starts with original preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 original bytes remain identical"
+    },
+    {
+      "result": "PASS",
+      "label": "original-19 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "original-19 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "original-19 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 exact legacy source proof succeeds"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 prepares without activation"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 preparation does not replace preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 review opens exact original"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 protected revised PDF opens"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-19 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-19 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "revision-19 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 activates only after comparison"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 regular preview now serves revised Quicksand bytes"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 internal download matches revised preview"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture pic"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 full-access pic receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture wali"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 full-access wali receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture head"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 full-access head receives selected immutable revision"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture agama"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 coordinator agama uses frozen, scoped source"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-19 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-19 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-agama-19 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Authenticate fixture bing"
+    },
+    {
+      "result": "PASS",
+      "label": "Session 19 coordinator bing uses frozen, scoped source"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-19 valid PDF"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-19 correct embedded font"
+    },
+    {
+      "result": "PASS",
+      "label": "scoped-bing-19 text stays inside paper"
+    },
+    {
+      "result": "PASS",
+      "label": "Legacy standalone PPI blocks rather than borrowing current identity/TTD"
+    }
+  ],
+  "pdfs": [
+    {
+      "label": "original-17",
+      "pages": 17,
+      "fonts": [
+        "SUBAAB+DejaVuSans-Bold",
+        "SUBAAC+DejaVuSans"
+      ],
+      "sha256": "c2ad5f9268667464aae041fbbfd8c0e9e32b9c44afb850256d137331bd2b612a"
+    },
+    {
+      "label": "revision-17",
+      "pages": 17,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "2ba9948074d6543c267df8ec3de892a312cfdd929993a9048d8e59c51b4cdf06"
+    },
+    {
+      "label": "scoped-agama-17",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "881428366f1573d47161ff920176a301bcd9bd28fb539c83f91ddea5dea8fb99"
+    },
+    {
+      "label": "scoped-bing-17",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "5d6b91aa8065f4630640eba0ff77b97223f6d7469d59e70a6c75150f4df402c4"
+    },
+    {
+      "label": "original-18",
+      "pages": 20,
+      "fonts": [
+        "SUBAAB+DejaVuSans-Bold",
+        "SUBAAC+DejaVuSans"
+      ],
+      "sha256": "8fe4bc221c56314565ec297785481ab4a7d74cc4010c732fc9491a6a49b09b39"
+    },
+    {
+      "label": "revision-18",
+      "pages": 20,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "09888d0aa52d55db1f8fed86f3cd9b3c56fee0ba16dfede51a6390147466d6aa"
+    },
+    {
+      "label": "scoped-agama-18",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "a159f43df8ede4c2945430ef99e7216531a205b60835cf8077a75aa29a56d6ed"
+    },
+    {
+      "label": "scoped-bing-18",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "abe4dfd7266ff6afd040a3704aad6a3e3d10fa4fbfdc62e0e109aff6837cf115"
+    },
+    {
+      "label": "original-19",
+      "pages": 17,
+      "fonts": [
+        "SUBAAB+DejaVuSans-Bold",
+        "SUBAAC+DejaVuSans"
+      ],
+      "sha256": "c78f14b5f72827361172354956c4a6c24277eb584b41d1eeb6572f38d3318c94"
+    },
+    {
+      "label": "revision-19",
+      "pages": 17,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "63e569116daf63a8ef7db3102ddaf9fcbff67d1032eeaf3c8876dd74f93e4427"
+    },
+    {
+      "label": "scoped-agama-19",
+      "pages": 5,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "99d3fad6267f54c5cbe3a923d3077eb9c4c60f057e815ace0bc720b8ff5e9267"
+    },
+    {
+      "label": "scoped-bing-19",
+      "pages": 2,
+      "fonts": [
+        "SUBAAB+Quicksand-Bold",
+        "SUBAAC+Quicksand-Regular"
+      ],
+      "sha256": "8e133edba02e0b44d643c0b3b3bf4d575974d945f64c8f01f56f0a1040cee00d"
+    }
+  ]
+}
