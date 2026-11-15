@@ -23,3 +23,6 @@ tests/report-preview-check.png
 /*.xlsx
 /docs/*.xlsx
 /docs/*.png
+
+# Spesifikasi eRapor (dokumen sumber, jangan di-commit)
+/eRapor_Zivana_Spesifikasi/
