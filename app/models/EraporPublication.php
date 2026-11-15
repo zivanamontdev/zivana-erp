@@ -322,8 +322,9 @@ final class EraporPublication
             'ttd_sha256'=>$hash,'consent_at'=>$row['consent_at'] ?? null];
     }
 
-    private static function age(string $birthDate,DateTimeImmutable $on): string
+    private static function age(?string $birthDate,DateTimeImmutable $on): string
     {
+        if ($birthDate===null || $birthDate==='') return '-';
         try { $birth=new DateTimeImmutable($birthDate); } catch (Throwable) { return '-'; }
         if ($birth>$on) return '-'; $diff=$birth->diff($on);
         return $diff->y.' tahun '.$diff->m.' bulan';

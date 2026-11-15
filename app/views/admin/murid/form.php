@@ -70,22 +70,22 @@ require VIEW_PATH . '/layouts/shell-header.php';
     <div class="tabs-panel is-active" data-tab-panel="data-murid">
         <div class="field-row">
             <?= $field('nama_lengkap', 'Nama Lengkap') ?>
-            <?= $field('nama_panggilan', 'Nama Panggilan') ?>
+            <?= $field('nama_panggilan', 'Nama Panggilan', 'text', false) ?>
         </div>
         <div class="field-row">
             <?= $field('nisn', 'NISN', 'text', false) ?>
-            <?= $selectField('agama', 'Agama', $agamaOptions) ?>
+            <?= $selectField('agama', 'Agama', $agamaOptions, false) ?>
         </div>
         <div class="field-row">
-            <?= $field('nik', 'NIK') ?>
-            <?= $field('no_registrasi_akte', 'No. Registrasi Akte') ?>
+            <?= $field('nik', 'NIK', 'text', false) ?>
+            <?= $field('no_registrasi_akte', 'No. Registrasi Akte', 'text', false) ?>
         </div>
         <div class="field-row">
             <?= $selectField('jenis_kelamin', 'Jenis Kelamin', $jenisKelaminOptions) ?>
-            <?= $field('tempat_lahir', 'Tempat Lahir') ?>
+            <?= $field('tempat_lahir', 'Tempat Lahir', 'text', false) ?>
         </div>
         <div class="field-row">
-            <?= $field('tanggal_lahir', 'Tanggal Lahir', 'date') ?>
+            <?= $field('tanggal_lahir', 'Tanggal Lahir', 'date', false) ?>
             <?php
             $age = '';
             $birthDateValue = (string) $val('tanggal_lahir');
@@ -99,13 +99,13 @@ require VIEW_PATH . '/layouts/shell-header.php';
             ?>
         </div>
         <div class="field-row">
-            <?= $field('alamat', 'Alamat', 'textarea', true, true) ?>
+            <?= $field('alamat', 'Alamat', 'textarea', false, true) ?>
         </div>
     </div>
 
     <div class="tabs-panel" data-tab-panel="informasi">
         <div class="field-row">
-            <?= $field('tanggal_masuk_sekolah', 'Tanggal Masuk Sekolah', 'date') ?>
+            <?= $field('tanggal_masuk_sekolah', 'Tanggal Masuk Sekolah', 'date', false) ?>
             <?= $selectField('status_kondisi', 'Status Kondisi', $statusKondisiOptions) ?>
         </div>
         <div class="field-row">
@@ -127,31 +127,31 @@ require VIEW_PATH . '/layouts/shell-header.php';
 
     <div class="tabs-panel" data-tab-panel="relasi">
         <div class="field-row">
-            <?= $field('alamat_domisili', 'Alamat Domisili') ?>
+            <?= $field('alamat_domisili', 'Alamat Domisili', 'text', false) ?>
             <?= $field('anak_ke', 'Anak Ke-', 'number', false) ?>
         </div>
         <div class="field-row">
-            <?= $field('jumlah_saudara', 'Jumlah Saudara', 'number') ?>
+            <?= $field('jumlah_saudara', 'Jumlah Saudara', 'number', false) ?>
         </div>
 
         <h3 class="text-body-sm font-bold">Informasi Ayah</h3>
         <div class="field-row">
-            <?= $field('nama_ayah', 'Nama Ayah') ?>
-            <?= $field('pendidikan_ayah', 'Pendidikan Terakhir') ?>
+            <?= $field('nama_ayah', 'Nama Ayah', 'text', false) ?>
+            <?= $field('pendidikan_ayah', 'Pendidikan Terakhir', 'text', false) ?>
         </div>
         <div class="field-row">
-            <?= $field('pekerjaan_ayah', 'Pekerjaan') ?>
-            <?= $field('telp_ayah', 'No. Telp', 'tel') ?>
+            <?= $field('pekerjaan_ayah', 'Pekerjaan', 'text', false) ?>
+            <?= $field('telp_ayah', 'No. Telp', 'tel', false) ?>
         </div>
 
         <h3 class="text-body-sm font-bold">Informasi Ibu</h3>
         <div class="field-row">
-            <?= $field('nama_ibu', 'Nama Ibu') ?>
-            <?= $field('pendidikan_ibu', 'Pendidikan Terakhir') ?>
+            <?= $field('nama_ibu', 'Nama Ibu', 'text', false) ?>
+            <?= $field('pendidikan_ibu', 'Pendidikan Terakhir', 'text', false) ?>
         </div>
         <div class="field-row">
-            <?= $field('pekerjaan_ibu', 'Pekerjaan') ?>
-            <?= $field('telp_ibu', 'No. Telp', 'tel') ?>
+            <?= $field('pekerjaan_ibu', 'Pekerjaan', 'text', false) ?>
+            <?= $field('telp_ibu', 'No. Telp', 'tel', false) ?>
         </div>
     </div>
 

@@ -77,6 +77,9 @@ class MuridController extends Controller
 
         $data = $this->collectInput();
         $errors = $this->validate($data);
+        if ($data['nama_panggilan'] === '' && $data['nama_lengkap'] !== '') {
+            $data['nama_panggilan'] = explode(' ', $data['nama_lengkap'])[0];
+        }
 
         if (!empty($errors)) {
             $_SESSION['murid_old'] = $data;
@@ -118,6 +121,9 @@ class MuridController extends Controller
 
         $data = $this->collectInput();
         $errors = $this->validate($data);
+        if ($data['nama_panggilan'] === '' && $data['nama_lengkap'] !== '') {
+            $data['nama_panggilan'] = explode(' ', $data['nama_lengkap'])[0];
+        }
 
         if (!empty($errors)) {
             $_SESSION['murid_old'] = $data;
@@ -176,28 +182,28 @@ class MuridController extends Controller
             'nama_lengkap' => trim((string) $this->input('nama_lengkap', '')),
             'nama_panggilan' => trim((string) $this->input('nama_panggilan', '')),
             'nisn' => trim((string) $this->input('nisn', '')) ?: null,
-            'agama' => trim((string) $this->input('agama', '')),
-            'nik' => trim((string) $this->input('nik', '')),
-            'no_registrasi_akte' => trim((string) $this->input('no_registrasi_akte', '')),
+            'agama' => trim((string) $this->input('agama', '')) ?: null,
+            'nik' => trim((string) $this->input('nik', '')) ?: null,
+            'no_registrasi_akte' => trim((string) $this->input('no_registrasi_akte', '')) ?: null,
             'jenis_kelamin' => trim((string) $this->input('jenis_kelamin', '')),
-            'tempat_lahir' => trim((string) $this->input('tempat_lahir', '')),
-            'tanggal_lahir' => trim((string) $this->input('tanggal_lahir', '')),
-            'alamat' => trim((string) $this->input('alamat', '')),
-            'tanggal_masuk_sekolah' => trim((string) $this->input('tanggal_masuk_sekolah', '')),
+            'tempat_lahir' => trim((string) $this->input('tempat_lahir', '')) ?: null,
+            'tanggal_lahir' => trim((string) $this->input('tanggal_lahir', '')) ?: null,
+            'alamat' => trim((string) $this->input('alamat', '')) ?: null,
+            'tanggal_masuk_sekolah' => trim((string) $this->input('tanggal_masuk_sekolah', '')) ?: null,
             'status_kondisi' => trim((string) $this->input('status_kondisi', '')),
             'jenis_kebutuhan' => trim((string) $this->input('jenis_kebutuhan', '')) ?: null,
             'kelengkapan_berkas' => trim((string) $this->input('kelengkapan_berkas', '')) ?: null,
-            'alamat_domisili' => trim((string) $this->input('alamat_domisili', '')),
+            'alamat_domisili' => trim((string) $this->input('alamat_domisili', '')) ?: null,
             'anak_ke' => $this->input('anak_ke', '') !== '' ? (int) $this->input('anak_ke') : null,
-            'jumlah_saudara' => (int) $this->input('jumlah_saudara', 0),
-            'nama_ayah' => trim((string) $this->input('nama_ayah', '')),
-            'pendidikan_ayah' => trim((string) $this->input('pendidikan_ayah', '')),
-            'pekerjaan_ayah' => trim((string) $this->input('pekerjaan_ayah', '')),
-            'telp_ayah' => trim((string) $this->input('telp_ayah', '')),
-            'nama_ibu' => trim((string) $this->input('nama_ibu', '')),
-            'pendidikan_ibu' => trim((string) $this->input('pendidikan_ibu', '')),
-            'pekerjaan_ibu' => trim((string) $this->input('pekerjaan_ibu', '')),
-            'telp_ibu' => trim((string) $this->input('telp_ibu', '')),
+            'jumlah_saudara' => $this->input('jumlah_saudara', '') !== '' ? (int) $this->input('jumlah_saudara') : null,
+            'nama_ayah' => trim((string) $this->input('nama_ayah', '')) ?: null,
+            'pendidikan_ayah' => trim((string) $this->input('pendidikan_ayah', '')) ?: null,
+            'pekerjaan_ayah' => trim((string) $this->input('pekerjaan_ayah', '')) ?: null,
+            'telp_ayah' => trim((string) $this->input('telp_ayah', '')) ?: null,
+            'nama_ibu' => trim((string) $this->input('nama_ibu', '')) ?: null,
+            'pendidikan_ibu' => trim((string) $this->input('pendidikan_ibu', '')) ?: null,
+            'pekerjaan_ibu' => trim((string) $this->input('pekerjaan_ibu', '')) ?: null,
+            'telp_ibu' => trim((string) $this->input('telp_ibu', '')) ?: null,
         ];
     }
 
@@ -210,13 +216,8 @@ class MuridController extends Controller
         } elseif ($this->input('level_kelas', '') !== $kelas['level_kelas']) {
             $errors['kelas_id'] = 'Kelas tidak sesuai dengan level yang dipilih.';
         }
-        $required = [
-            'nama_lengkap', 'nama_panggilan', 'agama', 'nik', 'no_registrasi_akte',
-            'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat',
-            'tanggal_masuk_sekolah', 'status_kondisi',
-            'alamat_domisili', 'nama_ayah', 'pendidikan_ayah', 'pekerjaan_ayah', 'telp_ayah',
-            'nama_ibu', 'pendidikan_ibu', 'pekerjaan_ibu', 'telp_ibu',
-        ];
+        // Hanya data dasar yang wajib; data lain boleh dilengkapi kemudian lewat Ubah Murid.
+        $required = ['nama_lengkap', 'jenis_kelamin', 'status_kondisi'];
 
         foreach ($required as $field) {
             if (($data[$field] ?? '') === '') {
