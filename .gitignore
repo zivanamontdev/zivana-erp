@@ -26,3 +26,9 @@ tests/report-preview-check.png
 
 # Spesifikasi eRapor (dokumen sumber, jangan di-commit)
 /eRapor_Zivana_Spesifikasi/
+
+# Docker khusus laptop lokal (jangan di-commit)
+/docker/
+/docker-compose.yml
+/docker-start.cmd
+/docker-stop.cmd
