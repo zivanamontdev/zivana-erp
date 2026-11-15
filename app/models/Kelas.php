@@ -2,7 +2,7 @@
 
 class Kelas extends Model
 {
-    public const LEVELS = ['Akar', 'Batang', 'Ranting', 'Daun'];
+    public const LEVELS = ['Akar', 'Batang', 'Ranting', 'Daun', 'Pucuk'];
     protected string $table = 'kelas';
 
     public function delete($id): bool
