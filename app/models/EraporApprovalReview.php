@@ -79,14 +79,14 @@ final class EraporApprovalReview
     private static function displayRows(array $document): array
     {
         $type=$document['jenis_dokumen']; $defs=$document['form']['definitions']; $values=$document['form']['values']; $rows=[];
-        $scaleKey=match($type) {'RTS'=>'nilai','AGAMA'=>'kolom_cetak','BING'=>'kode','UMMI'=>'kode',default=>null};
+        $scaleKey=match($type) {'RTS','RAS'=>'nilai','AGAMA'=>'kolom_cetak','BING'=>'kode','UMMI'=>'kode',default=>null};
         $scales=[];
         if ($scaleKey!==null) foreach ($defs['scale'] ?? [] as $scale) $scales[(string)$scale[$scaleKey]]=(string)$scale['label'];
         $append=static function(string $label,mixed $value,string $group='',string $sub='') use (&$rows): void {
             $value=is_string($value) ? trim($value) : $value;
             $rows[]=['label'=>$label,'value'=>($value===null || $value==='')?'Belum dinilai':(string)$value,'group'=>$group,'sub'=>$sub];
         };
-        if ($type==='RTS') {
+        if ($type==='RTS' || $type==='RAS') {
             $areas=[]; foreach ($defs['areas'] ?? [] as $area) $areas[(int)$area['id']]=mb_convert_case((string)$area['nama'],MB_CASE_TITLE,'UTF-8');
             $subs=[]; foreach ($defs['subareas'] ?? [] as $sub) $subs[(int)$sub['id']]=$sub;
             foreach ($defs['items'] as $item) {
@@ -95,6 +95,7 @@ final class EraporApprovalReview
                 $value=$values['nilai:'.$item['id']] ?? null;
                 $append((string)$item['tujuan'],$scales[(string)$value] ?? null,$sub ? ($areas[(int)$sub['area_id']] ?? '') : '',$subLabel);
             }
+            if ($type==='RAS') $append('Perkembangan anak secara keseluruhan',$values['narasi'] ?? null,'Perkembangan Anak Secara Keseluruhan');
         } elseif ($type==='AGAMA') {
             $scopes=[]; foreach ($defs['scopes'] ?? [] as $scope) $scopes[(int)$scope['id']]=$scope['nomor_romawi'].'. '.$scope['nama'];
             $subs=[]; foreach ($defs['subscopes'] ?? [] as $sub) $subs[(int)$sub['id']]=$sub;

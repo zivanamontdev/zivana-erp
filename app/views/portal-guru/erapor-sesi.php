@@ -230,8 +230,9 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     <span class="teacher-session-document-progress" data-erapor-document-progress><?= $type==='PPI' && !empty($ppiState['separate']) ? (int)$ppiState['progress']['filled'].' / '.(int)$ppiState['progress']['required'] : ($optional ? 'Opsional' : (int)$progress['filled'] . ' / ' . (int)$progress['required'] . ' terisi') ?></span>
                 </div>
 
-            <?php if ($type === 'RTS'): ?>
+            <?php if ($type === 'RTS' || $type === 'RAS'): ?>
                 <?php
+                $isRas = $type === 'RAS';
                 $subareasByArea = [];
                 foreach ($definitions['subareas'] as $subarea) $subareasByArea[(int)$subarea['area_id']][] = $subarea;
                 $groups = array_column($definitions['groups'], null, 'id');
@@ -239,7 +240,7 @@ require VIEW_PATH . '/layouts/focus-header.php';
                 foreach ($definitions['scale'] as $scale) $scaleChoices[(string)(int)$scale['nilai']] = $scale;
                 $reference = $document['reference'] ?? null;
                 ?>
-                <p class="erapor-page-help">Pilih satu simbol capaian untuk setiap tujuan. Semua tujuan wajib diisi; pilih <strong>-</strong> bila tujuan belum dikenalkan kepada murid.</p>
+                <p class="erapor-page-help">Pilih satu simbol capaian untuk setiap tujuan. Semua tujuan wajib diisi; pilih <strong>-</strong> bila tujuan belum dikenalkan kepada murid.<?php if ($isRas): ?> Lengkapi juga narasi <strong>Perkembangan anak secara keseluruhan</strong> di akhir halaman.<?php endif; ?></p>
                 <ul class="erapor-scale-legend" aria-label="Keterangan simbol capaian">
                     <?php foreach ($definitions['scale'] as $scale): ?>
                         <li><?= $scaleIcon($scale) ?><span><?= e($scale['label']) ?></span></li>
@@ -281,6 +282,20 @@ require VIEW_PATH . '/layouts/focus-header.php';
                     <?php endforeach; ?>
                     </div></details>
                 <?php endforeach; ?>
+                <?php if ($isRas): ?>
+                    <details class="ui-disclosure erapor-section"><summary class="pengisian-kategori-header erapor-page-heading ui-disclosure-trigger"><span>Perkembangan Anak Secara Keseluruhan</span><span class="ui-disclosure-chevron" aria-hidden="true"><?= icon('icon_chevron') ?></span></summary><div class="erapor-section-body">
+                        <?php if ($reference): ?>
+                            <div class="erapor-narrative-reference" data-erapor-narrative-reference>
+                                <strong><?= e($reference['label']) ?> (hanya baca)</strong>
+                                <p><?= ($reference['values']['narasi'] ?? '') !== '' ? nl2br(e($reference['values']['narasi'])) : '—' ?></p>
+                            </div>
+                        <?php endif; ?>
+                        <div class="erapor-question" data-erapor-question>
+                            <?= $renderText($document, 'RAS', 'narasi', $reference ? 'Narasi Akhir Semester Genap' : 'Narasi ' . $period['nama'], $values['narasi'] ?? null, false, true) ?>
+                            <p class="erapor-question-error" data-erapor-question-error hidden>Narasi perkembangan anak wajib diisi.</p>
+                        </div>
+                    </div></details>
+                <?php endif; ?>
 
             <?php elseif ($type === 'BING'): ?>
                 <?php

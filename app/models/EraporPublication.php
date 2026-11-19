@@ -84,7 +84,7 @@ final class EraporPublication
     private static function capture(PDO $db,array $session,array $approvals,DateTimeImmutable $now,?callable $observe=null,?int $historyCutoff=null): array
     {
         if ($observe) $observe('capture_identity');
-        if ($session['jenis']!=='TENGAH') throw new DomainException('Rapor Akhir Semester belum memiliki rubrik resmi; paket tidak dapat diterbitkan.');
+        if (!in_array($session['jenis'],['TENGAH','AKHIR'],true)) throw new DomainException('Jenis periode sesi tidak dikenal.');
         $period=self::one($db,'SELECT p.*,ta.tahun_awal,ta.tahun_akhir FROM periode_penilaian p JOIN tahun_ajaran ta ON ta.id=p.tahun_ajaran_id WHERE p.id=?',[$session['periode_id']]);
         $student=self::one($db,'SELECT m.id,m.nama_lengkap,m.nama_panggilan,m.nisn,m.tanggal_lahir,m.tempat_lahir,m.status_kondisi,m.jenis_kebutuhan,k.level_kelas,k.nama_kelas
             FROM murid m LEFT JOIN kelas k ON k.id=m.kelas_id WHERE m.id=?',[$session['murid_id']]);
@@ -93,7 +93,7 @@ final class EraporPublication
         // Snapshot sesi sudah ternormalisasi (Regular/ABK); teks mentah murid bisa 'Reguler'/'Berkebutuhan Khusus'.
         $student['status_kondisi']=$session['kondisi'];
         $cal=EraporCalendar::normalize($period);
-        if ($cal['jenis']!=='TENGAH' || $cal['semester']!==$session['semester'] || $cal['tahun_ajaran_id']!==(int)$session['tahun_ajaran_id']) throw new DomainException('Periode sesi berubah atau bukan periode Tengah.');
+        if ($cal['jenis']!==$session['jenis'] || $cal['semester']!==$session['semester'] || $cal['tahun_ajaran_id']!==(int)$session['tahun_ajaran_id']) throw new DomainException('Periode sesi berubah.');
         $address=(string)$school['alamat'];
         $place=self::extractPlace($address);
         if ($place==='') throw new DomainException('Kota pengesahan belum tersedia pada Data Sekolah.');
@@ -117,7 +117,7 @@ final class EraporPublication
         $docs=self::all($db,'SELECT d.id,d.rubrik_id,r.kode,r.nama,r.jenis_dokumen,r.judul_cetak,r.versi,r.status
             FROM erapor_sesi_dokumen sd JOIN erapor_dokumen d ON d.id=sd.dokumen_id
             JOIN erapor_rubrik r ON r.id=d.rubrik_id WHERE sd.sesi_id=? ORDER BY sd.urutan',[$session['id']]);
-        $expected=['RTS','AGAMA','UMMI','BING']; if ($session['kondisi']==='ABK') $expected[]='PPI';
+        $expected=[$session['jenis']==='AKHIR'?'RAS':'RTS','AGAMA','UMMI','BING']; if ($session['kondisi']==='ABK') $expected[]='PPI';
         if (array_column($docs,'jenis_dokumen')!==$expected) throw new DomainException('Paket dokumen tidak cocok dengan kondisi murid.');
         $documents=[];
         foreach ($docs as $doc) {
@@ -135,18 +135,21 @@ final class EraporPublication
                 $relatedForm=EraporTeacherForm::documentForm($db,$relatedSession,$doc);
                 $key=match($doc['jenis_dokumen']) {
                     'RTS'=>'TS_'.$relatedSession['period_semester'],
+                    'RAS'=>'AS_'.$relatedSession['period_semester'],
                     'AGAMA'=>$relatedSession['period_type'].'_'.$relatedSession['period_semester'],
                     'UMMI'=>$relatedSession['period_type'],
                     default=>(int)$relatedSession['id']===(int)$session['id']?'CURRENT':null,
                 };
-                if ($key!==null && ($doc['jenis_dokumen']!=='RTS' || $relatedSession['period_type']==='TENGAH')) {
+                // RTS hanya dari periode Tengah, RAS hanya dari periode Akhir (dokumen tahunan dipakai bersama dua sesi per semester).
+                $annualType=['RTS'=>'TENGAH','RAS'=>'AKHIR'][$doc['jenis_dokumen']] ?? null;
+                if ($key!==null && ($annualType===null || $relatedSession['period_type']===$annualType)) {
                     $periodValues[$key]=$relatedForm['values'];
                     if ($doc['jenis_dokumen']==='UMMI') foreach ($relatedForm['values'] as $valueKey=>$value) if (str_starts_with($valueKey,'tes:') && is_array($value)) $tests[$key][]=$value;
                 }
                 if ($observe) $observe('capture_signatures_'.$doc['jenis_dokumen']);
                 $block=self::signatureBlock($db,$relatedSession,$approvals,(int)$session['id']===(int)$relatedSession['id']?$now:null,$schoolSnapshot['tempat_pengesahan']);
                 if ((int)$relatedSession['id']===(int)$session['id']) { $signatureCurrent=$block; $doc['form']=$relatedForm; }
-                if ($doc['jenis_dokumen']==='RTS' && $relatedSession['period_type']==='TENGAH') $signatures[$relatedSession['period_semester']]=$block;
+                if ($annualType!==null && $relatedSession['period_type']===$annualType) $signatures[$relatedSession['period_semester']]=$block;
             }
             $doc['period_values']=$periodValues; $doc['signature_periods']=$signatures;
             $doc['signature_current']=$signatureCurrent;

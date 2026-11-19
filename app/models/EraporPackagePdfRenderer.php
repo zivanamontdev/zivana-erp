@@ -22,7 +22,7 @@ final class EraporPackagePdfRenderer
         if ($observe) $observe('render_validation');
         if (!class_exists(\Dompdf\Dompdf::class)) throw new RuntimeException('Dompdf belum tersedia.');
         $types=array_column($package['documents'] ?? [],'jenis_dokumen');
-        $expected=['RTS','AGAMA','UMMI','BING'];
+        $expected=[($package['period']['jenis'] ?? '')==='AKHIR'?'RAS':'RTS','AGAMA','UMMI','BING'];
         if (($package['student']['status_kondisi'] ?? '')==='ABK' && empty($package['exclude_ppi'])) $expected[]='PPI';
         if (!empty($package['standalone_ppi'])) {
             if (($package['student']['status_kondisi'] ?? '')!=='ABK') throw new DomainException('PPI hanya tersedia untuk ABK.');
@@ -32,7 +32,7 @@ final class EraporPackagePdfRenderer
         // paket rapor murid wajib lengkap sesuai kondisi.
         $valid=!empty($package['template']) || !empty($package['scoped']) ? ($types!==[] && array_values(array_intersect($expected,$types))===$types) : $types===$expected;
         if (!$valid) throw new DomainException('Susunan paket atau rubrik PDF belum lengkap.');
-        if (($package['period']['jenis'] ?? '')!=='TENGAH') throw new DomainException('PDF final menunggu spesifikasi Rapor Akhir Semester.');
+        if (!in_array($package['period']['jenis'] ?? '',['TENGAH','AKHIR'],true)) throw new DomainException('Jenis periode PDF tidak dikenal.');
 
         // Lintasan 1 tanpa kop di blok tanda tangan; blok yang ternyata mulai di halaman baru
         // dirender ulang (lintasan 2) dengan kop identitas rapor agar halaman itu tetap beridentitas.
@@ -66,6 +66,7 @@ final class EraporPackagePdfRenderer
             $body.='<section class="report report-'.strtolower(e($document['jenis_dokumen'])).'">';
             $body.=match ($document['jenis_dokumen']) {
                 'RTS'=>self::rts($package,$document),
+                'RAS'=>self::ras($package,$document),
                 'AGAMA'=>self::agama($package,$document),
                 'UMMI'=>self::ummi($package,$document),
                 'BING'=>self::bing($package,$document),
@@ -173,6 +174,53 @@ final class EraporPackagePdfRenderer
         if ($semesters===[]) $semesters=[($p['period']['semester'] ?? 'GANJIL')==='GENAP'?'GENAP':'GANJIL'];
         $label=implode(' dan ',array_map(static fn($s)=>$s==='GANJIL'?'Ganjil':'Genap',$semesters));
         return $html.self::signatureBlock($p,$d,'Pengesahan Tengah Semester '.$label,$periods[end($semesters)] ?? null);
+    }
+
+    /** RAS: indikator di kiri, empat kolom tingkat (BD/MB/BSH/BSB) untuk tiap semester; tingkat ditandai centang. */
+    private static function ras(array $p,array $d): string
+    {
+        $f=$d['form']['definitions']; $vals=$d['period_values'] ?? [];
+        $subByArea=[]; foreach ($f['subareas'] ?? [] as $s) $subByArea[(int)$s['area_id']][]=$s;
+        $items=[]; foreach ($f['items'] ?? [] as $i) $items[(int)$i['sub_area_id']][]=$i;
+        $levels=[]; foreach ($f['scale'] ?? [] as $s) if ((int)$s['nilai']>=1) $levels[(int)$s['nilai']]=$s;
+        ksort($levels);
+        $semesters=['GANJIL'=>'AS_GANJIL','GENAP'=>'AS_GENAP'];
+        // Satu kolom kompetensi lebar + 2x4 kolom tingkat; baris pengukur mengunci lebar (Dompdf mengabaikan colgroup).
+        $html='<table class="report-table fixed-cols ras-table"><thead><tr class="col-sizer"><th style="width:52%"></th>'.str_repeat('<th style="width:6%"></th>',8).'</tr>'
+            .self::tableIdentity($p,$d,9,3)
+            .'<tr><th rowspan="2">Kompetensi</th><th colspan="4">Akhir Semester Ganjil</th><th colspan="4">Akhir Semester Genap</th></tr>'
+            .'<tr>'.str_repeat(implode('',array_map(static fn($l)=>'<th class="ras-level">'.e($l['kode']).'</th>',$levels)),2).'</tr></thead><tbody>'
+            .'<tr class="legend-row"><td colspan="9"><div class="ras-legend"><strong>Keterangan:</strong> '.implode(' &nbsp; ',array_map(static fn($l)=>e($l['kode']).' = '.e($l['label']),$levels)).' &nbsp; &mdash; = Belum Dikenalkan</div></td></tr>';
+        foreach ($f['areas'] ?? [] as $area) {
+            $html.='<tr class="section-row"><th colspan="9">'.e($area['nama']).'</th></tr>';
+            foreach ($subByArea[(int)$area['id']] ?? [] as $sub) {
+                if (!(bool)$sub['implisit']) $html.='<tr class="sub-row"><th colspan="9">'.e(trim(($sub['huruf'] ?? '').'. '.($sub['nama'] ?? ''))).'</th></tr>';
+                foreach ($items[(int)$sub['id']] ?? [] as $item) {
+                    $html.='<tr><td>'.e($item['tujuan']).'</td>';
+                    foreach ($semesters as $semester=>$key) {
+                        $v=$vals[$key]['nilai:'.$item['id']] ?? null;
+                        if ($v===0) $html.='<td colspan="4" class="grade ras-none"><span class="skala-dash">&#8212;</span></td>'; // 0 = Belum Dikenalkan
+                        else foreach ($levels as $grade=>$_) $html.='<td class="grade ras-mark">'.($v!==null && (int)$v===$grade?self::check():'').'</td>';
+                    }
+                    $html.='</tr>';
+                }
+            }
+        }
+        // Judul + narasi satu blok yang tidak terpotong halaman (judul tidak boleh tertinggal sendirian).
+        $html.='</tbody></table><div class="ras-narratives"><h2>Perkembangan anak secara keseluruhan</h2>';
+        $current=($p['period']['semester'] ?? 'GANJIL')==='GENAP'?'GENAP':'GANJIL';
+        foreach ($semesters as $semester=>$key) {
+            $text=trim((string)($vals[$key]['narasi'] ?? ''));
+            if ($text==='' && $semester!==$current) continue; // Ganjil yang belum pernah diisi tidak dicetak.
+            if ($text==='' && !empty($p['template'])) $text='{Narasi perkembangan anak}';
+            $html.='<div class="ras-narrative"><strong>Akhir Semester '.($semester==='GANJIL'?'Ganjil':'Genap').':</strong><p class="narrative">'.self::text($text).'</p></div>';
+        }
+        $html.='</div>';
+        $periods=$d['signature_periods'] ?? [];
+        $present=array_values(array_intersect(['GANJIL','GENAP'],array_keys($periods)));
+        if ($present===[]) $present=[$current];
+        $label=implode(' dan ',array_map(static fn($s)=>$s==='GANJIL'?'Ganjil':'Genap',$present));
+        return $html.self::signatureBlock($p,$d,'Pengesahan Akhir Semester '.$label,$periods[end($present)] ?? null);
     }
 
     private static function agama(array $p,array $d): string
@@ -361,7 +409,7 @@ final class EraporPackagePdfRenderer
         $identity='Nama: '.e($s['nama_lengkap']).' &nbsp; Kelas: '.e($s['nama_kelas'] ?? '-').' &nbsp; NISN: '.e($s['nisn'] ?? '-');
         if ($d['jenis_dokumen']==='UMMI') $identity='Unit Sekolah: '.e($school['nama_komersial']).' &nbsp; Nama: '.e($s['nama_lengkap']).' &nbsp; NISN: '.e($s['nisn'] ?? '-').' &nbsp; Kelas: '.e($s['nama_kelas'] ?? '-');
         if ($d['jenis_dokumen']==='PPI') $identity.='<br>Tempat, tanggal lahir: '.e(trim(($s['tempat_lahir'] ?? '').', '.($s['tanggal_lahir'] ?? ''))).' &nbsp; Usia: '.e($s['usia'] ?? '-');
-        $periodLine=$d['jenis_dokumen']==='RTS'?'T.A '.$p['period']['tahun_label']:$p['period']['label'].' · Tahun Pelajaran '.$p['period']['tahun_label'];
+        $periodLine=in_array($d['jenis_dokumen'],['RTS','RAS'],true)?'T.A '.$p['period']['tahun_label']:$p['period']['label'].' · Tahun Pelajaran '.$p['period']['tahun_label'];
         return '<tr class="identity-head"><th colspan="'.($columns-$logoSpan).'"><strong>'.e($title).'</strong><br>'.e($periodLine).'<br>'.e($school['nama_komersial']).'<br>'.$identity.'</th><th class="logo-cell"'.($logoSpan>1?' colspan="'.$logoSpan.'"':'').'><img src="'.e($logo).'" alt=""></th></tr>';
     }
 
@@ -471,6 +519,6 @@ final class EraporPackagePdfRenderer
     {
         $ink=colorToken('neutral-900'); $muted=colorToken('neutral-500'); $line=colorToken('neutral-150');
         $surface=colorToken('neutral-50'); $section=colorToken('neutral-75'); $white=colorToken('neutral-white');
-        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:Quicksand,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:14pt}.agama-grade img{width:11pt;height:11pt;vertical-align:middle}.agama-table .agama-narrative td{font-size:8pt;padding:5pt}.agama-table .agama-narrative td.narrative{text-align:justify;line-height:1.5}.sign-job{height:34pt;overflow:hidden}.sign-image{height:116pt;margin:2pt auto}.sign-image img{max-width:100%;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}.signature-title{margin:10pt 0 4pt;text-align:center;font-size:10pt;font-weight:bold}.agama-wide{font-size:8pt}.agama-wide th,.agama-wide td{padding:3pt}.agama-wide .agama-stage th{font-size:6.5pt}.agama-wide .agama-grade img{width:12pt;height:12pt}.agama-wide .agama-narrative td{font-size:8.5pt}';
+        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:Quicksand,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:14pt}.agama-grade img{width:11pt;height:11pt;vertical-align:middle}.agama-table .agama-narrative td{font-size:8pt;padding:5pt}.agama-table .agama-narrative td.narrative{text-align:justify;line-height:1.5}.sign-job{height:34pt;overflow:hidden}.sign-image{height:116pt;margin:2pt auto}.sign-image img{max-width:100%;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}.signature-title{margin:10pt 0 4pt;text-align:center;font-size:10pt;font-weight:bold}.agama-wide{font-size:8pt}.agama-wide th,.agama-wide td{padding:3pt}.agama-wide .agama-stage th{font-size:6.5pt}.agama-wide .agama-grade img{width:12pt;height:12pt}.agama-wide .agama-narrative td{font-size:8.5pt}.ras-table .ras-level{font-size:7pt;padding:3pt 1pt;text-align:center}.ras-table .ras-mark{padding:3pt 0;text-align:center;vertical-align:middle}.ras-table .ras-mark img{width:10pt;height:10pt}.ras-table .ras-none{vertical-align:middle}.ras-legend{font-size:7.5pt;line-height:1.5}.ras-narratives{page-break-inside:avoid}.ras-narrative{margin:0 0 8pt}.ras-narrative p{margin:3pt 0 0}';
     }
 }

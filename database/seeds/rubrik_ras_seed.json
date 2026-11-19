@@ -57,25 +57,25 @@
     "nilai": 1,
     "kode": "BD",
     "label": "Baru Dikenalkan",
-    "simbol": "✓"
+    "simbol": "/"
    },
    {
     "nilai": 2,
     "kode": "MB",
     "label": "Mulai Berkembang",
-    "simbol": "✓"
+    "simbol": "∠"
    },
    {
     "nilai": 3,
     "kode": "BSH",
     "label": "Berkembang Sesuai Harapan",
-    "simbol": "✓"
+    "simbol": "△"
    },
    {
     "nilai": 4,
     "kode": "BSB",
     "label": "Berkembang Sangat Baik",
-    "simbol": "✓"
+    "simbol": "▲"
    }
   ],
   "statistik": {
@@ -643,5 +643,5 @@
    ]
   }
  ],
- "_catatan_skema": "Disusun dari RAPOR AKHIR SEMESTER.docx. Ejaan indikator diperbaiki (kelass, Menklasifikasikan, lambing, focus, tangan(merobek). Tanda centang pada skala hanya penanda kolom; posisi kolom menunjukkan tingkat. Narasi berupa teks bebas per semester."
+ "_catatan_skema": "Disusun dari RAPOR AKHIR SEMESTER.docx. Ejaan indikator diperbaiki (kelass, Menklasifikasikan, lambing, focus, tangan(merobek). Simbol skala sama dengan RTS agar pilihan di layar guru mudah dibedakan; pada PDF tingkat ditandai tanda centang di kolom masing-masing. Narasi berupa teks bebas per semester."
 }
