@@ -28,11 +28,14 @@ class EraporTeacherApiController extends Controller
             foreach ($form['documents'] as $doc) if ((int)$doc['id']===$did) $type=$doc['jenis_dokumen'];
             if ($type===null) throw new DomainException('Dokumen tidak tersedia dalam sesi.');
             foreach ($body['changes'] as $change) {
-                $allowed=$type==='RTS'?['indikator_id','nilai','expected']:['key','value','expected'];
+                $rtsShape=['indikator_id','nilai','expected']; $textShape=['key','value','expected'];
+                // RAS: indikator memakai bentuk RTS, narasi memakai bentuk teks (kunci 'narasi').
+                $allowed=$type==='RTS'?$rtsShape:($type==='RAS'?(is_array($change) && array_key_exists('key',$change)?$textShape:$rtsShape):$textShape);
                 if (!is_array($change) || array_diff(array_keys($change),$allowed) || array_diff($allowed,array_keys($change))) throw new InvalidArgumentException('Struktur isian tidak valid.');
             }
             $saved = match ($type) {
                 'RTS'=>EraporRtsEntry::save($db,$sid,$did,$actor,$body['changes']),
+                'RAS'=>EraporRtsEntry::save($db,$sid,$did,$actor,$body['changes'],null,'RAS'),
                 'BING','PPI'=>EraporStructuredEntry::save($db,$type,$sid,$did,$actor,$body['changes']),
                 'AGAMA'=>EraporAgamaEntry::save($db,$sid,$did,$actor,$body['changes']),
                 'UMMI'=>EraporUmmiEntry::save($db,$sid,$did,$actor,$body['changes']),

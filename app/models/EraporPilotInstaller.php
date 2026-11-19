@@ -27,6 +27,7 @@ final class EraporPilotInstaller
         '20260930_erapor_agama_tanpa_keterangan.sql',
         '20261018_erapor_ppi_terpisah.sql',
         '20261021_erapor_pdf_revisi.sql',
+        '20261023_erapor_ras.sql',
     ];
 
     private const SEEDS = [
@@ -35,6 +36,7 @@ final class EraporPilotInstaller
         'PPI' => ['rubrik_ppi_seed.json', EraporUmmiPpiSeed::class],
         'BING' => ['rubrik_bing_seed.json', EraporBingSeed::class],
         'AGAMA' => ['rubrik_agama_seed.json', EraporAgamaSeed::class],
+        'RAS' => ['rubrik_ras_seed.json', EraporRasSeed::class],
     ];
 
     public static function plan(string $root): array
@@ -84,8 +86,8 @@ final class EraporPilotInstaller
         $approvalStageCount = self::countIfTableExists($db, 'erapor_alur_penyetuju');
         $assignmentCount = self::countIfTableExists($db, 'erapor_penyetuju_user');
         $complete = count($ledger) === count(self::MIGRATIONS)
-            && $rubricCount === 5
-            && $seedHistoryCount === 5
+            && $rubricCount === 6
+            && $seedHistoryCount === 6
             && $approvalStageCount === 4;
 
         return [
@@ -168,6 +170,7 @@ final class EraporPilotInstaller
             'EraporUmmiPpiSeed.php',
             'EraporBingSeed.php',
             'EraporAgamaSeed.php',
+            'EraporRasSeed.php',
         ] as $file) {
             require_once $root . '/app/models/' . $file;
         }
@@ -178,7 +181,9 @@ final class EraporPilotInstaller
         self::loadDependencies($root);
         $seeds = [];
         foreach (self::SEEDS as $kind => [$file, $class]) {
-            $seeds[$kind] = $class::load($root . '/eRapor_Zivana_Spesifikasi/' . $file);
+            // Seed resmi ikut ter-commit di database/seeds; salinan di folder spesifikasi hanya cadangan lokal.
+            $path = is_file($root . '/database/seeds/' . $file) ? $root . '/database/seeds/' . $file : $root . '/eRapor_Zivana_Spesifikasi/' . $file;
+            $seeds[$kind] = $class::load($path);
         }
         return $seeds;
     }

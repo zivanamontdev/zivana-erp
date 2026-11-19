@@ -1,0 +1,241 @@
+{
+  "_catatan": "Seed Rapor PPI. Hanya nama aspek dan definisi kolom yang tetap. Seluruh isi rapor adalah teks bebas yang diketik guru.",
+  "_sumber": "PPI_Muhammad_Ibrahim_Hanif_2026_JUNI.pdf",
+  "rubrik": {
+    "kode": "PPI_V1",
+    "jenis_dokumen": "PPI",
+    "nama": "Program Pembelajaran Individu",
+    "judul_cetak": "PROGRAM PEMBELAJARAN INDIVIDU",
+    "versi": 1,
+    "cakupan": "SEMESTER",
+    "jenis_periode": null,
+    "cetak_gabung_periode": false,
+    "khusus_abk": true,
+    "orientasi_cetak": "portrait",
+    "ukuran_kertas": "A4",
+    "lebar_cetak_cm": 17.0,
+    "margin_cetak_cm": 2.0,
+    "bagian": [
+      {
+        "kode": "A",
+        "urutan": 1,
+        "judul": "IDENTITAS",
+        "jenis": "identitas",
+        "wajib": false,
+        "catatan": "Terisi otomatis dari Data Murid. Bukan tahap pengisian."
+      },
+      {
+        "kode": "B",
+        "urutan": 2,
+        "judul": "KARAKTERISTIK ANAK BERDASARKAN HASIL OBSERVASI",
+        "jenis": "matriks",
+        "wajib": true,
+        "teks_atas": null
+      },
+      {
+        "kode": "C",
+        "urutan": 3,
+        "judul": "PROGRAM PEMBELAJARAN INDIVIDU",
+        "jenis": "matriks",
+        "wajib": true,
+        "teks_atas": "Pelaksana : Guru dan Orangtua"
+      }
+    ],
+    "penandatangan": [
+      {
+        "urutan": 1,
+        "peran": "KEPALA_SEKOLAH",
+        "jabatan_cetak": "Kepala TK Zivana Montessori",
+        "prefiks": "Mengetahui,",
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      },
+      {
+        "urutan": 2,
+        "peran": "GURU_KELAS",
+        "jabatan_cetak": "Guru Kelas",
+        "prefiks": null,
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      }
+    ]
+  },
+  "identitas_baris": [
+    {
+      "kode": "nama",
+      "urutan": 1,
+      "label": "Nama",
+      "sumber": "murid.nama"
+    },
+    {
+      "kode": "usia",
+      "urutan": 2,
+      "label": "Usia",
+      "sumber": "hitung:murid.tanggal_lahir",
+      "format": "{tahun} tahun {bulan} bulan"
+    },
+    {
+      "kode": "kelas",
+      "urutan": 3,
+      "label": "Kelas",
+      "sumber": "murid.kelas.nama"
+    },
+    {
+      "kode": "diagnosa",
+      "urutan": 4,
+      "label": "Diagnosa",
+      "sumber": "murid.diagnosa",
+      "kosong_cetak": "-"
+    },
+    {
+      "kode": "sekolah",
+      "urutan": 5,
+      "label": "Sekolah",
+      "sumber": "sekolah.nama"
+    }
+  ],
+  "aspek": [
+    {
+      "kode": "NAM",
+      "urutan": 1,
+      "nama": "Nilai Agama dan Moral"
+    },
+    {
+      "kode": "FM",
+      "urutan": 2,
+      "nama": "Fisik Motorik"
+    },
+    {
+      "kode": "KOG",
+      "urutan": 3,
+      "nama": "Kognitif"
+    },
+    {
+      "kode": "BHS",
+      "urutan": 4,
+      "nama": "Bahasa"
+    },
+    {
+      "kode": "SOSEM",
+      "urutan": 5,
+      "nama": "Sosial Emosional"
+    }
+  ],
+  "kolom": [
+    {
+      "bagian": "B",
+      "kode": "kekuatan",
+      "urutan": 1,
+      "label_cetak": "Kekuatan",
+      "grup_cetak": null,
+      "wajib": true,
+      "lebar_cetak_cm": 7.0,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "diisi_di_sesi": true
+    },
+    {
+      "bagian": "B",
+      "kode": "tantangan",
+      "urutan": 2,
+      "label_cetak": "Tantangan",
+      "grup_cetak": null,
+      "wajib": true,
+      "lebar_cetak_cm": 6.0,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "diisi_di_sesi": true
+    },
+    {
+      "bagian": "C",
+      "kode": "tujuan_jangka_panjang",
+      "urutan": 1,
+      "label_cetak": "Jangka Panjang\n(1 Tahun)",
+      "grup_cetak": "Tujuan",
+      "wajib": true,
+      "lebar_cetak_cm": 2.4,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "diisi_di_sesi": true
+    },
+    {
+      "bagian": "C",
+      "kode": "tujuan_jangka_pendek",
+      "urutan": 2,
+      "label_cetak": "Jangka Pendek\n(3 Bulan)",
+      "grup_cetak": "Tujuan",
+      "wajib": true,
+      "lebar_cetak_cm": 2.4,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "diisi_di_sesi": true
+    },
+    {
+      "bagian": "C",
+      "kode": "strategi",
+      "urutan": 3,
+      "label_cetak": "Strategi",
+      "grup_cetak": null,
+      "wajib": true,
+      "lebar_cetak_cm": 3.0,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "diisi_di_sesi": true
+    },
+    {
+      "bagian": "C",
+      "kode": "media",
+      "urutan": 4,
+      "label_cetak": "Media",
+      "grup_cetak": null,
+      "wajib": true,
+      "lebar_cetak_cm": 1.8,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "diisi_di_sesi": true
+    },
+    {
+      "bagian": "C",
+      "kode": "hasil_capaian_guru",
+      "urutan": 5,
+      "label_cetak": "Guru",
+      "grup_cetak": "Hasil Capaian",
+      "wajib": false,
+      "lebar_cetak_cm": 2.1,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "catatan": "Dicetak tapi kosong saat rapor terbit. TIDAK PERNAH disimpan di rapor_ppi_isian; hanya di ppi_capaian, diisi setelah sesi SELESAI lewat alur terpisah pasca-pilot. Lihat SPEK_RUBRIK_PPI.md bagian 6.",
+      "diisi_di_sesi": false
+    },
+    {
+      "bagian": "C",
+      "kode": "hasil_capaian_orangtua",
+      "urutan": 6,
+      "label_cetak": "Orangtua",
+      "grup_cetak": "Hasil Capaian",
+      "wajib": false,
+      "lebar_cetak_cm": 2.1,
+      "jenis": "TEXTAREA",
+      "render": "BULLET_PER_BARIS",
+      "cetak": true,
+      "catatan": "Dicetak tapi kosong saat rapor terbit. TIDAK PERNAH disimpan di rapor_ppi_isian; hanya di ppi_capaian, diisi setelah sesi SELESAI lewat alur terpisah pasca-pilot. Lihat SPEK_RUBRIK_PPI.md bagian 6.",
+      "diisi_di_sesi": false
+    }
+  ],
+  "ringkasan": {
+    "jumlah_aspek": 5,
+    "kolom_bagian_b": 2,
+    "kolom_bagian_c": 6,
+    "kolom_dicetak": 8,
+    "textarea_wajib_per_periode": 30,
+    "catatan": "30 kotak wajib, yaitu 5 aspek x 6 kolom. 2 kolom Hasil Capaian dicetak tapi diisi di luar sesi. Lihat SPEK_RUBRIK_PPI.md bagian 6 dan 9."
+  },
+  "_catatan_skema": "Kolom rubrik mengikuti SPEK_ALUR_PENGISIAN.md bagian 7.3. kolom_periode hanya nama kolom cetakan; setiap baris isian memakai periode_id konkret dari tabel periode."
+}

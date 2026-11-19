@@ -27,7 +27,7 @@ final class EraporCompleteness
             }
             $args=[$session['id'],$doc['id'],$rid];
             $rows=[];
-            if ($type==='RTS') {
+            if ($type==='RTS' || $type==='RAS') {
                 // "Belum Dikenalkan" (0) adalah jawaban yang sah, bukan isian kosong.
                 $rows=self::rows($db,"SELECT CONCAT('nilai:',i.id) AS field,i.tujuan AS label,COALESCE(sc.nilai,IF(b.indikator_id IS NULL,NULL,0)) AS value
                     FROM erapor_rubrik_indikator i JOIN erapor_rubrik_sub_area s ON s.id=i.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id
@@ -35,6 +35,10 @@ final class EraporCompleteness
                     LEFT JOIN erapor_skala_nilai sc ON sc.id=n.skala_id AND sc.rubrik_id=a.rubrik_id
                     LEFT JOIN erapor_rts_belum_dikenalkan b ON b.indikator_id=i.id AND b.sesi_id=? AND b.dokumen_id=?
                     WHERE a.rubrik_id=? AND i.aktif=1 ORDER BY i.id",[$session['id'],$doc['id'],$session['id'],$doc['id'],$rid]);
+                if ($type==='RAS') { // Narasi "Perkembangan anak secara keseluruhan" wajib, satu per sesi.
+                    $rows=array_merge($rows,self::rows($db,"SELECT 'narasi' AS field,'Perkembangan anak secara keseluruhan' AS label,
+                        (SELECT n.isi FROM erapor_ras_narasi n WHERE n.sesi_id=? AND n.dokumen_id=?) AS value",[$session['id'],$doc['id']]));
+                }
             } elseif ($type==='BING') {
                 // Rapor Bahasa Inggris opsional (sama seperti Ummi): tidak menghalangi Selesaikan Rapor.
                 $rows=[];

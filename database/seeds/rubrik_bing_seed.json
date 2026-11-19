@@ -1,0 +1,237 @@
+{
+  "_catatan": "Seed Rapor Bahasa Inggris (Statement of Result). Teks disalin persis dari sumber, termasuk salah ketik. Perbaikan teks menunggu keputusan sekolah, lihat spesifikasi bagian 9.",
+  "_sumber": "STATEMENT_OF_RESULT.pdf",
+  "rubrik": {
+    "kode": "BING_V1",
+    "jenis_dokumen": "BING",
+    "nama": "Rapor Bahasa Inggris",
+    "judul_cetak": "STATEMENT OF RESULT",
+    "versi": 1,
+    "cakupan": "SEMESTER",
+    "jenis_periode": null,
+    "cetak_gabung_periode": false,
+    "khusus_abk": false,
+    "sub_judul_cetak": "ENGLISH CLASS",
+    "bahasa": "en",
+    "orientasi_cetak": "portrait",
+    "ukuran_kertas": "A4",
+    "lebar_cetak_cm": 17.0,
+    "margin_cetak_cm": 2.0,
+    "bagian": [
+      {
+        "kode": "A",
+        "urutan": 1,
+        "jenis": "rubrik",
+        "wajib": true,
+        "judul": "LEARNING ACHIEVEMENT"
+      },
+      {
+        "kode": "B",
+        "urutan": 2,
+        "jenis": "teks_bebas",
+        "wajib": true,
+        "judul": "TEACHER COMMENTS"
+      }
+    ],
+    "penandatangan": [
+      {
+        "urutan": 1,
+        "peran": "KOORDINATOR_BING",
+        "jabatan_cetak": "English Coordinator",
+        "posisi_cetak": "kiri",
+        "cetak_nuptk": false,
+        "prefiks": null
+      },
+      {
+        "urutan": 2,
+        "peran": "GURU_KELAS",
+        "jabatan_cetak": "English Teacher",
+        "posisi_cetak": "kanan",
+        "cetak_nuptk": true,
+        "prefiks": null
+      },
+      {
+        "urutan": 3,
+        "peran": "KEPALA_SEKOLAH",
+        "jabatan_cetak": "Principal of Zivana Montessori School",
+        "posisi_cetak": "tengah",
+        "cetak_nuptk": true,
+        "prefiks": null
+      }
+    ]
+  },
+  "skala": [
+    {
+      "kode": "EXCELLENT",
+      "label": "Excellent",
+      "urutan_tampil": 1,
+      "peringkat": 4,
+      "definisi": "Student demonstrates a very good understanding of the English material, responds confidently, uses vocabulary appropriately, and can communicate independently with little or no assistance."
+    },
+    {
+      "kode": "OUTSTANDING",
+      "label": "Outstanding",
+      "urutan_tampil": 2,
+      "peringkat": 3,
+      "definisi": "Student demonstrates excellent understanding and confidence in using English. The child can respond, speak, and use vocabulary appropriately and independently in various classroom activities."
+    },
+    {
+      "kode": "GOOD",
+      "label": "Good",
+      "urutan_tampil": 3,
+      "peringkat": 2,
+      "definisi": "Student demonstrates a good understanding of the English material and can respond and participate in activities with occasional guidance from the teacher."
+    },
+    {
+      "kode": "FAIR",
+      "label": "Fair",
+      "urutan_tampil": 4,
+      "peringkat": 1,
+      "definisi": "Student demonstrates a basic understanding of the English material but still needs frequent guidance, repetition, and encouragement to respond or participate in English activities."
+    }
+  ],
+  "identitas_baris": [
+    {
+      "kode": "nama",
+      "urutan": 1,
+      "label_cetak": "Student’s Name",
+      "sumber": "murid.nama"
+    },
+    {
+      "kode": "tanggal_lahir",
+      "urutan": 2,
+      "label_cetak": "Date of Birth",
+      "sumber": "murid.tanggal_lahir"
+    },
+    {
+      "kode": "kelas",
+      "urutan": 3,
+      "label_cetak": "Class",
+      "sumber": "murid.kelas.nama"
+    },
+    {
+      "kode": "term_semester",
+      "urutan": 4,
+      "label_cetak": "Term / Semester",
+      "sumber": "periode"
+    }
+  ],
+  "indikator": [
+    {
+      "kode": "attendance",
+      "urutan": 1,
+      "label_cetak": "Student Attendance",
+      "grup": null,
+      "jenis": "SKALA",
+      "wajib": true
+    },
+    {
+      "kode": "written_test",
+      "urutan": 2,
+      "label_cetak": "Written test results",
+      "grup": null,
+      "jenis": "SKALA",
+      "wajib": true
+    },
+    {
+      "kode": "speaking__grammar_vocabulary",
+      "urutan": 3,
+      "label_cetak": "Grammar and Vocabulary",
+      "grup": "Speaking Test Result",
+      "penanda_cetak": "a.",
+      "jenis": "SKALA",
+      "wajib": true
+    },
+    {
+      "kode": "speaking__pronounciation",
+      "urutan": 4,
+      "label_cetak": "Pronounciation",
+      "grup": "Speaking Test Result",
+      "penanda_cetak": "b.",
+      "jenis": "SKALA",
+      "wajib": true,
+      "catatan": "Salah ketik di sumber. Seharusnya Pronunciation. Lihat spesifikasi bagian 9."
+    },
+    {
+      "kode": "speaking__interactive_communication",
+      "urutan": 5,
+      "label_cetak": "Interactive Communication",
+      "grup": "Speaking Test Result",
+      "penanda_cetak": "c.",
+      "jenis": "SKALA",
+      "wajib": true
+    }
+  ],
+  "grup": [
+    {
+      "label_cetak": "Speaking Test Result",
+      "urutan": 1,
+      "sel_nilai": "DIARSIR"
+    }
+  ],
+  "komentar": [
+    {
+      "kode": "speaking",
+      "urutan": 1,
+      "penanda_cetak": "a.",
+      "label_cetak": "Speaking (grammar, vocabulary, interactive communication)",
+      "jenis": "TEXTAREA",
+      "wajib": true
+    },
+    {
+      "kode": "reading",
+      "urutan": 2,
+      "penanda_cetak": "b.",
+      "label_cetak": "Reading",
+      "jenis": "TEXTAREA",
+      "wajib": true
+    },
+    {
+      "kode": "listening",
+      "urutan": 3,
+      "penanda_cetak": "c.",
+      "label_cetak": "Listening",
+      "jenis": "TEXTAREA",
+      "wajib": true
+    },
+    {
+      "kode": "writing",
+      "urutan": 4,
+      "penanda_cetak": "d.",
+      "label_cetak": "Writing",
+      "jenis": "TEXTAREA",
+      "wajib": true
+    }
+  ],
+  "teks_tetap": [
+    {
+      "kode": "kolom_nilai",
+      "teks": "In Figures"
+    },
+    {
+      "kode": "kolom_nilai_sub",
+      "teks": "(Excellent, Outstanding, Good, Fair )"
+    },
+    {
+      "kode": "kolom_indikator",
+      "teks": "Progress Indicators"
+    },
+    {
+      "kode": "remarks_judul",
+      "teks": "REMARKS :"
+    },
+    {
+      "kode": "remarks_pembuka",
+      "teks": "The most detail Indicators  for Students :",
+      "catatan": "Kalimatnya rusak di sumber. Lihat spesifikasi bagian 9."
+    }
+  ],
+  "ringkasan": {
+    "nilai_per_periode": 5,
+    "textarea_per_periode": 4,
+    "nilai_skala": 4,
+    "penandatangan": 3,
+    "halaman_sumber": 2
+  },
+  "_catatan_skema": "Kolom rubrik mengikuti SPEK_ALUR_PENGISIAN.md bagian 7.3. kolom_periode hanya nama kolom cetakan; setiap baris isian memakai periode_id konkret dari tabel periode."
+}

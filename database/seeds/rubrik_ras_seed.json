@@ -1,0 +1,647 @@
+{
+ "rubrik": {
+  "kode": "RAS_MONTESSORI_V1",
+  "jenis_dokumen": "RAS",
+  "nama": "Rapor Akhir Semester - Montessori",
+  "judul_cetak": "LAPORAN PERKEMBANGAN AKHIR SEMESTER GANJIL & GENAP",
+  "versi": 1,
+  "cakupan": "TAHUNAN",
+  "jenis_periode": "AKHIR",
+  "cetak_gabung_periode": true,
+  "khusus_abk": false,
+  "kolom_periode": [
+   {
+    "kode": "AS_GANJIL",
+    "label": "Akhir Semester Ganjil",
+    "urutan": 1,
+    "semester": "GANJIL",
+    "jenis": "AKHIR"
+   },
+   {
+    "kode": "AS_GENAP",
+    "label": "Akhir Semester Genap",
+    "urutan": 2,
+    "semester": "GENAP",
+    "jenis": "AKHIR"
+   }
+  ],
+  "penandatangan": [
+   {
+    "urutan": 1,
+    "peran": "KEPALA_SEKOLAH",
+    "jabatan_cetak": "Kepala Sekolah",
+    "prefiks": null,
+    "cetak_nuptk": true,
+    "posisi_cetak": null
+   },
+   {
+    "urutan": 2,
+    "peran": "GURU_KELAS",
+    "jabatan_cetak": "Guru Kelas {nama_kelas}",
+    "prefiks": null,
+    "cetak_nuptk": true,
+    "posisi_cetak": null
+   },
+   {
+    "urutan": 3,
+    "peran": "ORANG_TUA",
+    "jabatan_cetak": "Orang Tua Siswa",
+    "prefiks": null,
+    "cetak_nuptk": false,
+    "posisi_cetak": null
+   }
+  ],
+  "sumber": "RAPOR AKHIR SEMESTER.docx (template RAS, Nov 2026)",
+  "skala": [
+   {
+    "nilai": 1,
+    "kode": "BD",
+    "label": "Baru Dikenalkan",
+    "simbol": "✓"
+   },
+   {
+    "nilai": 2,
+    "kode": "MB",
+    "label": "Mulai Berkembang",
+    "simbol": "✓"
+   },
+   {
+    "nilai": 3,
+    "kode": "BSH",
+    "label": "Berkembang Sesuai Harapan",
+    "simbol": "✓"
+   },
+   {
+    "nilai": 4,
+    "kode": "BSB",
+    "label": "Berkembang Sangat Baik",
+    "simbol": "✓"
+   }
+  ],
+  "statistik": {
+   "jumlah_area": 6,
+   "jumlah_sub_area_bernama": 2,
+   "jumlah_grup": 0,
+   "jumlah_indikator": 62,
+   "jumlah_sel_penilaian_per_murid": 124
+  },
+  "bagian": [
+   {
+    "kode": "RAS",
+    "judul": "Seluruh indikator",
+    "jenis": "rubrik",
+    "wajib": true,
+    "urutan": 1
+   },
+   {
+    "kode": "NARASI",
+    "judul": "Perkembangan anak secara keseluruhan",
+    "jenis": "teks_bebas",
+    "wajib": true,
+    "urutan": 2
+   }
+  ]
+ },
+ "area": [
+  {
+   "kode": "ras_nilai_agama_dan_moral",
+   "nama": "Nilai Agama dan Moral",
+   "urutan": 1,
+   "sub_area": [
+    {
+     "kode": "ras_nilai_agama_dan_moral",
+     "huruf": null,
+     "nama": null,
+     "urutan": 1,
+     "implisit": true,
+     "indikator": [
+      {
+       "kode": "ras_nilai_agama_dan_moral__mengetahui_ciptaan_tuhan",
+       "tujuan": "Mengetahui ciptaan Tuhan",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 1
+      },
+      {
+       "kode": "ras_nilai_agama_dan_moral__mengenal_agama_dan_tempat_ibadahnya",
+       "tujuan": "Mengenal agama dan tempat ibadahnya",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 2
+      },
+      {
+       "kode": "ras_nilai_agama_dan_moral__menyapa_dan_membalas_salam",
+       "tujuan": "Menyapa dan membalas salam",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 3
+      },
+      {
+       "kode": "ras_nilai_agama_dan_moral__mengenal_perilaku_baik_dan_tidak_baik",
+       "tujuan": "Mengenal perilaku baik dan tidak baik",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 4
+      },
+      {
+       "kode": "ras_nilai_agama_dan_moral__dapat_mengucapkan_terima_kasih_maaf_dan_tolong",
+       "tujuan": "Dapat mengucapkan terima kasih, maaf, dan tolong",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 5
+      },
+      {
+       "kode": "ras_nilai_agama_dan_moral__membaca_doa_sebelum_dan_sesudah_belajar",
+       "tujuan": "Membaca doa sebelum dan sesudah belajar",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kode": "ras_fisik_motorik",
+   "nama": "Fisik Motorik",
+   "urutan": 2,
+   "sub_area": [
+    {
+     "kode": "ras_fisik_motorik__a",
+     "huruf": "a",
+     "nama": "Motorik Kasar",
+     "urutan": 1,
+     "implisit": false,
+     "indikator": [
+      {
+       "kode": "ras_fisik_motorik__a__melempar_dan_menangkap_bola",
+       "tujuan": "Melempar dan menangkap bola",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 1
+      },
+      {
+       "kode": "ras_fisik_motorik__a__menendang_dan_mengoper_bola",
+       "tujuan": "Menendang dan mengoper bola",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 2
+      },
+      {
+       "kode": "ras_fisik_motorik__a__mencuci_tangan",
+       "tujuan": "Mencuci tangan",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 3
+      },
+      {
+       "kode": "ras_fisik_motorik__a__melakukan_permainan_fisik_dengan_aturan_melompat_berlari",
+       "tujuan": "Melakukan permainan fisik dengan aturan (melompat/berlari)",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 4
+      },
+      {
+       "kode": "ras_fisik_motorik__a__melakukan_gerakan_senam_secara_terkoordinasi",
+       "tujuan": "Melakukan gerakan/senam secara terkoordinasi",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 5
+      }
+     ]
+    },
+    {
+     "kode": "ras_fisik_motorik__b",
+     "huruf": "b",
+     "nama": "Motorik Halus",
+     "urutan": 2,
+     "implisit": false,
+     "indikator": [
+      {
+       "kode": "ras_fisik_motorik__b__menuang_air_pasir_biji_bijian_ke_dalam_wadah",
+       "tujuan": "Menuang air/pasir/biji-bijian ke dalam wadah",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 1
+      },
+      {
+       "kode": "ras_fisik_motorik__b__mengontrol_gerakan_tangan_merobek_menggenggam_memeras_dan_menggulung",
+       "tujuan": "Mengontrol gerakan tangan (merobek, menggenggam, memeras, dan menggulung)",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 2
+      },
+      {
+       "kode": "ras_fisik_motorik__b__kemampuan_memegang_alat_tulis",
+       "tujuan": "Kemampuan memegang alat tulis",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 3
+      },
+      {
+       "kode": "ras_fisik_motorik__b__membuat_garis_vertikal_horizontal_lengkung_kiri_kanan_dan_lingkaran",
+       "tujuan": "Membuat garis vertikal, horizontal, lengkung kiri/kanan, dan lingkaran",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 4
+      },
+      {
+       "kode": "ras_fisik_motorik__b__membuat_tiruan_bentuk_menjiplak",
+       "tujuan": "Membuat tiruan bentuk/menjiplak",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 5
+      },
+      {
+       "kode": "ras_fisik_motorik__b__menempel_gambar_dengan_tepat",
+       "tujuan": "Menempel gambar dengan tepat",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 6
+      },
+      {
+       "kode": "ras_fisik_motorik__b__menggunting_sesuai_dengan_pola",
+       "tujuan": "Menggunting sesuai dengan pola",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 7
+      },
+      {
+       "kode": "ras_fisik_motorik__b__merapikan_material_dan_area_bermain",
+       "tujuan": "Merapikan material dan area bermain",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 8
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kode": "ras_kognitif",
+   "nama": "Kognitif",
+   "urutan": 3,
+   "sub_area": [
+    {
+     "kode": "ras_kognitif",
+     "huruf": null,
+     "nama": null,
+     "urutan": 1,
+     "implisit": true,
+     "indikator": [
+      {
+       "kode": "ras_kognitif__mengerjakan_tugas_sampai_tuntas",
+       "tujuan": "Mengerjakan tugas sampai tuntas",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 1
+      },
+      {
+       "kode": "ras_kognitif__memahami_urutan_kegiatan_di_kelas",
+       "tujuan": "Memahami urutan kegiatan di kelas",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 2
+      },
+      {
+       "kode": "ras_kognitif__mengklasifikasikan_benda_berdasarkan_warna_bentuk_dan_ukuran",
+       "tujuan": "Mengklasifikasikan benda berdasarkan warna, bentuk, dan ukuran",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 3
+      },
+      {
+       "kode": "ras_kognitif__mengenal_dan_menyebutkan_lambang_bilangan_1_10",
+       "tujuan": "Mengenal dan menyebutkan lambang bilangan 1-10",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 4
+      },
+      {
+       "kode": "ras_kognitif__mencocokkan_kuantitas_dengan_lambang_bilangan_1_10",
+       "tujuan": "Mencocokkan kuantitas dengan lambang bilangan 1-10",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 5
+      },
+      {
+       "kode": "ras_kognitif__mengenal_konsep_lebih_banyak_dan_sedikit",
+       "tujuan": "Mengenal konsep lebih banyak dan sedikit",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 6
+      },
+      {
+       "kode": "ras_kognitif__menyelesaikan_penjumlahan_sederhana_1_10",
+       "tujuan": "Menyelesaikan penjumlahan sederhana 1-10",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 7
+      },
+      {
+       "kode": "ras_kognitif__menyelesaikan_pengurangan_sederhana_1_10",
+       "tujuan": "Menyelesaikan pengurangan sederhana 1-10",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 8
+      },
+      {
+       "kode": "ras_kognitif__mengenal_berbagai_lambang_huruf",
+       "tujuan": "Mengenal berbagai lambang huruf",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 9
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kode": "ras_bahasa",
+   "nama": "Bahasa",
+   "urutan": 4,
+   "sub_area": [
+    {
+     "kode": "ras_bahasa",
+     "huruf": null,
+     "nama": null,
+     "urutan": 1,
+     "implisit": true,
+     "indikator": [
+      {
+       "kode": "ras_bahasa__mengerti_dua_perintah_yang_diberikan_bersamaan",
+       "tujuan": "Mengerti dua perintah yang diberikan bersamaan",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 1
+      },
+      {
+       "kode": "ras_bahasa__menunjukkan_minat_dalam_membaca",
+       "tujuan": "Menunjukkan minat dalam membaca",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 2
+      },
+      {
+       "kode": "ras_bahasa__memahami_instruksi_sederhana",
+       "tujuan": "Memahami instruksi sederhana",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 3
+      },
+      {
+       "kode": "ras_bahasa__dapat_berkomunikasi_dua_arah",
+       "tujuan": "Dapat berkomunikasi dua arah",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 4
+      },
+      {
+       "kode": "ras_bahasa__dapat_mengajukan_dan_menjawab_pertanyaan",
+       "tujuan": "Dapat mengajukan dan menjawab pertanyaan",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 5
+      },
+      {
+       "kode": "ras_bahasa__bertanya_dengan_kalimat_yang_benar",
+       "tujuan": "Bertanya dengan kalimat yang benar",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 6
+      },
+      {
+       "kode": "ras_bahasa__mengutarakan_pendapat",
+       "tujuan": "Mengutarakan pendapat",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 7
+      },
+      {
+       "kode": "ras_bahasa__menyatakan_alasan_terhadap_sesuatu_yang_diinginkan_atau_ketidaksetujuan",
+       "tujuan": "Menyatakan alasan terhadap sesuatu yang diinginkan atau ketidaksetujuan",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 8
+      },
+      {
+       "kode": "ras_bahasa__dapat_menulis_nama_diri",
+       "tujuan": "Dapat menulis nama diri",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 9
+      },
+      {
+       "kode": "ras_bahasa__dapat_bercerita_pengalaman_diri_sendiri_secara_sederhana",
+       "tujuan": "Dapat bercerita pengalaman diri sendiri secara sederhana",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 10
+      },
+      {
+       "kode": "ras_bahasa__memahami_isi_cerita_yang_dibacakan_dan_menceritakan_kembali",
+       "tujuan": "Memahami isi cerita yang dibacakan dan menceritakan kembali",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 11
+      },
+      {
+       "kode": "ras_bahasa__mengenal_dan_menyebutkan_huruf_vokal",
+       "tujuan": "Mengenal dan menyebutkan huruf vokal",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 12
+      },
+      {
+       "kode": "ras_bahasa__mengenal_dan_menyebutkan_huruf_konsonan",
+       "tujuan": "Mengenal dan menyebutkan huruf konsonan",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 13
+      },
+      {
+       "kode": "ras_bahasa__mengenal_huruf_awal_kata",
+       "tujuan": "Mengenal huruf awal kata",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 14
+      },
+      {
+       "kode": "ras_bahasa__membaca_kata",
+       "tujuan": "Membaca kata",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 15
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kode": "ras_sosial_emosional",
+   "nama": "Sosial Emosional",
+   "urutan": 5,
+   "sub_area": [
+    {
+     "kode": "ras_sosial_emosional",
+     "huruf": null,
+     "nama": null,
+     "urutan": 1,
+     "implisit": true,
+     "indikator": [
+      {
+       "kode": "ras_sosial_emosional__menunjukkan_sikap_kemandirian",
+       "tujuan": "Menunjukkan sikap kemandirian",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 1
+      },
+      {
+       "kode": "ras_sosial_emosional__menyebutkan_nama_orangtua",
+       "tujuan": "Menyebutkan nama orangtua",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 2
+      },
+      {
+       "kode": "ras_sosial_emosional__menunjukkan_rasa_percaya_diri",
+       "tujuan": "Menunjukkan rasa percaya diri",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 3
+      },
+      {
+       "kode": "ras_sosial_emosional__memiliki_sikap_gigih_tidak_mudah_menyerah",
+       "tujuan": "Memiliki sikap gigih (tidak mudah menyerah)",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 4
+      },
+      {
+       "kode": "ras_sosial_emosional__menyebutkan_nama_lengkap",
+       "tujuan": "Menyebutkan nama lengkap",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 5
+      },
+      {
+       "kode": "ras_sosial_emosional__menyebutkan_nama_orang_tua",
+       "tujuan": "Menyebutkan nama orang tua",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 6
+      },
+      {
+       "kode": "ras_sosial_emosional__dapat_menyimak_dan_fokus",
+       "tujuan": "Dapat menyimak dan fokus",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 7
+      },
+      {
+       "kode": "ras_sosial_emosional__menggunakan_material_kelas_dengan_baik",
+       "tujuan": "Menggunakan material kelas dengan baik",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 8
+      },
+      {
+       "kode": "ras_sosial_emosional__melakukan_kegiatan_dengan_mandiri_dan_sampai_tuntas",
+       "tujuan": "Melakukan kegiatan dengan mandiri dan sampai tuntas",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 9
+      },
+      {
+       "kode": "ras_sosial_emosional__dapat_berinteraksi_dan_bekerjasama_dengan_teman",
+       "tujuan": "Dapat berinteraksi dan bekerjasama dengan teman",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 10
+      },
+      {
+       "kode": "ras_sosial_emosional__dapat_berinteraksi_dengan_orang_dewasa",
+       "tujuan": "Dapat berinteraksi dengan orang dewasa",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 11
+      },
+      {
+       "kode": "ras_sosial_emosional__dapat_berbagi_menolong_dan_membantu_teman",
+       "tujuan": "Dapat berbagi, menolong dan membantu teman",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 12
+      },
+      {
+       "kode": "ras_sosial_emosional__dapat_beradaptasi_pada_lingkungan_situasi_baru",
+       "tujuan": "Dapat beradaptasi pada lingkungan/situasi baru",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 13
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kode": "ras_seni",
+   "nama": "Seni",
+   "urutan": 6,
+   "sub_area": [
+    {
+     "kode": "ras_seni",
+     "huruf": null,
+     "nama": null,
+     "urutan": 1,
+     "implisit": true,
+     "indikator": [
+      {
+       "kode": "ras_seni__anak_bernyanyi_lagu_kesukaannya",
+       "tujuan": "Anak bernyanyi lagu kesukaannya",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 1
+      },
+      {
+       "kode": "ras_seni__memainkan_alat_musik_bersama_teman",
+       "tujuan": "Memainkan alat musik bersama teman",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 2
+      },
+      {
+       "kode": "ras_seni__bertepuk_tangan_sesuai_dengan_irama",
+       "tujuan": "Bertepuk tangan sesuai dengan irama",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 3
+      },
+      {
+       "kode": "ras_seni__dapat_menggambar_menggunakan_berbagai_media",
+       "tujuan": "Dapat menggambar menggunakan berbagai media",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 4
+      },
+      {
+       "kode": "ras_seni__mengekspresikan_gerakan_dengan_irama_yang_bervariasi",
+       "tujuan": "Mengekspresikan gerakan dengan irama yang bervariasi",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 5
+      },
+      {
+       "kode": "ras_seni__membuat_prakarya",
+       "tujuan": "Membuat prakarya",
+       "aparatus": null,
+       "grup": null,
+       "urutan": 6
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "_catatan_skema": "Disusun dari RAPOR AKHIR SEMESTER.docx. Ejaan indikator diperbaiki (kelass, Menklasifikasikan, lambing, focus, tangan(merobek). Tanda centang pada skala hanya penanda kolom; posisi kolom menunjukkan tingkat. Narasi berupa teks bebas per semester."
+}

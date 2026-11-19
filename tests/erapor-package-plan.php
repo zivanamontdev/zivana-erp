@@ -30,7 +30,12 @@ foreach (['ganjil','genap'] as $s) foreach (['Tengah Semester','Akhir Semester']
     $result=$build('ABK',$row);
     planCheck($result['periode']['urutan']===($s==='ganjil'?0:2)+($t==='Tengah Semester'?1:2));
     if ($t==='Akhir Semester') {
-        planCheck(!$result['dapat_dibentuk'] && $result['rubrik_belum_tersedia']===['RAS'] && $result['dokumen']===[]);
+        // RAS terikat ke RAS_MONTESSORI_V1: paket akhir semester = RAS (bukan RTS) + dokumen lain.
+        planCheck($result['dapat_dibentuk'] && array_column($result['dokumen'],'jenis')===['RAS','AGAMA','UMMI','BING','PPI']);
+        planCheck(array_column($build('Regular',$row)['dokumen'],'jenis')===['RAS','AGAMA','UMMI','BING']);
+        $noRas=array_values(array_filter($catalog,fn($r)=>$r['jenis_dokumen']!=='RAS'));
+        $blocked=$build('ABK',$row,$noRas);
+        planCheck(!$blocked['dapat_dibentuk'] && $blocked['rubrik_belum_tersedia']===['RAS'] && $blocked['dokumen']===[]);
     }
 }
 $missing=$catalog; array_pop($missing);

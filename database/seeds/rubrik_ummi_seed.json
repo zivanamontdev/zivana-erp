@@ -1,0 +1,356 @@
+{
+  "rubrik": {
+    "kode": "UMMI_V1",
+    "jenis_dokumen": "UMMI",
+    "nama": "Rapor Al-Quran Metode Ummi",
+    "judul_cetak": "RAPOR AL-QURAN SEMESTER {SEMESTER}",
+    "versi": 1,
+    "cakupan": "SEMESTER",
+    "jenis_periode": null,
+    "cetak_gabung_periode": true,
+    "khusus_abk": false,
+    "kolom_periode": [
+      {
+        "kode": "TENGAH_SEMESTER",
+        "label": "Tengah Semester",
+        "urutan": 1,
+        "semester": null,
+        "jenis": "TENGAH"
+      },
+      {
+        "kode": "AKHIR_SEMESTER",
+        "label": "Akhir Semester",
+        "urutan": 2,
+        "semester": null,
+        "jenis": "AKHIR"
+      }
+    ],
+    "catatan_kolom_periode": "semester NULL: semester kolom diambil dari semester rapor.",
+    "penandatangan": [
+      {
+        "urutan": 1,
+        "peran": "KEPALA_SEKOLAH",
+        "jabatan_cetak": "Kepala TK Zivana Montessori",
+        "prefiks": null,
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      },
+      {
+        "urutan": 2,
+        "peran": "KOORDINATOR_QURAN",
+        "jabatan_cetak": "Koordinator Al-Quran",
+        "prefiks": null,
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      }
+    ],
+    "urutan_dokumen": 4,
+    "sumber": "Rapor_Metode_Ummi_20262027-1.xlsx (sheet JILID dan PRA)",
+    "catatan_varian": "TIDAK ADA varian dokumen terpisah. Seluruh tingkat PRA TK sampai VI berada dalam satu rubrik, dan seluruh isiannya boleh kosong. Murid hanya mengisi tingkat yang sudah dijalaninya. Tingkat PRA TK ditandai hanya_pra_tk=true, dipakai untuk menentukan apakah blok itu ikut dicetak.",
+    "skala": {
+      "huruf": {
+        "jenis": "huruf",
+        "status": "LENGKAP",
+        "dipakai_oleh": [
+          "Bagian A",
+          "Bagian B"
+        ],
+        "catatan": "Ditetapkan sekolah: A sampai D, masing-masing dengan plus dan minus. Peringkat 12 = tertinggi (A+), 1 = terendah (D-).",
+        "nilai": [
+          {
+            "kode": "A+",
+            "label": "A+",
+            "peringkat": 12
+          },
+          {
+            "kode": "A",
+            "label": "A",
+            "peringkat": 11
+          },
+          {
+            "kode": "A-",
+            "label": "A-",
+            "peringkat": 10
+          },
+          {
+            "kode": "B+",
+            "label": "B+",
+            "peringkat": 9
+          },
+          {
+            "kode": "B",
+            "label": "B",
+            "peringkat": 8
+          },
+          {
+            "kode": "B-",
+            "label": "B-",
+            "peringkat": 7
+          },
+          {
+            "kode": "C+",
+            "label": "C+",
+            "peringkat": 6
+          },
+          {
+            "kode": "C",
+            "label": "C",
+            "peringkat": 5
+          },
+          {
+            "kode": "C-",
+            "label": "C-",
+            "peringkat": 4
+          },
+          {
+            "kode": "D+",
+            "label": "D+",
+            "peringkat": 3
+          },
+          {
+            "kode": "D",
+            "label": "D",
+            "peringkat": 2
+          },
+          {
+            "kode": "D-",
+            "label": "D-",
+            "peringkat": 1
+          }
+        ]
+      }
+    },
+    "bagian": [
+      {
+        "kode": "A",
+        "judul": "BACAAN JILID",
+        "jenis": "rubrik",
+        "skala": "huruf",
+        "wajib": false,
+        "sifat_isian": "jarang",
+        "catatan": "Normal kalau sebagian besar kosong. Murid mengisi hanya tingkat yang sudah dijalani."
+      },
+      {
+        "kode": "B",
+        "judul": "NILAI TES KENAIKAN JILID",
+        "jenis": "daftar_catatan",
+        "skala": "huruf",
+        "wajib": false,
+        "catatan": "Opsional, boleh nol baris. Kalau kosong, yang tercetak hanya judul bab dan baris kepala tabel.",
+        "catatan_periode": "Tiap baris milik periode tempat tes dicatat. Cetakan menampilkan seluruh baris semester itu sampai periode yang terbit."
+      },
+      {
+        "kode": "C",
+        "judul": "CATATAN GURU",
+        "jenis": "teks_bebas",
+        "skala": null,
+        "wajib": true,
+        "bentuk_isian": "textarea",
+        "catatan": "Satu-satunya bagian wajib. Di berkas sumber salah diberi label C bersama blok Hafalan yang bukan milik dokumen mana pun.",
+        "catatan_periode": "Satu catatan per periode. Cetakan menampilkan catatan periode yang terbit."
+      }
+    ],
+    "statistik": {
+      "jumlah_tingkat": 7,
+      "jumlah_materi_total": 27,
+      "jumlah_materi_pra_tk": 2,
+      "jumlah_bagian": 3,
+      "jumlah_nilai_huruf": 12
+    },
+    "catatan_semester": "Isi Bagian A, B, dan C identik untuk Semester Ganjil dan Genap. Yang berbeda hanya label semester pada judul cetak. Satu rubrik melayani keduanya."
+  },
+  "jilid": [
+    {
+      "kode": "ummi__pra_tk",
+      "nama": "PRA TK",
+      "urutan": 1,
+      "hanya_pra_tk": true,
+      "materi": [
+        {
+          "kode": "ummi__pra_tk__mengenal_huruf_tunggal_berharokat_fathah_a_ya",
+          "teks": "Mengenal huruf tunggal berharokat fathah ( A- Ya )",
+          "urutan": 1
+        },
+        {
+          "kode": "ummi__pra_tk__membaca_2_huruf_tunggal_berharokat_fathah_a_ya",
+          "teks": "Membaca 2 huruf tunggal berharokat fathah A - Ya",
+          "urutan": 2
+        }
+      ]
+    },
+    {
+      "kode": "ummi__i",
+      "nama": "I",
+      "urutan": 2,
+      "hanya_pra_tk": false,
+      "materi": [
+        {
+          "kode": "ummi__i__mengenal_huruf_tunggal_hijaiyah_alif_ya",
+          "teks": "Mengenal huruf tunggal/ hijaiyah ( Alif – Ya’ )",
+          "urutan": 1
+        },
+        {
+          "kode": "ummi__i__mengenal_huruf_tunggal_berharokat_fathah_a_ya",
+          "teks": "Mengenal huruf tunggal berharokat fathah ( A- Ya )",
+          "urutan": 2
+        },
+        {
+          "kode": "ummi__i__membaca_2_3_huruf_tunggal_berharokat_fathah_a_ya",
+          "teks": "Membaca 2 – 3 huruf tunggal berharokat fathah A - Ya",
+          "urutan": 3
+        }
+      ]
+    },
+    {
+      "kode": "ummi__ii",
+      "nama": "II",
+      "urutan": 3,
+      "hanya_pra_tk": false,
+      "materi": [
+        {
+          "kode": "ummi__ii__mengenal_harokat_kasroh_dlommah",
+          "teks": "Mengenal harokat kasroh, dlommah,",
+          "urutan": 1
+        },
+        {
+          "kode": "ummi__ii__mengenal_huruf_sambung_alif_ya",
+          "teks": "Mengenal huruf sambung Alif–Ya’",
+          "urutan": 2
+        },
+        {
+          "kode": "ummi__ii__mengenal_harokat_fathatain_kasrotain_dan_dlommatain",
+          "teks": "Mengenal harokat fathatain, kasrotain dan dlommatain.",
+          "urutan": 3
+        },
+        {
+          "kode": "ummi__ii__mengenal_angka_arab_1_99",
+          "teks": "Mengenal angka arab 1 - 99",
+          "urutan": 4
+        }
+      ]
+    },
+    {
+      "kode": "ummi__iii",
+      "nama": "III",
+      "urutan": 4,
+      "hanya_pra_tk": false,
+      "materi": [
+        {
+          "kode": "ummi__iii__fathah_diikuti_alif_dan_fathah_panjang",
+          "teks": "Fathah diikuti alif dan fathah panjang",
+          "urutan": 1
+        },
+        {
+          "kode": "ummi__iii__kasroh_diikuti_ya_sukun_dan_kasroh_panjang",
+          "teks": "Kasroh diikuti ya sukun dan kasroh panjang",
+          "urutan": 2
+        },
+        {
+          "kode": "ummi__iii__dlommah_diikuti_waw_sukun_dan_dlommah_panjang",
+          "teks": "Dlommah diikuti waw sukun dan dlommah panjang",
+          "urutan": 3
+        },
+        {
+          "kode": "ummi__iii__mengenal_tanda_baca_panjang",
+          "teks": "Mengenal tanda baca panjang",
+          "urutan": 4
+        },
+        {
+          "kode": "ummi__iii__mengenal_angka_arab_100_500",
+          "teks": "Mengenal angka arab 100-500",
+          "urutan": 5
+        }
+      ]
+    },
+    {
+      "kode": "ummi__iv",
+      "nama": "IV",
+      "urutan": 5,
+      "hanya_pra_tk": false,
+      "materi": [
+        {
+          "kode": "ummi__iv__mengenal_tanda_sukun_ditekan_membacanya",
+          "teks": "Mengenal tanda sukun ditekan membacanya",
+          "urutan": 1
+        },
+        {
+          "kode": "ummi__iv__mengenal_tanda_tasydid_ditekan_membacanya",
+          "teks": "Mengenal tanda tasydid ditekan membacanya",
+          "urutan": 2
+        },
+        {
+          "kode": "ummi__iv__mengenal_angka_arab_500_900",
+          "teks": "Mengenal angka arab 500-900",
+          "urutan": 3
+        }
+      ]
+    },
+    {
+      "kode": "ummi__v",
+      "nama": "V",
+      "urutan": 6,
+      "hanya_pra_tk": false,
+      "materi": [
+        {
+          "kode": "ummi__v__mengenal_cara_membaca_waqof_atau_mewaqofkan",
+          "teks": "Mengenal cara membaca waqof atau mewaqofkan",
+          "urutan": 1
+        },
+        {
+          "kode": "ummi__v__mengenal_bacaan_dengung_atau_gunnah",
+          "teks": "Mengenal bacaan dengung atau gunnah",
+          "urutan": 2
+        },
+        {
+          "kode": "ummi__v__mengenal_bacaan_ikhfa_samar",
+          "teks": "Mengenal bacaan ikhfa’/samar",
+          "urutan": 3
+        },
+        {
+          "kode": "ummi__v__mengenal_bacaan_idghom_bighunnah",
+          "teks": "Mengenal bacaan idghom bighunnah",
+          "urutan": 4
+        },
+        {
+          "kode": "ummi__v__mengenal_bacaan_iqlab",
+          "teks": "Mengenal bacaan iqlab",
+          "urutan": 5
+        },
+        {
+          "kode": "ummi__v__mengenal_bacaan_lafadz_allah",
+          "teks": "Mengenal bacaan lafadz Allah",
+          "urutan": 6
+        }
+      ]
+    },
+    {
+      "kode": "ummi__vi",
+      "nama": "VI",
+      "urutan": 7,
+      "hanya_pra_tk": false,
+      "materi": [
+        {
+          "kode": "ummi__vi__mengenal_bacaan_qolqolah",
+          "teks": "Mengenal bacaan qolqolah",
+          "urutan": 1
+        },
+        {
+          "kode": "ummi__vi__mengenal_bacaan_idghom_bilaghunnah",
+          "teks": "Mengenal bacaan idghom bilaghunnah",
+          "urutan": 2
+        },
+        {
+          "kode": "ummi__vi__mengenal_bacaan_idzhar",
+          "teks": "Mengenal bacaan idzhar",
+          "urutan": 3
+        },
+        {
+          "kode": "ummi__vi__mengenal_bacaan_ana_na_nya_dibaca_pendek",
+          "teks": "Mengenal bacaan Ana, Na-nya dibaca pendek",
+          "urutan": 4
+        }
+      ]
+    }
+  ],
+  "_catatan_skema": "Kolom rubrik mengikuti SPEK_ALUR_PENGISIAN.md bagian 7.3. kolom_periode hanya nama kolom cetakan; setiap baris isian memakai periode_id konkret dari tabel periode."
+}

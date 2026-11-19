@@ -1,0 +1,942 @@
+{
+  "rubrik": {
+    "kode": "AGAMA_V1",
+    "jenis_dokumen": "AGAMA",
+    "nama": "Rapor Pendidikan Agama Islam",
+    "judul_cetak": "RAPOR AGAMA",
+    "versi": 1,
+    "cakupan": "TAHUNAN",
+    "jenis_periode": null,
+    "cetak_gabung_periode": true,
+    "khusus_abk": false,
+    "kolom_periode": [
+      {
+        "kode": "TENGAH_SEMESTER",
+        "label": "Tengah Semester",
+        "urutan": 1,
+        "semester": null,
+        "jenis": "TENGAH"
+      },
+      {
+        "kode": "AKHIR_SEMESTER",
+        "label": "Akhir Semester",
+        "urutan": 2,
+        "semester": null,
+        "jenis": "AKHIR"
+      }
+    ],
+    "catatan_kolom_periode": "semester NULL: semester kolom diambil dari semester butir.",
+    "penandatangan": [
+      {
+        "urutan": 1,
+        "peran": "KEPALA_SEKOLAH",
+        "jabatan_cetak": "Kepala TK Zivana Montessori Makassar",
+        "prefiks": null,
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      },
+      {
+        "urutan": 2,
+        "peran": "GURU_KELAS",
+        "jabatan_cetak": "Guru Kelas",
+        "prefiks": null,
+        "cetak_nuptk": true,
+        "posisi_cetak": null
+      },
+      {
+        "urutan": 3,
+        "peran": "ORANG_TUA",
+        "jabatan_cetak": "Orang Tua Siswa",
+        "prefiks": null,
+        "cetak_nuptk": false,
+        "posisi_cetak": null
+      }
+    ],
+    "urutan_dokumen": 3,
+    "sumber": "RAPOR_AGAMA__RANTING_20262027-2.docx",
+    "skala": {
+      "jenis": "tahapan_bertingkat",
+      "tahapan": [
+        {
+          "kode": "TELADAN",
+          "label": "Teladan",
+          "urutan": 1,
+          "subtingkat": null,
+          "definisi": "Jika anak hanya melihat guru/orang tua melakukannya atau mendengar guru/orang tua melakukannya, sedang anak belum tergerak untuk mau melakukan atau mengucapkan."
+        },
+        {
+          "kode": "TALQIN",
+          "label": "Talqin",
+          "urutan": 2,
+          "subtingkat": null,
+          "definisi": "Jika anak ikut melafalkan kembali apa yang guru/orang tua ucapkan, bacakan, dan lakukan."
+        },
+        {
+          "kode": "TAHFIZH",
+          "label": "Tahfizh",
+          "urutan": 3,
+          "subtingkat": [
+            {
+              "kode": "D",
+              "label": "Dho'if",
+              "arti": "Hafalan Lemah",
+              "definisi": "bila hafalan anak masih perlu dituntun dan dibantu untuk menyambung ke ayat selanjutnya"
+            },
+            {
+              "kode": "J",
+              "label": "Jayyid",
+              "arti": "Hafalan Baik",
+              "definisi": "bila hanya terdapat 1-3 kesalahan pada hafalan anak"
+            },
+            {
+              "kode": "M",
+              "label": "Mumtaaz",
+              "arti": "Hafalan Istimewa",
+              "definisi": "bila hafalan anak fasih, lancar dan tidak ada kesalahan"
+            }
+          ],
+          "definisi": "Jika anak sudah menghafalkannya."
+        },
+        {
+          "kode": "TAFHIM",
+          "label": "Tafhim",
+          "urutan": 4,
+          "subtingkat": null,
+          "definisi": "Jika anak sudah mampu memahami, mengartikan, dan menjelaskannya dengan baik."
+        },
+        {
+          "kode": "TADIB",
+          "label": "Ta'dib",
+          "urutan": 5,
+          "subtingkat": null,
+          "definisi": "Jika anak sudah mampu menjunjung tinggi dan mengamalkan nilai-nilai iman dan adab. (Pembiasaan dan penyempurnaan)"
+        }
+      ],
+      "catatan_pilihan": "Guru memilih SATU nilai per butir per periode lewat dropdown. Tahfizh dipecah jadi tiga pilihan terpisah di daftar dropdown, tapi di cetakan tetap satu kolom TAHFIZH dengan sub-kolom D, J, atau M.",
+      "bentuk_isian": "dropdown",
+      "pilihan_dropdown": [
+        {
+          "urutan": 1,
+          "label": "Teladan",
+          "tahapan": "TELADAN",
+          "subtingkat": null,
+          "kolom_cetak": "TELADAN"
+        },
+        {
+          "urutan": 2,
+          "label": "Talqin",
+          "tahapan": "TALQIN",
+          "subtingkat": null,
+          "kolom_cetak": "TALQIN"
+        },
+        {
+          "urutan": 3,
+          "label": "Tahfizh Dho'if",
+          "tahapan": "TAHFIZH",
+          "subtingkat": "D",
+          "kolom_cetak": "TAHFIZH/D"
+        },
+        {
+          "urutan": 4,
+          "label": "Tahfizh Jayyid",
+          "tahapan": "TAHFIZH",
+          "subtingkat": "J",
+          "kolom_cetak": "TAHFIZH/J"
+        },
+        {
+          "urutan": 5,
+          "label": "Tahfizh Mumtaaz",
+          "tahapan": "TAHFIZH",
+          "subtingkat": "M",
+          "kolom_cetak": "TAHFIZH/M"
+        },
+        {
+          "urutan": 6,
+          "label": "Tafhim",
+          "tahapan": "TAFHIM",
+          "subtingkat": null,
+          "kolom_cetak": "TAFHIM"
+        },
+        {
+          "urutan": 7,
+          "label": "Ta'dib",
+          "tahapan": "TADIB",
+          "subtingkat": null,
+          "kolom_cetak": "TADIB"
+        }
+      ]
+    },
+    "bagian": [
+      {
+        "kode": "I-VI",
+        "judul": "RUANG LINGKUP PENDIDIKAN AGAMA ISLAM",
+        "jenis": "rubrik",
+        "wajib": true
+      },
+      {
+        "kode": "VII",
+        "judul": "LAPORAN PERKEMBANGAN AGAMA",
+        "jenis": "teks_bebas",
+        "wajib": true,
+        "catatan": "Guru mengisi enam potongan kalimat, satu per ruang lingkup. Sistem merangkai kalimat utuhnya.",
+        "bentuk_isian": "enam textarea"
+      }
+    ],
+    "statistik": {
+      "jumlah_ruang_lingkup": 6,
+      "jumlah_baris_nilai": 73,
+      "baris_semester_ganjil": 37,
+      "baris_semester_genap": 36,
+      "sel_per_murid": 146,
+      "jumlah_nama_asmaul_husna": 99,
+      "jumlah_pilihan_dropdown": 7,
+      "jumlah_kolom_cetak_per_periode": 7
+    }
+  },
+  "ruang_lingkup": [
+    {
+      "kode": "i_aqidah_tauhid",
+      "nomor_romawi": "I",
+      "nama": "AQIDAH TAUHID",
+      "urutan": 1,
+      "sub": [
+        {
+          "kode": "i_aqidah_tauhid",
+          "huruf": null,
+          "nama": null,
+          "implisit": true,
+          "urutan": 1,
+          "item": [
+            {
+              "kode": "i_aqidah_tauhid__rukun_iman",
+              "teks": "Rukun Iman",
+              "semester": "GANJIL",
+              "urutan": 1,
+              "nomor": 1
+            },
+            {
+              "kode": "i_aqidah_tauhid__rukun_islam",
+              "teks": "Rukun Islam",
+              "semester": "GANJIL",
+              "urutan": 2,
+              "nomor": 2
+            },
+            {
+              "kode": "i_aqidah_tauhid__syahadat",
+              "teks": "Syahadat",
+              "semester": "GANJIL",
+              "urutan": 3,
+              "nomor": 3
+            },
+            {
+              "kode": "i_aqidah_tauhid__mengenal_al_quran",
+              "teks": "Mengenal Al-Qur’an",
+              "semester": "GANJIL",
+              "urutan": 4,
+              "nomor": 4
+            },
+            {
+              "kode": "i_aqidah_tauhid__nabi_dan_rasul",
+              "teks": "Nabi dan Rasul",
+              "semester": "GENAP",
+              "urutan": 5,
+              "nomor": 5
+            },
+            {
+              "kode": "i_aqidah_tauhid__hari_kiamat",
+              "teks": "Hari Kiamat",
+              "semester": "GENAP",
+              "urutan": 6,
+              "nomor": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "ii_fiqih_ibadah",
+      "nomor_romawi": "II",
+      "nama": "FIQIH/IBADAH",
+      "urutan": 2,
+      "sub": [
+        {
+          "kode": "ii_fiqih_ibadah",
+          "huruf": null,
+          "nama": null,
+          "implisit": true,
+          "urutan": 1,
+          "item": [
+            {
+              "kode": "ii_fiqih_ibadah__bersuci",
+              "teks": "Bersuci",
+              "semester": "GANJIL",
+              "urutan": 1,
+              "nomor": 1
+            },
+            {
+              "kode": "ii_fiqih_ibadah__wudhu",
+              "teks": "Wudhu",
+              "semester": "GANJIL",
+              "urutan": 2,
+              "nomor": 2
+            },
+            {
+              "kode": "ii_fiqih_ibadah__adzan_dan_iqamah",
+              "teks": "Adzan dan Iqamah",
+              "semester": "GANJIL",
+              "urutan": 3,
+              "nomor": 3
+            },
+            {
+              "kode": "ii_fiqih_ibadah__gerakan_shalat_dan_bacaan_shalat",
+              "teks": "Gerakan Shalat dan Bacaan Shalat",
+              "semester": "GANJIL",
+              "urutan": 4,
+              "nomor": 4
+            },
+            {
+              "kode": "ii_fiqih_ibadah__puasa_ramadhan",
+              "teks": "Puasa Ramadhan",
+              "semester": "GENAP",
+              "urutan": 5,
+              "nomor": 5
+            },
+            {
+              "kode": "ii_fiqih_ibadah__zakat_infaq_shodaqoh_hadiah",
+              "teks": "Zakat/Infaq/Shodaqoh/Hadiah",
+              "semester": "GENAP",
+              "urutan": 6,
+              "nomor": 6
+            },
+            {
+              "kode": "ii_fiqih_ibadah__haji",
+              "teks": "Haji",
+              "semester": "GENAP",
+              "urutan": 7,
+              "nomor": 7
+            },
+            {
+              "kode": "ii_fiqih_ibadah__hari_raya_islam",
+              "teks": "Hari Raya Islam",
+              "semester": "GENAP",
+              "urutan": 8,
+              "nomor": 8
+            },
+            {
+              "kode": "ii_fiqih_ibadah__kalimat_toyyibah",
+              "teks": "Kalimat Toyyibah",
+              "semester": "GENAP",
+              "urutan": 9,
+              "nomor": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "iii_akhlaq",
+      "nomor_romawi": "III",
+      "nama": "AKHLAQ",
+      "urutan": 3,
+      "sub": [
+        {
+          "kode": "iii_akhlaq",
+          "huruf": null,
+          "nama": null,
+          "implisit": true,
+          "urutan": 1,
+          "item": [
+            {
+              "kode": "iii_akhlaq__adab_belajar",
+              "teks": "Adab Belajar",
+              "semester": "GANJIL",
+              "urutan": 1,
+              "nomor": 1
+            },
+            {
+              "kode": "iii_akhlaq__adab_makan_dan_minum",
+              "teks": "Adab Makan dan Minum",
+              "semester": "GANJIL",
+              "urutan": 2,
+              "nomor": 2
+            },
+            {
+              "kode": "iii_akhlaq__adab_tidur",
+              "teks": "Adab Tidur",
+              "semester": "GANJIL",
+              "urutan": 3,
+              "nomor": 3
+            },
+            {
+              "kode": "iii_akhlaq__adab_kebersihan",
+              "teks": "Adab Kebersihan",
+              "semester": "GANJIL",
+              "urutan": 4,
+              "nomor": 4
+            },
+            {
+              "kode": "iii_akhlaq__adab_terhadap_orang_tua",
+              "teks": "Adab Terhadap Orang Tua",
+              "semester": "GANJIL",
+              "urutan": 5,
+              "nomor": 5
+            },
+            {
+              "kode": "iii_akhlaq__adab_pergaulan",
+              "teks": "Adab Pergaulan",
+              "semester": "GENAP",
+              "urutan": 6,
+              "nomor": 6
+            },
+            {
+              "kode": "iii_akhlaq__adab_silaturrahmi",
+              "teks": "Adab Silaturrahmi",
+              "semester": "GENAP",
+              "urutan": 7,
+              "nomor": 7
+            },
+            {
+              "kode": "iii_akhlaq__adab_berbicara",
+              "teks": "Adab Berbicara",
+              "semester": "GENAP",
+              "urutan": 8,
+              "nomor": 8
+            },
+            {
+              "kode": "iii_akhlaq__adab_terhadap_orang_yang_terkena_musibah",
+              "teks": "Adab Terhadap Orang Yang Terkena Musibah",
+              "semester": "GENAP",
+              "urutan": 9,
+              "nomor": 9
+            },
+            {
+              "kode": "iii_akhlaq__sifat_mahmudah_dan_madzmumah",
+              "teks": "Sifat Mahmudah dan Madzmumah",
+              "semester": "GENAP",
+              "urutan": 10,
+              "nomor": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "iv_alquran_dan_hadits",
+      "nomor_romawi": "IV",
+      "nama": "ALQUR’AN DAN HADITS",
+      "urutan": 4,
+      "sub": [
+        {
+          "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek",
+          "huruf": "A",
+          "nama": "Surah-surah Pendek",
+          "implisit": false,
+          "urutan": 1,
+          "item": [
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_al_fatihah",
+              "teks": "Surah Al-Fatihah",
+              "semester": "GANJIL",
+              "urutan": 1,
+              "nomor": 1
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_an_nas",
+              "teks": "Surah An-Nas",
+              "semester": "GANJIL",
+              "urutan": 2,
+              "nomor": 2
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_al_falaq",
+              "teks": "Surah Al-Falaq",
+              "semester": "GANJIL",
+              "urutan": 3,
+              "nomor": 3
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_al_ikhlas",
+              "teks": "Surah Al-Ikhlas",
+              "semester": "GANJIL",
+              "urutan": 4,
+              "nomor": 4
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_al_lahab",
+              "teks": "Surah Al-Lahab",
+              "semester": "GANJIL",
+              "urutan": 5,
+              "nomor": 5
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_an_nasr",
+              "teks": "Surah An-Nasr",
+              "semester": "GENAP",
+              "urutan": 6,
+              "nomor": 6
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_al_kafirun",
+              "teks": "Surah Al-Kafirun",
+              "semester": "GENAP",
+              "urutan": 7,
+              "nomor": 7
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_al_kausar",
+              "teks": "Surah Al-Kausar",
+              "semester": "GENAP",
+              "urutan": 8,
+              "nomor": 8
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_al_maun",
+              "teks": "Surah Al-Ma’un",
+              "semester": "GENAP",
+              "urutan": 9,
+              "nomor": 9
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__a_surah_surah_pendek__surah_quraisy",
+              "teks": "Surah Quraisy",
+              "semester": "GENAP",
+              "urutan": 10,
+              "nomor": 10
+            }
+          ]
+        },
+        {
+          "kode": "iv_alquran_dan_hadits__b_hadits",
+          "huruf": "B",
+          "nama": "Hadits",
+          "implisit": false,
+          "urutan": 2,
+          "item": [
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__kasih_sayang",
+              "teks": "Kasih Sayang",
+              "semester": "GANJIL",
+              "urutan": 1,
+              "nomor": 1
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__keindahan",
+              "teks": "Keindahan",
+              "semester": "GANJIL",
+              "urutan": 2,
+              "nomor": 2
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__menyebarkan_salam",
+              "teks": "Menyebarkan Salam",
+              "semester": "GANJIL",
+              "urutan": 3,
+              "nomor": 3
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__jangan_suka_marah",
+              "teks": "Jangan Suka Marah",
+              "semester": "GANJIL",
+              "urutan": 4,
+              "nomor": 4
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__sesama_muslim_bersaudara",
+              "teks": "Sesama Muslim Bersaudara",
+              "semester": "GANJIL",
+              "urutan": 5,
+              "nomor": 5
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__menutup_aurat",
+              "teks": "Menutup Aurat",
+              "semester": "GENAP",
+              "urutan": 6,
+              "nomor": 6
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__shalat_tepat_waktu",
+              "teks": "Shalat Tepat Waktu",
+              "semester": "GENAP",
+              "urutan": 7,
+              "nomor": 7
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__berbuat_baik",
+              "teks": "Berbuat Baik",
+              "semester": "GENAP",
+              "urutan": 8,
+              "nomor": 8
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__memberi_hadiah",
+              "teks": "Memberi Hadiah",
+              "semester": "GENAP",
+              "urutan": 9,
+              "nomor": 9
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__b_hadits__wajib_menuntut_ilmu",
+              "teks": "Wajib Menuntut Ilmu",
+              "semester": "GENAP",
+              "urutan": 10,
+              "nomor": 10
+            }
+          ]
+        },
+        {
+          "kode": "iv_alquran_dan_hadits__c_doa_doa_harian",
+          "huruf": "C",
+          "nama": "Doa-doa Harian",
+          "implisit": false,
+          "urutan": 3,
+          "item": [
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__sebelum_belajar_dan_pembuka_hati",
+              "teks": "Sebelum Belajar dan Pembuka Hati",
+              "semester": "GANJIL",
+              "urutan": 1,
+              "nomor": 1
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__bepergian",
+              "teks": "Bepergian",
+              "semester": "GANJIL",
+              "urutan": 2,
+              "nomor": 2
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__naik_kendaraan",
+              "teks": "Naik Kendaraan",
+              "semester": "GANJIL",
+              "urutan": 3,
+              "nomor": 3
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__kedua_orang_tua",
+              "teks": "Kedua Orang Tua",
+              "semester": "GANJIL",
+              "urutan": 4,
+              "nomor": 4
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__penutup_majelis",
+              "teks": "Penutup Majelis",
+              "semester": "GANJIL",
+              "urutan": 5,
+              "nomor": 5
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__sebelum_dan_setelah_tidur",
+              "teks": "Sebelum dan Setelah Tidur",
+              "semester": "GENAP",
+              "urutan": 6,
+              "nomor": 6
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__masuk_dan_keluar_wc",
+              "teks": "Masuk dan Keluar WC",
+              "semester": "GENAP",
+              "urutan": 7,
+              "nomor": 7
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__melepas_pakaian",
+              "teks": "Melepas Pakaian",
+              "semester": "GENAP",
+              "urutan": 8,
+              "nomor": 8
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__bercermin",
+              "teks": "Bercermin",
+              "semester": "GENAP",
+              "urutan": 9,
+              "nomor": 9
+            },
+            {
+              "kode": "iv_alquran_dan_hadits__c_doa_doa_harian__berpakaian",
+              "teks": "Berpakaian",
+              "semester": "GENAP",
+              "urutan": 10,
+              "nomor": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "v_asmaul_husna",
+      "nomor_romawi": "V",
+      "nama": "ASMAUL HUSNA",
+      "urutan": 5,
+      "sub": [
+        {
+          "kode": "v_asmaul_husna",
+          "huruf": null,
+          "nama": null,
+          "implisit": true,
+          "urutan": 1,
+          "item": [
+            {
+              "kode": "v_asmaul_husna__baris_1",
+              "teks": "Ar-Rahman, Ar-Rahim, Al-Malik, Al-Quddus, As-Salam, Al-Mu'min, Al-Muhaimin, Al-'Aziz, Al-Jabbar, Al-Mutakabbir",
+              "semester": "GANJIL",
+              "urutan": 1,
+              "jumlah_nama": 10,
+              "nama": [
+                "Ar-Rahman",
+                "Ar-Rahim",
+                "Al-Malik",
+                "Al-Quddus",
+                "As-Salam",
+                "Al-Mu'min",
+                "Al-Muhaimin",
+                "Al-'Aziz",
+                "Al-Jabbar",
+                "Al-Mutakabbir"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_2",
+              "teks": "Al-Khaliq, Al-Bari', Al-Musawwir, Al-Ghaffar, Al-Qahhar, Al-Wahhab, Ar-Razzaq, Al-Fattah, Al-'Alim, Al-Qabidh",
+              "semester": "GANJIL",
+              "urutan": 2,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Khaliq",
+                "Al-Bari'",
+                "Al-Musawwir",
+                "Al-Ghaffar",
+                "Al-Qahhar",
+                "Al-Wahhab",
+                "Ar-Razzaq",
+                "Al-Fattah",
+                "Al-'Alim",
+                "Al-Qabidh"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_3",
+              "teks": "Al-Basith, Al-Khafidh, Ar-Rafi', Al-Mu'iz, Al-Mudzill, As-Sami', Al-Bashir, Al-Hakam, Al-'Adl, Al-Lathif",
+              "semester": "GANJIL",
+              "urutan": 3,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Basith",
+                "Al-Khafidh",
+                "Ar-Rafi'",
+                "Al-Mu'iz",
+                "Al-Mudzill",
+                "As-Sami'",
+                "Al-Bashir",
+                "Al-Hakam",
+                "Al-'Adl",
+                "Al-Lathif"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_4",
+              "teks": "Al-Khabir, Al-Halim, Al-'Azhim, Al-Ghafur, Asy-Syakur, Al-'Aliyy, Al-Kabir, Al-Hafizh, Al-Muqit, Al-Hasib",
+              "semester": "GANJIL",
+              "urutan": 4,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Khabir",
+                "Al-Halim",
+                "Al-'Azhim",
+                "Al-Ghafur",
+                "Asy-Syakur",
+                "Al-'Aliyy",
+                "Al-Kabir",
+                "Al-Hafizh",
+                "Al-Muqit",
+                "Al-Hasib"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_5",
+              "teks": "Al-Jalil, Al-Karim, Ar-Raqib, Al-Mujib, Al-Wasi', Al-Hakim, Al-Wadud, Al-Majid, Al-Ba'its, Asy-Syahid",
+              "semester": "GANJIL",
+              "urutan": 5,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Jalil",
+                "Al-Karim",
+                "Ar-Raqib",
+                "Al-Mujib",
+                "Al-Wasi'",
+                "Al-Hakim",
+                "Al-Wadud",
+                "Al-Majid",
+                "Al-Ba'its",
+                "Asy-Syahid"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_6",
+              "teks": "Al-Haqq, Al-Wakil, Al-Qawiyy, Al-Matin, Al-Waliyy, Al-Hamid, Al-Muhshi, Al-Mubdi', Al-Mu'id, Al-Muhyi",
+              "semester": "GENAP",
+              "urutan": 6,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Haqq",
+                "Al-Wakil",
+                "Al-Qawiyy",
+                "Al-Matin",
+                "Al-Waliyy",
+                "Al-Hamid",
+                "Al-Muhshi",
+                "Al-Mubdi'",
+                "Al-Mu'id",
+                "Al-Muhyi"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_7",
+              "teks": "Al-Mumit, Al-Hayy, Al-Qayyum, Al-Wajid, Al-Majid, Al-Wahid, Al-Ahad, Ash-Shamad, Al-Qadir, Al-Muqtadir",
+              "semester": "GENAP",
+              "urutan": 7,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Mumit",
+                "Al-Hayy",
+                "Al-Qayyum",
+                "Al-Wajid",
+                "Al-Majid",
+                "Al-Wahid",
+                "Al-Ahad",
+                "Ash-Shamad",
+                "Al-Qadir",
+                "Al-Muqtadir"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_8",
+              "teks": "Al-Muqaddim, Al-Mu'akhkhir, Al-Awwal, Al-Akhir, Azh-Zhahir, Al-Bathin, Al-Wali, Al-Muta'ali, Al-Barr, At-Tawwab",
+              "semester": "GENAP",
+              "urutan": 8,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Muqaddim",
+                "Al-Mu'akhkhir",
+                "Al-Awwal",
+                "Al-Akhir",
+                "Azh-Zhahir",
+                "Al-Bathin",
+                "Al-Wali",
+                "Al-Muta'ali",
+                "Al-Barr",
+                "At-Tawwab"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_9",
+              "teks": "Al-Muntaqim, Al-'Afuww, Ar-Ra'uf, Malikul Mulk, Dzul Jalali wal Ikram, Al-Muqsith, Al-Jami', Al-Ghaniyy, Al-Mughni, Al-Mani'",
+              "semester": "GENAP",
+              "urutan": 9,
+              "jumlah_nama": 10,
+              "nama": [
+                "Al-Muntaqim",
+                "Al-'Afuww",
+                "Ar-Ra'uf",
+                "Malikul Mulk",
+                "Dzul Jalali wal Ikram",
+                "Al-Muqsith",
+                "Al-Jami'",
+                "Al-Ghaniyy",
+                "Al-Mughni",
+                "Al-Mani'"
+              ]
+            },
+            {
+              "kode": "v_asmaul_husna__baris_10",
+              "teks": "Ad-Dharr, An-Nafi', An-Nur, Al-Hadi, Al-Badi', Al-Baqi, Al-Warits, Ar-Rasyid, Ash-Shabur",
+              "semester": "GENAP",
+              "urutan": 10,
+              "jumlah_nama": 9,
+              "nama": [
+                "Ad-Dharr",
+                "An-Nafi'",
+                "An-Nur",
+                "Al-Hadi",
+                "Al-Badi'",
+                "Al-Baqi",
+                "Al-Warits",
+                "Ar-Rasyid",
+                "Ash-Shabur"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kode": "vi_kisah_sahabat_rasulullah",
+      "nomor_romawi": "VI",
+      "nama": "KISAH SAHABAT RASULULLAH",
+      "urutan": 6,
+      "sub": [
+        {
+          "kode": "vi_kisah_sahabat_rasulullah",
+          "huruf": null,
+          "nama": null,
+          "implisit": true,
+          "urutan": 1,
+          "item": [
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__abu_bakar_ash_shiddiq",
+              "teks": "Abu Bakar Ash-Shiddiq",
+              "semester": "GANJIL",
+              "urutan": 1
+            },
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__umar_bin_khattab",
+              "teks": "Umar bin Khattab",
+              "semester": "GANJIL",
+              "urutan": 2
+            },
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__utsman_bin_affan",
+              "teks": "Utsman bin Affan",
+              "semester": "GANJIL",
+              "urutan": 3
+            },
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__ali_bin_abi_thalib",
+              "teks": "Ali bin Abi Thalib",
+              "semester": "GANJIL",
+              "urutan": 4
+            },
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__khadijah_binti_khuwailid",
+              "teks": "Khadijah binti Khuwailid",
+              "semester": "GENAP",
+              "urutan": 5
+            },
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__fatimah_binti_rasulullah",
+              "teks": "Fatimah binti Rasulullah",
+              "semester": "GENAP",
+              "urutan": 6
+            },
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__asiyah_binti_muzahim",
+              "teks": "Asiyah binti Muzahim",
+              "semester": "GENAP",
+              "urutan": 7
+            },
+            {
+              "kode": "vi_kisah_sahabat_rasulullah__maryam_binti_imran",
+              "teks": "Maryam binti Imran",
+              "semester": "GENAP",
+              "urutan": 8
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_catatan_revisi": "Teks sudah mengikuti perbaikan sekolah (spesifikasi bagian 9.1). Kode butir ikut diturunkan ulang karena rubrik belum pernah di-seed. Sejak seeding pertama, kode dibekukan.",
+  "_catatan_skema": "Kolom rubrik mengikuti SPEK_ALUR_PENGISIAN.md bagian 7.3. kolom_periode hanya nama kolom cetakan; setiap baris isian memakai periode_id konkret dari tabel periode."
+}

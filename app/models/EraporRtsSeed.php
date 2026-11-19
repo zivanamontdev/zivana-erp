@@ -86,6 +86,12 @@ final class EraporRtsSeed
     public static function apply(PDO $db, array $seed): string
     {
         self::validate($seed);
+        return self::applyRubric($db, $seed);
+    }
+
+    /** Menulis rubrik yang SUDAH divalidasi pemanggil (dipakai juga oleh EraporRasSeed). */
+    public static function applyRubric(PDO $db, array $seed): string
+    {
         if ($db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql' || $db->inTransaction()) {
             throw new RuntimeException('Seeder requires a dedicated MySQL connection.');
         }

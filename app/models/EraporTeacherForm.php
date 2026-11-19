@@ -62,7 +62,7 @@ final class EraporTeacherForm
         $rid=(int)$d['rubrik_id']; $args=[$s['id'],$d['id'],$rid]; $defs=[]; $values=[];
         // Identifiers below are fixed server-owned lists, never request input.
         $tables=match ($d['jenis_dokumen']) {
-            'RTS'=>['areas'=>['erapor_rubrik_area','urutan'],'scale'=>['erapor_skala_nilai','urutan']],
+            'RTS','RAS'=>['areas'=>['erapor_rubrik_area','urutan'],'scale'=>['erapor_skala_nilai','urutan']],
             'BING'=>['items'=>['erapor_bing_indikator','urutan'],'comments'=>['erapor_bing_komentar','urutan'],'scale'=>['erapor_bing_skala','urutan_tampil']],
             'PPI'=>['aspects'=>['erapor_ppi_aspek','urutan'],'columns'=>['erapor_ppi_kolom','bagian,urutan']],
             'UMMI'=>['volumes'=>['erapor_ummi_jilid','urutan'],'scale'=>['erapor_skala_huruf','peringkat DESC']],
@@ -71,13 +71,14 @@ final class EraporTeacherForm
         };
         foreach ($tables as $key=>[$table,$order]) $defs[$key]=self::rows($db,'SELECT * FROM '.$table.' WHERE rubrik_id=? ORDER BY '.$order,[$rid]);
         switch ($d['jenis_dokumen']) {
-            case 'RTS':
+            case 'RTS': case 'RAS':
                 $defs['subareas']=self::rows($db,'SELECT s.* FROM erapor_rubrik_sub_area s JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE a.rubrik_id=? ORDER BY a.urutan,s.urutan',[$rid]);
                 $defs['groups']=self::rows($db,'SELECT g.* FROM erapor_rubrik_grup g JOIN erapor_rubrik_sub_area s ON s.id=g.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE a.rubrik_id=? ORDER BY a.urutan,s.urutan,g.urutan',[$rid]);
                 $defs['items']=self::rows($db,'SELECT i.* FROM erapor_rubrik_indikator i JOIN erapor_rubrik_sub_area s ON s.id=i.sub_area_id JOIN erapor_rubrik_area a ON a.id=s.area_id WHERE a.rubrik_id=? AND i.aktif=1 ORDER BY a.urutan,s.urutan,i.urutan',[$rid]);
                 // Pilihan tambahan di luar skala rubrik V1; nilai 0 disimpan di erapor_rts_belum_dikenalkan.
                 array_unshift($defs['scale'],self::RTS_NOT_YET);
                 $values=self::rtsValues($db,(int)$rid,(int)$s['id'],(int)$d['id']);
+                if ($d['jenis_dokumen']==='RAS') $values['narasi']=self::rasNarrative($db,(int)$s['id'],(int)$d['id']);
                 break;
             case 'BING':
                 foreach (self::rows($db,'SELECT indikator_id,pilihan_kode FROM erapor_bing_nilai WHERE sesi_id=? AND dokumen_id=? AND rubrik_id=?',$args) as $v) $values['nilai:'.$v['indikator_id']]=$v['pilihan_kode'];
@@ -118,12 +119,21 @@ final class EraporTeacherForm
      * Baris itu milik sesi Tengah Ganjil; tidak pernah disalin ke sesi Genap. */
     private static function rtsReference(PDO $db,array $s,array $d): ?array
     {
-        if ($d['jenis_dokumen']!=='RTS' || $s['semester']!=='GENAP' || $s['jenis']!=='TENGAH') return null;
+        // RAS: saat mengisi Akhir Semester Genap, nilai dan narasi Akhir Semester Ganjil tampil hanya-baca.
+        $periodType=match ($d['jenis_dokumen']) {'RTS'=>'TENGAH','RAS'=>'AKHIR',default=>null};
+        if ($periodType===null || $s['semester']!=='GENAP' || $s['jenis']!==$periodType) return null;
         $ganjil=self::rows($db,"SELECT s.id FROM erapor_sesi s JOIN erapor_sesi_dokumen sd ON sd.sesi_id=s.id
-            WHERE sd.dokumen_id=? AND s.murid_id=? AND s.tahun_ajaran_id=? AND s.semester='GANJIL' AND s.jenis='TENGAH' AND s.id<>?",
-            [$d['id'],$s['murid_id'],$s['tahun_ajaran_id'],$s['id']])[0] ?? null;
+            WHERE sd.dokumen_id=? AND s.murid_id=? AND s.tahun_ajaran_id=? AND s.semester='GANJIL' AND s.jenis=? AND s.id<>?",
+            [$d['id'],$s['murid_id'],$s['tahun_ajaran_id'],$periodType,$s['id']])[0] ?? null;
         if (!$ganjil) return null;
-        return ['label'=>'TS Ganjil','values'=>self::rtsValues($db,(int)$d['rubrik_id'],(int)$ganjil['id'],(int)$d['id'])];
+        $values=self::rtsValues($db,(int)$d['rubrik_id'],(int)$ganjil['id'],(int)$d['id']);
+        if ($d['jenis_dokumen']==='RAS') $values['narasi']=self::rasNarrative($db,(int)$ganjil['id'],(int)$d['id']);
+        return ['label'=>$d['jenis_dokumen']==='RAS'?'Akhir Semester Ganjil':'TS Ganjil','values'=>$values];
+    }
+
+    private static function rasNarrative(PDO $db,int $sessionId,int $documentId): ?string
+    {
+        return self::rows($db,'SELECT isi FROM erapor_ras_narasi WHERE sesi_id=? AND dokumen_id=?',[$sessionId,$documentId])[0]['isi'] ?? null;
     }
 
     /** Pilihan RTS "-" untuk tujuan yang belum dikenalkan kepada murid (nilai 0). */
