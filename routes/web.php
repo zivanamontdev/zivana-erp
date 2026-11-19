@@ -116,8 +116,6 @@ $router->get('/sistem/revisi-pdf/{id}/{kind}/pdf', [EraporPdfRevisionController:
 $router->get('/sistem/diagnosis-pdf', [EraporPdfDiagnosticController::class, 'index']);
 $router->post('/sistem/diagnosis-pdf', [EraporPdfDiagnosticController::class, 'run']);
 $router->post('/sistem/diagnosis-pdf/unduh', [EraporPdfDiagnosticController::class, 'download']);
-$router->get('/sistem/seed-ras', [EraporRasSeedController::class, 'index']);
-$router->post('/sistem/seed-ras', [EraporRasSeedController::class, 'run']);
 $router->get('/sistem/migrasi-erapor', [EraporMigrationController::class, 'index']);
 $router->post('/sistem/migrasi-erapor', [EraporMigrationController::class, 'run']);
 // Kosongkan data operasional + seed uji coba. 404 kecuali DATA_RESET_TOKEN diisi di .env.

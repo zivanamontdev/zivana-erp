@@ -1,6 +1,6 @@
 # eRapor RAS (Rapor Akhir Semester)
 
-Status: backend, form guru, persetujuan, dan PDF selesai serta lulus uji lokal (Docker). Belum dirilis ke production.
+Status: selesai dan sudah terpasang di production (migrasi `20261023_erapor_ras.sql` dan seed rubrik sudah dijalankan; halaman seed sementara sudah dihapus dari kode). Diuji nyata di production: pembuatan sesi, form RAS, simpan narasi, pratinjau PDF.
 
 ## Isi
 - Rubrik `RAS_MONTESSORI_V1`: 62 indikator, 6 area, skala BD/MB/BSH/BSB + "-" (Belum Dikenalkan). Seed: `database/seeds/rubrik_ras_seed.json`. Spesifikasi lengkap: `eRapor_Zivana_Spesifikasi/SPEK_RUBRIK_RAS.md` (lokal).
@@ -16,10 +16,10 @@ Status: backend, form guru, persetujuan, dan PDF selesai serta lulus uji lokal (
 ## Tes
 `tests/erapor-ras-seed.php`, `tests/erapor-ras-renderer.php`, `tests/erapor-package-plan.php`. Alur penuh (isi -> Selesaikan -> Finalisasi -> persetujuan -> PDF terbit) diuji di Docker lokal.
 
-## Rilis ke production (belum dilakukan)
-1. Deploy kode. 2. Buat tabel `erapor_ras_narasi` (`database/migrations/20261023_erapor_ras.sql`). 3. Seed rubrik RAS (`EraporRasSeed::apply`; tidak bisa lewat SQL biasa karena menulis hash seed). Rencana cara menjalankan perlu disepakati (halaman migrasi bertoken atau halaman sementara).
-4. Setelah rubrik ada, sesi Akhir Semester dapat dibuat guru; sebelum itu paket Akhir Semester tetap tertahan ("Rubrik belum tersedia: RAS").
+## Template dan cetakan
+- Manajemen Rapor memiliki bagian "Rapor Akhir Semester" berisi template RAS (pratinjau + Simpan PDF). Rubrik lain memakai template Tengah Semester.
+- Cetakan RAS memiliki footer "Laporan Perkembangan Akhir Semester Tahun Ajaran X-Y" hanya pada halaman RAS (penanda `ras-start`/`ras-end` di `EraporPackagePdfRenderer`).
 
-## Belum dikerjakan
-- Template RAS di Manajemen Template (halaman template masih RTS saja).
-- Footer "Laporan Perkembangan Akhir Semester Tahun Ajaran …" pada cetakan (RTS juga belum punya footer).
+## Catatan operasional
+- Docker lokal (`docker-start.cmd`) menerapkan migrasi sesudah dump, mencatat ledger, dan menyeed rubrik RAS otomatis.
+- Rubrik RAS berstatus `draft` sampai sesi pertama dibuat (lalu `terkunci`); Manajemen Rapor menampilkan keduanya.

@@ -4,6 +4,8 @@ if (!function_exists('e')) { function e(mixed $value): string { return htmlspeci
 if (!function_exists('colorToken')) { function colorToken(string $n): string { return '#000'; } }
 require __DIR__.'/../app/models/EraporRtsSeed.php';
 require __DIR__.'/../app/models/EraporRasSeed.php';
+require __DIR__.'/../vendor/autoload.php';
+require __DIR__.'/../app/models/EraporPrintFont.php';
 require __DIR__.'/../app/models/EraporPackagePdfRenderer.php';
 $checks=0;
 $check=static function(bool $ok,string $message) use (&$checks): void { if (!$ok) throw new RuntimeException($message); $checks++; };
@@ -51,6 +53,11 @@ $check(str_contains($h2,'Pengesahan Akhir Semester Ganjil</p>'),'judul pengesaha
 // Draf sesi Genap tanpa narasi Ganjil: blok Genap tetap tampil (kosong), Ganjil dilewati.
 $dn=$doc; $dn['period_values']=['AS_GENAP'=>$e]; $h3=$m->invoke(null,$package,$dn);
 $check(!str_contains($h3,'Akhir Semester Ganjil:</strong>') && str_contains($h3,'Akhir Semester Genap:</strong>'),'blok narasi hanya untuk semester sesi atau yang berisi');
+// Penanda halaman RAS untuk footer "Laporan Perkembangan Akhir Semester ..." (hanya halaman RAS).
+$full=new ReflectionMethod(EraporPackagePdfRenderer::class,'renderPdf'); $full->setAccessible(true);
+$scoped=$package; $scoped['scoped']=true; $moved=null; $args=[$scoped,&$moved];
+[$pdfObj,$pageHtml]=$full->invokeArgs(null,$args);
+$check(substr_count($pageHtml,'id="ras-start"')===1 && substr_count($pageHtml,'id="ras-end"')===1 && strpos($pageHtml,'ras-start')<strpos($pageHtml,'ras-end'),'penanda awal dan akhir RAS');
 // Susunan paket: akhir semester memakai RAS, bukan RTS.
 $rm=new ReflectionMethod(EraporPackagePdfRenderer::class,'renderArtifact');
 $wrong=$package; $wrong['documents'][0]['jenis_dokumen']='RTS';

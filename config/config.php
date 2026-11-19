@@ -77,8 +77,6 @@ if ($eraporApiEnabled === false) $eraporApiEnabled = envValue($env, 'ERAPOR_API_
 define('ERAPOR_API_ENABLED', filter_var($eraporApiEnabled, FILTER_VALIDATE_BOOLEAN));
 // Kosong = halaman /sistem/migrasi-erapor 404. Isi (min. 32 karakter) hanya saat migrasi, lalu hapus lagi.
 define('ERAPOR_MIGRATION_TOKEN', trim((string) envValue($env, 'ERAPOR_MIGRATION_TOKEN', '')));
-// Sementara: kosong = /sistem/seed-ras 404. Isi (min. 32 karakter) hanya saat seed rubrik RAS, lalu hapus lagi.
-define('ERAPOR_RAS_SEED_TOKEN', trim((string) envValue($env, 'ERAPOR_RAS_SEED_TOKEN', '')));
 // Sama: kosong = /sistem/reset-data 404. Isi hanya saat reset data, lalu hapus lagi.
 define('DATA_RESET_TOKEN', trim((string) envValue($env, 'DATA_RESET_TOKEN', '')));
 // Temporary Superadmin-only PDF diagnostics; empty/removed = 404. Never reuse migration/reset tokens.

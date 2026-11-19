@@ -3,7 +3,7 @@
 class TemplateRaporController extends Controller
 {
     /** Urutan tahapan paket rapor (SPEK_ALUR_PENGISIAN bagian 6). */
-    private const ERAPOR_ORDER = ['RTS' => 1, 'AGAMA' => 2, 'UMMI' => 3, 'BING' => 4, 'PPI' => 5];
+    private const ERAPOR_ORDER = ['RTS' => 1, 'AGAMA' => 2, 'UMMI' => 3, 'BING' => 4, 'PPI' => 5, 'RAS' => 6];
 
     public function index(): void
     {
@@ -159,7 +159,8 @@ class TemplateRaporController extends Controller
         if (!$rubric) { http_response_code(404); require VIEW_PATH . '/errors/404.php'; return; }
         $type = $rubric['jenis_dokumen'];
         $semester = $this->semester();
-        $package = EraporPublication::templatePackage(Database::getInstance(), $type === 'PPI' ? 'ABK' : 'Regular', $semester, $type);
+        // RAS adalah satu-satunya template Akhir Semester; rubrik lain memakai template Tengah Semester.
+        $package = EraporPublication::templatePackage(Database::getInstance(), $type === 'PPI' ? 'ABK' : 'Regular', $semester, $type, $type === 'RAS' ? 'AKHIR' : 'TENGAH');
         $pdf = EraporPackagePdfRenderer::render($package);
         $filename = 'template-' . strtolower($rubric['kode']) . '-' . strtolower($semester) . '.pdf';
         header('Content-Type: application/pdf');
@@ -180,7 +181,7 @@ class TemplateRaporController extends Controller
     {
         try {
             $rows = Database::getInstance()->query("SELECT r.id,r.kode,r.nama,r.jenis_dokumen,r.versi,h.seeded_at
-                FROM erapor_rubrik r LEFT JOIN erapor_seed_history h ON h.rubrik_id=r.id WHERE r.status='terkunci'")->fetchAll();
+                FROM erapor_rubrik r LEFT JOIN erapor_seed_history h ON h.rubrik_id=r.id WHERE r.status IN ('terkunci','draft')")->fetchAll();
         } catch (PDOException $e) {
             return [];
         }

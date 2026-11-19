@@ -237,23 +237,23 @@ final class EraporPublication
         return $data;
     }
 
-    /** Template kosong 5 rubrik (Tengah Semester) dengan identitas placeholder, untuk Manajemen Template. */
-    public static function templatePackage(PDO $db,string $kondisi,string $semester='GANJIL',?string $only=null): array
+    /** Template kosong 5 rubrik (Tengah Semester, atau RAS pada Akhir Semester) dengan identitas placeholder, untuk Manajemen Template. */
+    public static function templatePackage(PDO $db,string $kondisi,string $semester='GANJIL',?string $only=null,string $periodType='TENGAH'): array
     {
-        if (!in_array($kondisi,['Regular','ABK'],true) || !in_array($semester,['GANJIL','GENAP'],true)) throw new DomainException('Pilihan template tidak valid.');
+        if (!in_array($kondisi,['Regular','ABK'],true) || !in_array($semester,['GANJIL','GENAP'],true) || !in_array($periodType,['TENGAH','AKHIR'],true)) throw new DomainException('Pilihan template tidak valid.');
         $school=self::one($db,'SELECT * FROM sekolah ORDER BY id LIMIT 1',[]);
         $address=(string)($school['alamat'] ?? '');
         $logo=ROOT_PATH.'/public/assets/images/logo-colored.png';
-        $order=['RTS','AGAMA','UMMI','BING']; if ($kondisi==='ABK') $order[]='PPI';
+        $order=[$periodType==='AKHIR'?'RAS':'RTS','AGAMA','UMMI','BING']; if ($kondisi==='ABK') $order[]='PPI';
         if ($only!==null) {
             if (!in_array($only,$order,true)) throw new DomainException('Rubrik template tidak tersedia untuk kondisi ini.');
             $order=[$only];
         }
         $rubrics=[];
-        foreach (self::all($db,"SELECT id AS rubrik_id,kode,nama,jenis_dokumen,judul_cetak,versi FROM erapor_rubrik WHERE status='terkunci'",[]) as $r) $rubrics[$r['jenis_dokumen']]=$r;
+        foreach (self::all($db,"SELECT id AS rubrik_id,kode,nama,jenis_dokumen,judul_cetak,versi FROM erapor_rubrik WHERE status IN ('terkunci','draft')",[]) as $r) $rubrics[$r['jenis_dokumen']]=$r;
         $student=['id'=>0,'nama_lengkap'=>'{Nama Siswa}','nama_panggilan'=>'{Nama Panggilan}','nisn'=>'{NISN}','tanggal_lahir'=>'{Tanggal Lahir}','tempat_lahir'=>'{Tempat Lahir}',
             'status_kondisi'=>$kondisi,'jenis_kebutuhan'=>null,'level_kelas'=>'','nama_kelas'=>'{Kelas}','usia'=>'{Usia}'];
-        $session=['id'=>0,'semester'=>$semester,'jenis'=>'TENGAH','kondisi'=>$kondisi];
+        $session=['id'=>0,'semester'=>$semester,'jenis'=>$periodType,'kondisi'=>$kondisi];
         $documents=[];
         foreach ($order as $type) {
             if (!isset($rubrics[$type])) throw new DomainException('Rubrik '.$type.' belum tersedia. Jalankan migrasi eRapor.');
@@ -265,8 +265,8 @@ final class EraporPublication
             $doc['signature_current']=['signers'=>[],'tempat'=>'','tanggal'=>null];
             $documents[]=self::describeDocument($db,$doc,[],$student['nama_lengkap'],$semester);
         }
-        return ['session'=>$session,'period'=>['jenis'=>'TENGAH','semester'=>$semester,'semester_label'=>$semester,
-            'label'=>'Tengah Semester '.($semester==='GANJIL'?'Ganjil':'Genap'),'tahun_label'=>'{Tahun Ajaran}'],
+        return ['session'=>$session,'period'=>['jenis'=>$periodType,'semester'=>$semester,'semester_label'=>$semester,
+            'label'=>($periodType==='AKHIR'?'Akhir':'Tengah').' Semester '.($semester==='GANJIL'?'Ganjil':'Genap'),'tahun_label'=>'{Tahun Ajaran}'],
             'student'=>$student,'school'=>['snapshot'=>['id'=>(int)($school['id'] ?? 0),'nama_legal'=>$school['nama_legal'] ?? '{Nama Legal Sekolah}',
                 'nama_komersial'=>$school['nama_komersial'] ?? '{Nama Sekolah}','alamat'=>$address,'tempat_pengesahan'=>self::extractPlace($address) ?: '{Kota}',
                 'npsn'=>$school['npsn'] ?? '{NPSN}'],'logo_data_uri'=>is_file($logo)?'data:image/png;base64,'.base64_encode(file_get_contents($logo)):''],

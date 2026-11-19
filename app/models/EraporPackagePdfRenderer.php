@@ -64,6 +64,8 @@ final class EraporPackagePdfRenderer
             // Ummi dan Bahasa Inggris opsional: tidak dicetak bila tidak ada isian sama sekali (template tetap dicetak).
             if (empty($package['template']) && in_array($document['jenis_dokumen'],['UMMI','BING'],true) && !self::hasEntries($document)) continue;
             $body.='<section class="report report-'.strtolower(e($document['jenis_dokumen'])).'">';
+            // Penanda awal/akhir RAS: footer "Laporan Perkembangan Akhir Semester" hanya dicetak pada halaman RAS.
+            if ($document['jenis_dokumen']==='RAS') $body.='<div id="ras-start" class="page-marker"></div>';
             $body.=match ($document['jenis_dokumen']) {
                 'RTS'=>self::rts($package,$document),
                 'RAS'=>self::ras($package,$document),
@@ -73,6 +75,7 @@ final class EraporPackagePdfRenderer
                 'PPI'=>self::ppi($package,$document),
                 default=>throw new DomainException('Renderer PDF belum mendukung jenis dokumen ini.'),
             };
+            if ($document['jenis_dokumen']==='RAS') $body.='<div id="ras-end" class="page-marker"></div>';
             $body.='</section>';
         }
         // Unfinalized drafts print cleanly. A finalized session gets a background logo, even while awaiting approval.
@@ -98,6 +101,13 @@ final class EraporPackagePdfRenderer
                     if ($observe) $observe('render_layout');
                 }];
             }
+            $rasPages=[];
+            $callbacks[]=['event'=>'begin_frame','f'=>static function ($frame) use (&$rasPages,$pdf): void {
+                $node=$frame->get_node();
+                if (!$node instanceof DOMElement) return;
+                $id=$node->getAttribute('id');
+                if ($id==='ras-start' || $id==='ras-end') $rasPages[$id]=$pdf->getCanvas()->get_page_number();
+            }];
             if ($moved!==null) {
                 $callbacks[]=['event'=>'begin_frame','f'=>static function ($frame) use (&$moved): void {
                     $node=$frame->get_node();
@@ -108,6 +118,7 @@ final class EraporPackagePdfRenderer
             $pdf->setCallbacks($callbacks);
             if ($observe) $observe('render_layout');
             $pdf->loadHtml($html,'UTF-8'); $pdf->setPaper('A4','portrait'); $pdf->render();
+            self::rasFooter($pdf,$package,$rasPages);
             if ($moved!==null) $moved=array_values(array_unique($moved));
             return [$pdf,$html];
         } finally {
@@ -115,6 +126,22 @@ final class EraporPackagePdfRenderer
             // Dompdf clears these on success; also clear cached signature/logo files when a callback throws.
             if (!$pdf->getOptions()->getDebugKeepTemp()) \Dompdf\Image\Cache::clear();
         }
+    }
+
+    /** Footer "Laporan Perkembangan Akhir Semester Tahun Ajaran X-Y" pada halaman RAS saja (di margin bawah, tanpa mengubah tata letak). */
+    private static function rasFooter(\Dompdf\Dompdf $pdf,array $package,array $pages): void
+    {
+        if (!isset($pages['ras-start'],$pages['ras-end'])) return;
+        $first=(int)$pages['ras-start']; $last=(int)$pages['ras-end'];
+        $text='Laporan Perkembangan Akhir Semester Tahun Ajaran '.str_replace('/','-',(string)($package['period']['tahun_label'] ?? ''));
+        $metrics=$pdf->getFontMetrics();
+        $font=$metrics->getFont('Quicksand','normal') ?: $metrics->getFont('Helvetica','normal');
+        $color=[0.45,0.45,0.45]; $size=7;
+        $pdf->getCanvas()->page_script(static function ($number,$count,$canvas,$fontMetrics) use ($first,$last,$text,$font,$size,$color): void {
+            if ($number<$first || $number>$last) return;
+            $width=$fontMetrics->getTextWidth($text,$font,$size);
+            $canvas->text(($canvas->get_width()-$width)/2,$canvas->get_height()-28,$text,$font,$size,$color);
+        });
     }
 
     /** Materialize only the validated snapshot PNG; never accept paths or remote URLs. Caller owns cleanup. */
@@ -519,6 +546,6 @@ final class EraporPackagePdfRenderer
     {
         $ink=colorToken('neutral-900'); $muted=colorToken('neutral-500'); $line=colorToken('neutral-150');
         $surface=colorToken('neutral-50'); $section=colorToken('neutral-75'); $white=colorToken('neutral-white');
-        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:Quicksand,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:14pt}.agama-grade img{width:11pt;height:11pt;vertical-align:middle}.agama-table .agama-narrative td{font-size:8pt;padding:5pt}.agama-table .agama-narrative td.narrative{text-align:justify;line-height:1.5}.sign-job{height:34pt;overflow:hidden}.sign-image{height:116pt;margin:2pt auto}.sign-image img{max-width:100%;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}.signature-title{margin:10pt 0 4pt;text-align:center;font-size:10pt;font-weight:bold}.agama-wide{font-size:8pt}.agama-wide th,.agama-wide td{padding:3pt}.agama-wide .agama-stage th{font-size:6.5pt}.agama-wide .agama-grade img{width:12pt;height:12pt}.agama-wide .agama-narrative td{font-size:8.5pt}.ras-table .ras-level{font-size:7pt;padding:3pt 1pt;text-align:center}.ras-table .ras-mark{padding:3pt 0;text-align:center;vertical-align:middle}.ras-table .ras-mark img{width:10pt;height:10pt}.ras-table .ras-none{vertical-align:middle}.ras-legend{font-size:7.5pt;line-height:1.5}.ras-narratives{page-break-inside:avoid}.ras-narrative{margin:0 0 8pt}.ras-narrative p{margin:3pt 0 0}';
+        return '@page{size:A4 portrait;margin:16mm 13mm 14mm}body{font-family:Quicksand,sans-serif;font-size:9pt;color:'.$ink.'}.report{page-break-after:always}.report:last-child{page-break-after:auto}h2{font-size:11pt;margin:12pt 0 5pt}.report-table{width:100%;border-collapse:collapse;margin:0 0 10pt}.report-table th,.report-table td{border:.5pt solid '.$line.';padding:4pt;vertical-align:top}.report-table th{background:'.$surface.';font-weight:bold}.report-table thead{display:table-header-group}.report-table tr{page-break-inside:avoid}.section-row th{background:'.$section.';text-align:left}.sub-row th{background:'.$surface.';text-align:left}.group-row td:first-child{font-weight:bold}.grade{text-align:center;width:9%}.identity-head th{background:'.$white.';text-align:left;line-height:1.5}.identity-head .logo-cell{width:18%;text-align:center;vertical-align:middle}.logo-cell img{width:92pt}.legend{width:100%;border-collapse:collapse;margin:4pt 0}.legend th,.legend td{border:0;padding:3pt 4pt;vertical-align:middle;font-size:8pt;text-align:left}.legend th{width:12%;background:none}.legend td.legend-symbol{width:4%;padding-right:0;text-align:center}.skala-simbol{width:12pt;height:12pt;vertical-align:middle}.narrative{line-height:1.5;text-align:justify}.signature-block{page-break-inside:avoid;margin-top:6pt}.signature-identity{margin-bottom:4pt}.signature-heading{text-align:center!important}.signatures{width:100%;border-collapse:collapse;table-layout:fixed}.signatures td{border:0;text-align:center;vertical-align:top;padding:4pt}.signatures .place-date{padding-bottom:6pt}.sign-line{width:70%;margin:0 auto;border-bottom:.5pt solid '.$ink.';line-height:1}.skala-dash{font-weight:bold;font-size:10pt;line-height:1}.agama-table td{height:14pt}.agama-grade img{width:11pt;height:11pt;vertical-align:middle}.agama-table .agama-narrative td{font-size:8pt;padding:5pt}.agama-table .agama-narrative td.narrative{text-align:justify;line-height:1.5}.sign-job{height:34pt;overflow:hidden}.sign-image{height:116pt;margin:2pt auto}.sign-image img{max-width:100%;margin-top:4pt}.sign-name{font-weight:bold;text-decoration:underline}.sign-nuptk,.muted{font-size:8pt;color:'.$muted.'}.ppi-table{font-size:7pt}.ppi-table th,.ppi-table td{padding:3pt;word-wrap:break-word}.report-ppi{margin-left:7mm;margin-right:7mm}.ppi-program-title,.page-break{page-break-before:always}.ppi-identity-fields th{width:25%;text-align:left}.ppi-identity-fields td{width:75%}.ppi-implementer{margin:0 0 6pt}.ppi-program{width:17cm;table-layout:fixed}.ppi-program th,.ppi-program td{overflow-wrap:break-word}.agama-table{table-layout:fixed;font-size:6pt}.agama-table th,.agama-table td{padding:2pt}.agama-table th:first-child,.agama-table td:first-child{width:30%;text-align:left}.agama-stage th{font-size:4.5pt;padding:2pt 0!important;text-align:center;vertical-align:middle}.agama-grade{width:5%;padding:2pt 0!important;text-align:center;vertical-align:middle!important}.bing-header{width:100%;border-collapse:collapse;margin:0 0 10pt}.bing-header td{border:0;background:'.$white.';text-align:center;line-height:1.4}.bing-logo{width:24%;text-align:left!important}.bing-logo img{width:100pt}.bing-header strong{font-size:15pt}.bing-student th{width:32%;text-align:left}.bing-comments th{text-align:left;width:37%}.bing-group th{background:'.$section.'}.bing-remarks th{width:22%}.bullet-line{margin:0 0 3pt}.report-table .jilid-cell{border-bottom:0!important}.report-table .jilid-cont{border-top:0!important}.report-table tr:last-child .jilid-cell{border-bottom:.5pt solid '.$line.'!important}.fixed-cols{table-layout:fixed}.fixed-cols .grade{width:auto}.col-sizer th{height:0;padding:0!important;border:0!important;background:none!important;line-height:0;font-size:0}.signature-block h2:empty{display:none}.signature-title{margin:10pt 0 4pt;text-align:center;font-size:10pt;font-weight:bold}.agama-wide{font-size:8pt}.agama-wide th,.agama-wide td{padding:3pt}.agama-wide .agama-stage th{font-size:6.5pt}.agama-wide .agama-grade img{width:12pt;height:12pt}.agama-wide .agama-narrative td{font-size:8.5pt}.ras-table .ras-level{font-size:7pt;padding:3pt 1pt;text-align:center}.ras-table .ras-mark{padding:3pt 0;text-align:center;vertical-align:middle}.ras-table .ras-mark img{width:10pt;height:10pt}.ras-table .ras-none{vertical-align:middle}.ras-legend{font-size:7.5pt;line-height:1.5}.page-marker{height:0;line-height:0;font-size:0}.ras-narratives{page-break-inside:avoid}.ras-narrative{margin:0 0 8pt}.ras-narrative p{margin:3pt 0 0}';
     }
 }

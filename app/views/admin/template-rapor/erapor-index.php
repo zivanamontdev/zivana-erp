@@ -1,6 +1,6 @@
 <?php
 /**
- * Manajemen Rapor: lima rubrik eRapor terkunci hasil seed spesifikasi (eRapor_Zivana_Spesifikasi).
+ * Manajemen Rapor: rubrik eRapor terkunci hasil seed spesifikasi (eRapor_Zivana_Spesifikasi).
  * Variabel dari TemplateRaporController::index(): $rubrics, $canPdf
  */
 $headerActions = '';
@@ -10,7 +10,7 @@ $formatDate = static function (?string $value) use ($months): string {
     $d = new DateTimeImmutable($value);
     return $d->format('j') . ' ' . $months[(int) $d->format('n')] . ' ' . $d->format('Y, H:i');
 };
-$scope = ['RTS' => 'Semua murid', 'AGAMA' => 'Semua murid', 'UMMI' => 'Semua murid', 'BING' => 'Semua murid', 'PPI' => 'Khusus murid ABK'];
+$scope = ['RTS' => 'Semua murid', 'RAS' => 'Semua murid', 'AGAMA' => 'Semua murid', 'UMMI' => 'Semua murid', 'BING' => 'Semua murid', 'PPI' => 'Khusus murid ABK'];
 require VIEW_PATH . '/layouts/shell-header.php';
 ?>
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/manajemen-rapor.css?v=<?= filemtime(ROOT_PATH . '/public/assets/css/manajemen-rapor.css') ?>">
@@ -28,7 +28,8 @@ require VIEW_PATH . '/layouts/shell-header.php';
                     <th scope="col" class="col-action"><span class="ui-visually-hidden">Aksi</span></th>
                 </tr></thead>
                 <tbody>
-                    <?php foreach ($rubrics as $index => $rubric): $slug = strtolower($rubric['jenis_dokumen']); ?>
+                    <?php $tengah = array_values(array_filter($rubrics, fn($r) => $r['jenis_dokumen'] !== 'RAS')); ?>
+                    <?php foreach ($tengah as $index => $rubric): $slug = strtolower($rubric['jenis_dokumen']); ?>
                     <tr>
                         <td><?= $index + 1 ?></td>
                         <td><?= e($rubric['nama']) ?> <span class="report-template-code"><?= e($rubric['kode']) ?></span></td>
@@ -48,7 +49,37 @@ require VIEW_PATH . '/layouts/shell-header.php';
     </section>
     <section class="report-template-section" aria-labelledby="report-section-akhir">
         <?= uiText('Rapor Akhir Semester', 'body-sm', ['tag' => 'h2', 'attributes' => ['id' => 'report-section-akhir']]) ?>
-        <p class="report-template-note">Rapor Akhir Semester (RAS) menunggu spesifikasi rubrik dari sekolah. Agama, Ummi, dan Bahasa Inggris memakai template yang sama dengan Tengah Semester pada kolom Akhir Semester.</p>
+        <?php $akhir = array_values(array_filter($rubrics, fn($r) => $r['jenis_dokumen'] === 'RAS')); ?>
+        <?php if ($akhir): ?>
+        <div class="data-table-wrapper">
+            <table class="data-table report-template-table" aria-labelledby="report-section-akhir">
+                <thead><tr>
+                    <th scope="col" class="report-stage">Urutan Tahapan</th>
+                    <th scope="col">Template</th>
+                    <th scope="col">Berlaku untuk</th>
+                    <th scope="col" class="report-updated">Terakhir Diperbarui</th>
+                    <th scope="col" class="col-action"><span class="ui-visually-hidden">Aksi</span></th>
+                </tr></thead>
+                <tbody>
+                    <?php foreach ($akhir as $rubric): $slug = strtolower($rubric['jenis_dokumen']); ?>
+                    <tr>
+                        <td>1</td>
+                        <td><?= e($rubric['nama']) ?> <span class="report-template-code"><?= e($rubric['kode']) ?></span></td>
+                        <td><?= e($scope[$rubric['jenis_dokumen']] ?? '—') ?></td>
+                        <td class="report-updated"><?= e($formatDate($rubric['seeded_at'])) ?></td>
+                        <td class="col-action report-template-actions">
+                            <a class="ui-button ui-button--outline" href="<?= BASE_PATH ?>/kurikulum/manajemen-template/erapor/<?= e($slug) ?>">Pratinjau</a>
+                            <?php if ($canPdf): ?>
+                            <a class="ui-button ui-button--outline" href="<?= BASE_PATH ?>/kurikulum/manajemen-template/erapor/<?= e($slug) ?>/pdf?unduh=1">Simpan PDF</a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+        <p class="report-template-note">Pada Akhir Semester, tahap pertama memakai RAS. Agama, Ummi, dan Bahasa Inggris (serta PPI untuk murid ABK) memakai template yang sama dengan Tengah Semester pada kolom Akhir Semester.</p>
     </section>
 </div>
 <?php require VIEW_PATH . '/layouts/shell-footer.php'; ?>
